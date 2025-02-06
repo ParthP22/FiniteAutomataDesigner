@@ -1,0 +1,86 @@
+[gd_scene load_steps=5 format=3 uid="uid://ie36c0vdchcp"]
+
+[ext_resource type="Script" path="res://click_handler.gd" id="1_b0jvf"]
+[ext_resource type="PackedScene" uid="uid://behkyanycuqxc" path="res://label.tscn" id="1_bml3s"]
+
+[sub_resource type="GDScript" id="GDScript_dq8ed"]
+script/source = "extends Node2D
+var _fa_node = preload(\"res://fa_node.tscn\")
+var _existing_unlabeled_node = false
+var _curr_select_node = null
+var _label = null
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	_label = getTextField(get_children())
+	pass # Replace with function body.
+
+# Gets the child that is named \"Input\"
+func getTextField(array: Array) -> Object:
+	for x in array:
+		if x.name == \"Input\":
+			return x
+	return null
+
+func spawn_node(mousePos: Vector2):
+	var fa_instance_node = _fa_node.instantiate()
+	fa_instance_node.position = mousePos
+	add_child(fa_instance_node)
+	
+func print_curr_selection():
+	print(_curr_select_node)
+
+func _on_area_2d_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed() and !_existing_unlabeled_node:
+		print(\"Click! Spawning FA!\")
+		spawn_node(get_global_mouse_position())
+		_existing_unlabeled_node = true
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+
+func _on_child_entered_tree(node):
+	print(\"made the node and called this method because of node entering tree\")
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5rr84"]
+size = Vector2(1152, 651)
+
+[node name="Main" type="Node2D"]
+script = SubResource("GDScript_dq8ed")
+
+[node name="Label" parent="." instance=ExtResource("1_bml3s")]
+offset_left = 500.0
+offset_top = 50.0
+offset_right = 697.0
+offset_bottom = 73.0
+text = "Finite Automata Designer
+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="."]
+script = ExtResource("1_b0jvf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(576, 324)
+shape = SubResource("RectangleShape2D_5rr84")
+
+[node name="Input" type="LineEdit" parent="."]
+offset_left = 51.0
+offset_top = 585.0
+offset_right = 240.0
+offset_bottom = 616.0
+placeholder_text = "No node selected"
+
+[node name="Error_Label" type="Label" parent="."]
+offset_left = 68.0
+offset_top = 533.0
+offset_right = 108.0
+offset_bottom = 556.0
+text = "placeholder"
+
+[connection signal="child_entered_tree" from="." to="." method="_on_child_entered_tree"]
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]
