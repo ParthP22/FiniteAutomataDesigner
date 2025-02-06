@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://dekf5qhqobrpl"]
+[gd_scene load_steps=7 format=3 uid="uid://dekf5qhqobrpl"]
 
 [ext_resource type="Script" path="res://fa_node.gd" id="1_quw3j"]
 [ext_resource type="Texture2D" uid="uid://bqegqmqoqoyds" path="res://circle_FA.png" id="2_1gxso"]
 [ext_resource type="Script" path="res://node_click.gd" id="3_3is0d"]
+[ext_resource type="Texture2D" uid="uid://cwmnyi852dhg7" path="res://fa_light.png" id="4_fnl2a"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_vu1vr"]
 font_size = 32
@@ -11,8 +12,15 @@ font_color = Color(0, 0.621665, 0.677136, 1)
 [sub_resource type="CircleShape2D" id="CircleShape2D_k03c7"]
 radius = 40.0125
 
-[node name="FA_Node_2" type="Node2D"]
+[node name="FA_Node_2" type="RigidBody2D"]
+gravity_scale = 0.0
 script = ExtResource("1_quw3j")
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+scale = Vector2(1.5, 1.5)
+energy = 0.0
+blend_mode = 2
+texture = ExtResource("4_fnl2a")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.160767, 0.160767)
@@ -38,4 +46,7 @@ vertical_alignment = 1
 script = ExtResource("3_3is0d")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_k03c7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_k03c7")
