@@ -1,9 +1,25 @@
-[gd_scene load_steps=3 format=3 uid="uid://ie36c0vdchcp"]
+[gd_scene load_steps=5 format=3 uid="uid://ie36c0vdchcp"]
 
+[ext_resource type="Script" path="res://click_handler.gd" id="1_b0jvf"]
 [ext_resource type="PackedScene" uid="uid://behkyanycuqxc" path="res://label.tscn" id="1_bml3s"]
-[ext_resource type="PackedScene" uid="uid://dh4511i1vxieb" path="res://fa_node.tscn" id="2_rkthm"]
+
+[sub_resource type="GDScript" id="GDScript_dq8ed"]
+script/source = "extends Node2D
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5rr84"]
+size = Vector2(1152, 651)
 
 [node name="Main" type="Node2D"]
+script = SubResource("GDScript_dq8ed")
 
 [node name="Label" parent="." instance=ExtResource("1_bml3s")]
 offset_left = 500.0
@@ -15,8 +31,9 @@ text = "Finite Automata Designer
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="FA_Node3" parent="." instance=ExtResource("2_rkthm")]
-position = Vector2(328, 243)
+[node name="Area2D" type="Area2D" parent="."]
+script = ExtResource("1_b0jvf")
 
-[node name="FA_Node5" parent="." instance=ExtResource("2_rkthm")]
-position = Vector2(726, 395)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(576, 324)
+shape = SubResource("RectangleShape2D_5rr84")
