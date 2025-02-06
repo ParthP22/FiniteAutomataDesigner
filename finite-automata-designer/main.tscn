@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://ie36c0vdchcp"]
+
+[ext_resource type="PackedScene" uid="uid://behkyanycuqxc" path="res://label.tscn" id="1_bml3s"]
+[ext_resource type="PackedScene" uid="uid://dh4511i1vxieb" path="res://fa_node.tscn" id="2_rkthm"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Label" parent="." instance=ExtResource("1_bml3s")]
+offset_left = 439.0
+offset_top = 34.0
+offset_right = 636.0
+offset_bottom = 57.0
+text = "Finite Automata Designer
+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FA_Node" parent="." instance=ExtResource("2_rkthm")]
+position = Vector2(106, 716)
+
+[node name="FA_Node2" parent="." instance=ExtResource("2_rkthm")]
+position = Vector2(1068, 24)
+
+[node name="FA_Node3" parent="." instance=ExtResource("2_rkthm")]
+
+[node name="FA_Node4" parent="." instance=ExtResource("2_rkthm")]
+position = Vector2(-174, 332)
+
+[node name="FA_Node5" parent="." instance=ExtResource("2_rkthm")]
+position = Vector2(988, 288)
