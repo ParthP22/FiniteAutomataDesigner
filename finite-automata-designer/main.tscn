@@ -37,3 +37,7 @@ script = ExtResource("1_b0jvf")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2(576, 324)
 shape = SubResource("RectangleShape2D_5rr84")
+
+[node name="LineEdit" type="LineEdit" parent="."]
+offset_right = 67.0625
+offset_bottom = 31.0
