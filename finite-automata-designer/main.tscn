@@ -6,25 +6,17 @@
 [node name="Main" type="Node2D"]
 
 [node name="Label" parent="." instance=ExtResource("1_bml3s")]
-offset_left = 439.0
-offset_top = 34.0
-offset_right = 636.0
-offset_bottom = 57.0
+offset_left = 500.0
+offset_top = 50.0
+offset_right = 697.0
+offset_bottom = 73.0
 text = "Finite Automata Designer
 "
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="FA_Node" parent="." instance=ExtResource("2_rkthm")]
-position = Vector2(106, 716)
-
-[node name="FA_Node2" parent="." instance=ExtResource("2_rkthm")]
-position = Vector2(1068, 24)
-
 [node name="FA_Node3" parent="." instance=ExtResource("2_rkthm")]
-
-[node name="FA_Node4" parent="." instance=ExtResource("2_rkthm")]
-position = Vector2(-174, 332)
+position = Vector2(328, 243)
 
 [node name="FA_Node5" parent="." instance=ExtResource("2_rkthm")]
-position = Vector2(988, 288)
+position = Vector2(726, 395)

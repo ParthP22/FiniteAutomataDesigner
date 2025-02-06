@@ -3,12 +3,13 @@
 [ext_resource type="Texture2D" uid="uid://bqegqmqoqoyds" path="res://circle_FA.png" id="1_suc73"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xmt85"]
-radius = 53.0094
+radius = 38.0
 
 [node name="FA_Node" type="AnimatableBody2D"]
 
 [node name="CircleFa" type="Sprite2D" parent="."]
-scale = Vector2(0.2075, 0.2075)
+position = Vector2(-1.90735e-06, 1.90735e-06)
+scale = Vector2(0.15, 0.15)
 texture = ExtResource("1_suc73")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
