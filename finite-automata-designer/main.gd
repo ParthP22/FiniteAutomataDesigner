@@ -22,6 +22,8 @@ func toggle_brightness():
 func _input(event):
 	if event.is_action_pressed("left_click"):
 		draw_node()
+	elif event.is_action_pressed("shift_right_click"):
+		connect_nodes()
 
 func draw_node():
 	# point cast for node checks
@@ -56,6 +58,44 @@ func draw_node():
 		_selected_node = node
 		toggle_brightness()
 		add_child(node)
+		_all_nodes.append(_selected_node)
+		
+func connect_nodes():
+	if !_selected_node:
+		print("No node selected!")
+	else:
+		#Check collision with another node
+		# point cast for node checks
+		var mouse_pos = get_global_mouse_position()
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsPointQueryParameters2D.new()
+		query.position = mouse_pos
+		query.collide_with_bodies = true # Ensure it detects PhysicsBody2D nodes
+		# results of point cast
+		var results = space_state.intersect_point(query)
+		for result in results:
+			var node = result.collider
+			# collision check with self
+			if node == _selected_node: 
+				if !node.self_looping:
+					node.self_looping = true
+					node.add_to_outgoing(node)
+					print("making self loop")
+					return
+				else:
+					print("node already points to self")
+			# collision with another node
+			elif node != _selected_node:
+				# points from _selected_node -> other_node
+				_selected_node.add_to_outgoing(node)
+				node.add_to_incoming(_selected_node)
+				var temp = preload("res://filler.tscn")
+				var tempNode = temp.instantiate()
+				tempNode.position = _selected_node.position.lerp(node.position, 0.5)
+				add_child(tempNode)
+				print("connected *funny little dance*")
+				return
+		print("hit nothing")
 
 func _on_line_edit_text_submitted(new_text):
 	if _selected_node:
