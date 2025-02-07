@@ -1,12 +1,19 @@
 extends Node2D
 var _preloaded_fa_node = preload("res://fa_node_2.tscn")
-var _selected_node: PhysicsBody2D = null
+var _selected_node: RigidBody2D = null
 var _text_field: LineEdit = null
 var _all_nodes: Array = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	_text_field = get_child(1).get_child(1)
+	var arrow_node = Polygon2D.new()
+	arrow_node.polygon = PackedVector2Array([
+		Vector2(100,  100),
+		Vector2(100, 200),
+		Vector2(200, 150)
+	])
+	add_child(arrow_node)
 #
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -89,10 +96,11 @@ func connect_nodes():
 				# points from _selected_node -> other_node
 				_selected_node.add_to_outgoing(node)
 				node.add_to_incoming(_selected_node)
-				var temp = preload("res://filler.tscn")
-				var tempNode = temp.instantiate()
-				tempNode.position = _selected_node.position.lerp(node.position, 0.5)
-				add_child(tempNode)
+				var arrow = preload("res://Arrow.tscn").instantiate()
+				arrow.start_node = _selected_node
+				arrow.end_node = node
+				add_child(arrow)
+
 				print("connected *funny little dance*")
 				return
 		print("hit nothing")

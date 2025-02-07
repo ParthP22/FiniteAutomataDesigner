@@ -10,20 +10,20 @@ font_size = 32
 font_color = Color(0, 0.621665, 0.677136, 1)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_k03c7"]
-radius = 40.0125
+radius = 26.1725
 
 [node name="FA_Node_2" type="RigidBody2D"]
 gravity_scale = 0.0
 script = ExtResource("1_quw3j")
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
-scale = Vector2(1.5, 1.5)
+scale = Vector2(0.8, 0.8)
 energy = 0.0
 blend_mode = 2
 texture = ExtResource("4_fnl2a")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.160767, 0.160767)
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("2_1gxso")
 
 [node name="Label" type="Label" parent="."]

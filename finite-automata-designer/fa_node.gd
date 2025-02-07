@@ -21,10 +21,34 @@ func set_text(new_label_text: String):
 	_label.text = new_label_text
 
 func add_to_outgoing(node: Object):
-	_out_going_to.append(node)
+	if !_contains_node_out_going(node):
+		_out_going_to.append(node)
+	
 	
 func add_to_incoming(node: Object):
 	_incoming.append(node)
+	
+func _contains_node_out_going(node: Object) -> bool:
+	for n in _out_going_to:
+		if node == n:
+			print("Arrow connecting from this node to the next already exists")
+			return true
+	return false
+
+func _contains_node_incoming(node: Object):
+	for n in _incoming:
+		if n == node:
+			print("The node already points to this one!!")
+			return true
+	return false
+func contains(node: Object):
+	for n in _out_going_to:
+		if n == node:
+			return true
+	for n in _incoming:
+		if n == node:
+			return true
+	return false
 	
 func _print_array_size():
 	print(_out_going_to.size())
