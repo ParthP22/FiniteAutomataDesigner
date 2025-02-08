@@ -7,13 +7,6 @@ var _all_nodes: Array = []
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	_text_field = get_child(1).get_child(1)
-	var arrow_node = Polygon2D.new()
-	arrow_node.polygon = PackedVector2Array([
-		Vector2(100,  100),
-		Vector2(100, 200),
-		Vector2(200, 150)
-	])
-	add_child(arrow_node)
 #
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
