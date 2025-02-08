@@ -5,6 +5,7 @@ var self_looping = false
 var _label: Label = null
 var _out_going_to: Array = []
 var _incoming: Array = []
+@onready var _light: PointLight2D = $PointLight2D
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	_label = get_child(2)
@@ -27,6 +28,12 @@ func add_to_outgoing(node: Object):
 	
 func add_to_incoming(node: Object):
 	_incoming.append(node)
+	
+func toggle_light():
+	if _light.energy > 1.1:
+		_light.energy = 1
+	else:
+		_light.energy = 2
 	
 func _contains_node_out_going(node: Object) -> bool:
 	for n in _out_going_to:

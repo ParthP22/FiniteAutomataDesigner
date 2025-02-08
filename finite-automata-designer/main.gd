@@ -3,6 +3,8 @@ var _preloaded_fa_node = preload("res://fa_node_2.tscn")
 var _selected_node: RigidBody2D = null
 var _text_field: LineEdit = null
 var _all_nodes: Array = []
+var _is_dragging = false
+var _drag_offset = Vector2.ZERO  # Offset from node center when dragging
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -10,14 +12,24 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	if _is_dragging:
+		drag_self()
 			
 func _input(event):
 	if event.is_action_pressed("left_click"):
 		draw_node()
 	elif event.is_action_pressed("shift_right_click"):
 		connect_nodes()
+	if event.is_action_pressed("right_click"):
+		_drag_offset = get_global_mouse_position() - _selected_node.global_position
+		_is_dragging = true
+	if event.is_action_released("right_click"):
+		_is_dragging = false
 		
+		
+func loop_through_nodes():
+	pass
+	
 func return_ray_point_result():
 	var mouse_pos = get_global_mouse_position()
 	var space_state = get_world_2d().direct_space_state
@@ -30,12 +42,15 @@ func return_ray_point_result():
 		return results[0].collider
 	return null
 
+func drag_self():
+	if _selected_node and _is_dragging:
+		var new_position = get_global_mouse_position() - _drag_offset
+		_selected_node.position = new_position
+
+# turn the pointlide2d brightness up and down
 func toggle_brightness():
-	if _selected_node != null:
-		if _selected_node.get_child(0).energy > 1 :
-			_selected_node.get_child(0).energy = 0.5
-		else:
-			_selected_node.get_child(0).energy = 2
+	if _selected_node:
+		_selected_node.toggle_light()
 
 func draw_node():
 	var node = return_ray_point_result()
@@ -61,10 +76,9 @@ func draw_node():
 		var temp = _preloaded_fa_node.instantiate()
 		temp.position = get_global_mouse_position()
 		_selected_node = temp
-		toggle_brightness()
 		add_child(temp)
 		_all_nodes.append(_selected_node)
-		
+		toggle_brightness()
 # Draw a line between two states
 func connect_nodes():
 	# Check if anything is selected
