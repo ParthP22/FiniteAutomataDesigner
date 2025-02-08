@@ -7,21 +7,30 @@ var end_node: RigidBody2D = null
 var arrow_head = Polygon2D.new()
 var arrow_shaft = Line2D.new()
 
+var semi_circle_points = Curve2D.new()
+var line_curve = Line2D.new()
+
 func _ready():
+	# Arrow to another node
 	add_child(arrow_shaft)
 	arrow_shaft.default_color = Color(1, 1, 1, 1)  # White color for visibility
-	arrow_shaft.width = 2
-
+	arrow_shaft.width = 3
 	add_child(arrow_head)
 	arrow_head.color = Color(1, 0, 0, 1)  # Red color for visibility
+	
+	# Arrow to self
+	add_child(line_curve)
+	line_curve.default_color = Color(1, 1, 1, 1) # White
+	line_curve.width = 3
+	
 
 func _process(delta):
 	if start_node and end_node and start_node == end_node:
-		update_arrow()
+		update_arrow_to_self()
 	elif start_node and end_node and start_node != end_node:
-		update_arrow()
+		update_arrow_to_another()
 
-func update_arrow():
+func update_arrow_to_another():
 	var start_pos = start_node.global_position
 	var end_pos = end_node.global_position
 	var distance = start_pos.distance_to(end_pos)
@@ -55,3 +64,23 @@ func update_arrow():
 
 	# Update arrowhead
 	arrow_head.polygon = PackedVector2Array([perp_start, adjusted_end, perp_end])
+	
+func update_arrow_to_self():
+	var node_center = start_node.global_position
+	# Clear the previous points
+	semi_circle_points.clear_points()
+	
+	semi_circle_points.add_point(Vector2(node_center.x - node_rad+8, node_center.y - node_rad + 20))
+	semi_circle_points.add_point(Vector2(node_center.x, node_center.y - (node_rad * 2)), 
+				Vector2(-node_rad,0),
+				Vector2(node_rad,0))
+	semi_circle_points.add_point(Vector2(node_center.x + node_rad/2 + 5, node_center.y - node_rad))
+	line_curve.points = semi_circle_points.get_baked_points()
+	
+	arrow_head.polygon = PackedVector2Array([
+		Vector2(node_center.x + node_rad/2 - 10 + 5, node_center.y - node_rad),
+		Vector2(node_center.x + node_rad/2 + 5, node_center.y - node_rad + 10),
+		Vector2(node_center.x + node_rad/2 + 10 + 5, node_center.y - node_rad)
+	])
+	
+	
