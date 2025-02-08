@@ -16,7 +16,9 @@ func _ready():
 	arrow_head.color = Color(1, 0, 0, 1)  # Red color for visibility
 
 func _process(delta):
-	if start_node and end_node:
+	if start_node and end_node and start_node == end_node:
+		update_arrow()
+	elif start_node and end_node and start_node != end_node:
 		update_arrow()
 
 func update_arrow():
@@ -43,7 +45,7 @@ func update_arrow():
 
 	# Find perpendicular direction for arrowhead
 	var direction = (adjusted_end - adjusted_start).normalized()
-	var perp_direction = Vector2(-direction.y, direction.x) * 5
+	var perp_direction = Vector2(-direction.y, direction.x) * 7
 
 	var perp_start = arrow_tip - perp_direction
 	var perp_end = arrow_tip + perp_direction
