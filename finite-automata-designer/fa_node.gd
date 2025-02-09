@@ -44,7 +44,9 @@ func draw_arrow_to_self(arrow_node: Object) -> Object:
 func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 	if _going_to.has(other_node) and _incoming.has(other_node):
 		print(self.name, " and ", other_node.name, " point to each other (double arrow detection)")
-		print("also not redrawing")
+		print("also not redrawing HOWEVER adjusting offsets")
+		#_going_to[other_node].offset = 10
+		#_incoming[other_node].offset = -10
 		return null
 	elif _going_to.has(other_node):
 		print(self.name, " points to", other_node.name, " already, not redrawing")
