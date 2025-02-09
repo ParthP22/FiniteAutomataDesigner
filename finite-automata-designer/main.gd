@@ -2,22 +2,39 @@ extends Node2D
 var _preloaded_fa_node = preload("res://fa_node_2.tscn")
 var _preloaded_arrow = preload("res://Arrow.tscn")
 var _selected_node: RigidBody2D = null
-var _text_field: LineEdit = null
 var _all_nodes: Array = []
 var _is_dragging = false
 var _drag_offset = Vector2.ZERO  # Offset from node center when dragging
+@onready var _state_text_field: LineEdit = $StateTextField/LineEdit
+@onready var _arrow_text_field: LineEdit = $ArrowTextField/LineEdit
+@onready var _is_start_state: RigidBody2D = $StartStateToggle
+@onready var _is_end_state: RigidBody2D = $EndStateToggle
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	_text_field = get_child(1).get_child(1)
+	pass 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	if _is_dragging:
 		drag_self()
 			
+
+# Called anytime an 'event' occurs i.e. mouse move, clicks
 func _input(event):
-	if event.is_action_pressed("left_click"):
+	# Setting state and arrow fields to be visible
+	if _selected_node:
+		_state_text_field.visible = true
+		_arrow_text_field.visible = true
+		_is_start_state.visible = true
+		_is_end_state.visible = true
+	else:
+		_state_text_field.visible = false
+		_arrow_text_field.visible = false
+		_is_start_state.visible = false
+		_is_end_state.visible = false
+	
+	if event.is_action_pressed("left_click") and !event.double_click:
 		draw_node()
 	elif event.is_action_pressed("shift_right_click"):
 		connect_nodes()
@@ -31,7 +48,7 @@ func _input(event):
 		_is_dragging = true
 	if event.is_action_released("right_click"):
 		_is_dragging = false
-		
+	
 		
 func loop_through_nodes():
 	pass
@@ -111,4 +128,4 @@ func connect_nodes():
 func _on_line_edit_text_submitted(new_text):
 	if _selected_node:
 		_selected_node.set_text(new_text)
-		_text_field.text = ""
+		_state_text_field.text = ""

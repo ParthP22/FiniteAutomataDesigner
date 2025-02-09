@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://dl8k47mliaxvs"]
+[gd_scene load_steps=5 format=3 uid="uid://dl8k47mliaxvs"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_n2rlr"]
 
@@ -11,10 +11,13 @@ outline_color = Color(0.230315, 0.230315, 0.230315, 1)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_taevs"]
 size = Vector2(233, 45)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3bfpm"]
+size = Vector2(220, 45)
+
 [node name="main" type="Node2D"]
 script = ExtResource("1_n2rlr")
 
-[node name="Label" type="Label" parent="."]
+[node name="Title" type="Label" parent="."]
 offset_left = 403.0
 offset_top = 37.0
 offset_right = 796.0
@@ -23,16 +26,16 @@ text = "Finite Automata Designer
 "
 label_settings = SubResource("LabelSettings_db6vl")
 
-[node name="RigidBody2D" type="RigidBody2D" parent="."]
-position = Vector2(154, 578)
+[node name="StateTextField" type="RigidBody2D" parent="."]
+position = Vector2(154, 577)
 mass = 100000.0
 gravity_scale = 0.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
-position = Vector2(-2.5, -0.5)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StateTextField"]
+position = Vector2(-2.5, 0)
 shape = SubResource("RectangleShape2D_taevs")
 
-[node name="LineEdit" type="LineEdit" parent="RigidBody2D"]
+[node name="LineEdit" type="LineEdit" parent="StateTextField"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -51,10 +54,10 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 351.0
-offset_top = 523.0
-offset_right = 832.0
-offset_bottom = 624.0
+offset_left = 935.0
+offset_top = 601.0
+offset_right = 1427.0
+offset_bottom = 728.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "FOR PARTH: 
@@ -63,4 +66,85 @@ Left Click: On an existing circle selects it and makes it editable
 Left Click: When something is selected clears the selection
 Text field lets you labels the nodes when a node is selected"
 
-[connection signal="text_submitted" from="RigidBody2D/LineEdit" to="." method="_on_line_edit_text_submitted"]
+[node name="ArrowTextField" type="RigidBody2D" parent="."]
+position = Vector2(154, 622)
+mass = 100000.0
+gravity_scale = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ArrowTextField"]
+position = Vector2(-2.5, 0)
+shape = SubResource("RectangleShape2D_taevs")
+
+[node name="LineEdit" type="LineEdit" parent="ArrowTextField"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -105.5
+offset_top = -15.5
+offset_right = 105.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "Label the arrow"
+
+[node name="StartStateToggle" type="RigidBody2D" parent="."]
+position = Vector2(379, 577)
+mass = 100000.0
+gravity_scale = 0.0
+
+[node name="StartStateButton" type="CheckButton" parent="StartStateToggle"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 47.0
+offset_top = -11.0
+offset_right = 91.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.2, 1.2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StartStateToggle"]
+shape = SubResource("RectangleShape2D_3bfpm")
+
+[node name="Label" type="Label" parent="StartStateToggle"]
+offset_left = -98.0
+offset_top = -11.0
+offset_right = 39.0
+offset_bottom = 12.0
+text = "Start State Toggle:"
+
+[node name="EndStateToggle" type="RigidBody2D" parent="."]
+position = Vector2(379, 622)
+mass = 100000.0
+gravity_scale = 0.0
+
+[node name="EndStateButton" type="CheckButton" parent="EndStateToggle"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 47.0
+offset_top = -11.0
+offset_right = 91.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.2, 1.2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EndStateToggle"]
+shape = SubResource("RectangleShape2D_3bfpm")
+
+[node name="Label" type="Label" parent="EndStateToggle"]
+offset_left = -98.0
+offset_top = -11.0
+offset_right = 39.0
+offset_bottom = 12.0
+text = "Start State Toggle:"
+
+[connection signal="text_submitted" from="StateTextField/LineEdit" to="." method="_on_line_edit_text_submitted"]
