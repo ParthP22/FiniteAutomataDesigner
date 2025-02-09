@@ -23,12 +23,19 @@ func _ready():
 	line_curve.default_color = Color(1, 1, 1, 1) # White
 	line_curve.width = 3
 	
-
 func _process(delta):
 	if start_node and end_node and start_node == end_node:
 		update_arrow_to_self()
 	elif start_node and end_node and start_node != end_node:
 		update_arrow_to_another()
+
+func set_start_node(node: Object):
+	if !start_node:
+		start_node = node
+	
+func set_end_node(node: Object):
+	if !end_node:
+		end_node = node
 
 func update_arrow_to_another():
 	var start_pos = start_node.global_position

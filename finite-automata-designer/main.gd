@@ -1,5 +1,6 @@
 extends Node2D
 var _preloaded_fa_node = preload("res://fa_node_2.tscn")
+var _preloaded_arrow = preload("res://Arrow.tscn")
 var _selected_node: RigidBody2D = null
 var _text_field: LineEdit = null
 var _all_nodes: Array = []
@@ -38,7 +39,6 @@ func return_ray_point_result():
 	query.collide_with_bodies = true # Ensure it detects PhysicsBody2D nodes
 	var results = space_state.intersect_point(query)
 	if results.size() == 1:
-		print(results[0].collider)
 		return results[0].collider
 	return null
 
@@ -90,26 +90,15 @@ func connect_nodes():
 		# collision check with self
 		# HAVE THE FA_NODES DRAW THE ARROWS THEMSELVE!!!! it makes the logic easier to check arrows
 		if node == _selected_node: 
-			if !node.self_looping:
-				node.self_looping = true
-				var self_arrow = preload("res://Arrow.tscn").instantiate()
-				self_arrow.start_node = _selected_node
-				self_arrow.end_node = _selected_node
-				node.add_to_outgoing(node, self_arrow)
-				add_child(self_arrow)
-				print("making self loop")
-				return
-			else:
-				print("node already points to self")
+			var arrow_node = _selected_node.draw_arrow_to_self(_preloaded_arrow.instantiate())
+			if arrow_node:
+				add_child(arrow_node)
+			return
 		# collision with another node
 		elif node != _selected_node and node != null:
-			# points from _selected_node -> other_node
-			_selected_node.add_to_outgoing(node)
-			node.add_to_incoming(_selected_node)
-			var arrow = preload("res://Arrow.tscn").instantiate()
-			arrow.start_node = _selected_node
-			arrow.end_node = node
-			add_child(arrow)
+			var arrow_node = _selected_node.draw_arrow(node, _preloaded_arrow.instantiate())
+			if arrow_node:
+				add_child(arrow_node)
 			return
 			
 
