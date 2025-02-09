@@ -26,6 +26,10 @@ func _input(event):
 	if _selected_node:
 		_state_text_field.visible = true
 		_arrow_text_field.visible = true
+		
+		#set the state of the check buttons before showing them
+		_is_start_state.get_child(0).button_pressed  = _selected_node.get_start_state()
+		_is_end_state.get_child(0).button_pressed  = _selected_node.get_end_state()
 		_is_start_state.visible = true
 		_is_end_state.visible = true
 	else:
@@ -44,8 +48,6 @@ func _input(event):
 			_is_dragging = true
 		else:
 			_is_dragging = false
-		_drag_offset = get_global_mouse_position() - _selected_node.global_position
-		_is_dragging = true
 	if event.is_action_released("right_click"):
 		_is_dragging = false
 	
@@ -77,7 +79,7 @@ func toggle_brightness():
 func draw_node():
 	var node = return_ray_point_result()
 	# If you click the anything else with a collision don't draw the circle 
-	if node is RigidBody2D and node.get_child(1) is LineEdit:
+	if node is RigidBody2D and (node.get_child(0) is LineEdit or node.get_child(0) is CheckButton):
 		print("clicked on an object that isn't state")
 		return
 	# If you click a state select it
@@ -129,3 +131,13 @@ func _on_line_edit_text_submitted(new_text):
 	if _selected_node:
 		_selected_node.set_text(new_text)
 		_state_text_field.text = ""
+
+
+func _on_start_state_button_toggled(toggled_on):
+	if _selected_node:
+		_selected_node.set_start_state(toggled_on)
+
+
+func _on_end_state_button_toggled(toggled_on):
+	if _selected_node:
+		_selected_node.set_end_state(toggled_on)
