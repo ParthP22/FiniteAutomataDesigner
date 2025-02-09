@@ -22,6 +22,11 @@ func _input(event):
 	elif event.is_action_pressed("shift_right_click"):
 		connect_nodes()
 	if event.is_action_pressed("right_click"):
+		if _selected_node:
+			_drag_offset = get_global_mouse_position() - _selected_node.global_position
+			_is_dragging = true
+		else:
+			_is_dragging = false
 		_drag_offset = get_global_mouse_position() - _selected_node.global_position
 		_is_dragging = true
 	if event.is_action_released("right_click"):
@@ -79,6 +84,7 @@ func draw_node():
 		add_child(temp)
 		_all_nodes.append(_selected_node)
 		toggle_brightness()
+		
 # Draw a line between two states
 func connect_nodes():
 	# Check if anything is selected
