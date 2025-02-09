@@ -149,6 +149,7 @@ offset_right = 39.0
 offset_bottom = 12.0
 text = "End State Toggle:"
 
-[connection signal="text_submitted" from="StateTextField/LineEdit" to="." method="_on_line_edit_text_submitted"]
+[connection signal="text_submitted" from="StateTextField/LineEdit" to="." method="_on_state_edit_text_submitted"]
+[connection signal="text_submitted" from="ArrowTextField/LineEdit" to="." method="_on_arrow_edit_text_submitted"]
 [connection signal="toggled" from="StartStateToggle/StartStateButton" to="." method="_on_start_state_button_toggled"]
 [connection signal="toggled" from="EndStateToggle/EndStateButton" to="." method="_on_end_state_button_toggled"]

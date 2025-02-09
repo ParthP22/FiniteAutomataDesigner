@@ -2,6 +2,7 @@ extends Node2D
 var _preloaded_fa_node = preload("res://fa_node_2.tscn")
 var _preloaded_arrow = preload("res://Arrow.tscn")
 var _selected_node: RigidBody2D = null
+var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
 var _is_dragging = false
 var _drag_offset = Vector2.ZERO  # Offset from node center when dragging
@@ -23,9 +24,9 @@ func _process(_delta):
 # Called anytime an 'event' occurs i.e. mouse move, clicks
 func _input(event):
 	# Setting state and arrow fields to be visible
-	if _selected_node:
+	if _selected_node and !_selected_arrow:
 		_state_text_field.visible = true
-		_arrow_text_field.visible = true
+		_arrow_text_field.visible = false
 		
 		#set the state of the check buttons before showing them
 		_is_start_state.get_child(0).button_pressed  = _selected_node.get_start_state()
@@ -34,12 +35,16 @@ func _input(event):
 		_is_end_state.visible = true
 	else:
 		_state_text_field.visible = false
-		_arrow_text_field.visible = false
 		_is_start_state.visible = false
 		_is_end_state.visible = false
 	
+	if _selected_arrow and !_selected_node:
+		_arrow_text_field.visible = true
+	else:
+		_arrow_text_field.visible = false
+	
 	if event.is_action_pressed("left_click") and !event.double_click:
-		draw_node()
+		draw()
 	elif event.is_action_pressed("shift_right_click"):
 		connect_nodes()
 	if event.is_action_pressed("right_click"):
@@ -75,35 +80,76 @@ func drag_self():
 func toggle_brightness():
 	if _selected_node:
 		_selected_node.toggle_light()
+		
+func toggle_arrow_brightness():
+	if _selected_arrow:
+		_selected_arrow.toggle_light()
 
-func draw_node():
+func draw():
 	var node = return_ray_point_result()
-	# If you click the anything else with a collision don't draw the circle 
-	if node is RigidBody2D and (node.get_child(0) is LineEdit or node.get_child(0) is CheckButton):
-		print("clicked on an object that isn't state")
-		return
-	# If you click a state select it
-	elif node is RigidBody2D and node.get_child(0) is PointLight2D:
+	var mouse_pos = get_global_mouse_position()
+	# Rewriting click checks
+	if !node and !_selected_node:
+		# If nothing is hit, draw the circle there
 		toggle_brightness()
-		_selected_node = node
-		toggle_brightness()
-		print("selection changed: ", _selected_node.name)
+		toggle_arrow_brightness()
+		_selected_node = null
+		_selected_arrow = null
+		draw_state(mouse_pos)
 		return
-	# If you already have a node selected, deselect it
-	if _selected_node != null:
-		print("deselected: ", _selected_node.name)
+	if !node and _selected_node:
+		toggle_brightness()
+		toggle_arrow_brightness()
+		_selected_node = null
+		_selected_arrow = null
+	elif node is RigidBody2D:
+		_selected_arrow = null
+		toggle_brightness()
+		if _all_nodes.find(node) > -1:
+			_selected_node = node
+			toggle_brightness()
+			return
+	elif node is StaticBody2D:
+		print("selected arrow")
 		toggle_brightness()
 		_selected_node = null
-		return
-	# If no existing node was found and nothing was selected, create a new FA_Node
-	else:
-		var temp = _preloaded_fa_node.instantiate()
-		temp.position = get_global_mouse_position()
-		_selected_node = temp
-		add_child(temp)
-		_all_nodes.append(_selected_node)
-		toggle_brightness()
+		_selected_arrow = node
+		toggle_arrow_brightness()
+	# If you click the anything else with a collision don't draw the circle 
+	#if node is RigidBody2D and (node.get_child(0) is LineEdit or node.get_child(0) is CheckButton):
+		#print("clicked on an object that isn't state")
+		#return
+	## If you click a state select it
+	#elif node is RigidBody2D and node.get_child(0) is PointLight2D:
+		#toggle_brightness()
+		#_selected_node = node
+		#toggle_brightness()
+		#print("selection changed: ", _selected_node.name)
+		#return
+	## If you already have a node selected, deselect it
+	#if _selected_node != null:
+		#print("deselected: ", _selected_node.name)
+		#toggle_brightness()
+		#_selected_node = null
+		#return
+	## If no existing node was found and nothing was selected, create a new FA_Node
+	#else:
+		#var temp = _preloaded_fa_node.instantiate()
+		#temp.position = get_global_mouse_position()
+		#_selected_node = temp
+		#add_child(temp)
+		#_all_nodes.append(_selected_node)
+		#toggle_brightness()
 		
+
+func draw_state(mouse_pos: Vector2):
+	var state = _preloaded_fa_node.instantiate()
+	state.position = mouse_pos
+	_selected_node = state
+	add_child(state)
+	_all_nodes.append(state)
+	toggle_brightness()
+
 # Draw a line between two states
 func connect_nodes():
 	# Check if anything is selected
@@ -127,16 +173,21 @@ func connect_nodes():
 			return
 			
 
-func _on_line_edit_text_submitted(new_text):
+func _on_state_edit_text_submitted(new_text):
 	if _selected_node:
 		_selected_node.set_text(new_text)
 		_state_text_field.text = ""
 
+func _on_arrow_edit_text_submitted(new_text):
+	if _selected_node:
+		var out_arrows = _selected_node.get_outgoing()
+		
+		_selected_node.set_text(new_text)
+		_arrow_text_field.text = ""
 
 func _on_start_state_button_toggled(toggled_on):
 	if _selected_node:
 		_selected_node.set_start_state(toggled_on)
-
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:

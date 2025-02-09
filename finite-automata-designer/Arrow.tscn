@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://cjni6lvjqg5dw"]
+[gd_scene load_steps=3 format=3 uid="uid://cjni6lvjqg5dw"]
 
 [ext_resource type="Script" path="res://arrow.gd" id="1_ayvgo"]
+[ext_resource type="Texture2D" uid="uid://bqowa8tmxi61u" path="res://light.png" id="2_lck2w"]
 
-[node name="Node2D" type="Node2D"]
+[node name="Arrow" type="StaticBody2D"]
+disable_mode = 1
 script = ExtResource("1_ayvgo")
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+color = Color(0, 0.520913, 0.62382, 1)
+energy = 0.0
+texture = ExtResource("2_lck2w")
+texture_scale = 0.1

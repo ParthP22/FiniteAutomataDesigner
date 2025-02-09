@@ -7,10 +7,15 @@ var end_node: RigidBody2D = null
 var arrow_head = Polygon2D.new()
 var arrow_shaft = Line2D.new()
 
+
 var offset: float = 1
+var special_name: String = "state"
 var semi_circle_points = Curve2D.new()
 var line_curve = Line2D.new()
 var label = Label.new()
+var label_bg = Sprite2D.new()
+var arrow_hitbox: CollisionPolygon2D = CollisionPolygon2D.new()
+@onready var light: Light2D = $PointLight2D
 
 
 func _ready():
@@ -29,10 +34,15 @@ func _ready():
 	# Label modifications
 	line_curve.add_child(label)
 	label.text = "a"
-	label.add_theme_color_override("font_color", Color("black"))
+	label.add_theme_color_override("font_color", Color("blue"))
 	label.add_theme_font_size_override("font_size", 20)
-	
+	# Add arrow hitbox child
+	add_child(arrow_hitbox)
+
 func _process(delta):
+	pass
+
+func _physics_process(delta):
 	if start_node and end_node and start_node == end_node:
 		update_arrow_to_self()
 	elif start_node and end_node and start_node != end_node:
@@ -47,40 +57,56 @@ func set_end_node(node: Object):
 		end_node = node
 
 func update_arrow_to_another():
+# Calculate midpoint and set it as the arrow's position
 	var start_pos = start_node.global_position
 	var end_pos = end_node.global_position
-	var distance = start_pos.distance_to(end_pos)
+	var midpoint = (start_pos + end_pos) / 2
+	self.position = midpoint  # Move arrow to midpoint
+
+	# Compute local positions relative to `self.position`
+	var local_start = start_pos - self.position
+	var local_end = end_pos - self.position
+	var distance = local_start.distance_to(local_end)
+
 	# Offset start and end positions to prevent overlap with circles
 	var t1 = node_rad / distance
 	var t2 = node_rad / distance
-	var x1 = (1 - t1) * start_pos.x + t1 * end_pos.x
-	var y1 = (1 - t1) * start_pos.y + t1 * end_pos.y
-	var x2 = (1 - t2) * end_pos.x + t2 * start_pos.x
-	var y2 = (1 - t2) * end_pos.y + t2 * start_pos.y
-	# Non overlapping stand and end points
-	var adjusted_start = Vector2(x1, y1)
-	var adjusted_end = Vector2(x2, y2)
+	var adjusted_start = (1 - t1) * local_start + t1 * local_end
+	var adjusted_end = (1 - t2) * local_end + t2 * local_start
+
 	# Compute direction and perpendicular direction
 	var direction = (adjusted_end - adjusted_start).normalized()
 	var perp_direction = Vector2(-direction.y, direction.x) * offset
+
 	# Apply perpendicular offset to shift the entire arrow
 	adjusted_start += perp_direction
 	adjusted_end += perp_direction
+
 	# Find a point slightly before the end for the arrowhead
 	var t3 = 10 / adjusted_start.distance_to(adjusted_end)
-	var x3 = (1 - t3) * adjusted_end.x + t3 * adjusted_start.x
-	var y3 = (1 - t3) * adjusted_end.y + t3 * adjusted_start.y
-	var arrow_tip = Vector2(x3, y3)
+	var arrow_tip = (1 - t3) * adjusted_end + t3 * adjusted_start
+
 	# Find perpendicular points for arrowhead
 	var perp_start = arrow_tip - perp_direction.normalized() * 7
 	var perp_end = arrow_tip + perp_direction.normalized() * 7
-	# Update shaft (main line)
+
+	# Update shaft (main line) - Now relative to `self.position`
 	arrow_shaft.points = [adjusted_start, arrow_tip]
-	# Update arrowhead
+
+	# Update arrowhead - Now relative to `self.position`
 	arrow_head.polygon = PackedVector2Array([perp_start, adjusted_end, perp_end])
+
 	# Position label at the midpoint of the arrow, slightly above
-	var midpoint = (adjusted_start + adjusted_end) / 2
-	label.position = midpoint + perp_direction.normalized() * 15  # Move label slightly above
+	label.position = perp_direction.normalized() * 15  # Offset slightly above
+
+	# Reshape arrow shaft collision box
+	var hitbox_width = 5
+	var p1 = adjusted_start + perp_direction.normalized() * hitbox_width
+	var p2 = adjusted_start - perp_direction.normalized() * hitbox_width
+	var p3 = adjusted_end - perp_direction.normalized() * hitbox_width
+	var p4 = adjusted_end + perp_direction.normalized() * hitbox_width
+	arrow_hitbox.polygon = PackedVector2Array([p1, p2, p3, p4])
+	
 	
 func update_arrow_to_self():
 	var node_center = start_node.global_position
@@ -100,4 +126,8 @@ func update_arrow_to_self():
 		Vector2(node_center.x + node_rad/2 + 10 + 5, node_center.y - node_rad)
 	])
 	
-	
+func toggle_light():
+	if light.energy <= 0:
+		light.energy = 1
+	else:
+		light.energy = 0

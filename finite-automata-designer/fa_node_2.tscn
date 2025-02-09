@@ -31,6 +31,7 @@ func _input_event(viewport, event, shape_idx):
 radius = 26.1725
 
 [node name="FA_Node_2" type="RigidBody2D"]
+mass = 1e+06
 gravity_scale = 0.0
 script = ExtResource("1_quw3j")
 
@@ -40,7 +41,7 @@ color = Color(0.883056, 0.458227, 0.0715185, 1)
 energy = 0.0
 blend_mode = 2
 texture = ExtResource("4_gcrma")
-texture_scale = 0.2
+texture_scale = 0.13
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.1, 0.1)

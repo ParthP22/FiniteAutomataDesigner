@@ -5,8 +5,9 @@ var _self_looping = false
 var _label: Label = null
 var _going_to: Dictionary = {}
 var _incoming: Dictionary = {}
-
 @onready var _light: PointLight2D = $PointLight2D
+
+var special_name: String = "state"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -74,8 +75,11 @@ func _add_to_going_to(node: Object, arrow: Object):
 func _add_to_incoming(node: Object, arrow: Object):
 	_incoming[node] = arrow
 
-func _check_double_arrow(incoming_node: Object, going_to_node: Object) -> bool:
-	return true
+func get_out_arrows():
+	return _going_to
+
+func get_in_arrows():
+	return _incoming
 
 func get_start_state():
 	return _is_start_state
@@ -92,20 +96,13 @@ func set_end_state(value: bool):
 	update_light_color()
 
 func update_light_color():
-	print("start state: ", _is_start_state)
-	print("end state: ", _is_end_state)
 	if _is_start_state and _is_end_state:
-		print('reached purple both true???')
 		_light.color = Color("Purple")
 		return
-		
 	if _is_start_state:
-		print("reached start state, currently blue")
 		_light.color = Color("Blue")
 		return
-		
 	if _is_end_state:
-		print('reached green end state color selection')
 		_light.color = Color("Green")
 		return
 	_light.color = Color(0.883, 0.458, 0.072)  # Default orange

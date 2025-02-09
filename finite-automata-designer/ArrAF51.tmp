@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://cjni6lvjqg5dw"]
+
+[ext_resource type="Script" path="res://arrow.gd" id="1_ayvgo"]
+
+[node name="Arrow" type="RigidBody2D"]
+disable_mode = 1
+mass = 1e+07
+gravity_scale = 0.0
+script = ExtResource("1_ayvgo")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-6, -4, 5, -4, 5, 4)
