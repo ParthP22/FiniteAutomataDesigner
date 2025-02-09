@@ -88,13 +88,14 @@ func connect_nodes():
 		#Check collision with another node
 		var node = return_ray_point_result()
 		# collision check with self
+		# HAVE THE FA_NODES DRAW THE ARROWS THEMSELVE!!!! it makes the logic easier to check arrows
 		if node == _selected_node: 
 			if !node.self_looping:
 				node.self_looping = true
-				node.add_to_outgoing(node)
 				var self_arrow = preload("res://Arrow.tscn").instantiate()
 				self_arrow.start_node = _selected_node
 				self_arrow.end_node = _selected_node
+				node.add_to_outgoing(node, self_arrow)
 				add_child(self_arrow)
 				print("making self loop")
 				return

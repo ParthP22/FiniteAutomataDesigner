@@ -2,12 +2,28 @@
 
 [ext_resource type="Script" path="res://fa_node.gd" id="1_quw3j"]
 [ext_resource type="Texture2D" uid="uid://bqegqmqoqoyds" path="res://circle_FA.png" id="2_1gxso"]
-[ext_resource type="Script" path="res://node_click.gd" id="3_3is0d"]
 [ext_resource type="Texture2D" uid="uid://cwmnyi852dhg7" path="res://fa_light.png" id="4_fnl2a"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_vu1vr"]
 font_size = 32
 font_color = Color(0, 0.621665, 0.677136, 1)
+
+[sub_resource type="GDScript" id="GDScript_4xnxh"]
+script/source = "extends Area2D
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+func _input_event(viewport, event, shape_idx):
+	if event.is_action_pressed(\"left_click\"):
+		print(\"Clicked on me!\", get_parent().speak_up())
+"
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_k03c7"]
 radius = 26.1725
@@ -43,7 +59,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Area2D" type="Area2D" parent="."]
-script = ExtResource("3_3is0d")
+script = SubResource("GDScript_4xnxh")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("CircleShape2D_k03c7")

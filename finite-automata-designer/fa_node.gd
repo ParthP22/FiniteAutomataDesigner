@@ -3,8 +3,8 @@ var is_start_state: bool = false
 var is_end_state: bool = false
 var self_looping = false
 var _label: Label = null
-var _out_going_to: Array = []
-var _incoming: Array = []
+var _out_going_to: Dictionary = {}
+var _incoming: Dictionary = {}
 @onready var _light: PointLight2D = $PointLight2D
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -21,13 +21,13 @@ func set_text(new_label_text: String):
 	_label.text = ""
 	_label.text = new_label_text
 
-func add_to_outgoing(node: Object):
-	if !_contains_node_out_going(node):
-		_out_going_to.append(node)
+func add_to_outgoing(node: Object, arrow: Object):
+	if !_out_going_to.has(node):
+		_out_going_to[node] = arrow
 	
-	
-func add_to_incoming(node: Object):
-	_incoming.append(node)
+func add_to_incoming(node: Object, arrow: Object):
+	if !_incoming:
+		_incoming[node] = arrow
 	
 func toggle_light():
 	if _light.energy > 1.1:
@@ -48,6 +48,7 @@ func _contains_node_incoming(node: Object):
 			print("The node already points to this one!!")
 			return true
 	return false
+	
 func contains(node: Object):
 	for n in _out_going_to:
 		if n == node:
