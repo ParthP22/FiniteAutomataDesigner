@@ -67,7 +67,6 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 			_incoming[other_node].offset = 10
 		return arrow_node
 
-	
 func _add_to_going_to(node: Object, arrow: Object):
 	_going_to[node] = arrow
 

@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://fa_node.gd" id="1_quw3j"]
 [ext_resource type="Texture2D" uid="uid://bqegqmqoqoyds" path="res://circle_FA.png" id="2_1gxso"]
+[ext_resource type="Texture2D" uid="uid://bxsjktrv52lvv" path="res://point_light_2d.png" id="3_eofgv"]
 [ext_resource type="Texture2D" uid="uid://wl22posoy3mc" path="res://icon.svg" id="4_0rfd8"]
-[ext_resource type="Texture2D" uid="uid://bqowa8tmxi61u" path="res://light.png" id="4_gcrma"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_vu1vr"]
 font_size = 32
@@ -31,21 +31,20 @@ func _input_event(viewport, event, shape_idx):
 radius = 26.1725
 
 [node name="FA_Node_2" type="RigidBody2D"]
-mass = 1e+06
 gravity_scale = 0.0
 script = ExtResource("1_quw3j")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_1gxso")
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
 scale = Vector2(0.8, 0.8)
 color = Color(0.883056, 0.458227, 0.0715185, 1)
 energy = 0.0
 blend_mode = 2
-texture = ExtResource("4_gcrma")
-texture_scale = 0.13
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("2_1gxso")
+texture = ExtResource("3_eofgv")
+texture_scale = 2.0
 
 [node name="Label" type="Label" parent="."]
 anchors_preset = 8

@@ -9,8 +9,8 @@ var _drag_offset: Vector2 = Vector2.ZERO
 var _alphabet: String = ""
 var _input_string: String = ""
 # Text Labels
-@onready var _input_string_label: Label = $Control/InputStringLabel
-@onready var _alphabet_label: Label = $Control/AlphabetLabel
+@onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
+@onready var _alphabet_label: Label = $Control/AlphabetRigidBody/AlphabetLabel
 # Text fields (LineEdits)
 @onready var _input_string_text_field: LineEdit = $InputTextField/LineEdit
 @onready var _alphabet_text_field: LineEdit = $AlphabetTextField/LineEdit
@@ -54,7 +54,7 @@ func _input(event):
 	
 	if event.is_action_pressed("left_click") and !event.double_click:
 		draw()
-	elif event.is_action_pressed("shift_right_click"):
+	elif event.is_action_pressed("shift_keyboard"):
 		connect_nodes()
 	if event.is_action_pressed("right_click"):
 		if _selected_node:
@@ -192,22 +192,23 @@ func connect_nodes():
 	if !_selected_node:
 		print("No node selected!")
 	else:
-		#Check collision with another node
 		var node = return_ray_point_result()
-		# collision check with self
-		# HAVE THE FA_NODES DRAW THE ARROWS THEMSELVE!!!! it makes the logic easier to check arrows
+		# Check collision with selected node
 		if node == _selected_node: 
 			var arrow_node = _selected_node.draw_arrow_to_self(_preloaded_arrow.instantiate())
 			if arrow_node:
 				add_child(arrow_node)
 			return
-		# collision with another node
+		# collision with raycast hit
 		elif node != _selected_node and node != null:
-			var arrow_node = _selected_node.draw_arrow(node, _preloaded_arrow.instantiate())
-			if arrow_node:
-				add_child(arrow_node)
-			return
-			
+			# Verifying the node you selected is an FA_Node
+			if node.get_child(0) is Sprite2D:
+				var arrow_node = _selected_node.draw_arrow(node, _preloaded_arrow.instantiate())
+				if arrow_node:
+					add_child(arrow_node)
+				return
+			else:
+				print("shift press on something other than a node")
 
 func _on_state_edit_text_submitted(new_text):
 	if _selected_node:
