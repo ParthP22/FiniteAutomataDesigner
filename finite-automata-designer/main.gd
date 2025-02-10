@@ -8,6 +8,8 @@ var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
 var _alphabet: Array = []
 var _input_string: String = ""
+var start_state : RigidBody2D = null
+var end_state : RigidBody2D = null
 
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
@@ -20,6 +22,8 @@ var _input_string: String = ""
 # Toggles
 @onready var _is_start_state: RigidBody2D = $StartStateToggle
 @onready var _is_end_state: RigidBody2D = $EndStateToggle
+
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -199,11 +203,16 @@ func _on_arrow_edit_text_submitted(new_text):
 
 func _on_start_state_button_toggled(toggled_on):
 	if _selected_node:
-		_selected_node.set_start_state(toggled_on)
+		if start_state:
+			print("There already exists a start state!")
+		else:
+			_selected_node.set_start_state(toggled_on)
+			start_state = _selected_node
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:
 		_selected_node.set_end_state(toggled_on)
+		end_state = _selected_node
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
@@ -233,5 +242,5 @@ func _on_button_button_down():
 	pass # Replace with function body.
 	
 func dfa():
-	
+	var tmp : RigidBody2D = start_state
 	pass

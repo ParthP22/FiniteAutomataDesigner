@@ -51,16 +51,16 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		print("also not redrawing")
 		print(typeof(_going_to[other_node]))
 		
-		print(_going_to)
-		print(_incoming)
+		#print(_going_to)
+		#print(_incoming)
 		
 		return null
 	elif _going_to.has(other_node):
 		print(self.name, " points to", other_node.name, " already, not redrawing")
 		
 		
-		print(_going_to)
-		print(_incoming)
+		#print(_going_to)
+		#print(_incoming)
 		
 		return null
 	else:
@@ -76,8 +76,8 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 			_incoming[other_node].offset = 10
 			
 		
-		print(_going_to)
-		print(_incoming)
+		#print(_going_to)
+		#print(_incoming)
 		
 		return arrow_node
 	

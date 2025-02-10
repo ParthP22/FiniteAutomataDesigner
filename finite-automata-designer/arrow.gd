@@ -3,6 +3,7 @@ extends Node2D
 var node_rad = 26.1725006103516
 var start_node: RigidBody2D = null
 var end_node: RigidBody2D = null
+var transition: String = ""
 
 var arrow_head = Polygon2D.new()
 var arrow_shaft = Line2D.new()
@@ -129,6 +130,12 @@ func update_arrow_to_self():
 func set_text(text: String):
 	label.text = ""
 	label.text = text
+	
+func get_transition() -> String:
+	return transition
+	
+func set_transition(new_transition: String):
+	transition = new_transition
 
 func toggle_light():
 	print('reached arrow light')
