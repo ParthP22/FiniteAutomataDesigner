@@ -6,8 +6,9 @@ var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
 var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
-var _alphabet: String = ""
+var _alphabet: Array = []
 var _input_string: String = ""
+
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
 @onready var _alphabet_label: Label = $Control/AlphabetRigidBody/AlphabetLabel
@@ -124,31 +125,7 @@ func draw():
 		return
 	else:
 		print('clicked something else')
-	# If you click the anything else with a collision don't draw the circle 
-	#if node is RigidBody2D and (node.get_child(0) is LineEdit or node.get_child(0) is CheckButton):
-		#print("clicked on an object that isn't state")
-		#return
-	## If you click a state select it
-	#elif node is RigidBody2D and node.get_child(0) is PointLight2D:
-		#toggle_brightness()
-		#_selected_node = node
-		#toggle_brightness()
-		#print("selection changed: ", _selected_node.name)
-		#return
-	## If you already have a node selected, deselect it
-	#if _selected_node != null:
-		#print("deselected: ", _selected_node.name)
-		#toggle_brightness()
-		#_selected_node = null
-		#return
-	## If no existing node was found and nothing was selected, create a new FA_Node
-	#else:
-		#var temp = _preloaded_fa_node.instantiate()
-		#temp.position = get_global_mouse_position()
-		#_selected_node = temp
-		#add_child(temp)
-		#_all_nodes.append(_selected_node)
-		#toggle_brightness()
+	
 		
 
 func select_node(node: RigidBody2D):
@@ -235,12 +212,26 @@ func _on_input_text_submitted(new_text):
 	_input_string_text_field.text = ""
 
 func _on_alphabet_text_submitted(new_text):
-	_alphabet = new_text
+	# Add each element of the new alphabet into the alphabet array
+	for char in new_text:
+		if char != ',':
+			_alphabet.append(char)
+
+	# Print it out for good measure
+	print(_alphabet)
+	
+	# Set the label to the new alphabet
 	_alphabet_label.text = ""
-	_alphabet_label.text = "Alphabet: " + _alphabet
+	_alphabet_label.text = "Alphabet: " + new_text
+	
+	# Reset text field after submission
 	_alphabet_text_field.text = ""
 
 
 func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
+	
+func dfa():
+	
+	pass
