@@ -6,7 +6,7 @@ var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
 var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
-var _alphabet: String = ""
+var _alphabet: Array = []
 var _input_string: String = ""
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
@@ -235,9 +235,12 @@ func _on_input_text_submitted(new_text):
 	_input_string_text_field.text = ""
 
 func _on_alphabet_text_submitted(new_text):
-	_alphabet = new_text
+	for char in new_text:
+		if char != ',':
+			_alphabet.append(char)
+	print(_alphabet)
 	_alphabet_label.text = ""
-	_alphabet_label.text = "Alphabet: " + _alphabet
+	_alphabet_label.text = "Alphabet: " + new_text
 	_alphabet_text_field.text = ""
 
 
