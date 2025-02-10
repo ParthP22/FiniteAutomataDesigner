@@ -50,9 +50,18 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		print(self.name, " and ", other_node.name, " point to each other (double arrow detection)")
 		print("also not redrawing")
 		print(typeof(_going_to[other_node]))
+		
+		print(_going_to)
+		print(_incoming)
+		
 		return null
 	elif _going_to.has(other_node):
 		print(self.name, " points to", other_node.name, " already, not redrawing")
+		
+		
+		print(_going_to)
+		print(_incoming)
+		
 		return null
 	else:
 		# tracking arrow
@@ -65,7 +74,13 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		if _going_to.has(other_node) and _incoming.has(other_node):
 			_going_to[other_node].offset = 10
 			_incoming[other_node].offset = 10
+			
+		
+		print(_going_to)
+		print(_incoming)
+		
 		return arrow_node
+	
 
 func _add_to_going_to(node: Object, arrow: Object):
 	_going_to[node] = arrow
