@@ -121,6 +121,9 @@ func draw():
 		print("selected arrow")
 		deselect_curr_node()
 		select_arrow(node)
+		return
+	else:
+		print('clicked something else')
 	# If you click the anything else with a collision don't draw the circle 
 	#if node is RigidBody2D and (node.get_child(0) is LineEdit or node.get_child(0) is CheckButton):
 		#print("clicked on an object that isn't state")
@@ -235,3 +238,8 @@ func _on_alphabet_text_submitted(new_text):
 	_alphabet_label.text = ""
 	_alphabet_label.text = "Alphabet: " + _alphabet
 	_alphabet_text_field.text = ""
+
+
+func _on_button_button_down():
+	print('pressed run button')
+	pass # Replace with function body.

@@ -1,6 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://dl8k47mliaxvs"]
+[gd_scene load_steps=6 format=3 uid="uid://dl8k47mliaxvs"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_n2rlr"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1sqlt"]
+size = Vector2(129, 64)
 
 [sub_resource type="LabelSettings" id="LabelSettings_db6vl"]
 font_size = 32
@@ -17,6 +20,14 @@ size = Vector2(220, 45)
 [node name="main" type="Node2D"]
 script = ExtResource("1_n2rlr")
 
+[node name="ButtonCover" type="RigidBody2D" parent="."]
+position = Vector2(881, 587)
+gravity_scale = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ButtonCover"]
+position = Vector2(0.5, 2)
+shape = SubResource("RectangleShape2D_1sqlt")
+
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 
 [node name="Control" type="Control" parent="."]
@@ -31,17 +42,17 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 611.0
-offset_top = 492.0
-offset_right = 1103.0
-offset_bottom = 619.0
+offset_left = 28.0
+offset_top = 670.0
+offset_right = 520.0
+offset_bottom = 797.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "FOR PARTH: 
-Left Click: Emtpy space when nothing is selected creates a circle
+Left Click: Empty space when nothing is selected creates a circle
 Left Click: On an existing circle selects it and makes it editable
-Left Click: When something is selected clears the selection
-Text field lets you labels the nodes when a node is selected"
+Left Click: On an arrow makes it editable
+Right Click (hold): Lets you drag selected node"
 
 [node name="Title" type="Label" parent="Control"]
 offset_left = 386.0
@@ -81,6 +92,29 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Alphabet: "
 vertical_alignment = 1
+
+[node name="Result" type="Label" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 512.0
+offset_top = 574.0
+offset_right = 684.0
+offset_bottom = 600.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Result: PASS/FAIL"
+vertical_alignment = 1
+
+[node name="Button" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 824.0
+offset_top = 564.0
+offset_right = 937.0
+offset_bottom = 614.0
+text = "Run"
 
 [node name="InputTextField" type="RigidBody2D" parent="."]
 position = Vector2(154, 488)
@@ -232,6 +266,7 @@ offset_right = 39.0
 offset_bottom = 12.0
 text = "End State Toggle:"
 
+[connection signal="button_down" from="Control/Button" to="." method="_on_button_button_down"]
 [connection signal="text_submitted" from="InputTextField/LineEdit" to="." method="_on_input_text_submitted"]
 [connection signal="text_submitted" from="AlphabetTextField/LineEdit" to="." method="_on_alphabet_text_submitted"]
 [connection signal="text_submitted" from="StateTextField/LineEdit" to="." method="_on_state_edit_text_submitted"]
