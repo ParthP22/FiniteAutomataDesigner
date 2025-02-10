@@ -8,6 +8,8 @@ var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
 var _alphabet: Array = []
 var _input_string: String = ""
+var start_state : RigidBody2D = null
+var end_state : RigidBody2D = null
 
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
@@ -20,6 +22,8 @@ var _input_string: String = ""
 # Toggles
 @onready var _is_start_state: RigidBody2D = $StartStateToggle
 @onready var _is_end_state: RigidBody2D = $EndStateToggle
+
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -194,16 +198,30 @@ func _on_state_edit_text_submitted(new_text):
 
 func _on_arrow_edit_text_submitted(new_text):
 	if _selected_arrow:
-		_selected_arrow.set_text(new_text)
+		if new_text in _alphabet:
+			if(_determinism_check(_selected_arrow.start_node)):
+				print("failed")
+			_selected_arrow.set_text(new_text)
+			_selected_arrow.set_transition(new_text)
+		else:
+			print("This character is not in the alphabet")
 		_arrow_text_field.text = ""
 
 func _on_start_state_button_toggled(toggled_on):
 	if _selected_node:
-		_selected_node.set_start_state(toggled_on)
+		if start_state:
+			print("There already exists a start state!")
+		else:
+			_selected_node.set_start_state(toggled_on)
+			start_state = _selected_node
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:
-		_selected_node.set_end_state(toggled_on)
+		if end_state:
+			print("There already exists an end state!")
+		else:
+			_selected_node.set_end_state(toggled_on)
+			end_state = _selected_node
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
@@ -232,6 +250,11 @@ func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
 	
-func dfa():
+func _determinism_check(node: RigidBody2D) -> bool:
+	for value in node.get_out_arrows().values():
+		print(value.get_transition())
+	return true
 	
+func _dfa():
+	var tmp : RigidBody2D = start_state
 	pass
