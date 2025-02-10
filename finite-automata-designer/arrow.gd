@@ -126,7 +126,12 @@ func update_arrow_to_self():
 		Vector2(node_center.x + node_rad/2 + 10 + 5, node_center.y - node_rad)
 	])
 	
+func set_text(text: String):
+	label.text = ""
+	label.text = text
+
 func toggle_light():
+	print('reached arrow light')
 	if light.energy <= 0:
 		light.energy = 1
 	else:

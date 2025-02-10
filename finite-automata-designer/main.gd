@@ -89,32 +89,29 @@ func draw():
 	var node = return_ray_point_result()
 	var mouse_pos = get_global_mouse_position()
 	# Rewriting click checks
+	# If nothing hit by raycast and no node selected
 	if !node and !_selected_node:
 		# If nothing is hit, draw the circle there
-		toggle_brightness()
-		toggle_arrow_brightness()
-		_selected_node = null
-		_selected_arrow = null
-		draw_state(mouse_pos)
+		deselect_arrow()
+		deselect_curr_node()
+		var state = draw_state(mouse_pos)
+		select_node(state)
 		return
 	if !node and _selected_node:
-		toggle_brightness()
-		toggle_arrow_brightness()
-		_selected_node = null
-		_selected_arrow = null
-	elif node is RigidBody2D:
-		_selected_arrow = null
-		toggle_brightness()
-		if _all_nodes.find(node) > -1:
-			_selected_node = node
-			toggle_brightness()
-			return
-	elif node is StaticBody2D:
+		# if nothing is hit and a node is selected, just reset and wait for the next click
+		deselect_arrow()
+		deselect_curr_node()
+		return
+	if node is RigidBody2D and _all_nodes.find(node) > -1:
+		# you hit a state, deselect the curr state and select the new one
+		select_node(node)
+		deselect_arrow()
+		return
+	elif node is StaticBody2D and !_selected_arrow:
+		# if you click an arrow, deselect curr state and any curr arrow
 		print("selected arrow")
-		toggle_brightness()
-		_selected_node = null
-		_selected_arrow = node
-		toggle_arrow_brightness()
+		deselect_curr_node()
+		select_arrow(node)
 	# If you click the anything else with a collision don't draw the circle 
 	#if node is RigidBody2D and (node.get_child(0) is LineEdit or node.get_child(0) is CheckButton):
 		#print("clicked on an object that isn't state")
@@ -142,13 +139,40 @@ func draw():
 		#toggle_brightness()
 		
 
-func draw_state(mouse_pos: Vector2):
-	var state = _preloaded_fa_node.instantiate()
+func select_node(node: RigidBody2D):
+	if _selected_node:
+		deselect_curr_node()
+		_selected_node = node
+		_selected_node.toggle_light()
+	else:
+		_selected_node = node
+		_selected_node.toggle_light()
+		
+func select_arrow(arrow: StaticBody2D):
+	if _selected_arrow:
+		deselect_arrow()
+		_selected_arrow = arrow
+		_selected_arrow.toggle_light()
+	else:
+		_selected_arrow = arrow
+		_selected_arrow.toggle_light()
+		
+func deselect_curr_node():
+	if _selected_node:
+		_selected_node.toggle_light()
+		_selected_node = null
+
+func deselect_arrow():
+	if _selected_arrow:
+		_selected_arrow.toggle_light()
+		_selected_arrow = null
+
+func draw_state(mouse_pos: Vector2) -> RigidBody2D:
+	var state:RigidBody2D = _preloaded_fa_node.instantiate()
 	state.position = mouse_pos
-	_selected_node = state
 	add_child(state)
 	_all_nodes.append(state)
-	toggle_brightness()
+	return state
 
 # Draw a line between two states
 func connect_nodes():
@@ -179,10 +203,8 @@ func _on_state_edit_text_submitted(new_text):
 		_state_text_field.text = ""
 
 func _on_arrow_edit_text_submitted(new_text):
-	if _selected_node:
-		var out_arrows = _selected_node.get_outgoing()
-		
-		_selected_node.set_text(new_text)
+	if _selected_arrow:
+		_selected_arrow.set_text(new_text)
 		_arrow_text_field.text = ""
 
 func _on_start_state_button_toggled(toggled_on):

@@ -71,7 +71,6 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 func _add_to_going_to(node: Object, arrow: Object):
 	_going_to[node] = arrow
 
-
 func _add_to_incoming(node: Object, arrow: Object):
 	_incoming[node] = arrow
 
