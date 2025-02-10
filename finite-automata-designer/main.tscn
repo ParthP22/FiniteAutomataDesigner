@@ -28,7 +28,7 @@ size = Vector2(220, 45)
 script = ExtResource("1_n2rlr")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
-color = Color(0.458405, 0.458405, 0.458405, 1)
+color = Color(0.762404, 0.762404, 0.762404, 1)
 
 [node name="Background" type="Sprite2D" parent="."]
 position = Vector2(577.5, 325)

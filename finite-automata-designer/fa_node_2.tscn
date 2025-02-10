@@ -40,11 +40,11 @@ texture = ExtResource("2_1gxso")
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
 scale = Vector2(0.8, 0.8)
-color = Color(0.883056, 0.458227, 0.0715185, 1)
+color = Color(0.764485, 0.810351, 0.908487, 1)
 energy = 0.0
 blend_mode = 2
 texture = ExtResource("3_eofgv")
-texture_scale = 2.0
+texture_scale = 1.2
 
 [node name="Label" type="Label" parent="."]
 anchors_preset = 8

@@ -103,5 +103,5 @@ func update_light_color():
 	if _is_end_state:
 		_light.color = Color("Green")
 		return
-	_light.color = Color(0.883, 0.458, 0.072)  # Default orange
+	_light.color = Color(0.764, 0.81, 0.908)  # Default orange
 		
