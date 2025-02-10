@@ -198,7 +198,13 @@ func _on_state_edit_text_submitted(new_text):
 
 func _on_arrow_edit_text_submitted(new_text):
 	if _selected_arrow:
-		_selected_arrow.set_text(new_text)
+		if new_text in _alphabet:
+			if(_determinism_check(_selected_arrow.start_node)):
+				print("failed")
+			_selected_arrow.set_text(new_text)
+			_selected_arrow.set_transition(new_text)
+		else:
+			print("This character is not in the alphabet")
 		_arrow_text_field.text = ""
 
 func _on_start_state_button_toggled(toggled_on):
@@ -211,8 +217,11 @@ func _on_start_state_button_toggled(toggled_on):
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:
-		_selected_node.set_end_state(toggled_on)
-		end_state = _selected_node
+		if end_state:
+			print("There already exists an end state!")
+		else:
+			_selected_node.set_end_state(toggled_on)
+			end_state = _selected_node
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
@@ -241,6 +250,11 @@ func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
 	
-func dfa():
+func _determinism_check(node: RigidBody2D) -> bool:
+	for value in node.get_out_arrows().values():
+		print(value.get_transition())
+	return true
+	
+func _dfa():
 	var tmp : RigidBody2D = start_state
 	pass
