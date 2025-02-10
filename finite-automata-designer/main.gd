@@ -1,13 +1,22 @@
 extends Node2D
-var _preloaded_fa_node = preload("res://fa_node_2.tscn")
-var _preloaded_arrow = preload("res://Arrow.tscn")
+var _preloaded_fa_node: PackedScene = preload("res://fa_node_2.tscn")
+var _preloaded_arrow: PackedScene = preload("res://Arrow.tscn")
 var _selected_node: RigidBody2D = null
 var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
-var _is_dragging = false
-var _drag_offset = Vector2.ZERO  # Offset from node center when dragging
+var _is_dragging: bool = false
+var _drag_offset: Vector2 = Vector2.ZERO
+var _alphabet: String = ""
+var _input_string: String = ""
+# Text Labels
+@onready var _input_string_label: Label = $Control/InputStringLabel
+@onready var _alphabet_label: Label = $Control/AlphabetLabel
+# Text fields (LineEdits)
+@onready var _input_string_text_field: LineEdit = $InputTextField/LineEdit
+@onready var _alphabet_text_field: LineEdit = $AlphabetTextField/LineEdit
 @onready var _state_text_field: LineEdit = $StateTextField/LineEdit
 @onready var _arrow_text_field: LineEdit = $ArrowTextField/LineEdit
+# Toggles
 @onready var _is_start_state: RigidBody2D = $StartStateToggle
 @onready var _is_end_state: RigidBody2D = $EndStateToggle
 
@@ -214,3 +223,15 @@ func _on_start_state_button_toggled(toggled_on):
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:
 		_selected_node.set_end_state(toggled_on)
+
+func _on_input_text_submitted(new_text):
+	_input_string = new_text
+	_input_string_label.text = ""
+	_input_string_label.text = "String: " + _input_string
+	_input_string_text_field.text = ""
+
+func _on_alphabet_text_submitted(new_text):
+	_alphabet = new_text
+	_alphabet_label.text = ""
+	_alphabet_label.text = "Alphabet: " + _alphabet
+	_alphabet_text_field.text = ""

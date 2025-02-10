@@ -19,24 +19,22 @@ script = ExtResource("1_n2rlr")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 
-[node name="Title" type="Label" parent="."]
-offset_left = 403.0
-offset_top = 37.0
-offset_right = 796.0
-offset_bottom = 82.0
-text = "Finite Automata Designer
-"
-label_settings = SubResource("LabelSettings_db6vl")
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="InstructionsLabel" type="Label" parent="."]
+[node name="InstructionsLabel" type="Label" parent="Control"]
+layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 935.0
-offset_top = 601.0
-offset_right = 1427.0
-offset_bottom = 728.0
+offset_left = 611.0
+offset_top = 492.0
+offset_right = 1103.0
+offset_bottom = 619.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "FOR PARTH: 
@@ -44,6 +42,91 @@ Left Click: Emtpy space when nothing is selected creates a circle
 Left Click: On an existing circle selects it and makes it editable
 Left Click: When something is selected clears the selection
 Text field lets you labels the nodes when a node is selected"
+
+[node name="Title" type="Label" parent="Control"]
+offset_left = 386.0
+offset_top = 14.0
+offset_right = 779.0
+offset_bottom = 59.0
+text = "Finite Automata Designer
+"
+label_settings = SubResource("LabelSettings_db6vl")
+
+[node name="InputStringLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 255.0
+offset_top = 462.0
+offset_right = 427.0
+offset_bottom = 488.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "String: "
+vertical_alignment = 1
+
+[node name="AlphabetLabel" type="Label" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 255.0
+offset_top = 508.0
+offset_right = 427.0
+offset_bottom = 534.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Alphabet: "
+vertical_alignment = 1
+
+[node name="InputTextField" type="RigidBody2D" parent="."]
+position = Vector2(154, 488)
+mass = 100000.0
+gravity_scale = 0.0
+
+[node name="LineEdit" type="LineEdit" parent="InputTextField"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -105.5
+offset_top = -15.5
+offset_right = 105.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "Input String"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InputTextField"]
+position = Vector2(-2.5, 0)
+shape = SubResource("RectangleShape2D_taevs")
+
+[node name="AlphabetTextField" type="RigidBody2D" parent="."]
+position = Vector2(154, 533)
+mass = 100000.0
+gravity_scale = 0.0
+
+[node name="LineEdit" type="LineEdit" parent="AlphabetTextField"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -105.5
+offset_top = -15.5
+offset_right = 105.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "Set Alphabet"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AlphabetTextField"]
+position = Vector2(-2.5, 0)
+shape = SubResource("RectangleShape2D_taevs")
 
 [node name="StateTextField" type="RigidBody2D" parent="."]
 position = Vector2(154, 577)
@@ -149,6 +232,8 @@ offset_right = 39.0
 offset_bottom = 12.0
 text = "End State Toggle:"
 
+[connection signal="text_submitted" from="InputTextField/LineEdit" to="." method="_on_input_text_submitted"]
+[connection signal="text_submitted" from="AlphabetTextField/LineEdit" to="." method="_on_alphabet_text_submitted"]
 [connection signal="text_submitted" from="StateTextField/LineEdit" to="." method="_on_state_edit_text_submitted"]
 [connection signal="text_submitted" from="ArrowTextField/LineEdit" to="." method="_on_arrow_edit_text_submitted"]
 [connection signal="toggled" from="StartStateToggle/StartStateButton" to="." method="_on_start_state_button_toggled"]
