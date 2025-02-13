@@ -6,7 +6,7 @@ var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
 var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
-var _alphabet: Array = []
+var _alphabet: Array = ["0","1"]
 var _input_string: String = ""
 var start_state : RigidBody2D = null
 var end_state : RigidBody2D = null
@@ -196,15 +196,19 @@ func _on_state_edit_text_submitted(new_text):
 		_selected_node.set_text(new_text)
 		_state_text_field.text = ""
 
-func _on_arrow_edit_text_submitted(new_text):
+func _on_arrow_edit_text_submitted(new_text : String):
 	if _selected_arrow:
-		if new_text in _alphabet:
-			if(_determinism_check(_selected_arrow.start_node)):
-				print("failed")
+		for char in new_text:
+			if char != "," and char not in _alphabet:
+				print(char + " is not in the alphabet")
+				return
+		
+		if(_transition_determinism_check(_selected_arrow,new_text)):
+			
 			_selected_arrow.set_text(new_text)
 			_selected_arrow.set_transition(new_text)
 		else:
-			print("This character is not in the alphabet")
+			print("failed")
 		_arrow_text_field.text = ""
 
 func _on_start_state_button_toggled(toggled_on):
@@ -250,9 +254,13 @@ func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
 	
-func _determinism_check(node: RigidBody2D) -> bool:
-	for value in node.get_out_arrows().values():
-		print(value.get_transition())
+func _transition_determinism_check(arrow: Node2D, new_transitions: String) -> bool:
+	for value in arrow.start_node.get_out_arrows().values():
+		var transitions = value.get_transition()
+		for transition in transitions:
+			for new_transition in new_transitions:
+				if new_transition != "," and new_transition in transition:
+					return false
 	return true
 	
 func _dfa():

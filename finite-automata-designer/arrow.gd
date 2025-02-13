@@ -3,7 +3,7 @@ extends Node2D
 var node_rad = 26.1725006103516
 var start_node: RigidBody2D = null
 var end_node: RigidBody2D = null
-var transition: String = ""
+var transition: Array = []
 
 var arrow_head = Polygon2D.new()
 var arrow_shaft = Line2D.new()
@@ -34,7 +34,7 @@ func _ready():
 	
 	# Label modifications
 	line_curve.add_child(label)
-	label.text = "a"
+	label.text = ""
 	label.add_theme_color_override("font_color", Color("blue"))
 	label.add_theme_font_size_override("font_size", 20)
 	# Add arrow hitbox child
@@ -131,11 +131,13 @@ func set_text(text: String):
 	label.text = ""
 	label.text = text
 	
-func get_transition() -> String:
+func get_transition() -> Array:
 	return transition
 	
-func set_transition(new_transition: String):
-	transition = new_transition
+func set_transition(new_transitions: String):
+	for new_transition in new_transitions:
+		if new_transition != ",":
+			transition.append(new_transition)
 
 func toggle_light():
 	print('reached arrow light')
