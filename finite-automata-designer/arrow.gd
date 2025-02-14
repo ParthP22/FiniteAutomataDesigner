@@ -45,7 +45,6 @@ func _process(_delta):
 func _physics_process(_delta):
 	if start_state and end_state and start_state == end_state:
 		update_arrow_to_self()
-		set_text("test")
 	elif start_state and end_state and start_state != end_state:
 		update_arrow_to_another()
 
@@ -112,7 +111,7 @@ func update_arrow_to_another():
 func update_arrow_to_self():
 	var node_center = start_state.global_position
 	self.position = node_center
-	light.position.y -= (node_rad * 2)
+	light.position = Vector2(0, -node_rad*2)
 	# Clear the previous points
 	semi_circle_points.clear_points()
 	
@@ -133,12 +132,15 @@ func update_arrow_to_self():
 	label.position = Vector2(0, -node_rad * 2.2)
 
 	# Hitbox for self-loop
-	var hitbox_offset = 5 
-	var p1 = Vector2(- node_rad - hitbox_offset, -node_rad)
-	var p2 = Vector2(0, -(node_rad * 2) - hitbox_offset)
-	var p3 = Vector2(node_rad + hitbox_offset, -node_rad)
+	var hitbox_offset = 5
+	var p1 = Vector2(-node_rad - hitbox_offset + 12, -node_rad*1.9)  # Left
+	var p2 = Vector2(0, -node_rad * 2 - hitbox_offset)  # Top
+	var p3 = Vector2(node_rad + hitbox_offset - 12, -node_rad*1.9)  # Right
+	var p4 = Vector2(node_rad, -node_rad)  # Bottom right
+	var p5 = Vector2(-node_rad/2, -node_rad-1) # Bottom middle
+	var p6 = Vector2(-node_rad - hitbox_offset+8,-node_rad+12)  # Bottom left
 
-	arrow_hitbox.polygon = PackedVector2Array([p1, p2, p3])
+	arrow_hitbox.polygon = PackedVector2Array([p1, p2, p3, p4, p5, p6])  # Ensure all points are included
 	
 func get_start_state():
 	return start_state
