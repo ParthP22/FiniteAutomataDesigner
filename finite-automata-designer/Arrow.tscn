@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://bxsjktrv52lvv" path="res://point_light_2d.png" id="2_3285i"]
 
 [node name="Arrow" type="StaticBody2D"]
-disable_mode = 1
 script = ExtResource("1_ayvgo")
 
 [node name="PointLight2D" type="PointLight2D" parent="."]

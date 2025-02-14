@@ -8,7 +8,6 @@ var transition: Array = []
 var arrow_head = Polygon2D.new()
 var arrow_shaft = Line2D.new()
 
-
 var offset: float = 1
 var special_name: String = "state"
 var semi_circle_points = Curve2D.new()

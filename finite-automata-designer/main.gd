@@ -56,11 +56,14 @@ func _input(event):
 		_arrow_text_field.visible = true
 	else:
 		_arrow_text_field.visible = false
-	
-	if event.is_action_pressed("left_click") and !event.double_click:
+	# Drawing states using `left click` and selecting states and arrows using `left click`
+	if event.is_action_pressed("left_click"):
 		draw()
-	elif event.is_action_pressed("shift_keyboard"):
+		return
+	# # Drawing and  using `left click`
+	if event.is_action_pressed("shift_keyboard"):
 		connect_nodes()
+		return
 	if event.is_action_pressed("right_click"):
 		if _selected_node:
 			_drag_offset = get_global_mouse_position() - _selected_node.global_position
@@ -69,8 +72,9 @@ func _input(event):
 			_is_dragging = false
 	if event.is_action_released("right_click"):
 		_is_dragging = false
-	
-		
+	if event.is_action_pressed("backspace_keyboard"):
+		delete_selected()
+
 func loop_through_nodes():
 	pass
 	
@@ -129,8 +133,6 @@ func draw():
 		return
 	else:
 		print('clicked something else')
-	
-		
 
 func select_node(node: RigidBody2D):
 	if _selected_node:
@@ -190,6 +192,43 @@ func connect_nodes():
 				return
 			else:
 				print("shift press on something other than a node")
+				
+# If something (state/arrow) is selected, delete it and associated objects
+func delete_selected():
+	if _selected_arrow:
+		_selected_arrow.start_node.remove_arrow(_selected_arrow.end_node)
+		_selected_arrow.end_node.remove_arrow(_selected_arrow.start_node)
+		_selected_arrow.queue_free()
+		_selected_arrow = null
+	if _selected_node:
+		var complete = delete_attached_arrows(_selected_node)
+		
+		return
+			
+# Deleted 
+func delete_attached_arrows(node: Object):
+	var selected_node_going_to = node._going_to
+	var selected_node_incoming = node._incoming
+	print("going to size",selected_node_going_to.size())
+	var going_to_count = selected_node_going_to.size()
+	print("incoming size",selected_node_incoming.size())
+	var incoming_count = selected_node_incoming.size()
+	for x in range(going_to_count):
+		for key in selected_node_going_to:
+			var arrow = selected_node_going_to[key]
+			arrow.start_node.remove_arrow(arrow.end_node)
+			arrow.end_node.remove_arrow(arrow.start_node)
+			arrow.queue_free()
+	for x in range(incoming_count):
+		print("incoming count",x)
+		for key in selected_node_incoming:
+			var arrow = selected_node_incoming[key]
+			print(arrow)
+			arrow.start_node.remove_arrow(arrow.end_node)
+			arrow.end_node.remove_arrow(arrow.start_node)
+			arrow.queue_free()
+	return "complete"
+
 
 func _on_state_edit_text_submitted(new_text):
 	if _selected_node:
@@ -248,8 +287,7 @@ func _on_alphabet_text_submitted(new_text):
 	
 	# Reset text field after submission
 	_alphabet_text_field.text = ""
-
-
+	
 func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
