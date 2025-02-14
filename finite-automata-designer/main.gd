@@ -57,9 +57,9 @@ func _input(event):
 		_arrow_text_field.visible = true
 	else:
 		_arrow_text_field.visible = false
-	# Drawing states using `left click` and selecting states and arrows using `left click`
+	# Based on selection using `left click` draw accordingly
 	if event.is_action_pressed("left_click"):
-		draw()
+		select()
 		return
 	# # Drawing arrows using `left click`
 	if event.is_action_pressed("shift_keyboard"):
@@ -95,8 +95,8 @@ func drag_self():
 		var new_position = get_global_mouse_position() - _drag_offset
 		_selected_node.position = new_position
 
-# turn the pointlide2d brightness up and down
-func toggle_brightness():
+# turn the pointlight2d brightness up and down
+func toggle_state_brightness():
 	if _selected_node:
 		_selected_node.toggle_light()
 		
@@ -104,7 +104,7 @@ func toggle_arrow_brightness():
 	if _selected_arrow:
 		_selected_arrow.toggle_light()
 
-func draw():
+func select():
 	var node = return_ray_point_result()
 	var mouse_pos = get_global_mouse_position()
 	# Rewriting click checks
@@ -198,15 +198,7 @@ func connect_nodes():
 				
 # If something (state/arrow) is selected, delete it and associated objects
 func delete_selected():
-	if _selected_arrow:
-		_selected_arrow.start_node.remove_arrow(_selected_arrow.end_node)
-		_selected_arrow.end_node.remove_arrow(_selected_arrow.start_node)
-		_selected_arrow.queue_free()
-		_selected_arrow = null
-	if _selected_node:
-		var complete = delete_attached_arrows(_selected_node)
-		
-		return
+	pass
 			
 # Deleted 
 func delete_attached_arrows(node: Object):
@@ -240,9 +232,9 @@ func _on_state_edit_text_submitted(new_text):
 
 func _on_arrow_edit_text_submitted(new_text : String):
 	if _selected_arrow:
-		for char in new_text:
-			if char != "," and char not in _alphabet:
-				print(char + " is not in the alphabet")
+		for c in new_text:
+			if c != "," and c not in _alphabet:
+				print(c + " is not in the alphabet")
 				return
 		
 		if(_transition_determinism_check(_selected_arrow,new_text)):
@@ -277,9 +269,9 @@ func _on_input_text_submitted(new_text):
 
 func _on_alphabet_text_submitted(new_text):
 	# Add each element of the new alphabet into the alphabet array
-	for char in new_text:
-		if char != ',':
-			_alphabet.append(char)
+	for c in new_text:
+		if c != ',':
+			_alphabet.append(c)
 
 	# Print it out for good measure
 	print(_alphabet)

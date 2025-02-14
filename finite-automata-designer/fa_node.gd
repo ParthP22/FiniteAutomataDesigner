@@ -26,7 +26,7 @@ func set_text(new_label_text: String):
 	await get_tree().create_timer(0.5).timeout  # Wait for 0.5 seconds
 
 	_label.bbcode_enabled = true
-	var formatted_text = "[color=black]"
+	var formatted_text = "[center][color=black]"
 	var is_sub: bool = false
 	for char in new_label_text:
 		if char != "_":
@@ -39,7 +39,9 @@ func set_text(new_label_text: String):
 				formatted_text += "[/sub][/font_size]"
 				is_sub = !is_sub
 	
+	formatted_text += "[/color][/center]"
 	_label.text = formatted_text
+	print(formatted_text)
 
 
 	
