@@ -198,31 +198,29 @@ func connect_nodes():
 				
 # If something (state/arrow) is selected, delete it and associated objects
 func delete_selected():
+	if !_selected_node and !_selected_arrow:
+		print("nothing is selected, deleting nothing")
+	if _selected_node:
+		print("deleting state", _selected_node.get_text())
+		delete_state()
+		return
+	if _selected_arrow:
+		delete_arrow()
 	pass
 			
 # Deleted 
-func delete_attached_arrows(node: Object):
-	var selected_node_going_to = node._going_to
-	var selected_node_incoming = node._incoming
-	print("going to size",selected_node_going_to.size())
-	var going_to_count = selected_node_going_to.size()
-	print("incoming size",selected_node_incoming.size())
-	var incoming_count = selected_node_incoming.size()
-	for x in range(going_to_count):
-		for key in selected_node_going_to:
-			var arrow = selected_node_going_to[key]
-			arrow.start_node.erase_in_going_to(arrow.end_node)
-			arrow.end_node.remove_arrow(arrow.start_node)
-			arrow.queue_free()
-	for x in range(incoming_count):
-		print("incoming count",x)
-		for key in selected_node_incoming:
-			var arrow = selected_node_incoming[key]
-			print(arrow)
-			arrow.start_node.remove_arrow(arrow.end_node)
-			arrow.end_node.remove_arrow(arrow.start_node)
-			arrow.queue_free()
-	return "complete"
+func delete_state():
+	if _selected_node:
+		var out_going_arrow_dict = _selected_node.get_out_arrows()
+		var out_going_count = out_going_arrow_dict.size()
+		var incoming_arrows_dict = _selected_node.get_in_arrows()
+		var incoming_count = incoming_arrows_dict.size()
+
+
+func delete_arrow():
+	if _selected_arrow:
+		var start_node = _selected_arrow.start_node()
+	pass
 
 
 func _on_state_edit_text_submitted(new_text):

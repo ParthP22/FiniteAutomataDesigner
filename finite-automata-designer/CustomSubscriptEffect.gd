@@ -1,4 +1,3 @@
-@tool
 extends RichTextEffect
 class_name RichSubscriptText
 

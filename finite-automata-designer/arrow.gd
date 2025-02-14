@@ -1,8 +1,8 @@
 extends Node2D
 
 var node_rad = 26.1725006103516
-var start_node: RigidBody2D = null
-var end_node: RigidBody2D = null
+var start_state: RigidBody2D = null
+var end_state: RigidBody2D = null
 var transition: Array = []
 
 var arrow_head = Polygon2D.new()
@@ -43,23 +43,23 @@ func _process(delta):
 	pass
 
 func _physics_process(delta):
-	if start_node and end_node and start_node == end_node:
+	if start_state and end_state and start_state == end_state:
 		update_arrow_to_self()
-	elif start_node and end_node and start_node != end_node:
+	elif start_state and end_state and start_state != end_state:
 		update_arrow_to_another()
 
-func set_start_node(node: Object):
-	if !start_node:
-		start_node = node
+func set_start_state(node: Object):
+	if !start_state:
+		start_state = node
 	
-func set_end_node(node: Object):
-	if !end_node:
-		end_node = node
+func set_end_state(node: Object):
+	if !end_state:
+		end_state = node
 
 func update_arrow_to_another():
 # Calculate midpoint and set it as the arrow's position
-	var start_pos = start_node.global_position
-	var end_pos = end_node.global_position
+	var start_pos = start_state.global_position
+	var end_pos = end_state.global_position
 	var midpoint = (start_pos + end_pos) / 2
 	self.position = midpoint  # Move arrow to midpoint
 
@@ -109,7 +109,7 @@ func update_arrow_to_another():
 	
 	
 func update_arrow_to_self():
-	var node_center = start_node.global_position
+	var node_center = start_state.global_position
 	# Clear the previous points
 	semi_circle_points.clear_points()
 	
@@ -126,10 +126,19 @@ func update_arrow_to_self():
 		Vector2(node_center.x + node_rad/2 + 10 + 5, node_center.y - node_rad)
 	])
 	
+func get_start_state():
+	return start_state
+
+func get_end_state():
+	return end_state
+
+func get_text() -> String:
+	return label.text
+
 func set_text(text: String):
 	label.text = ""
 	label.text = text
-	
+
 func get_transition() -> Array:
 	return transition
 	

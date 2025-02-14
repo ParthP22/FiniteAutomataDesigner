@@ -30,7 +30,7 @@ func _input_event(viewport, event, shape_idx):
 [sub_resource type="CircleShape2D" id="CircleShape2D_k03c7"]
 radius = 26.1725
 
-[node name="FA_Node_2" type="RigidBody2D"]
+[node name="State" type="RigidBody2D"]
 gravity_scale = 0.0
 script = ExtResource("1_quw3j")
 

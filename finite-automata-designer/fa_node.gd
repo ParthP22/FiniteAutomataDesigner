@@ -22,9 +22,8 @@ func _process(delta):
 func speak_up() -> String:
 	return self.name
 
+# Checks for underscores acting as subscript indicators
 func set_text(new_label_text: String):
-	await get_tree().create_timer(0.5).timeout  # Wait for 0.5 seconds
-
 	_label.bbcode_enabled = true
 	var formatted_text = "[center][color=black]"
 	var is_sub: bool = false
@@ -38,13 +37,15 @@ func set_text(new_label_text: String):
 			else:
 				formatted_text += "[/sub][/font_size]"
 				is_sub = !is_sub
-	
+	# closes out the formatting
+	if is_sub:
+		formatted_text += "[/sub][/font_size]"
 	formatted_text += "[/color][/center]"
 	_label.text = formatted_text
-	print(formatted_text)
 
+func get_text() -> String:
+	return _label.text
 
-	
 func toggle_light():
 	if _light.energy > 1.1:
 		_light.energy = 1
