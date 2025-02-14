@@ -1,8 +1,8 @@
 extends Node2D
 
 var node_rad = 26.1725006103516
-var start_state: RigidBody2D = null
-var end_state: RigidBody2D = null
+var _start_state: RigidBody2D = null
+var _end_state: RigidBody2D = null
 var transition: Array = []
 
 var arrow_head = Polygon2D.new()
@@ -43,23 +43,23 @@ func _process(_delta):
 	pass
 
 func _physics_process(_delta):
-	if start_state and end_state and start_state == end_state:
+	if _start_state and _end_state and _start_state == _end_state:
 		update_arrow_to_self()
-	elif start_state and end_state and start_state != end_state:
+	elif _start_state and _end_state and _start_state != _end_state:
 		update_arrow_to_another()
 
 func set_start_state(node: Object):
-	if !start_state:
-		start_state = node
+	if !_start_state:
+		_start_state = node
 	
 func set_end_state(node: Object):
-	if !end_state:
-		end_state = node
+	if !_end_state:
+		_end_state = node
 
 func update_arrow_to_another():
 # Calculate midpoint and set it as the arrow's position
-	var start_pos = start_state.global_position
-	var end_pos = end_state.global_position
+	var start_pos = _start_state.global_position
+	var end_pos = _end_state.global_position
 	var midpoint = (start_pos + end_pos) / 2
 	self.position = midpoint  # Move arrow to midpoint
 
@@ -109,7 +109,7 @@ func update_arrow_to_another():
 	
 	
 func update_arrow_to_self():
-	var node_center = start_state.global_position
+	var node_center = _start_state.global_position
 	self.position = node_center
 	light.position = Vector2(0, -node_rad*2)
 	# Clear the previous points
@@ -143,10 +143,10 @@ func update_arrow_to_self():
 	arrow_hitbox.polygon = PackedVector2Array([p1, p2, p3, p4, p5, p6])  # Ensure all points are included
 	
 func get_start_state():
-	return start_state
+	return _start_state
 
 func get_end_state():
-	return end_state
+	return _end_state
 
 func get_text() -> String:
 	return label.text

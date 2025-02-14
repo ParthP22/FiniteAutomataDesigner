@@ -311,7 +311,7 @@ func _on_button_button_down():
 	pass # Replace with function body.
 	
 func _transition_determinism_check(arrow: Node2D, new_transitions: String) -> bool:
-	for value in arrow.start_node.get_out_arrows().values():
+	for value in arrow.get_start_state().get_out_arrows().values():
 		var transitions = value.get_transition()
 		for transition in transitions:
 			for new_transition in new_transitions:
