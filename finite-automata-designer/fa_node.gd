@@ -2,9 +2,9 @@ extends PhysicsBody2D
 var _is_start_state: bool: get = get_start_state, set = set_start_state
 var _is_end_state: bool: get = get_end_state, set = set_end_state
 var _self_looping = false
-var _label: Label = null
 var _going_to: Dictionary = {}
 var _incoming: Dictionary = {}
+@onready var _label: RichTextLabel = null
 @onready var _light: PointLight2D = $PointLight2D
 
 var special_name: String = "state"
@@ -13,7 +13,7 @@ var special_name: String = "state"
 func _ready():
 	_is_start_state = false
 	_is_end_state = false
-	_label = get_child(2)
+	_label = $RichTextLabel
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -23,8 +23,25 @@ func speak_up() -> String:
 	return self.name
 
 func set_text(new_label_text: String):
-	_label.text = ""
-	_label.text = new_label_text
+	await get_tree().create_timer(0.5).timeout  # Wait for 0.5 seconds
+
+	_label.bbcode_enabled = true
+	var formatted_text = "[color=black]"
+	var is_sub: bool = false
+	for char in new_label_text:
+		if char != "_":
+			formatted_text += char
+		else:
+			if !is_sub:
+				formatted_text += "[font_size=10][sub]"
+				is_sub = !is_sub
+			else:
+				formatted_text += "[/sub][/font_size]"
+				is_sub = !is_sub
+	
+	_label.text = formatted_text
+
+
 	
 func toggle_light():
 	if _light.energy > 1.1:
@@ -69,11 +86,13 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		print("going to dict\n",_going_to)
 		print("incoming dict\n",_incoming)
 		return arrow_node
-	
-func remove_arrow(node: Object):
+
+func erase_in_going_to(node: Object):
 	if _going_to.has(node):
 		print("removing arrow from going to")
-		print(_going_to.erase(node))
+		_going_to.erase(node)
+	
+func erase_in_incoming(node: Object):
 	if _incoming.has(node):
 		print("removing arrow from incoming")
 		print(_incoming.erase(node))

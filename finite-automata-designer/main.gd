@@ -10,6 +10,7 @@ var _alphabet: Array = ["0","1"]
 var _input_string: String = ""
 var start_state : RigidBody2D = null
 var end_state : RigidBody2D = null
+var state_count = 0
 
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
@@ -60,7 +61,7 @@ func _input(event):
 	if event.is_action_pressed("left_click"):
 		draw()
 		return
-	# # Drawing and  using `left click`
+	# # Drawing arrows using `left click`
 	if event.is_action_pressed("shift_keyboard"):
 		connect_nodes()
 		return
@@ -163,10 +164,12 @@ func deselect_arrow():
 		_selected_arrow = null
 
 func draw_state(mouse_pos: Vector2) -> RigidBody2D:
-	var state:RigidBody2D = _preloaded_fa_node.instantiate()
+	var state: RigidBody2D = _preloaded_fa_node.instantiate()
 	state.position = mouse_pos
 	add_child(state)
 	_all_nodes.append(state)
+	state.set_text("q_" + str(state_count)+"_")
+	state_count += 1
 	return state
 
 # Draw a line between two states
@@ -216,7 +219,7 @@ func delete_attached_arrows(node: Object):
 	for x in range(going_to_count):
 		for key in selected_node_going_to:
 			var arrow = selected_node_going_to[key]
-			arrow.start_node.remove_arrow(arrow.end_node)
+			arrow.start_node.erase_in_going_to(arrow.end_node)
 			arrow.end_node.remove_arrow(arrow.start_node)
 			arrow.queue_free()
 	for x in range(incoming_count):
