@@ -33,7 +33,7 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	if _is_dragging:
-		drag_self()
+		drag_state()
 			
 
 # Called anytime an 'event' occurs i.e. mouse move, clicks
@@ -44,8 +44,8 @@ func _input(event):
 		_arrow_text_field.visible = false
 		
 		#set the state of the check buttons before showing them
-		_is_start_state.get_child(0).button_pressed  = _selected_node.get_start_state()
-		_is_end_state.get_child(0).button_pressed  = _selected_node.get_end_state()
+		#_is_start_state.get_child(0).button_pressed  = _selected_node.get_start_state()
+		#_is_end_state.get_child(0).button_pressed  = _selected_node.get_end_state()
 		_is_start_state.visible = true
 		_is_end_state.visible = true
 	else:
@@ -73,7 +73,7 @@ func _input(event):
 			_is_dragging = false
 	if event.is_action_released("right_click"):
 		_is_dragging = false
-	if event.is_action_pressed("backspace_keyboard"):
+	if event.is_action_pressed("delete_keyboard"):
 		delete_selected()
 
 func loop_through_nodes():
@@ -90,7 +90,7 @@ func return_ray_point_result():
 		return results[0].collider
 	return null
 
-func drag_self():
+func drag_state():
 	if _selected_node and _is_dragging:
 		var new_position = get_global_mouse_position() - _drag_offset
 		_selected_node.position = new_position
@@ -99,7 +99,8 @@ func drag_self():
 func toggle_state_brightness():
 	if _selected_node:
 		_selected_node.toggle_light()
-		
+
+# turn the pointlight2d brightness up and down for curr selected arrow
 func toggle_arrow_brightness():
 	if _selected_arrow:
 		_selected_arrow.toggle_light()
@@ -132,6 +133,11 @@ func select():
 		deselect_curr_node()
 		select_arrow(node)
 		return
+	elif node is StaticBody2D and _selected_arrow:
+		print("selected new arrow")
+		deselect_curr_node()
+		deselect_arrow()
+		select_arrow(node)
 	else:
 		print('clicked something else')
 
@@ -154,12 +160,12 @@ func select_arrow(arrow: StaticBody2D):
 		_selected_arrow.toggle_light()
 		
 func deselect_curr_node():
-	if _selected_node:
+	if _selected_node and is_instance_valid(_selected_node):
 		_selected_node.toggle_light()
 		_selected_node = null
 
 func deselect_arrow():
-	if _selected_arrow:
+	if _selected_arrow and is_instance_valid(_selected_arrow):
 		_selected_arrow.toggle_light()
 		_selected_arrow = null
 
@@ -201,7 +207,7 @@ func delete_selected():
 	if !_selected_node and !_selected_arrow:
 		print("nothing is selected, deleting nothing")
 	if _selected_node:
-		print("deleting state", _selected_node.get_text())
+		print("deleting state: ", _selected_node.get_simple_name())
 		delete_state()
 		return
 	if _selected_arrow:
@@ -211,17 +217,36 @@ func delete_selected():
 # Deleted 
 func delete_state():
 	if _selected_node:
-		var out_going_arrow_dict = _selected_node.get_out_arrows()
-		var out_going_count = out_going_arrow_dict.size()
-		var incoming_arrows_dict = _selected_node.get_in_arrows()
-		var incoming_count = incoming_arrows_dict.size()
+		_state_delete_arrow()
 
+func _state_delete_arrow():
+	var out_going_arrow_dict = _selected_node.get_out_arrows()
+	var out_going_count = out_going_arrow_dict.size()
+	var incoming_arrows_dict = _selected_node.get_in_arrows()
+	var incoming_count = incoming_arrows_dict.size()
+	for x in range(out_going_count):
+		for key in out_going_arrow_dict:
+			_delete_arrow(out_going_arrow_dict[key])
+	for x in range(incoming_count):
+		for key in incoming_arrows_dict:
+			_delete_arrow(incoming_arrows_dict[key])
+
+	_selected_node.queue_free()
+	_selected_arrow = null
 
 func delete_arrow():
 	if _selected_arrow:
-		var start_node = _selected_arrow.start_node()
+		_delete_arrow(_selected_arrow)
 	pass
 
+func _delete_arrow(arrow):
+	var deleting_this_arrow = arrow
+	var begin_state = deleting_this_arrow.get_start_state()
+	var finish_state = deleting_this_arrow.get_end_state()
+	begin_state.erase_in_going_to(finish_state)
+	finish_state.erase_in_incoming(begin_state)
+	deleting_this_arrow.queue_free()
+	deleting_this_arrow = null
 
 func _on_state_edit_text_submitted(new_text):
 	if _selected_node:

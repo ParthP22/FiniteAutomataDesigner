@@ -22,8 +22,10 @@ func _process(delta):
 	pass
 
 func _input_event(viewport, event, shape_idx):
-	#if event.is_action_pressed(\"left_click\"):
-		#print(\"Clicked on me!\", get_parent().speak_up())
+	#var in_dict = get_parent().get_in_arrows();
+	#var out_dict = get_parent().get_out_arrows();
+	#print(\"arrows coming in from these nodes: \", in_dict)
+	#print(\"arrows going out to these nodes:\", out_dict)
 	pass
 "
 

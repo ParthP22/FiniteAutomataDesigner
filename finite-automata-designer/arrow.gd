@@ -39,12 +39,13 @@ func _ready():
 	# Add arrow hitbox child
 	add_child(arrow_hitbox)
 
-func _process(delta):
+func _process(_delta):
 	pass
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if start_state and end_state and start_state == end_state:
 		update_arrow_to_self()
+		set_text("test")
 	elif start_state and end_state and start_state != end_state:
 		update_arrow_to_another()
 
@@ -110,21 +111,34 @@ func update_arrow_to_another():
 	
 func update_arrow_to_self():
 	var node_center = start_state.global_position
+	self.position = node_center
+	light.position.y -= (node_rad * 2)
 	# Clear the previous points
 	semi_circle_points.clear_points()
 	
-	semi_circle_points.add_point(Vector2(node_center.x - node_rad+8, node_center.y - node_rad + 20))
-	semi_circle_points.add_point(Vector2(node_center.x, node_center.y - (node_rad * 2)), 
+	semi_circle_points.add_point(Vector2(-node_rad+10,-node_rad+10))
+	semi_circle_points.add_point(Vector2(0,  -node_rad * 2), 
 				Vector2(-node_rad,0),
 				Vector2(node_rad,0))
-	semi_circle_points.add_point(Vector2(node_center.x + node_rad/2 + 5, node_center.y - node_rad))
+	semi_circle_points.add_point(Vector2(node_rad/2 + 5, -node_rad))
 	line_curve.points = semi_circle_points.get_baked_points()
 	
 	arrow_head.polygon = PackedVector2Array([
-		Vector2(node_center.x + node_rad/2 - 10 + 5, node_center.y - node_rad),
-		Vector2(node_center.x + node_rad/2 + 5, node_center.y - node_rad + 10),
-		Vector2(node_center.x + node_rad/2 + 10 + 5, node_center.y - node_rad)
+		Vector2(node_rad/2 - 10 + 5, -node_rad),
+		Vector2(node_rad/2 + 5, -node_rad + 10),
+		Vector2(node_rad/2 + 10 + 5, -node_rad)
 	])
+	
+	# Adjust label position
+	label.position = Vector2(0, -node_rad * 2.2)
+
+	# Hitbox for self-loop
+	var hitbox_offset = 5 
+	var p1 = Vector2(- node_rad - hitbox_offset, -node_rad)
+	var p2 = Vector2(0, -(node_rad * 2) - hitbox_offset)
+	var p3 = Vector2(node_rad + hitbox_offset, -node_rad)
+
+	arrow_hitbox.polygon = PackedVector2Array([p1, p2, p3])
 	
 func get_start_state():
 	return start_state
@@ -148,7 +162,6 @@ func set_transition(new_transitions: String):
 			transition.append(new_transition)
 
 func toggle_light():
-	print('reached arrow light')
 	if light.energy <= 0:
 		light.energy = 1
 	else:
