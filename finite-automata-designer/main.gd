@@ -255,16 +255,23 @@ func _on_state_edit_text_submitted(new_text):
 
 func _on_arrow_edit_text_submitted(new_text : String):
 	if _selected_arrow:
+		var new_transition : Array = []
 		for c in new_text:
-			if c != "," and c not in _alphabet:
-				print(c + " is not in the alphabet")
-				return
+			if c != ",":
+				if c not in _alphabet:
+					print(c + " is not in the alphabet")
+					return
+				else:
+					new_transition.append(c)
+		var old_transition : Array = _selected_arrow.get_transition()
+		if(!old_transition.is_empty()):
+			_selected_arrow.set_transition([])
 		
-		if(_transition_determinism_check(_selected_arrow,new_text)):
-			
+		if(_transition_determinism_check(_selected_arrow,new_transition)):
 			_selected_arrow.set_text(new_text)
-			_selected_arrow.set_transition(new_text)
+			_selected_arrow.set_transition(new_transition)
 		else:
+			_selected_arrow.set_transition(old_transition)
 			print("failed")
 		_arrow_text_field.text = ""
 
@@ -275,6 +282,14 @@ func _on_start_state_button_toggled(toggled_on):
 		else:
 			_selected_node.set_start_state(toggled_on)
 			start_state = _selected_node
+			
+#func _on_start_state_button_toggled_off(toggled_off):
+	#if _selected_node:
+		#if start_state:
+			#_selected_node.set_start_state(toggled_off)
+			#start_state = null
+		#else:
+			#print("There is no start state!")
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:
@@ -310,15 +325,32 @@ func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
 	
-func _transition_determinism_check(arrow: Node2D, new_transitions: String) -> bool:
+func _transition_determinism_check(arrow: Node2D, new_transitions: Array) -> bool:
 	for value in arrow.get_start_state().get_out_arrows().values():
-		var transitions = value.get_transition()
-		for transition in transitions:
+		var old_transitions = value.get_transition()
+		for old_transition in old_transitions:
 			for new_transition in new_transitions:
-				if new_transition != "," and new_transition in transition:
+				if new_transition in old_transition:
 					return false
+	return true
+	
+func _input_determinism_check() -> bool:
+	for state in _all_nodes:
+		var out_arrows = state.get_out_arrows().values()
+		for char in _alphabet:
+			var exists : bool = false
+			for transition in out_arrows:
+				if char in transition:
+					exists = true
+					break
+			if !exists:
+				print(char + " has not been implemented for this state: " + state.get_simple_name() + ";
+					 \nnot all characters from alphabet were used")
+				return false
 	return true
 	
 func _dfa():
 	var tmp : RigidBody2D = start_state
-	pass
+	if(!_input_determinism_check()):
+		return
+	

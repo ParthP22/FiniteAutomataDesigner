@@ -90,8 +90,12 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		if _going_to.has(other_node) and _incoming.has(other_node):
 			_going_to[other_node].offset = 10
 			_incoming[other_node].offset = 10
-		#print("going to dict\n",_going_to)
-		#print("incoming dict\n",_incoming)
+		print("state\n",self)
+		print("going to dict\n",_going_to)
+		print("incoming dict\n",_incoming)
+			
+		
+		
 		return arrow_node
 
 func erase_in_going_to(node: Object):
