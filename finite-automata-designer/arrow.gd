@@ -158,10 +158,8 @@ func set_text(text: String):
 func get_transition() -> Array:
 	return transition
 	
-func set_transition(new_transitions: String):
-	for new_transition in new_transitions:
-		if new_transition != ",":
-			transition.append(new_transition)
+func set_transition(new_transition: Array):
+	transition = new_transition
 
 func toggle_light():
 	if light.energy <= 0:

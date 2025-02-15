@@ -67,7 +67,13 @@ func _input(event):
 		return
 	if event.is_action_pressed("right_click"):
 		if _selected_node:
+			# NOTE FOR MOMO: Idk what triggered this, but after messing around on the screen
+			# with the nodes for a bit, I right-clicked somewhere and it threw on error
+			# for this line:
 			_drag_offset = get_global_mouse_position() - _selected_node.global_position
+			# Here is the error message for it: Invalid access to property or key 'global_position'
+			# on a base object of type 'previously freed'.
+			
 			_is_dragging = true
 		else:
 			_is_dragging = false
@@ -243,6 +249,8 @@ func _delete_arrow(arrow):
 	var deleting_this_arrow = arrow
 	var begin_state = deleting_this_arrow.get_start_state()
 	var finish_state = deleting_this_arrow.get_end_state()
+	if begin_state == finish_state:
+		begin_state.set_self_looping(false)
 	begin_state.erase_in_going_to(finish_state)
 	finish_state.erase_in_incoming(begin_state)
 	deleting_this_arrow.queue_free()
@@ -255,16 +263,38 @@ func _on_state_edit_text_submitted(new_text):
 
 func _on_arrow_edit_text_submitted(new_text : String):
 	if _selected_arrow:
-		for c in new_text:
-			if c != "," and c not in _alphabet:
-				print(c + " is not in the alphabet")
-				return
 		
-		if(_transition_determinism_check(_selected_arrow,new_text)):
-			
+		# We will convert the new transition into an Array.
+		# Simultaneously, we will check the new transition
+		# contains any illegal characters, which if it does,
+		# then we return.
+		var new_transition : Array = []
+		for c in new_text:
+			if c != ",":
+				if c not in _alphabet:
+					print(c + " is not in the alphabet")
+					return
+				else:
+					new_transition.append(c)
+		
+		# We will save the old_transition for now
+		var old_transition : Array = _selected_arrow.get_transition()
+		
+		# If there already exists a transition for this arrow,
+		# then we'll just delete it for now. When doing the
+		# determinism check, we don't want to check the new
+		# transition against the old one, since it may incorrectly
+		# return false.
+		if(!old_transition.is_empty()):
+			_selected_arrow.set_transition([])
+		
+		if(_transition_determinism_check(_selected_arrow,new_transition)):
 			_selected_arrow.set_text(new_text)
-			_selected_arrow.set_transition(new_text)
+			_selected_arrow.set_transition(new_transition)
 		else:
+			# If the determinism check fails, we revert back to
+			# the old transition that we saved earlier.
+			_selected_arrow.set_transition(old_transition)
 			print("failed")
 		_arrow_text_field.text = ""
 
@@ -275,6 +305,14 @@ func _on_start_state_button_toggled(toggled_on):
 		else:
 			_selected_node.set_start_state(toggled_on)
 			start_state = _selected_node
+			
+#func _on_start_state_button_toggled_off(toggled_off):
+	#if _selected_node:
+		#if start_state:
+			#_selected_node.set_start_state(toggled_off)
+			#start_state = null
+		#else:
+			#print("There is no start state!")
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node:
@@ -289,6 +327,7 @@ func _on_input_text_submitted(new_text):
 	_input_string_label.text = ""
 	_input_string_label.text = "String: " + _input_string
 	_input_string_text_field.text = ""
+	_dfa(new_text)
 
 func _on_alphabet_text_submitted(new_text):
 	# Add each element of the new alphabet into the alphabet array
@@ -310,15 +349,57 @@ func _on_button_button_down():
 	print('pressed run button')
 	pass # Replace with function body.
 	
-func _transition_determinism_check(arrow: Node2D, new_transitions: String) -> bool:
+# This is a "correctness" check: does the new transition coincide
+# with other transitions going out from that state? If it does,
+# then it fails determinism.
+func _transition_determinism_check(arrow: Node2D, new_transitions: Array) -> bool:
 	for value in arrow.get_start_state().get_out_arrows().values():
-		var transitions = value.get_transition()
-		for transition in transitions:
+		var old_transitions = value.get_transition()
+		for old_transition in old_transitions:
 			for new_transition in new_transitions:
-				if new_transition != "," and new_transition in transition:
+				if new_transition in old_transition:
 					return false
 	return true
 	
-func _dfa():
-	var tmp : RigidBody2D = start_state
-	pass
+# This is a "completeness" check: were all characters of the
+# alphabet used when building the DFA? This is processed
+# every time we input a string.
+func _input_determinism_check() -> bool:
+	for state in _all_nodes:
+		if state == null:
+			continue
+		var out_arrows = state.get_out_arrows().values()
+		for char in _alphabet:
+			var exists : bool = false
+			for out_arrow in out_arrows:
+				for transition in out_arrow.get_transition():
+					if char in transition:
+						exists = true
+						break
+			if !exists:
+				print(char + " has not been implemented for this state: " + state.get_simple_name() + ";
+					 \nnot all characters from alphabet were used")
+				return false
+	return true
+	
+func _dfa(input : String) -> bool:
+	for char in input:
+		if char not in _alphabet:
+			print("Input contains \'" + char + "\', which is not in the alphabet")
+			return false
+	
+	var curr : RigidBody2D = start_state
+	if(!_input_determinism_check()):
+		return false
+	
+	for char in input:
+		for arrow in curr.get_out_arrows().values():
+			if char in arrow.get_transition():
+				curr = arrow.get_end_state()
+	if curr == end_state:
+		print("Accepted!")
+		return true
+	else:
+		print("Rejected!")
+		return false
+	
