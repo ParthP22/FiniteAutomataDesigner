@@ -15,6 +15,7 @@ var state_count = 0
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
 @onready var _alphabet_label: Label = $Control/AlphabetRigidBody/AlphabetLabel
+@onready var _result_label: Label = $Control/Result
 # Text fields (LineEdits)
 @onready var _input_string_text_field: LineEdit = $InputTextField/LineEdit
 @onready var _alphabet_text_field: LineEdit = $AlphabetTextField/LineEdit
@@ -66,13 +67,8 @@ func _input(event):
 		connect_nodes()
 		return
 	if event.is_action_pressed("right_click"):
-		if _selected_node:
-			# NOTE FOR MOMO: Idk what triggered this, but after messing around on the screen
-			# with the nodes for a bit, I right-clicked somewhere and it threw on error
-			# for this line:
+		if _selected_node and is_instance_valid(_selected_node):
 			_drag_offset = get_global_mouse_position() - _selected_node.global_position
-			# Here is the error message for it: Invalid access to property or key 'global_position'
-			# on a base object of type 'previously freed'.
 			
 			_is_dragging = true
 		else:
@@ -212,13 +208,8 @@ func connect_nodes():
 func delete_selected():
 	if !_selected_node and !_selected_arrow:
 		print("nothing is selected, deleting nothing")
-	if _selected_node:
-		# NOTE TO MOMO: Tried to delete an arrow and I got an error
-		# on this line:
+	if _selected_node and is_instance_valid(_selected_node):
 		print("deleting state: ", _selected_node.get_simple_name())
-		# The error message said: Attempt to call function 'get_simple_name'
-		# in base 'previously freed' on a null instance
-		
 		delete_state()
 		return
 	if _selected_arrow:
@@ -382,6 +373,8 @@ func _input_determinism_check() -> bool:
 						exists = true
 						break
 			if !exists:
+				_result_label.text = char + " has not been implemented for this state: " + state.get_simple_name() + ";
+					 \nnot all characters from alphabet were used"
 				print(char + " has not been implemented for this state: " + state.get_simple_name() + ";
 					 \nnot all characters from alphabet were used")
 				return false
@@ -390,6 +383,7 @@ func _input_determinism_check() -> bool:
 func _dfa(input : String) -> bool:
 	for char in input:
 		if char not in _alphabet:
+			_result_label.text = "Input contains \'" + char + "\', which is not in the alphabet"
 			print("Input contains \'" + char + "\', which is not in the alphabet")
 			return false
 	
@@ -402,9 +396,11 @@ func _dfa(input : String) -> bool:
 			if char in arrow.get_transition():
 				curr = arrow.get_end_state()
 	if curr == end_state:
+		_result_label.text = "Accepted!"
 		print("Accepted!")
 		return true
 	else:
+		_result_label.text = "Rejected!"
 		print("Rejected!")
 		return false
 	
