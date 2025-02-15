@@ -135,6 +135,9 @@ func set_start_state(value: bool):
 func set_end_state(value: bool):
 	_is_end_state = value
 	update_light_color()
+	
+func set_self_looping(value : bool):
+	_self_looping = value
 
 func update_light_color():
 	if _is_start_state and _is_end_state:
