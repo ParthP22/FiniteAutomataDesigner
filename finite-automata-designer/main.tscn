@@ -134,7 +134,7 @@ offset_right = 69.0
 offset_bottom = 13.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Alphabet: "
+text = "Alphabet: {0,1}"
 vertical_alignment = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Control/AlphabetRigidBody"]
