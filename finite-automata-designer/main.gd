@@ -326,6 +326,9 @@ func _on_input_text_submitted(new_text):
 	_dfa(new_text)
 
 func _on_alphabet_text_submitted(new_text):
+	# Reset alphabet array to prepare it for the new alphabet
+	_alphabet = []
+	
 	# Add each element of the new alphabet into the alphabet array
 	for c in new_text:
 		if c != ',':
@@ -336,7 +339,7 @@ func _on_alphabet_text_submitted(new_text):
 	
 	# Set the label to the new alphabet
 	_alphabet_label.text = ""
-	_alphabet_label.text = "Alphabet: " + new_text
+	_alphabet_label.text = "Alphabet: {" + new_text + "}"
 	
 	# Reset text field after submission
 	_alphabet_text_field.text = ""
@@ -349,10 +352,16 @@ func _on_button_button_down():
 # with other transitions going out from that state? If it does,
 # then it fails determinism.
 func _transition_determinism_check(arrow: Node2D, new_transitions: Array) -> bool:
+	# You iterate through every arrow that goes outwards from this current node
 	for value in arrow.get_start_state().get_out_arrows().values():
 		var old_transitions = value.get_transition()
+		# Then, you iterate through each of the old transitions for each arrow
 		for old_transition in old_transitions:
+			# Next, you iterate through each transition in the new
+			# transition, and compare it against each transition
+			# in the original transition for that arrow
 			for new_transition in new_transitions:
+				# If a transition already exists, then it fails determinism
 				if new_transition in old_transition:
 					return false
 	return true
@@ -361,17 +370,43 @@ func _transition_determinism_check(arrow: Node2D, new_transitions: Array) -> boo
 # alphabet used when building the DFA? This is processed
 # every time we input a string.
 func _input_determinism_check() -> bool:
+	# We iterate over every single state
 	for state in _all_nodes:
+		# Make sure the current state is not null (might've been deleted
+		# from the array)
 		if state == null:
 			continue
+		# We retrieve the outgoing arrows from the current state
 		var out_arrows = state.get_out_arrows().values()
+		# Next, we go through each character in the alphabet
 		for char in _alphabet:
+			# The "exists" variable will be used to track if
+			# this specific character in the alphabet has been
+			# used as a transition or not for this specific state
 			var exists : bool = false
+			# We iterate over all the outgoing arrows from the
+			# current state.
 			for out_arrow in out_arrows:
+				# Then, for each arrow, we iterate over every
+				# transition for it.
 				for transition in out_arrow.get_transition():
+					# If the current character in the alphabet
+					# does exist as a transition for this current
+					# state, then exists = true and we break out
+					# of this loop.
 					if char in transition:
 						exists = true
 						break
+					# If the transition does not exist in the alphabet,
+					# then immediately return false, since it violates
+					# determinism.
+					if transition not in _alphabet:
+						_result_label.text = "Transition " + transition + " for state " + state.get_simple_name() + " has not been defined in the alphabet"
+						print("Transition " + transition + " for state " + state.get_simple_name() + " has not been defined in the alphabet")
+						return false
+			# If we iterated over all the transitions for all the outgoing
+			# arrows of this state, and the current character in the alphabet
+			# was not found to be a transition at all, then it fails determinism.
 			if !exists:
 				_result_label.text = char + " has not been implemented for this state: " + state.get_simple_name() + ";
 					 \nnot all characters from alphabet were used"
@@ -381,24 +416,40 @@ func _input_determinism_check() -> bool:
 	return true
 	
 func _dfa(input : String) -> bool:
+	# First, we make sure the input string is legal. If it contains
+	# characters not defined in the alphabet, then we return false immediately.
 	for char in input:
 		if char not in _alphabet:
 			_result_label.text = "Input contains \'" + char + "\', which is not in the alphabet"
 			print("Input contains \'" + char + "\', which is not in the alphabet")
 			return false
 	
+	# This "curr" variable will be used to traverse over the whole DFA.
 	var curr : RigidBody2D = start_state
+	
+	# We check if the DFA has been defined correctly. If not, then return false.
 	if(!_input_determinism_check()):
 		return false
 	
+	# We begin traversing the input string.
 	for char in input:
+		# We go through every outgoing arrow for the 
+		# current state.
 		for arrow in curr.get_out_arrows().values():
+			# If the current character from the input string
+			# is found in one of the transitions, then we 
+			# use that transition to move to the next state.
 			if char in arrow.get_transition():
 				curr = arrow.get_end_state()
+				break
+	# If the final state that we arrived at is the end state,
+	# that means the string was accepted.
 	if curr == end_state:
 		_result_label.text = "Accepted!"
 		print("Accepted!")
 		return true
+	# Else, the final state we arrived at is not the end state,
+	# which means the string was rejected.
 	else:
 		_result_label.text = "Rejected!"
 		print("Rejected!")
