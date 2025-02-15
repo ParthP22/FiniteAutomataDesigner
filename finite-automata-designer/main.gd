@@ -213,7 +213,12 @@ func delete_selected():
 	if !_selected_node and !_selected_arrow:
 		print("nothing is selected, deleting nothing")
 	if _selected_node:
+		# NOTE TO MOMO: Tried to delete an arrow and I got an error
+		# on this line:
 		print("deleting state: ", _selected_node.get_simple_name())
+		# The error message said: Attempt to call function 'get_simple_name'
+		# in base 'previously freed' on a null instance
+		
 		delete_state()
 		return
 	if _selected_arrow:
