@@ -365,29 +365,38 @@ func _on_alphabet_text_submitted(new_text):
 	# Reset text field after submission
 	_alphabet_text_field.text = ""
 
-# Waits for an amount of time helper method
-func _wait(seconds: float) -> void:
-	await get_tree().create_timer(seconds).timeout
-
+# Used by fa_node_2's as they call the parent class to get the current letter of the input string being run
 func get_curr_letter():
 	if idx < _input_to_letter.size():
 		return _input_to_letter[idx]
 	else:
 		return ""
-
+# Used by fa_node_2's as they go through the input string
 func set_curr_letter():
-	idx += 1
+	if idx < _input_to_letter.size():
+		idx += 1
+# Reset the index into the input string to zero
+func reset_idx():
+	idx = 0
 	
 # Animates a blind (NFA) check of the input string and current machine
 func _on_button_button_down():
+	# Deselect the _selected_node
 	deselect_curr_node()
+	# Reset the input string index so that you can start from the beginning
+	reset_idx()
+	# Turn off any misc states being light up for some reason
 	for state in _all_nodes:
 		state.turn_off_light()
+	# If a start state is labeled and is valid, run the input string
 	if start_state and is_instance_valid(start_state):
 		_result_label.text = "Running"
+		# (new variable) an array of the input string from the user
 		_input_to_letter = _input_string.split()
+		# notify the start state that it can beging running through the string
 		start_state.set_notify(true)
 	else:
+		# If no start state is defined, define one
 		_result_label.text = "Please select a start state!"
 
 func _set_result_text(text: String) -> void:

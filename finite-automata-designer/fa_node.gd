@@ -163,23 +163,31 @@ func get_notify():
 func get_current_letter() -> String:
 	return get_parent().get_parent().curr_letter
 
+# Notify all this states outgoing states if they have been reached and
+# 			if they should be checking for the next input letter based on the arrow weights 
 func set_notify(notify: bool):
+	_notify_going_to = notify
+	# Light up the state for some form of feed back that it has been visited
 	if _light.energy <= 1:
 		turn_on_light()
-	_notify_going_to = notify
+	# Get the parent object to get the current letter
 	var main_parent = get_parent()
 	var letter = main_parent.get_curr_letter()
+	# update curr letter index
 	main_parent.set_curr_letter()
-	
+	# you are told to check your states and the input string isn't empty, check all arrow weights and notify the states  based on the arrow weights
 	if notify and letter != "":
 		for state in _going_to:
 			if letter in _going_to[state].get_transition():
+				# wait two seconds before notifying the respective states
 				await get_tree().create_timer(2).timeout
 				state.set_notify(notify)
 	elif letter == "":
+		# Landing on an end state (acccepted)
 		if _is_end_state:
 			var result_string = "Reached end state, string: " + main_parent.get_input_string()
 			main_parent._set_result_text(result_string)
+		# Did not land on an accept state (rejected)
 		else:
 			var result_string = "Did not reach end state, string: " + main_parent.get_input_string()
 			main_parent._set_result_text(result_string)
