@@ -11,6 +11,8 @@ var _input_string: String = ""
 var start_state : RigidBody2D = null
 var end_state : RigidBody2D = null
 var state_count = 0
+var _curr_letter: Array = []
+var idx: int = 0
 
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
@@ -21,9 +23,11 @@ var state_count = 0
 @onready var _alphabet_text_field: LineEdit = $AlphabetTextField/LineEdit
 @onready var _state_text_field: LineEdit = $StateTextField/LineEdit
 @onready var _arrow_text_field: LineEdit = $ArrowTextField/LineEdit
-# Toggles
+# Toggle Buttons
 @onready var _is_start_state_toggle: RigidBody2D = $StartStateToggle
 @onready var _is_end_state_toggle: RigidBody2D = $EndStateToggle
+# Regular Buttons
+@onready var _run_btn: Button = $Control/RunButton
 
 
 # Called when the node enters the scene tree for the first time.
@@ -220,13 +224,13 @@ func delete_selected():
 		return
 	if _selected_arrow:
 		delete_arrow()
-	pass
-			
-# Deleted 
+
+# Deletes states and associated arrows
 func delete_state():
 	if _selected_node:
 		_state_delete_arrow()
 
+# Does the actual deleting of states and arrows
 func _state_delete_arrow():
 	var out_going_arrow_dict = _selected_node.get_out_arrows()
 	var out_going_count = out_going_arrow_dict.size()
@@ -245,12 +249,11 @@ func _state_delete_arrow():
 		_selected_node.queue_free()
 		_selected_arrow = null
 	
-
+# Deletes arrows
 func delete_arrow():
 	if _selected_arrow:
 		_delete_arrow(_selected_arrow)
-	pass
-
+# Deletes arrows
 func _delete_arrow(arrow):
 	var deleting_this_arrow = arrow
 	var begin_state = deleting_this_arrow.get_start_state()
@@ -360,11 +363,26 @@ func _on_alphabet_text_submitted(new_text):
 	
 	# Reset text field after submission
 	_alphabet_text_field.text = ""
-	
+
+# Waits for an amount of time helper method
+func _wait(seconds: float) -> void:
+	await get_tree().create_timer(seconds).timeout
+
+func get_curr_letter():
+	if idx < _curr_letter.size():
+		return _curr_letter[idx]
+	else:
+		return ""
+
+func set_curr_letter():
+	idx += 1
+# Runs the DFA checks
 func _on_button_button_down():
-	print('pressed run button')
-	pass # Replace with function body.
-	
+	deselect_curr_node()
+	print("running")
+	_curr_letter = _input_string.split()
+	start_state.set_notify(true)
+
 # This is a "correctness" check: does the new transition coincide
 # with other transitions going out from that state? If it does,
 # then it fails determinism.

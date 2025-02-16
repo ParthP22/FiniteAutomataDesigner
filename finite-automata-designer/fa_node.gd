@@ -1,6 +1,7 @@
 extends PhysicsBody2D
 var _is_start_state: bool: get = get_start_state, set = set_start_state
 var _is_end_state: bool: get = get_end_state, set = set_end_state
+var _notify_going_to: bool: get = get_notify, set = set_notify
 var _self_looping = false
 var _simple_name: String = ""
 var _going_to: Dictionary = {}
@@ -55,7 +56,7 @@ func toggle_light():
 	if _light.energy > 1.1:
 		_light.energy = 1
 	else:
-		_light.energy = 2
+		_light.energy = 20
 
 func draw_arrow_to_self(arrow_node: Object) -> Object:
 	if !_self_looping:
@@ -151,3 +152,23 @@ func update_light_color():
 		return
 	_light.color = Color(0.764, 0.81, 0.908)  # Default orange
 		
+
+func get_notify():
+	return _notify_going_to
+
+func get_current_letter() -> String:
+	return get_parent().get_parent().curr_letter
+
+func set_notify(notify: bool):
+	_notify_going_to = notify
+	var main_parent = get_parent()
+	var letter = main_parent.get_curr_letter()
+	main_parent.set_curr_letter()
+	
+	if notify and letter != "":
+		for state in _going_to:
+			if letter in _going_to[state].get_transition():
+				await get_tree().create_timer(2).timeout
+				state.set_notify(notify)
+				state.toggle_light()
+	
