@@ -97,7 +97,7 @@ func update_arrow_to_another():
 	arrow_head.polygon = PackedVector2Array([perp_start, adjusted_end, perp_end])
 
 	# Position label at the midpoint of the arrow, slightly above
-	label.position = perp_direction.normalized() * 15  # Offset slightly above
+	label.position = perp_direction.normalized() * offset  # Offset slightly above
 
 	# Reshape arrow shaft collision box
 	var hitbox_width = 5

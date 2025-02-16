@@ -22,13 +22,19 @@ var state_count = 0
 @onready var _state_text_field: LineEdit = $StateTextField/LineEdit
 @onready var _arrow_text_field: LineEdit = $ArrowTextField/LineEdit
 # Toggles
-@onready var _is_start_state: RigidBody2D = $StartStateToggle
-@onready var _is_end_state: RigidBody2D = $EndStateToggle
-
+@onready var _is_start_state_toggle: RigidBody2D = $StartStateToggle
+@onready var _is_end_state_toggle: RigidBody2D = $EndStateToggle
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Simple labeling of the alphabet label on start up
+	var result = "{"
+	for letter in _alphabet:
+		result += letter + ","
+	result = result.substr(0, result.length()-1)
+	result += "}"
+	_alphabet_label.text = "Alphabet: " + result 
 	pass 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -40,19 +46,19 @@ func _process(_delta):
 # Called anytime an 'event' occurs i.e. mouse move, clicks
 func _input(event):
 	# Setting state and arrow fields to be visible
-	if _selected_node and !_selected_arrow:
+	if _selected_node and !_selected_arrow and is_instance_valid(_selected_node):
 		_state_text_field.visible = true
 		_arrow_text_field.visible = false
 		
 		#set the state of the check buttons before showing them
-		#_is_start_state.get_child(0).button_pressed  = _selected_node.get_start_state()
-		#_is_end_state.get_child(0).button_pressed  = _selected_node.get_end_state()
-		_is_start_state.visible = true
-		_is_end_state.visible = true
+		_is_start_state_toggle.get_child(0).button_pressed  = _selected_node.get_start_state()
+		_is_end_state_toggle.get_child(0).button_pressed  = _selected_node.get_end_state()
+		_is_start_state_toggle.visible = true
+		_is_end_state_toggle.visible = true
 	else:
 		_state_text_field.visible = false
-		_is_start_state.visible = false
-		_is_end_state.visible = false
+		_is_start_state_toggle.visible = false
+		_is_end_state_toggle.visible = false
 	
 	if _selected_arrow and !_selected_node:
 		_arrow_text_field.visible = true
@@ -232,9 +238,13 @@ func _state_delete_arrow():
 	for x in range(incoming_count):
 		for key in incoming_arrows_dict:
 			_delete_arrow(incoming_arrows_dict[key])
-
-	_selected_node.queue_free()
-	_selected_arrow = null
+	# After deleting all associated arrows to the node, then remove the state from the queue and array
+	var _selected_state_idx = _all_nodes.find(_selected_node)
+	if _selected_state_idx > -1:
+		_all_nodes.remove_at(_selected_state_idx)
+		_selected_node.queue_free()
+		_selected_arrow = null
+	
 
 func delete_arrow():
 	if _selected_arrow:
@@ -294,13 +304,23 @@ func _on_arrow_edit_text_submitted(new_text : String):
 			print("failed")
 		_arrow_text_field.text = ""
 
+# Called everytime the start state toggle is clicked (trigger)
 func _on_start_state_button_toggled(toggled_on):
-	if _selected_node:
-		if start_state:
-			print("There already exists a start state!")
+	if _selected_node and is_instance_valid(_selected_node):
+		# Get number of start states
+		var start_state_count = 0
+		for state in _all_nodes:
+			if state.get_start_state():
+				start_state_count += 1
+		# If there is already a start state, reset it and make the current selected node the start state
+		if start_state_count == 1:
+			if start_state != _selected_node and toggled_on:
+				start_state.set_start_state(false)
+				start_state = _selected_node
+				start_state.set_start_state(toggled_on)
 		else:
-			_selected_node.set_start_state(toggled_on)
 			start_state = _selected_node
+			start_state.set_start_state(toggled_on)
 			
 #func _on_start_state_button_toggled_off(toggled_off):
 	#if _selected_node:
@@ -311,12 +331,9 @@ func _on_start_state_button_toggled(toggled_on):
 			#print("There is no start state!")
 
 func _on_end_state_button_toggled(toggled_on):
-	if _selected_node:
-		if end_state:
-			print("There already exists an end state!")
-		else:
-			_selected_node.set_end_state(toggled_on)
-			end_state = _selected_node
+	if _selected_node and is_instance_valid(_selected_node):
+		_selected_node.set_end_state(toggled_on)
+		end_state = _selected_node
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
