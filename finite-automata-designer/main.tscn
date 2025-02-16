@@ -36,7 +36,7 @@ scale = Vector2(0.602604, 0.603704)
 texture = ExtResource("2_sj1jy")
 
 [node name="ButtonCover" type="RigidBody2D" parent="."]
-position = Vector2(881, 587)
+position = Vector2(1070, 587)
 gravity_scale = 0.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ButtonCover"]
@@ -94,9 +94,9 @@ vertical_alignment = 1
 
 [node name="RunButton" type="Button" parent="Control"]
 layout_mode = 0
-offset_left = 824.0
+offset_left = 1013.0
 offset_top = 564.0
-offset_right = 937.0
+offset_right = 1126.0
 offset_bottom = 614.0
 text = "Run"
 

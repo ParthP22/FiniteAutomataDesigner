@@ -393,7 +393,8 @@ func _on_button_button_down():
 func _set_result_text(text: String) -> void:
 	_result_label.text = text
 
-
+func get_input_string() -> String:
+	return _input_string
 # This is a "correctness" check: does the new transition coincide
 # with other transitions going out from that state? If it does,
 # then it fails determinism.

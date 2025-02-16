@@ -164,7 +164,7 @@ func get_current_letter() -> String:
 	return get_parent().get_parent().curr_letter
 
 func set_notify(notify: bool):
-	if _light.energy == 1:
+	if _light.energy <= 1:
 		turn_on_light()
 	_notify_going_to = notify
 	var main_parent = get_parent()
@@ -178,5 +178,10 @@ func set_notify(notify: bool):
 				state.set_notify(notify)
 	elif letter == "":
 		if _is_end_state:
-			main_parent._set_result_text("Reached end state, string: ", get)
+			var result_string = "Reached end state, string: " + main_parent.get_input_string()
+			main_parent._set_result_text(result_string)
+		else:
+			var result_string = "Did not reach end state, string: " + main_parent.get_input_string()
+			main_parent._set_result_text(result_string)
+			
 	
