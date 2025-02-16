@@ -56,7 +56,13 @@ func toggle_light():
 	if _light.energy > 1.1:
 		_light.energy = 1
 	else:
-		_light.energy = 20
+		_light.energy = 5
+		
+func turn_on_light():
+	_light.energy = 5
+
+func turn_off_light():
+	_light.energy = 1
 
 func draw_arrow_to_self(arrow_node: Object) -> Object:
 	if !_self_looping:
@@ -94,9 +100,7 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		print("state\n",self)
 		print("going to dict\n",_going_to)
 		print("incoming dict\n",_incoming)
-			
-		
-		
+
 		return arrow_node
 
 func erase_in_going_to(node: Object):
@@ -160,6 +164,8 @@ func get_current_letter() -> String:
 	return get_parent().get_parent().curr_letter
 
 func set_notify(notify: bool):
+	if _light.energy == 1:
+		turn_on_light()
 	_notify_going_to = notify
 	var main_parent = get_parent()
 	var letter = main_parent.get_curr_letter()
@@ -170,5 +176,7 @@ func set_notify(notify: bool):
 			if letter in _going_to[state].get_transition():
 				await get_tree().create_timer(2).timeout
 				state.set_notify(notify)
-				state.toggle_light()
+	elif letter == "":
+		if _is_end_state:
+			main_parent._set_result_text("Reached end state, string: ", get)
 	

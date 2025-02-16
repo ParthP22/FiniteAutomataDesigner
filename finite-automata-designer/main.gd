@@ -11,7 +11,7 @@ var _input_string: String = ""
 var start_state : RigidBody2D = null
 var end_state : RigidBody2D = null
 var state_count = 0
-var _curr_letter: Array = []
+var _input_to_letter: Array = []
 var idx: int = 0
 
 # Text Labels
@@ -253,7 +253,8 @@ func _state_delete_arrow():
 func delete_arrow():
 	if _selected_arrow:
 		_delete_arrow(_selected_arrow)
-# Deletes arrows
+		
+# Actully does the deleting of arrows
 func _delete_arrow(arrow):
 	var deleting_this_arrow = arrow
 	var begin_state = deleting_this_arrow.get_start_state()
@@ -369,19 +370,29 @@ func _wait(seconds: float) -> void:
 	await get_tree().create_timer(seconds).timeout
 
 func get_curr_letter():
-	if idx < _curr_letter.size():
-		return _curr_letter[idx]
+	if idx < _input_to_letter.size():
+		return _input_to_letter[idx]
 	else:
 		return ""
 
 func set_curr_letter():
 	idx += 1
-# Runs the DFA checks
+	
+# Animates a blind (NFA) check of the input string and current machine
 func _on_button_button_down():
 	deselect_curr_node()
-	print("running")
-	_curr_letter = _input_string.split()
-	start_state.set_notify(true)
+	for state in _all_nodes:
+		state.turn_off_light()
+	if start_state and is_instance_valid(start_state):
+		_result_label.text = "Running"
+		_input_to_letter = _input_string.split()
+		start_state.set_notify(true)
+	else:
+		_result_label.text = "Please select a start state!"
+
+func _set_result_text(text: String) -> void:
+	_result_label.text = text
+
 
 # This is a "correctness" check: does the new transition coincide
 # with other transitions going out from that state? If it does,
