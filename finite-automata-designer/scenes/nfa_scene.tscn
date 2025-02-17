@@ -1,16 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://dl8k47mliaxvs"]
+[gd_scene load_steps=9 format=3 uid="uid://068wjbsgvqtk"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_n2rlr"]
-[ext_resource type="Texture2D" uid="uid://bsxtwelrbo324" path="res://godot_bg.png" id="2_sj1jy"]
+[ext_resource type="Script" path="res://scripts/dfa.gd" id="1_nwayh"]
+[ext_resource type="Texture2D" uid="uid://bsxtwelrbo324" path="res://assets/godot_bg.png" id="2_haopd"]
+[ext_resource type="LabelSettings" uid="uid://dexm5mytqkou0" path="res://assets/title_label_settings.tres" id="3_j2ljs"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1sqlt"]
 size = Vector2(129, 64)
-
-[sub_resource type="LabelSettings" id="LabelSettings_db6vl"]
-font_size = 32
-font_color = Color(0.80624, 0.417894, 0.0426877, 1)
-outline_size = 1
-outline_color = Color(0.230315, 0.230315, 0.230315, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rjuwy"]
 size = Vector2(220, 45)
@@ -24,8 +19,8 @@ size = Vector2(233, 45)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3bfpm"]
 size = Vector2(220, 45)
 
-[node name="main" type="Node2D"]
-script = ExtResource("1_n2rlr")
+[node name="NFAScene" type="Node2D"]
+script = ExtResource("1_nwayh")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.762404, 0.762404, 0.762404, 1)
@@ -33,7 +28,7 @@ color = Color(0.762404, 0.762404, 0.762404, 1)
 [node name="Background" type="Sprite2D" parent="."]
 position = Vector2(577.5, 325)
 scale = Vector2(0.602604, 0.603704)
-texture = ExtResource("2_sj1jy")
+texture = ExtResource("2_haopd")
 
 [node name="ButtonCover" type="RigidBody2D" parent="."]
 position = Vector2(1070, 587)
@@ -43,11 +38,27 @@ gravity_scale = 0.0
 position = Vector2(0.5, 2)
 shape = SubResource("RectangleShape2D_1sqlt")
 
+[node name="ButtonCover2" type="RigidBody2D" parent="."]
+position = Vector2(70, 40)
+gravity_scale = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ButtonCover2"]
+position = Vector2(0.5, 2)
+shape = SubResource("RectangleShape2D_1sqlt")
+
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="Back" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 129.0
+offset_bottom = 66.0
+text = "Back"
 
 [node name="InstructionsLabel" type="Label" parent="Control"]
 layout_mode = 1
@@ -74,8 +85,9 @@ offset_top = 14.0
 offset_right = 779.0
 offset_bottom = 59.0
 text = "Finite Automata Designer
-"
-label_settings = SubResource("LabelSettings_db6vl")
+NFA"
+label_settings = ExtResource("3_j2ljs")
+horizontal_alignment = 1
 
 [node name="Result" type="Label" parent="Control"]
 layout_mode = 1
@@ -290,6 +302,7 @@ offset_right = 39.0
 offset_bottom = 12.0
 text = "End State Toggle:"
 
+[connection signal="button_down" from="Control/Back" to="." method="_go_home"]
 [connection signal="button_down" from="Control/RunButton" to="." method="_on_button_button_down"]
 [connection signal="text_submitted" from="InputTextField/LineEdit" to="." method="_on_input_text_submitted"]
 [connection signal="text_submitted" from="AlphabetTextField/LineEdit" to="." method="_on_alphabet_text_submitted"]

@@ -1,0 +1,66 @@
+[gd_scene load_steps=4 format=3 uid="uid://dyb8uuldp76vl"]
+
+[ext_resource type="Script" path="res://scenes/main_menu.gd" id="1_ft85a"]
+[ext_resource type="Texture2D" uid="uid://bsxtwelrbo324" path="res://assets/godot_bg.png" id="1_r2ykg"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_lana0"]
+font_size = 32
+font_color = Color(0.80624, 0.417894, 0.0426877, 1)
+outline_size = 1
+outline_color = Color(0.230315, 0.230315, 0.230315, 1)
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_ft85a")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color(0.762404, 0.762404, 0.762404, 1)
+
+[node name="Background" type="Sprite2D" parent="."]
+position = Vector2(577.5, 325)
+scale = Vector2(0.602604, 0.603704)
+texture = ExtResource("1_r2ykg")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1158.0
+offset_bottom = 651.0
+
+[node name="Title" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 370.0
+offset_top = 222.0
+offset_right = 763.0
+offset_bottom = 315.0
+text = "Finite Automata Designer
+Home
+"
+label_settings = SubResource("LabelSettings_lana0")
+horizontal_alignment = 1
+
+[node name="Authors" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 421.0
+offset_top = 361.0
+offset_right = 717.0
+offset_bottom = 384.0
+text = "by Mohammed Mowla and Parth Patel"
+
+[node name="GoToDFAScene" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 400.0
+offset_top = 470.0
+offset_right = 517.0
+offset_bottom = 514.0
+text = "DFA"
+
+[node name="GoToNFAScene" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 650.0
+offset_top = 470.0
+offset_right = 767.0
+offset_bottom = 514.0
+text = "NFA"
+
+[connection signal="button_down" from="Control/GoToDFAScene" to="." method="_on_go_to_dfa_scene_button_down"]
+[connection signal="button_down" from="Control/GoToNFAScene" to="." method="_on_go_to_nfa_scene_button_down"]

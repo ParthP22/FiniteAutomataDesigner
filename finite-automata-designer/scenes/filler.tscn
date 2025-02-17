@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://citlovol4v0dd"]
 
-[ext_resource type="Texture2D" uid="uid://wl22posoy3mc" path="res://icon.svg" id="1_vrfn4"]
+[ext_resource type="Texture2D" uid="uid://wl22posoy3mc" path="res://assets/icon.svg" id="1_eh28m"]
 
 [node name="Sprite2D" type="Sprite2D"]
 scale = Vector2(0.2, 0.2)
-texture = ExtResource("1_vrfn4")
+texture = ExtResource("1_eh28m")
 centered = false

@@ -1,6 +1,6 @@
 extends Node2D
-var _preloaded_fa_node: PackedScene = preload("res://fa_node_2.tscn")
-var _preloaded_arrow: PackedScene = preload("res://Arrow.tscn")
+var _preloaded_fa_node: PackedScene = preload("res://scenes/fa_node_2.tscn")
+var _preloaded_arrow: PackedScene = preload("res://scenes/Arrow.tscn")
 var _selected_node: RigidBody2D = null
 var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
@@ -511,3 +511,6 @@ func _dfa(input : String) -> bool:
 		print("Rejected!")
 		return false
 	
+
+func _go_home():
+	SceneSwitcher.switch_scene("res://scenes/main_menu.tscn")

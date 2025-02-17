@@ -1,13 +1,13 @@
 [gd_scene load_steps=9 format=3 uid="uid://dekf5qhqobrpl"]
 
-[ext_resource type="Script" path="res://fa_node.gd" id="1_quw3j"]
-[ext_resource type="Texture2D" uid="uid://bqegqmqoqoyds" path="res://circle_FA.png" id="2_1gxso"]
-[ext_resource type="Texture2D" uid="uid://bxsjktrv52lvv" path="res://point_light_2d.png" id="3_eofgv"]
-[ext_resource type="Texture2D" uid="uid://wl22posoy3mc" path="res://icon.svg" id="4_0rfd8"]
-[ext_resource type="Script" path="res://CustomSubscriptEffect.gd" id="4_uht4b"]
+[ext_resource type="Script" path="res://scripts/fa_node.gd" id="1_xx477"]
+[ext_resource type="Texture2D" uid="uid://bqegqmqoqoyds" path="res://assets/circle_FA.png" id="2_a73xs"]
+[ext_resource type="Texture2D" uid="uid://bxsjktrv52lvv" path="res://assets/point_light_2d.png" id="3_002sb"]
+[ext_resource type="Script" path="res://scripts/CustomSubscriptEffect.gd" id="4_jq3p8"]
+[ext_resource type="Texture2D" uid="uid://wl22posoy3mc" path="res://assets/icon.svg" id="5_e7x66"]
 
 [sub_resource type="RichTextEffect" id="RichTextEffect_5i386"]
-script = ExtResource("4_uht4b")
+script = ExtResource("4_jq3p8")
 
 [sub_resource type="GDScript" id="GDScript_4xnxh"]
 script/source = "extends Area2D
@@ -34,18 +34,18 @@ radius = 26.1725
 
 [node name="State" type="RigidBody2D"]
 gravity_scale = 0.0
-script = ExtResource("1_quw3j")
+script = ExtResource("1_xx477")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.1, 0.1)
-texture = ExtResource("2_1gxso")
+texture = ExtResource("2_a73xs")
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
 scale = Vector2(0.8, 0.8)
 color = Color(0.764485, 0.810351, 0.908487, 1)
 energy = 0.0
 blend_mode = 2
-texture = ExtResource("3_eofgv")
+texture = ExtResource("3_002sb")
 texture_scale = 1.2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
@@ -73,7 +73,7 @@ shape = SubResource("CircleShape2D_k03c7")
 
 [node name="PointLight2D" type="PointLight2D" parent="Area2D"]
 energy = 0.0
-texture = ExtResource("4_0rfd8")
+texture = ExtResource("5_e7x66")
 texture_scale = 0.2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

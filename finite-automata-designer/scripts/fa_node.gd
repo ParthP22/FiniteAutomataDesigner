@@ -97,28 +97,24 @@ func draw_arrow(other_node: Object, arrow_node: Object) -> Object:
 		if _going_to.has(other_node) and _incoming.has(other_node):
 			_going_to[other_node].offset = 10
 			_incoming[other_node].offset = 10
-		print("state\n",self)
-		print("going to dict\n",_going_to)
-		print("incoming dict\n",_incoming)
-
 		return arrow_node
 
 func erase_in_going_to(node: Object):
 	if _going_to.has(node):
-		print("removing arrow tracking from ", _simple_name, " going to ", node.get_simple_name())
+		#print("removing arrow tracking from ", _simple_name, " going to ", node.get_simple_name())
 		_going_to.erase(node)
 	
 func erase_in_incoming(node: Object):
 	if _incoming.has(node):
-		print("removing arrow tracking that came to ", _simple_name, " from ", node.get_simple_name())
+		#print("removing arrow tracking that came to ", _simple_name, " from ", node.get_simple_name())
 		_incoming.erase(node)
 
 func _add_to_going_to(node: Object, arrow: Object):
-	print('adding arrow to _going_to dict')
+	#print('adding arrow to _going_to dict')
 	_going_to[node] = arrow
 
 func _add_to_incoming(node: Object, arrow: Object):
-	print('adding arrow to _incoming dict')
+	#print('adding arrow to _incoming dict')
 	_incoming[node] = arrow
 
 func get_out_arrows():

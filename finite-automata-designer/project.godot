@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Finite Automata Designer"
-run/main_scene="res://main.tscn"
+run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
-config/icon="res://icon.svg"
+config/icon="res://assets/icon.svg"
+
+[autoload]
+
+SceneSwitcher="*res://scripts/scene_switcher.gd"
 
 [input]
 
