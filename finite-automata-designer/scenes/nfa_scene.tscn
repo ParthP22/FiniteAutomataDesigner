@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://068wjbsgvqtk"]
 
-[ext_resource type="Script" path="res://scripts/dfa.gd" id="1_nwayh"]
+[ext_resource type="Script" path="res://scripts/nfa.gd" id="1_0d25t"]
 [ext_resource type="Texture2D" uid="uid://bsxtwelrbo324" path="res://assets/godot_bg.png" id="2_haopd"]
 [ext_resource type="LabelSettings" uid="uid://dexm5mytqkou0" path="res://assets/title_label_settings.tres" id="3_j2ljs"]
 
@@ -20,7 +20,7 @@ size = Vector2(233, 45)
 size = Vector2(220, 45)
 
 [node name="NFAScene" type="Node2D"]
-script = ExtResource("1_nwayh")
+script = ExtResource("1_0d25t")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.762404, 0.762404, 0.762404, 1)
