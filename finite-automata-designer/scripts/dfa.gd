@@ -337,7 +337,11 @@ func _on_start_state_button_toggled(toggled_on):
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node and is_instance_valid(_selected_node):
 		_selected_node.set_end_state(toggled_on)
-		end_state = _selected_node
+		if toggled_on:
+			end_state = _selected_node
+		else:
+			end_state = null
+		
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
@@ -404,6 +408,7 @@ func _set_result_text(text: String) -> void:
 
 func get_input_string() -> String:
 	return _input_string
+
 # This is a "correctness" check: does the new transition coincide
 # with other transitions going out from that state? If it does,
 # then it fails determinism.
@@ -472,6 +477,16 @@ func _input_determinism_check() -> bool:
 	return true
 	
 func _dfa(input : String) -> bool:
+	if start_state == null and end_state == null:
+		print("Start and end states are both undefined")
+		return false
+	elif start_state == null:
+		print("Start state undefined")
+		return false
+	elif end_state == null:
+		print("End state undefined")
+		return false
+	
 	# First, we make sure the input string is legal. If it contains
 	# characters not defined in the alphabet, then we return false immediately.
 	for char in input:
