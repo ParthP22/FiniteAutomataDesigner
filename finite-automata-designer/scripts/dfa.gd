@@ -336,11 +336,25 @@ func _on_start_state_button_toggled(toggled_on):
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node and is_instance_valid(_selected_node):
-		_selected_node.set_end_state(toggled_on)
-		if toggled_on:
-			end_state = _selected_node
+		# Get number of end states
+		var end_state_count = 0
+		for state in _all_nodes:
+			if state.get_end_state():
+				end_state_count += 1
+		# If there are no end states, we enter this if-statement
+		if end_state_count == 0:
+			# If the end state button was toggled, then
+			# we set the current node as the end state
+			if toggled_on:
+				end_state = _selected_node
+				end_state.set_end_state(toggled_on)
+			# If the end state button is not toggled for
+			# this node, then we set the end state to null
+			else:
+				end_state = null
 		else:
-			end_state = null
+			end_state = _selected_node
+			end_state.set_end_state(toggled_on)
 		
 
 func _on_input_text_submitted(new_text):
@@ -479,13 +493,17 @@ func _input_determinism_check() -> bool:
 func _dfa(input : String) -> bool:
 	if start_state == null and end_state == null:
 		print("Start and end states are both undefined")
+		_result_label.text = "Start and end states are both undefined"
 		return false
 	elif start_state == null:
 		print("Start state undefined")
+		_result_label.text = "Start state undefined"
 		return false
 	elif end_state == null:
 		print("End state undefined")
+		_result_label.text = "End state undefined"
 		return false
+		
 	
 	# First, we make sure the input string is legal. If it contains
 	# characters not defined in the alphabet, then we return false immediately.
@@ -515,7 +533,7 @@ func _dfa(input : String) -> bool:
 				break
 	# If the final state that we arrived at is the end state,
 	# that means the string was accepted.
-	if curr == end_state:
+	if curr.get_end_state():
 		_result_label.text = "Accepted!"
 		print("Accepted!")
 		return true
