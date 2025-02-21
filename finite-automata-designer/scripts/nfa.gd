@@ -10,6 +10,7 @@ var _alphabet: Array = ["0","1"]
 var _input_string: String = ""
 var start_state : RigidBody2D = null
 var end_state : RigidBody2D = null
+var epsilon: String = "\u03B5"
 var state_count = 0
 var _input_to_letter: Array = []
 var idx: int = 0
@@ -151,6 +152,7 @@ func select():
 		deselect_arrow()
 		select_arrow(node)
 	else:
+		print(epsilon)
 		print('clicked something else')
 
 func select_node(node: RigidBody2D):
@@ -336,15 +338,28 @@ func _on_start_state_button_toggled(toggled_on):
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node and is_instance_valid(_selected_node):
-		_selected_node.set_end_state(toggled_on)
-		end_state = _selected_node
+		# Get number of end states
+		var end_state_count = 0
+		for state in _all_nodes:
+			if state.get_end_state():
+				end_state_count += 1
+		# If there is already an end state, reset it and make the current selected node the end state
+		if end_state_count == 0:
+			if toggled_on:
+				end_state = _selected_node
+				end_state.set_end_state(toggled_on)
+			else:
+				end_state = null
+		else:
+			end_state = _selected_node
+			end_state.set_end_state(toggled_on)
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
 	_input_string_label.text = ""
 	_input_string_label.text = "String: " + _input_string
 	_input_string_text_field.text = ""
-	_dfa(new_text)
+	_nfa(new_text)
 
 func _on_alphabet_text_submitted(new_text):
 	# Reset alphabet array to prepare it for the new alphabet
@@ -471,7 +486,7 @@ func _input_determinism_check() -> bool:
 				return false
 	return true
 	
-func _dfa(input : String) -> bool:
+func _nfa(input : String) -> bool:
 	# First, we make sure the input string is legal. If it contains
 	# characters not defined in the alphabet, then we return false immediately.
 	for char in input:
