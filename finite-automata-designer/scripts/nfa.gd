@@ -4,6 +4,7 @@ var _preloaded_arrow: PackedScene = preload("res://scenes/Arrow.tscn")
 var _selected_node: RigidBody2D = null
 var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
+var _all_pointers: Dictionary = {}
 var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
 var _alphabet: Array = ["0","1"]
@@ -273,6 +274,8 @@ func _on_state_edit_text_submitted(new_text):
 		_selected_node.set_text(new_text)
 		_state_text_field.text = ""
 
+# NOTE TO PARTH (myself): string formatting needs to be implementing
+# to check for duplicate transitions, etc
 func _on_arrow_edit_text_submitted(new_text : String):
 	if _selected_arrow:
 		
@@ -280,34 +283,32 @@ func _on_arrow_edit_text_submitted(new_text : String):
 		# Simultaneously, we will check the new transition
 		# contains any illegal characters, which if it does,
 		# then we return.
+		var i : int = 0
 		var new_transition : Array = []
-		for c in new_text:
-			if c != ",":
-				if c not in _alphabet:
-					print(c + " is not in the alphabet")
+		
+		while i < len(new_text):
+			# Checks to see if an epsilon transition was added
+			if new_text[i] == "e" and i + 1 < len(new_text) and new_text[i+1] == "p":
+				if epsilon not in new_transition:
+					new_transition.append(epsilon)
+				i += 2
+				continue
+			if new_text[i] != "," and new_text[i] not in new_transition:
+				if new_text[i] not in _alphabet:
+					print(new_text[i] + " is not in the alphabet")
 					return
 				else:
-					new_transition.append(c)
+					new_transition.append(new_text[i])
+			i += 1
 		
-		# We will save the old_transition for now
-		var old_transition : Array = _selected_arrow.get_transition()
+		var formatted_text = ""
+		for elem in new_transition:
+			formatted_text += elem
+			formatted_text += ","
+		formatted_text = formatted_text.left(len(formatted_text)-1)
 		
-		# If there already exists a transition for this arrow,
-		# then we'll just delete it for now. When doing the
-		# determinism check, we don't want to check the new
-		# transition against the old one, since it may incorrectly
-		# return false.
-		if(!old_transition.is_empty()):
-			_selected_arrow.set_transition([])
-		
-		if(_transition_determinism_check(_selected_arrow,new_transition)):
-			_selected_arrow.set_text(new_text)
-			_selected_arrow.set_transition(new_transition)
-		else:
-			# If the determinism check fails, we revert back to
-			# the old transition that we saved earlier.
-			_selected_arrow.set_transition(old_transition)
-			print("failed")
+		_selected_arrow.set_text(formatted_text)
+		_selected_arrow.set_transition(new_transition)
 		_arrow_text_field.text = ""
 
 # Called everytime the start state toggle is clicked (trigger)
@@ -419,74 +420,22 @@ func _set_result_text(text: String) -> void:
 
 func get_input_string() -> String:
 	return _input_string
-# This is a "correctness" check: does the new transition coincide
-# with other transitions going out from that state? If it does,
-# then it fails determinism.
-func _transition_determinism_check(arrow: Node2D, new_transitions: Array) -> bool:
-	# You iterate through every arrow that goes outwards from this current node
-	for value in arrow.get_start_state().get_out_arrows().values():
-		var old_transitions = value.get_transition()
-		# Then, you iterate through each of the old transitions for each arrow
-		for old_transition in old_transitions:
-			# Next, you iterate through each transition in the new
-			# transition, and compare it against each transition
-			# in the original transition for that arrow
-			for new_transition in new_transitions:
-				# If a transition already exists, then it fails determinism
-				if new_transition in old_transition:
-					return false
-	return true
-	
-# This is a "completeness" check: were all characters of the
-# alphabet used when building the DFA? This is processed
-# every time we input a string.
-func _input_determinism_check() -> bool:
-	# We iterate over every single state
-	for state in _all_nodes:
-		# Make sure the current state is not null (might've been deleted
-		# from the array)
-		if state == null:
-			continue
-		# We retrieve the outgoing arrows from the current state
-		var out_arrows = state.get_out_arrows().values()
-		# Next, we go through each character in the alphabet
-		for char in _alphabet:
-			# The "exists" variable will be used to track if
-			# this specific character in the alphabet has been
-			# used as a transition or not for this specific state
-			var exists : bool = false
-			# We iterate over all the outgoing arrows from the
-			# current state.
-			for out_arrow in out_arrows:
-				# Then, for each arrow, we iterate over every
-				# transition for it.
-				for transition in out_arrow.get_transition():
-					# If the current character in the alphabet
-					# does exist as a transition for this current
-					# state, then exists = true and we break out
-					# of this loop.
-					if char in transition:
-						exists = true
-						break
-					# If the transition does not exist in the alphabet,
-					# then immediately return false, since it violates
-					# determinism.
-					if transition not in _alphabet:
-						_result_label.text = "Transition " + transition + " for state " + state.get_simple_name() + " has not been defined in the alphabet"
-						print("Transition " + transition + " for state " + state.get_simple_name() + " has not been defined in the alphabet")
-						return false
-			# If we iterated over all the transitions for all the outgoing
-			# arrows of this state, and the current character in the alphabet
-			# was not found to be a transition at all, then it fails determinism.
-			if !exists:
-				_result_label.text = char + " has not been implemented for this state: " + state.get_simple_name() + ";
-					 \nnot all characters from alphabet were used"
-				print(char + " has not been implemented for this state: " + state.get_simple_name() + ";
-					 \nnot all characters from alphabet were used")
-				return false
-	return true
+
 	
 func _nfa(input : String) -> bool:
+	if start_state == null and end_state == null:
+		print("Start and end states are both undefined")
+		_result_label.text = "Start and end states are both undefined"
+		return false
+	elif start_state == null:
+		print("Start state undefined")
+		_result_label.text = "Start state undefined"
+		return false
+	elif end_state == null:
+		print("End state undefined")
+		_result_label.text = "End state undefined"
+		return false
+	
 	# First, we make sure the input string is legal. If it contains
 	# characters not defined in the alphabet, then we return false immediately.
 	for char in input:
@@ -498,9 +447,7 @@ func _nfa(input : String) -> bool:
 	# This "curr" variable will be used to traverse over the whole DFA.
 	var curr : RigidBody2D = start_state
 	
-	# We check if the DFA has been defined correctly. If not, then return false.
-	if(!_input_determinism_check()):
-		return false
+
 	
 	# We begin traversing the input string.
 	for char in input:
