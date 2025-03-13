@@ -14,6 +14,7 @@ var state_count = 0
 var _input_to_letter: Array = []
 var idx: int = 0
 
+
 # Text Labels
 @onready var _input_string_label: Label = $Control/InputStringRigidBody/InputStringLabel
 @onready var _alphabet_label: Label = $Control/AlphabetRigidBody/AlphabetLabel
@@ -151,6 +152,7 @@ func select():
 		deselect_arrow()
 		select_arrow(node)
 	else:
+
 		print('clicked something else')
 
 func select_node(node: RigidBody2D):

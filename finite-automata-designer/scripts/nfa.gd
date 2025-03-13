@@ -444,34 +444,52 @@ func _nfa(input : String) -> bool:
 			print("Input contains \'" + char + "\', which is not in the alphabet")
 			return false
 	
-	# This "curr" variable will be used to traverse over the whole DFA.
-	var curr : RigidBody2D = start_state
+	# First pointer will be the start_state
+	_all_pointers[start_state] = false
 	
 
 	
 	# We begin traversing the input string.
 	for char in input:
-		# We go through every outgoing arrow for the 
-		# current state.
-		for arrow in curr.get_out_arrows().values():
-			# If the current character from the input string
-			# is found in one of the transitions, then we 
-			# use that transition to move to the next state.
-			if char in arrow.get_transition():
-				curr = arrow.get_end_state()
-				break
+		for pointer in _all_pointers.keys():
+			# If the pointer has no outgoing arrows, but
+			# we are still traversing more characters, then
+			# that pointer dies
+			if pointer.get_out_arrows().is_empty():
+				_all_pointers.erase(pointer)
+				continue
+			# We go through every outgoing arrow for the 
+			# current state.
+			for arrow in pointer.get_out_arrows().values():
+				# For epsilon transitions (currently incomplete)
+				#if epsilon in arrow.get_transition():
+					#var epsilon_pointers : Dictionary = {}
+					#var curr_pointer = pointer
+					#epsilon_pointers[pointer] = true
+					#
+					#_all_pointers[arrow.get_end_state()] = true
+					#
+					#continue
+				if char in arrow.get_transition():
+					_all_pointers[arrow.get_end_state()] = true
+				_all_pointers.erase(pointer)
+			#if pointer in pointer.get_out_arrows().values():
+				#_all_pointers[pointer] = true
+				
 	# If the final state that we arrived at is the end state,
 	# that means the string was accepted.
-	if curr == end_state:
-		_result_label.text = "Accepted!"
-		print("Accepted!")
-		return true
+	for pointer in _all_pointers:
+		if pointer.get_end_state():
+			_result_label.text = "Accepted!"
+			print("Accepted!")
+			_all_pointers.clear()
+			return true
 	# Else, the final state we arrived at is not the end state,
 	# which means the string was rejected.
-	else:
-		_result_label.text = "Rejected!"
-		print("Rejected!")
-		return false
+	_result_label.text = "Rejected!"
+	print("Rejected!")
+	_all_pointers.clear()
+	return false
 	
 
 func _go_home():
