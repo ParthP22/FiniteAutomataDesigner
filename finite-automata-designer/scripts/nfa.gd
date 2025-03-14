@@ -444,11 +444,15 @@ func _nfa(input : String) -> bool:
 			print("Input contains \'" + char + "\', which is not in the alphabet")
 			return false
 	
+	# We don't want to carry memory of the pointers from previous
+	# inputs.
 	_all_pointers.clear()
 	
 	
 	# First pointer will be the start_state
 	_all_pointers[start_state] = false
+	
+	# Run an epsilon transition from the start state
 	_epsilon_transition(start_state)
 
 	
@@ -471,8 +475,11 @@ func _nfa(input : String) -> bool:
 				if char in arrow.get_transition():
 					_all_pointers[arrow.get_end_state()] = true
 				_all_pointers.erase(pointer)
-			#if pointer in pointer.get_out_arrows().values():
-				#_all_pointers[pointer] = true
+			
+	# After the input string has fully ran, we will run through
+	# the epsilon transitions one last time. There may be epsilon
+	# transitions that weren't activated (but should've been) by 
+	# the time you reach the final iteration in the for-loop above.
 	for pointer in _all_pointers.keys():
 		for arrow in pointer.get_out_arrows().values():
 			# For epsilon transitions (currently incomplete)
@@ -495,7 +502,12 @@ func _nfa(input : String) -> bool:
 	_all_pointers.clear()
 	return false
 	
-
+# The pointers created by the epsilon transition are done through
+# BFS. This version of BFS also keeps track of the previously visited
+# elements in order to avoid cycles. 
+# NOTE: Further modifications still need to be made to ensure it works
+# perfectly, but it works only in some situations currently.
+# NOTE: Fails Example 3.5 from textbook (pg 23) as of 3/13/2025.
 func _epsilon_transition(pointer):
 	
 	var queue : Array = []
@@ -503,14 +515,24 @@ func _epsilon_transition(pointer):
 	queue.push_back(pointer)
 	seen[pointer] = true
 	
+	# Run until queue is empty
 	while !queue.is_empty():
+		
+		# Poll the front of the queue
 		var epsilon_pointer = queue.pop_front()
+		
+		# Traverse all of its adjacent nodes
 		for epsilon_arrow in epsilon_pointer.get_out_arrows().values():
-			if epsilon in epsilon_arrow.get_transition():
-				if epsilon_arrow.get_end_state() not in seen:
-					seen[epsilon_arrow.get_end_state()] = true
-					_all_pointers[epsilon_arrow.get_end_state()] = true
-					queue.push_back(epsilon_arrow.get_end_state())
+			
+			# If the epsilon transition exists in the current transition
+			# and if the adjacent node hasn't been seen yet, then we will
+			# add that adjacent node into the queue and mark it as seen.
+			# NOTE: the second part of the if-statement is necessary to
+			# avoid cycles. 
+			if epsilon in epsilon_arrow.get_transition() and epsilon_arrow.get_end_state() not in seen:
+				seen[epsilon_arrow.get_end_state()] = true
+				_all_pointers[epsilon_arrow.get_end_state()] = true
+				queue.push_back(epsilon_arrow.get_end_state())
 					
 
 func _go_home():
