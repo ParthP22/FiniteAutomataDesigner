@@ -444,9 +444,12 @@ func _nfa(input : String) -> bool:
 			print("Input contains \'" + char + "\', which is not in the alphabet")
 			return false
 	
+	_all_pointers.clear()
+	
+	
 	# First pointer will be the start_state
 	_all_pointers[start_state] = false
-	
+	_epsilon_transition(start_state)
 
 	
 	# We begin traversing the input string.
@@ -458,23 +461,24 @@ func _nfa(input : String) -> bool:
 			if pointer.get_out_arrows().is_empty():
 				_all_pointers.erase(pointer)
 				continue
-			# We go through every outgoing arrow for the 
+			# Else, we go through every outgoing arrow for the 
 			# current state.
 			for arrow in pointer.get_out_arrows().values():
 				# For epsilon transitions (currently incomplete)
-				#if epsilon in arrow.get_transition():
-					#var epsilon_pointers : Dictionary = {}
-					#var curr_pointer = pointer
-					#epsilon_pointers[pointer] = true
-					#
-					#_all_pointers[arrow.get_end_state()] = true
-					#
-					#continue
+				if epsilon in arrow.get_transition():
+					_epsilon_transition(pointer)
+					continue
 				if char in arrow.get_transition():
 					_all_pointers[arrow.get_end_state()] = true
 				_all_pointers.erase(pointer)
 			#if pointer in pointer.get_out_arrows().values():
 				#_all_pointers[pointer] = true
+	for pointer in _all_pointers.keys():
+		for arrow in pointer.get_out_arrows().values():
+			# For epsilon transitions (currently incomplete)
+			if epsilon in arrow.get_transition():
+				_epsilon_transition(pointer)
+				continue
 				
 	# If the final state that we arrived at is the end state,
 	# that means the string was accepted.
@@ -491,6 +495,23 @@ func _nfa(input : String) -> bool:
 	_all_pointers.clear()
 	return false
 	
+
+func _epsilon_transition(pointer):
+	
+	var queue : Array = []
+	var seen : Dictionary = {}
+	queue.push_back(pointer)
+	seen[pointer] = true
+	
+	while !queue.is_empty():
+		var epsilon_pointer = queue.pop_front()
+		for epsilon_arrow in epsilon_pointer.get_out_arrows().values():
+			if epsilon in epsilon_arrow.get_transition():
+				if epsilon_arrow.get_end_state() not in seen:
+					seen[epsilon_arrow.get_end_state()] = true
+					_all_pointers[epsilon_arrow.get_end_state()] = true
+					queue.push_back(epsilon_arrow.get_end_state())
+					
 
 func _go_home():
 	SceneSwitcher.switch_scene("res://scenes/main_menu.tscn")
