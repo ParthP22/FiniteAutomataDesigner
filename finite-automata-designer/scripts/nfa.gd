@@ -4,12 +4,14 @@ var _preloaded_arrow: PackedScene = preload("res://scenes/Arrow.tscn")
 var _selected_node: RigidBody2D = null
 var _selected_arrow: Node2D = null
 var _all_nodes: Array = []
+var _all_pointers: Dictionary = {}
 var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
 var _alphabet: Array = ["0","1"]
 var _input_string: String = ""
 var start_state : RigidBody2D = null
 var end_state : RigidBody2D = null
+var epsilon: String = "\u03B5"
 var state_count = 0
 var _input_to_letter: Array = []
 var idx: int = 0
@@ -151,6 +153,7 @@ func select():
 		deselect_arrow()
 		select_arrow(node)
 	else:
+		print(epsilon)
 		print('clicked something else')
 
 func select_node(node: RigidBody2D):
@@ -271,6 +274,8 @@ func _on_state_edit_text_submitted(new_text):
 		_selected_node.set_text(new_text)
 		_state_text_field.text = ""
 
+# NOTE TO PARTH (myself): string formatting needs to be implementing
+# to check for duplicate transitions, etc
 func _on_arrow_edit_text_submitted(new_text : String):
 	if _selected_arrow:
 		
@@ -278,34 +283,32 @@ func _on_arrow_edit_text_submitted(new_text : String):
 		# Simultaneously, we will check the new transition
 		# contains any illegal characters, which if it does,
 		# then we return.
+		var i : int = 0
 		var new_transition : Array = []
-		for c in new_text:
-			if c != ",":
-				if c not in _alphabet:
-					print(c + " is not in the alphabet")
+		
+		while i < len(new_text):
+			# Checks to see if an epsilon transition was added
+			if new_text[i] == "e" and i + 1 < len(new_text) and new_text[i+1] == "p":
+				if epsilon not in new_transition:
+					new_transition.append(epsilon)
+				i += 2
+				continue
+			if new_text[i] != "," and new_text[i] not in new_transition:
+				if new_text[i] not in _alphabet:
+					print(new_text[i] + " is not in the alphabet")
 					return
 				else:
-					new_transition.append(c)
+					new_transition.append(new_text[i])
+			i += 1
 		
-		# We will save the old_transition for now
-		var old_transition : Array = _selected_arrow.get_transition()
+		var formatted_text = ""
+		for elem in new_transition:
+			formatted_text += elem
+			formatted_text += ","
+		formatted_text = formatted_text.left(len(formatted_text)-1)
 		
-		# If there already exists a transition for this arrow,
-		# then we'll just delete it for now. When doing the
-		# determinism check, we don't want to check the new
-		# transition against the old one, since it may incorrectly
-		# return false.
-		if(!old_transition.is_empty()):
-			_selected_arrow.set_transition([])
-		
-		if(_transition_determinism_check(_selected_arrow,new_transition)):
-			_selected_arrow.set_text(new_text)
-			_selected_arrow.set_transition(new_transition)
-		else:
-			# If the determinism check fails, we revert back to
-			# the old transition that we saved earlier.
-			_selected_arrow.set_transition(old_transition)
-			print("failed")
+		_selected_arrow.set_text(formatted_text)
+		_selected_arrow.set_transition(new_transition)
 		_arrow_text_field.text = ""
 
 # Called everytime the start state toggle is clicked (trigger)
@@ -336,15 +339,28 @@ func _on_start_state_button_toggled(toggled_on):
 
 func _on_end_state_button_toggled(toggled_on):
 	if _selected_node and is_instance_valid(_selected_node):
-		_selected_node.set_end_state(toggled_on)
-		end_state = _selected_node
+		# Get number of end states
+		var end_state_count = 0
+		for state in _all_nodes:
+			if state.get_end_state():
+				end_state_count += 1
+		# If there is already an end state, reset it and make the current selected node the end state
+		if end_state_count == 0:
+			if toggled_on:
+				end_state = _selected_node
+				end_state.set_end_state(toggled_on)
+			else:
+				end_state = null
+		else:
+			end_state = _selected_node
+			end_state.set_end_state(toggled_on)
 
 func _on_input_text_submitted(new_text):
 	_input_string = new_text
 	_input_string_label.text = ""
 	_input_string_label.text = "String: " + _input_string
 	_input_string_text_field.text = ""
-	_dfa(new_text)
+	_nfa(new_text)
 
 func _on_alphabet_text_submitted(new_text):
 	# Reset alphabet array to prepare it for the new alphabet
@@ -404,74 +420,22 @@ func _set_result_text(text: String) -> void:
 
 func get_input_string() -> String:
 	return _input_string
-# This is a "correctness" check: does the new transition coincide
-# with other transitions going out from that state? If it does,
-# then it fails determinism.
-func _transition_determinism_check(arrow: Node2D, new_transitions: Array) -> bool:
-	# You iterate through every arrow that goes outwards from this current node
-	for value in arrow.get_start_state().get_out_arrows().values():
-		var old_transitions = value.get_transition()
-		# Then, you iterate through each of the old transitions for each arrow
-		for old_transition in old_transitions:
-			# Next, you iterate through each transition in the new
-			# transition, and compare it against each transition
-			# in the original transition for that arrow
-			for new_transition in new_transitions:
-				# If a transition already exists, then it fails determinism
-				if new_transition in old_transition:
-					return false
-	return true
+
 	
-# This is a "completeness" check: were all characters of the
-# alphabet used when building the DFA? This is processed
-# every time we input a string.
-func _input_determinism_check() -> bool:
-	# We iterate over every single state
-	for state in _all_nodes:
-		# Make sure the current state is not null (might've been deleted
-		# from the array)
-		if state == null:
-			continue
-		# We retrieve the outgoing arrows from the current state
-		var out_arrows = state.get_out_arrows().values()
-		# Next, we go through each character in the alphabet
-		for char in _alphabet:
-			# The "exists" variable will be used to track if
-			# this specific character in the alphabet has been
-			# used as a transition or not for this specific state
-			var exists : bool = false
-			# We iterate over all the outgoing arrows from the
-			# current state.
-			for out_arrow in out_arrows:
-				# Then, for each arrow, we iterate over every
-				# transition for it.
-				for transition in out_arrow.get_transition():
-					# If the current character in the alphabet
-					# does exist as a transition for this current
-					# state, then exists = true and we break out
-					# of this loop.
-					if char in transition:
-						exists = true
-						break
-					# If the transition does not exist in the alphabet,
-					# then immediately return false, since it violates
-					# determinism.
-					if transition not in _alphabet:
-						_result_label.text = "Transition " + transition + " for state " + state.get_simple_name() + " has not been defined in the alphabet"
-						print("Transition " + transition + " for state " + state.get_simple_name() + " has not been defined in the alphabet")
-						return false
-			# If we iterated over all the transitions for all the outgoing
-			# arrows of this state, and the current character in the alphabet
-			# was not found to be a transition at all, then it fails determinism.
-			if !exists:
-				_result_label.text = char + " has not been implemented for this state: " + state.get_simple_name() + ";
-					 \nnot all characters from alphabet were used"
-				print(char + " has not been implemented for this state: " + state.get_simple_name() + ";
-					 \nnot all characters from alphabet were used")
-				return false
-	return true
+func _nfa(input : String) -> bool:
+	if start_state == null and end_state == null:
+		print("Start and end states are both undefined")
+		_result_label.text = "Start and end states are both undefined"
+		return false
+	elif start_state == null:
+		print("Start state undefined")
+		_result_label.text = "Start state undefined"
+		return false
+	elif end_state == null:
+		print("End state undefined")
+		_result_label.text = "End state undefined"
+		return false
 	
-func _dfa(input : String) -> bool:
 	# First, we make sure the input string is legal. If it contains
 	# characters not defined in the alphabet, then we return false immediately.
 	for char in input:
@@ -480,37 +444,96 @@ func _dfa(input : String) -> bool:
 			print("Input contains \'" + char + "\', which is not in the alphabet")
 			return false
 	
-	# This "curr" variable will be used to traverse over the whole DFA.
-	var curr : RigidBody2D = start_state
+	# We don't want to carry memory of the pointers from previous
+	# inputs.
+	_all_pointers.clear()
 	
-	# We check if the DFA has been defined correctly. If not, then return false.
-	if(!_input_determinism_check()):
-		return false
+	
+	# First pointer will be the start_state
+	_all_pointers[start_state] = false
+	
+	# Run an epsilon transition from the start state
+	_epsilon_transition(start_state)
+
 	
 	# We begin traversing the input string.
 	for char in input:
-		# We go through every outgoing arrow for the 
-		# current state.
-		for arrow in curr.get_out_arrows().values():
-			# If the current character from the input string
-			# is found in one of the transitions, then we 
-			# use that transition to move to the next state.
-			if char in arrow.get_transition():
-				curr = arrow.get_end_state()
-				break
+		for pointer in _all_pointers.keys():
+			# If the pointer has no outgoing arrows, but
+			# we are still traversing more characters, then
+			# that pointer dies
+			if pointer.get_out_arrows().is_empty():
+				_all_pointers.erase(pointer)
+				continue
+			# Else, we go through every outgoing arrow for the 
+			# current state.
+			for arrow in pointer.get_out_arrows().values():
+				# For epsilon transitions (currently incomplete)
+				if epsilon in arrow.get_transition():
+					_epsilon_transition(pointer)
+					continue
+				if char in arrow.get_transition():
+					_all_pointers[arrow.get_end_state()] = true
+				_all_pointers.erase(pointer)
+			
+	# After the input string has fully ran, we will run through
+	# the epsilon transitions one last time. There may be epsilon
+	# transitions that weren't activated (but should've been) by 
+	# the time you reach the final iteration in the for-loop above.
+	for pointer in _all_pointers.keys():
+		for arrow in pointer.get_out_arrows().values():
+			# For epsilon transitions (currently incomplete)
+			if epsilon in arrow.get_transition():
+				_epsilon_transition(pointer)
+				continue
+				
 	# If the final state that we arrived at is the end state,
 	# that means the string was accepted.
-	if curr == end_state:
-		_result_label.text = "Accepted!"
-		print("Accepted!")
-		return true
+	for pointer in _all_pointers:
+		if pointer.get_end_state():
+			_result_label.text = "Accepted!"
+			print("Accepted!")
+			_all_pointers.clear()
+			return true
 	# Else, the final state we arrived at is not the end state,
 	# which means the string was rejected.
-	else:
-		_result_label.text = "Rejected!"
-		print("Rejected!")
-		return false
+	_result_label.text = "Rejected!"
+	print("Rejected!")
+	_all_pointers.clear()
+	return false
 	
+# The pointers created by the epsilon transition are done through
+# BFS. This version of BFS also keeps track of the previously visited
+# elements in order to avoid cycles. 
+# NOTE: Further modifications still need to be made to ensure it works
+# perfectly, but it works only in some situations currently.
+# NOTE: Fails Example 3.5 from textbook (pg 23) as of 3/13/2025.
+func _epsilon_transition(pointer):
+	
+	var queue : Array = []
+	var seen : Dictionary = {}
+	queue.push_back(pointer)
+	seen[pointer] = true
+	
+	# Run until queue is empty
+	while !queue.is_empty():
+		
+		# Poll the front of the queue
+		var epsilon_pointer = queue.pop_front()
+		
+		# Traverse all of its adjacent nodes
+		for epsilon_arrow in epsilon_pointer.get_out_arrows().values():
+			
+			# If the epsilon transition exists in the current transition
+			# and if the adjacent node hasn't been seen yet, then we will
+			# add that adjacent node into the queue and mark it as seen.
+			# NOTE: the second part of the if-statement is necessary to
+			# avoid cycles. 
+			if epsilon in epsilon_arrow.get_transition() and epsilon_arrow.get_end_state() not in seen:
+				seen[epsilon_arrow.get_end_state()] = true
+				_all_pointers[epsilon_arrow.get_end_state()] = true
+				queue.push_back(epsilon_arrow.get_end_state())
+					
 
 func _go_home():
 	SceneSwitcher.switch_scene("res://scenes/main_menu.tscn")
