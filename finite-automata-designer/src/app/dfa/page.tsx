@@ -31,6 +31,18 @@ export default function DFAPage() {
                 className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
         </div>
+
+        {/* Textbox for inputting the alphabet */}
+        <div className="absolute bottom-60 left-4 w-50">
+            <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
+                Alphabet:
+            </label>
+            <input
+                type="text"
+                placeholder="Enter an alphabet..."
+                className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+        </div>
       </main>
       
     );
