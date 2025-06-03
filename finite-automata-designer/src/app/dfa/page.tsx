@@ -11,6 +11,11 @@ export default function DFAPage() {
         <Link href="/" className="absolute bottom-4 left-4 px-6 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
             ← Back
         </Link>
+
+        {/* Run button to run the DFA with the given input string */}
+        <Link href="/" className="absolute bottom-4 right-4 px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
+            Run
+        </Link>
         
         {/* DFA title at the top */}
         <h1 className="relative text-5xl font-bold text-center mt-8 text-black">
