@@ -1,5 +1,5 @@
 'use client';
-
+import FiniteAutomataCanvas from "@/components/Canvas";
 import Link from "next/link";
 
 
@@ -24,6 +24,8 @@ export default function DFAPage() {
             </span>
             <span className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
+
+        <FiniteAutomataCanvas />
 
         {/* Textbox for inputting strings */}
         <div className="absolute bottom-80 left-4 w-50">
