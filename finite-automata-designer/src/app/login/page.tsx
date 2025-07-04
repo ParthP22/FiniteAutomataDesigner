@@ -25,9 +25,12 @@ export default function LoginPage() {
         <span className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
       </h1>
 
+      {/* Just used for debugging to see if user is authenticated */}
       <pre>{JSON.stringify({ session, status }, null, 2)}</pre>
+
       {/* Centered Google sign-in button */}
       <div className="flex-grow flex items-center justify-center">
+        {/* Sign in button */}
         <button
           onClick={() => signIn('google')}
           className="flex items-center space-x-3 px-10 py-5 bg-gray-600 text-2xl text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-400 focus:outline-none focus:ring-4 focus:ring-blue-300"
