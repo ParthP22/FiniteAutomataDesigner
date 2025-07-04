@@ -1,5 +1,6 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -20,9 +21,15 @@ export default function Navbar() {
               />
             )}
             <span className="hidden sm:inline">{session.user?.name}</span>
+            <Link
+              href="/profile"
+              className="px-5 py-2 bg-blue-500 hover:bg-blue-700 rounded transition"
+            >
+              Profile
+            </Link>
             <button
               onClick={() => signOut()}
-              className="ml-4 px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
+              className="px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
             >
               Log out
             </button>
@@ -30,7 +37,7 @@ export default function Navbar() {
         ) : (
           <button
             onClick={() => signIn("google")}
-            className="ml-4 px-5 py-2 bg-blue-500 hover:bg-blue-700 rounded transition"
+            className="px-5 py-2 bg-blue-500 hover:bg-blue-700 rounded transition"
           >
             Log in
           </button>
