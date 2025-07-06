@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
 // Define the structure of a circle (aka state node)
 type Circle = {
@@ -9,59 +9,75 @@ type Circle = {
   radius: number;
 };
 
-export default function FiniteAutomataCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null); // Get a reference to the canvas DOM element
-  const [circles, setCircles] = useState<Circle[]>([]); // Store all drawn circles in state
 
-  // Set canvas dimensions and default circle size
-  const canvasWidth = 800;
-  const canvasHeight = 600;
-  const circleRadius = 30;
+const FiniteAutomataCanvas = forwardRef((props, ref) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
+  const [circles, setCircles] = useState<Circle[]>([]) // Storage of and setting circles
+
+  // Default values for canvas and circle
+  const canvasWidth = 800
+  const canvasHeight = 600
+  const circleRadius = 20
+
+  // Function to clear the canvas
+  const clear = () => {
+    const ctx = canvasRef.current?.getContext('2d')
+    if (ctx) {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+      setCircles([]) // Clear state so it doesn’t redraw old circles
+    }
+  }
+
+  // Expose clear function via ref
+  useImperativeHandle(ref, () => ({
+    clear,
+  }))
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    const ctx = canvas.getContext('2d'); // Get drawing context
-    if (!ctx) return;
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the entire canvas before redrawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Loop through and draw each circle
     circles.forEach(({ x, y, radius }) => {
-      ctx.beginPath(); // Start a new drawing path
-      ctx.arc(x, y, radius, 0, Math.PI * 2); // Draw a full circle at (x, y) with radius
-      ctx.stroke(); // Outline the circle
-    });
-  }, [circles]); // Re-run when `circles` state changes
+      ctx.beginPath()
+      ctx.arc(x, y, radius, 0, Math.PI * 2)
+      ctx.stroke()
+    })
+  }, [circles])
 
-  // Handle user clicks on the canvas
+  // Handle user clicks to draw circles
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    // Get the mouse position relative to the canvas
-    const rect = canvas.getBoundingClientRect(); // Canvas position on screen
-    const x = event.clientX - rect.left; // X inside canvas
-    const y = event.clientY - rect.top;  // Y inside canvas
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
 
-    // Create a new circle at that position
-    const newCircle: Circle = { x, y, radius: circleRadius };
+    
 
-    // Add the new circle to the list of circles (triggers a re-render)
-    setCircles(prev => [...prev, newCircle]);
-  };
+    const newCircle: Circle = { x, y, radius: circleRadius }
+    setCircles(prev => [...prev, newCircle])
+  }
 
-  // Render the canvas
   return (
     <div className="flex justify-center mt-4">
       <canvas
-        ref={canvasRef} // Attach the canvas DOM node to `canvasRef`
+        ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
-        onClick={handleClick} // Register click handler
-        className="border border-gray-400" // Optional styling
+        onClick={handleClick}
+        className="border border-gray-400"
       />
     </div>
-  );
-}
+  )
+})
+
+// Optional display name for debugging
+FiniteAutomataCanvas.displayName = 'FiniteAutomataCanvas'
+
+export default FiniteAutomataCanvas

@@ -1,9 +1,14 @@
 'use client';
 import FiniteAutomataCanvas from "@/components/Canvas";
 import Link from "next/link";
-
+import { useRef } from "react";
 
 export default function DFAPage() {
+    const canvasRef = useRef<{ clear: () => void }>(null);
+
+    const handleClear = () => {
+        canvasRef.current?.clear(); // safe call if the ref is defined
+    };
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col">
@@ -25,7 +30,16 @@ export default function DFAPage() {
             <span className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
 
-        <FiniteAutomataCanvas />
+        <FiniteAutomataCanvas ref={canvasRef}/>
+        <div className="mt-4 flex justify-center">
+            <button
+                type="button"
+                onClick={handleClear}
+                className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-500 transition">
+                    Clear Canvas
+                </button>
+        </div>
+
 
         {/* Textbox for inputting strings */}
         <div className="absolute bottom-80 left-4 w-50">
