@@ -52,16 +52,39 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   // Handle user clicks to draw circles
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
-    if (!canvas) return
-
+    if (!canvas) return;
+    console.log("click")
+    // get x y coords of click
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
 
-    
+    let insideCircle = false;
+    for (const circle of circles) {
+      const distance = Math.sqrt(Math.pow((x - circle.x), 2) + Math.pow((y - circle.y), 2)); // Distance calculation
+      if (distance < circle.radius) {
+        insideCircle = true;
+        break;
+      }
+    };
 
-    const newCircle: Circle = { x, y, radius: circleRadius }
-    setCircles(prev => [...prev, newCircle])
+    if (!insideCircle) {
+      const newCircle: Circle = { x, y, radius: circleRadius }
+      setCircles(prev => [...prev, newCircle])
+    }
+
+
+    
+  }
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return
+    console.log("double click")
+  }
+
+  const handleDrag = (event: React.DragEvent<HTMLCanvasElement>) => {
+    return
   }
 
   return (
@@ -71,6 +94,8 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         width={canvasWidth}
         height={canvasHeight}
         onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onDrag={handleDrag}
         className="border border-gray-400"
       />
     </div>
