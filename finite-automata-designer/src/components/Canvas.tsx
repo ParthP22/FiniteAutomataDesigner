@@ -7,6 +7,7 @@ type Circle = {
   x: number;
   y: number;
   radius: number;
+  color: string;
 };
 
 
@@ -17,7 +18,13 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   // Default values for canvas and circle
   const canvasWidth = 800
   const canvasHeight = 600
-  const circleRadius = 20
+  const circleRadius = 30
+
+  // Circle references
+  const defaultCircleColor = "black"
+  const circleHighlightColor = "blue"
+  let selectedCircleIdx: number | null = null
+
 
   // Function to clear the canvas
   const clear = () => {
@@ -33,58 +40,112 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     clear,
   }))
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    circles.forEach(({ x, y, radius }) => {
-      ctx.beginPath()
-      ctx.arc(x, y, radius, 0, Math.PI * 2)
-      ctx.stroke()
-    })
-  }, [circles])
-
-  // Handle user clicks to draw circles
-  const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
+  // Called inside useEffect and can be called by other methods to redraw the canvas
+  const draw = () => {
+    const canvas = canvasRef.current;
     if (!canvas) return;
-    console.log("click")
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    circles.forEach(({ x, y, radius, color }) => {
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+  };
+
+  // Makes all of the circles black again
+  const clearSelection = () => {
+    circles.forEach(circle => {
+      circle.color = defaultCircleColor;
+    });
+  }
+
+  // Checks if the user clicks inside of a circle
+  const collision = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return false;
+    
     // get x y coords of click
     const rect = canvas.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
 
+    // Collision check
     let insideCircle = false;
-    for (const circle of circles) {
-      const distance = Math.sqrt(Math.pow((x - circle.x), 2) + Math.pow((y - circle.y), 2)); // Distance calculation
-      if (distance < circle.radius) {
+    for (let i = 0; i < circles.length; i++) {
+      const distance = Math.sqrt(Math.pow((x - circles[i].x), 2) + Math.pow((y - circles[i].y), 2)); // Distance calculation
+      if (distance < circles[i].radius) {
         insideCircle = true;
+        selectedCircleIdx = i
         break;
       }
     };
-
-    if (!insideCircle) {
-      const newCircle: Circle = { x, y, radius: circleRadius }
-      setCircles(prev => [...prev, newCircle])
-    }
-
-
-    
+    return insideCircle;
   }
 
+
+  useEffect(() => {
+    draw()
+  }, [circles])
+
+  // Handle user clicks to select circles
+  const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const insideCircle = collision(event);
+
+    // When inside a circle make it blue else make all circles black again
+    if (insideCircle && selectedCircleIdx != null) {
+      clearSelection()
+      circles[selectedCircleIdx].color = circleHighlightColor
+      draw()
+    } else {
+      clearSelection();
+      draw();
+      selectedCircleIdx = null;
+    }
+  }
+
+  // Draw circles on doubleclick
   const handleDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return
-    console.log("double click")
+
+    // get x y coords of click
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+
+    const insideCircle = collision(event);
+
+
+    if (!insideCircle) {
+      clearSelection();
+      const newCircle: Circle = { x, y, radius: circleRadius, color: circleHighlightColor };
+      setCircles(prev => [...prev, newCircle]);
+
+      selectedCircleIdx = circles.length;
+      // console.log(editingCircleID)
+    }
   }
 
-  const handleDrag = (event: React.DragEvent<HTMLCanvasElement>) => {
-    return
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log("dragging");
+    const canvas = canvasRef.current;
+    if (!canvas) return
+    
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    if (selectedCircleIdx) {
+      circles[selectedCircleIdx].x = x;
+      circles[selectedCircleIdx].y = y;
+      draw();
+    }
+    console.log("dragging");
   }
 
   return (
@@ -95,7 +156,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         height={canvasHeight}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
-        onDrag={handleDrag}
+        onMouseDown={handleMouseDown}
         className="border border-gray-400"
       />
     </div>
