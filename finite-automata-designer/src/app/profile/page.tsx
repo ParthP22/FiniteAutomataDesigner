@@ -63,14 +63,14 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Name</label>
-              <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+              <p className="text-gray-900 px-3 py-2">
                 {session?.user?.name || "Not provided"}
               </p>
             </div>
             
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+              <p className="text-gray-900 px-3 py-2">
                 {session?.user?.email || "Not provided"}
               </p>
             </div>
