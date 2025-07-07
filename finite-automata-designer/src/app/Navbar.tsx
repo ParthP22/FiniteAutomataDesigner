@@ -48,12 +48,12 @@ export default function Navbar() {
           </div>
         // Here is the "else" part of the conditional operator
         ) : (
-          <button
-            onClick={() => signIn("google")}
+          <Link
+            href="/login"
             className="px-5 py-2 bg-blue-500 hover:bg-blue-700 rounded transition"
           >
-            Log in
-          </button>
+            Log In
+          </Link>
         )}
 
       </div>
