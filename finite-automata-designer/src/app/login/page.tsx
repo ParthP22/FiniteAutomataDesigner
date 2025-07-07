@@ -26,7 +26,7 @@ export default function LoginPage() {
       </h1>
 
       {/* Just used for debugging to see if user is authenticated */}
-      <pre>{JSON.stringify({ session, status }, null, 2)}</pre>
+      {/* <pre>{JSON.stringify({ session, status }, null, 2)}</pre> */}
 
       {/* Centered Google sign-in button */}
       <div className="flex-grow flex items-center justify-center">
