@@ -38,6 +38,22 @@ export default function DFAPage() {
                 className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-500 transition">
                     Clear Canvas
                 </button>
+                
+        </div>
+        <div className="my-4 flex justify-center text-black">
+            <div className="text-center">
+                <p className="underline font-bold">Instructions</p>
+            <ul className="list-disc text-left">
+                <li><p className="font-semibold inline">Add a state:</p> Double-click on the canvas</li>
+                <li><p className="font-semibold inline">Add an arrow:</p> Shift + Drag the mouse on the canvas</li>
+                <li><p className="font-semibold inline">Move anything:</p> Drag it around</li>
+                <li><p className="font-semibold inline">Delete anything:</p> Click it and press the delete key (not backspace)</li>
+                <li><p className="font-semibold inline">Make accept state:</p> Double-click an existing state</li>
+                <li><p className="font-semibold inline">Type numeric subscript:</p>Put an underscore before the number (ex: "q_0")</li>
+                
+            </ul>
+            </div>
+
         </div>
 
 

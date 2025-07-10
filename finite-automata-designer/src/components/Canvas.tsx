@@ -8,6 +8,7 @@ type Circle = {
   y: number;
   radius: number;
   color: string;
+  isAccept?: boolean
 };
 
 
@@ -50,11 +51,17 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    circles.forEach(({ x, y, radius, color }) => {
+    circles.forEach(({ x, y, radius, color, isAccept }) => {
       ctx.strokeStyle = color;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.stroke();
+      // If an accept state
+      if (isAccept) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius - 5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     });
   };
 
@@ -124,11 +131,17 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     if (!insideCircle) {
       clearSelection();
-      const newCircle: Circle = { x, y, radius: circleRadius, color: circleHighlightColor };
+      const newCircle: Circle = { x, y, radius: circleRadius, color: circleHighlightColor, isAccept: false};
       setCircles(prev => [...prev, newCircle]);
 
       selectedCircleIdx = circles.length;
       // console.log(editingCircleID)
+    } else {
+
+      if (selectedCircleIdx != null ){
+        circles[selectedCircleIdx].isAccept = !circles[selectedCircleIdx].isAccept;
+      }
+      
     }
   }
 
