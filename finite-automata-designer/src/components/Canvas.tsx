@@ -21,11 +21,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const circleRadius = 30
 
   // Circle references
-  const defaultCircleColor = "black"
-  const circleHighlightColor = "blue"
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const defaultCircleColor: string = "black"
+  const circleHighlightColor: string = "blue"
   let selectedCircleIdx: number | null = null
-  let dragging = false;
-  let insideCircle = false;
+  let dragging: boolean = false;
+  let insideCircle: boolean = false;
 
 
   // Function to clear the canvas
@@ -109,6 +110,22 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     }
   }
 
+  const updateDragOffset = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return
+
+    if (insideCircle && selectedCircleIdx != null) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      const circle = circles[selectedCircleIdx];
+      dragOffsetRef.current = {
+        x: mouseX - circle.x,
+        y: mouseY - circle.y
+      };
+    }
+  }
 
   useEffect(() => {
     draw()
@@ -126,15 +143,15 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     // get x y coords of click
     const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+    const mouseX = event.clientX - rect.left
+    const mouseY = event.clientY - rect.top
 
     insideCircle = collision(event);
 
-    // Make the circle add it to list, make it selected
+    // Make the circle add it to list, make it highlighted (i.e. selected)
     if (!insideCircle) {
       clearSelection();
-      const newCircle: Circle = { x, y, radius: circleRadius, color: circleHighlightColor, isAccept: false};
+      const newCircle: Circle = { x: mouseX, y: mouseY, radius: circleRadius, color: circleHighlightColor, isAccept: false};
       setCircles(prev => [...prev, newCircle])
       selectedCircleIdx = circles.length - 1;
     } else {
@@ -153,6 +170,8 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     
     insideCircle = collision(event);
     highlight_circle()
+
+    updateDragOffset(event)
 
     dragging = true
     // console.log("dragging");
@@ -173,14 +192,20 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     insideCircle = collision(event);
     if (dragging && insideCircle) {
       const rect = canvas.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
+      const mouseX = event.clientX - rect.left
+      const mouseY = event.clientY - rect.top
+      
       if (selectedCircleIdx != null) {
-        circles[selectedCircleIdx].x = x;
-        circles[selectedCircleIdx].y = y;
-        draw();
-    }
-    
+        const circle = circles[selectedCircleIdx];
+        // const some_x = x - (x - circle.x);
+        // const some_y = y - (y - circle.y);
+        // console.log("Drag offset X: ", (x - circle.x), "mouse x: ",x, "substraction: ", x - (x - circle.x));
+        // console.log("Drag offset Y: ", (y - circle.y), "mouse y: ",y, "substraction: ", y - (y - circle.y));
+        circle.x = mouseX - dragOffsetRef.current.x;
+        circle.y = mouseY - dragOffsetRef.current.y;
+
+          draw();
+      }
     }
   }
 
