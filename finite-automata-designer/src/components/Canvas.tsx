@@ -11,7 +11,6 @@ type Circle = {
   isAccept?: boolean
 };
 
-
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
   const [circles, setCircles] = useState<Circle[]>([]) // Storage of and setting circles
@@ -26,6 +25,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const circleHighlightColor = "blue"
   let selectedCircleIdx: number | null = null
   let dragging = false;
+  let insideCircle = false;
 
 
   // Function to clear the canvas
@@ -84,28 +84,20 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const y = event.clientY - rect.top
 
     // Collision check
-    let insideCircle = false;
+    insideCircle = false;
     for (let i = 0; i < circles.length; i++) {
       const distance = Math.sqrt(Math.pow((x - circles[i].x), 2) + Math.pow((y - circles[i].y), 2)); // Distance calculation
       if (distance < circles[i].radius) {
         insideCircle = true;
         selectedCircleIdx = i
-        console.log("Index found in collision check",selectedCircleIdx)
+        // console.log("Index found in collision check",selectedCircleIdx)
         break;
       }
     };
     return insideCircle;
   }
 
-
-  useEffect(() => {
-    draw()
-  }, [circles])
-
-  // Handle user clicks to select circles
-  const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const insideCircle = collision(event);
-    // When inside a circle make it blue else make all circles black again
+  const highlight_circle = () => {
     if (insideCircle && selectedCircleIdx != null) {
       clearSelection()
       circles[selectedCircleIdx].color = circleHighlightColor
@@ -115,6 +107,16 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       draw();
       selectedCircleIdx = null;
     }
+  }
+
+
+  useEffect(() => {
+    draw()
+  }, [circles])
+
+
+  // CALLED AFTER MOUSE DOWN AND THEN UP
+  const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
   }
 
   // Draw circles on doubleclick
@@ -127,7 +129,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
 
-    const insideCircle = collision(event);
+    insideCircle = collision(event);
 
     // Make the circle add it to list, make it selected
     if (!insideCircle) {
@@ -149,6 +151,9 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const canvas = canvasRef.current;
     if (!canvas) return
     
+    insideCircle = collision(event);
+    highlight_circle()
+
     dragging = true
     // console.log("dragging");
   }
@@ -163,9 +168,9 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return 
+    if (!canvas) return;
 
-    const insideCircle = collision(event)
+    insideCircle = collision(event);
     if (dragging && insideCircle) {
       const rect = canvas.getBoundingClientRect()
       const x = event.clientX - rect.left
@@ -185,7 +190,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
-        onClick={handleClick}
+        // onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
