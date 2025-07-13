@@ -50,11 +50,24 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
+    
+    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Maintain pixel smoothness
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvasWidth * dpr;
+    canvas.height = canvasHeight * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width = `${canvasWidth}px`;
+    canvas.style.height = `${canvasHeight}px`;
+
+    ctx.save();
+    ctx.translate(0.5, 0.5);
 
     circles.forEach(({ x, y, radius, color, isAccept }) => {
       ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.stroke();
