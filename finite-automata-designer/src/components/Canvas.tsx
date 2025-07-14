@@ -11,6 +11,42 @@ type Circle = {
   isAccept?: boolean
 };
 
+// Line
+type EntryArrow = {
+  type: 'EntryArrow';
+  node: Circle;
+  deltaX: number;
+  deltaY: number;
+  color: string,
+}
+
+type Arrow = {
+  type: 'Arrow';
+  nodeA: Circle;
+  nodeB: Circle;
+  perpendicularPart: number;
+  lineAngleAdjust: number;
+  color: string;
+}
+
+type SelfArrow = {
+  type: 'SelfArrow';
+  node: Circle;
+  anchorAngle: number;
+  color: string;
+}
+
+type TemporaryLink = {
+  type: 'TemporaryLink';
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  color: string;
+}
+
+type FSMObject = Circle | EntryArrow | Arrow | SelfArrow | TemporaryLink;
+
+
+
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
   const [circles, setCircles] = useState<Circle[]>([]) // Circle storage + access
