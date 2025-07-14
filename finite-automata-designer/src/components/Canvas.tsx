@@ -31,16 +31,6 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const defaultCircleColor: string = "black"
   const circleHighlightColor: string = "blue"
 
-  
-
-  // Circle references
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-
-  let selectedCircleIdx: number | null = null
-  let dragging: boolean = false;
-  let insideCircle: boolean = false;
-
-
   // Function to clear the canvas
   const clear = () => {
     const ctx = canvasRef.current?.getContext('2d')
@@ -115,19 +105,6 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     return null;
   }
   
-
-  const highlight_circle = () => {
-    if (insideCircle && selectedCircleIdx != null) {
-      clearSelection()
-      circles[selectedCircleIdx].color = circleHighlightColor
-      draw()
-    } else {
-      clearSelection();
-      draw();
-      selectedCircleIdx = null;
-    }
-  }
-
   const updateDragOffset = (
     event: React.MouseEvent<HTMLCanvasElement>,
     circleIdx: number 
