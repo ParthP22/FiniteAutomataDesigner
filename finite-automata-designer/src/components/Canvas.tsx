@@ -11,14 +11,13 @@ type Circle = {
   isAccept?: boolean
 };
 
-// Line
 type EntryArrow = {
   type: 'EntryArrow';
   node: Circle;
   deltaX: number;
   deltaY: number;
   color: string,
-}
+};
 
 type Arrow = {
   type: 'Arrow';
@@ -27,29 +26,27 @@ type Arrow = {
   perpendicularPart: number;
   lineAngleAdjust: number;
   color: string;
-}
+};
 
 type SelfArrow = {
   type: 'SelfArrow';
   node: Circle;
   anchorAngle: number;
   color: string;
-}
+};
 
 type TemporaryLink = {
   type: 'TemporaryLink';
   from: { x: number; y: number };
   to: { x: number; y: number };
   color: string;
-}
-
-type FSMObject = Circle | EntryArrow | Arrow | SelfArrow | TemporaryLink;
-
+};
 
 
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
   const [circles, setCircles] = useState<Circle[]>([]) // Circle storage + access
+  const [isShiftPressed, setIsShiftPressed] = useState(false); // tracking shift key
   const dragStateRef = useRef<{
     selectedCircleIdx: number | null;
     dragging: boolean;
@@ -67,6 +64,31 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const defaultCircleColor: string = "black"
   const circleHighlightColor: string = "blue"
 
+  useEffect(() => {
+    draw()
+  }, [circles]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Shift') {
+        setIsShiftPressed(true);
+        console.log("shift down");
+      }
+    };
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Shift') {
+        setIsShiftPressed(false);
+        console.log("shift up");
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [])
+
   // Function to clear the canvas
   const clear = () => {
     const ctx = canvasRef.current?.getContext('2d')
@@ -79,7 +101,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   // Expose clear function via ref
   useImperativeHandle(ref, () => ({
     clear,
-  }))
+  }));
 
   // Draw the canvas
   const draw = () => {
@@ -139,7 +161,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       }
     };
     return null;
-  }
+  };
   
   const updateDragOffset = (
     event: React.MouseEvent<HTMLCanvasElement>,
@@ -157,11 +179,9 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       x: mouseX - circle.x,
       y: mouseY - circle.y
     };
-  }
+  };
 
-  useEffect(() => {
-    draw()
-  }, [circles])
+
 
 
   // CALLED AFTER MOUSE DOWN AND THEN UP
@@ -229,12 +249,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       );
     }
     // console.log("dragging");
-  }
+  };
 
   const handleMouseUp = () => {
     dragStateRef.current.dragging = false
     // console.log("not dragging")
-  }
+  };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -258,7 +278,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         )
       )
     }
-  }
+  };
 
   return (
     <div className="flex justify-center mt-4">
@@ -275,9 +295,6 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       />
     </div>
   )
-})
-
-// Optional display name for debugging
-FiniteAutomataCanvas.displayName = 'FiniteAutomataCanvas'
+});
 
 export default FiniteAutomataCanvas
