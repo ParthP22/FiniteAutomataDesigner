@@ -42,3 +42,6 @@ next-env.d.ts
 
 # DynamoDB
 /dynamodb_local_latest
+
+# Cursor Chat Markdown
+cursor_fa_designer
