@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dynamodb": "java -Djava.library.path=./dynamodb_local_latest/DynamoDBLocal_lib -jar ./dynamodb_local_latest/DynamoDBLocal.jar -sharedDb",
+    "dynamodb": "cd dynamodb_local_latest && java -Djava.library.path=./dynamodb_local_latest/DynamoDBLocal_lib -jar ./dynamodb_local_latest/DynamoDBLocal.jar -sharedDb",
     "dev": "next dev",
     "dev:all": "concurrently \"npm run dynamodb\" \"npm run dev\""
   },
