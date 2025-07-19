@@ -229,6 +229,17 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     };
     return null;
   };
+
+  const collisionObj = (mouseX: number, mouseY: number) => {
+    // Circle collision check
+    for (let i = 0; i < circles.length; i++) {
+      if (circles[i].containsPoint(mouseX, mouseY)) {
+        return circles[i]
+      }
+    };
+
+    return null;
+  }
   
   const updateDragOffset = (
     event: React.MouseEvent<HTMLCanvasElement>,
@@ -264,21 +275,32 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    const circleIdx = collision(mouseX, mouseY);
+    const collidedObj = collisionObj(mouseX, mouseY);
 
-    if (circleIdx === null) {
-      setCircles((prev) => [
-        ...prev,
-        createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, ''),
-      ]);
+    if (collidedObj == null) {
+      const newCircle = createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, '');
+      setCircles((prev) => [ ...prev, newCircle ]);
       dragStateRef.current.selectedCircleIdx = circles.length;
-    } else {
+      dragStateRef.current.selectedObj = newCircle;
+    } else if (collidedObj.type == "Circle") {
       setCircles((prev) =>
         prev.map((circle, i) =>
-          i === circleIdx ? { ...circle, isAccept: !circle.isAccept } : circle
+          collidedObj == circle ? { ...circle, isAccept: !circle.isAccept } : circle
         )
       );
     }
+    // if (circleIdx === null) {
+    //   const newCircle = createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, '');
+    //   setCircles((prev) => [ ...prev, newCircle ]);
+    //   dragStateRef.current.selectedCircleIdx = circles.length;
+    //   dragStateRef.current.selectedObj = newCircle;
+    // } else {
+    //   setCircles((prev) =>
+    //     prev.map((circle, i) =>
+    //       i === circleIdx ? { ...circle, isAccept: !circle.isAccept } : circle
+    //     )
+    //   );
+    // }
   };
 
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -290,10 +312,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseY = event.clientY - rect.top;
 
     const circleIdx = collision(mouseX, mouseY);
+    const collidedObj = collisionObj(mouseX, mouseY);
     
     if (circleIdx !== null) {
       dragStateRef.current.selectedCircleIdx = circleIdx;
       dragStateRef.current.dragging = true;
+      dragStateRef.current.selectedObj = collidedObj;
       updateDragOffset(event, circleIdx);
 
       setCircles((prev) =>
@@ -303,6 +327,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       );
     } else {
       dragStateRef.current.selectedCircleIdx = null;
+      dragStateRef.current.selectedObj = null;
       setCircles((prev) => 
         prev.map((circle) => ({ ... circle, color: defaultCircleColor}))
       );
@@ -324,6 +349,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseY = event.clientY - rect.top
     
     const circleIdx = dragStateRef.current.selectedCircleIdx;
+    const collidedObj = dragStateRef.current.selectedObj;
     if (circleIdx !== null && (dragStateRef.current.dragging)) {
       // console.log(circles[circleIdx].type)
       const selectedCircle = circles[circleIdx]
