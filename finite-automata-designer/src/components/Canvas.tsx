@@ -211,11 +211,15 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const collision = (mouseX: number, mouseY: number) => {
     // Collision check
     for (let i = 0; i < circles.length; i++) {
-      const distance = Math.sqrt(
-        Math.pow((mouseX - circles[i].x), 2) + Math.pow((mouseY - circles[i].y), 2)
-      ); // Distance calculation
-      if (distance < circles[i].radius) {
-        return i;
+      // const distance = Math.sqrt(
+      //   Math.pow((mouseX - circles[i].x), 2) + Math.pow((mouseY - circles[i].y), 2)
+      // ); // Distance calculation
+      // if (distance < circles[i].radius) {
+      //   return i;
+      // }
+
+      if (circles[i].containsPoint(mouseX, mouseY)) {
+        return i
       }
     };
     return null;
