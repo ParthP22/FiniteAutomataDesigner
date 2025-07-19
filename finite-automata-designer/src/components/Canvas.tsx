@@ -1,114 +1,10 @@
 'use client';
 
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
-
-// Circle (aka state node)
-
-// Circle (aka state node)
-type Circle = {
-  type: string;
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
-  isAccept?: boolean;
-  text: string;
-  mouseOffsetX: number;
-  mouseOffsetY: number;
-  setMouseStart: (x: number, y: number) => void;
-  setAnchorPoint: (x: number, y: number) => void;
-  closestPointOnCircle: (x: number, y: number) => { x: number; y: number };
-  containsPoint: (x: number, y: number) => boolean;
-  draw: (ctx: CanvasRenderingContext2D) => void;
-};
-
-// Factory function to create a Circle
-const createCircle = (
-  type: string = 'Circle',
-  x: number,
-  y: number,
-  radius: number,
-  color: string,
-  isAccept: boolean = false,
-  text: string = ''
-): Circle => ({
-  type: 'Circle',
-  x,
-  y,
-  radius,
-  color,
-  isAccept,
-  text,
-  mouseOffsetX: 0,
-  mouseOffsetY: 0,
-  setMouseStart: function (x: number, y: number) {
-    this.mouseOffsetX = this.x - x;
-    this.mouseOffsetY = this.y - y;
-  },
-  setAnchorPoint: function (x: number, y: number) {
-    this.x = x + this.mouseOffsetX;
-    this.y = y + this.mouseOffsetY;
-  },
-  
-  closestPointOnCircle: function (x: number, y: number) {
-    const dx = x - this.x;
-    const dy = y - this.y;
-    const scale = Math.sqrt(dx * dx + dy * dy);
-    return {
-      x: this.x + (dx * this.radius) / scale,
-      y: this.y + (dy * this.radius) / scale,
-    };
-  },
-  containsPoint: function (x: number, y: number) {
-    return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < this.radius * this.radius;
-  },
-  draw: function (ctx: CanvasRenderingContext2D) {
-    ctx.strokeStyle = this.color;
-    ctx.fillStyle = this.color;
-    ctx.lineWidth = 1;
-    // Draw circle
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    ctx.stroke();
-    // Draw double circle for accept state
-    if (this.isAccept) {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
-    // Draw text
-    if (this.text) {
-      ctx.font = '20px "Times New Roman", serif';
-      const width = ctx.measureText(this.text).width;
-      ctx.fillText(this.text, this.x - width / 2, this.y + 6);
-    }
-  },
-});
-
-
-type EntryArrow = {
-  type: 'EntryArrow';
-  node: Circle;
-  deltaX: number;
-  deltaY: number;
-  color: string,
-};
-
-type Arrow = {
-  type: 'Arrow';
-  nodeA: Circle;
-  nodeB: Circle;
-  perpendicularPart: number;
-  lineAngleAdjust: number;
-  color: string;
-};
-
-type SelfArrow = {
-  type: 'SelfArrow';
-  node: Circle;
-  anchorAngle: number;
-  color: string;
-};
+import { Circle, createCircle } from './Circle';
+import { EntryArrow, createEntryArrow } from './EntryArrow';
+import { Arrow, createArrow } from './Arrow';
+import { SelfArrow, createSelfArrow } from './SelfArrow';
 
 type TemporaryLink = {
   type: 'TemporaryLink';
@@ -129,11 +25,9 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const dragStateRef = useRef<{
     selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null;
     dragging: boolean;
-    dragOffset: { x: number; y: number };
   }>({
     selectedObj: null,
     dragging: false,
-    dragOffset: { x: 0, y: 0 },
   });
 
   // Default values for canvas and circle
@@ -168,31 +62,34 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     };
   }, [])
 
-  // Function to clear the canvas
-  const clear = () => {
-    const ctx = canvasRef.current?.getContext('2d')
-    if (ctx) {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-      setCircles([]) // Clear state
-    }
-  }
-
   // Expose clear function via ref
   useImperativeHandle(ref, () => ({
     clear,
   }));
 
+  const updateDragOffset = (
+    event: React.MouseEvent<HTMLCanvasElement>,
+    collidedObj: Circle | EntryArrow
+  ) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    if ('setMouseStart' in collidedObj) {
+      collidedObj.setMouseStart(mouseX, mouseY);
+    }
+  };
+
   // Draw the canvas
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     // Maintain pixel smoothness
     const dpr = window.devicePixelRatio || 1;
     canvas.width = canvasWidth * dpr;
@@ -219,21 +116,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     return null;
   }
-  
-  const updateDragOffset = (
-    event: React.MouseEvent<HTMLCanvasElement>,
-    collidedObj: Circle | EntryArrow
-  ) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
 
-    if ('setMouseStart' in collidedObj) {
-      collidedObj.setMouseStart(mouseX, mouseY);
-    }
-  };
 
   // CALLED AFTER MOUSE DOWN AND THEN UP
   // const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -275,8 +158,8 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    const collidedObj = collisionObj(mouseX, mouseY);
 
+    const collidedObj = collisionObj(mouseX, mouseY);
     if (collidedObj !== null && collidedObj.type === 'Circle') {
       const updatedCircle = { ...collidedObj, color: circleHighlightColor };
       updateDragOffset(event, updatedCircle);
@@ -287,14 +170,13 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       );
       // Update references to the circle that was just highlighted
       dragStateRef.current.selectedObj = updatedCircle;
-      dragStateRef.current.dragging = true;
     } else {
       setCircles((prev) =>
         prev.map((circle) => ({ ...circle, color: defaultCircleColor }))
       );
       dragStateRef.current.selectedObj = null;
-      dragStateRef.current.dragging = false;
     }
+    dragStateRef.current.dragging = true;
   };
 
   const handleMouseUp = () => {
@@ -329,6 +211,16 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       );
     }
   };
+
+  // Function to clear the canvas
+  const clear = () => {
+    const ctx = canvasRef.current?.getContext('2d')
+    if (ctx) {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+      setCircles([]) // Clear state
+    }
+  }
+
   return (
     <div className="flex justify-center mt-4">
       <canvas
