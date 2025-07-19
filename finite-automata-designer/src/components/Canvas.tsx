@@ -324,23 +324,36 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseY = event.clientY - rect.top
     
     const circleIdx = dragStateRef.current.selectedCircleIdx;
-    if (dragStateRef.current.dragging) {
-      // if (circleIdx !== null) {
-      //   console.log(circles[circleIdx].type)
-      // }
-      
+    if (circleIdx !== null && (dragStateRef.current.dragging)) {
+      // console.log(circles[circleIdx].type)
+      const selectedCircle = circles[circleIdx]
       setCircles((prev) =>
-        prev.map((circle, i) =>
-          i === circleIdx 
-            ? {
+        prev.map((circle) =>
+          selectedCircle === circle ? {
                 ...circle,
                 x: mouseX - dragStateRef.current.dragOffset.x,
                 y: mouseY - dragStateRef.current.dragOffset.y,
-            } :
-            circle
+            } : circle
         )
       )
     }
+    // if (dragStateRef.current.dragging) {
+    //   if (circleIdx !== null) {
+    //     console.log(circles[circleIdx].type)
+    //   }
+      
+    //   setCircles((prev) =>
+    //     prev.map((circle, i) =>
+    //       i === circleIdx 
+    //         ? {
+    //             ...circle,
+    //             x: mouseX - dragStateRef.current.dragOffset.x,
+    //             y: mouseY - dragStateRef.current.dragOffset.y,
+    //         } :
+    //         circle
+    //     )
+    //   )
+    // }
   };
 
   return (
