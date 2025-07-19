@@ -3,13 +3,85 @@
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
 // Circle (aka state node)
+
+// Circle (aka state node)
 type Circle = {
   x: number;
   y: number;
   radius: number;
   color: string;
-  isAccept?: boolean
+  isAccept?: boolean;
+  text: string;
+  mouseOffsetX: number;
+  mouseOffsetY: number;
+  setMouseStart: (x: number, y: number) => void;
+  setAnchorPoint: (x: number, y: number) => void;
+  closestPointOnCircle: (x: number, y: number) => { x: number; y: number };
+  containsPoint: (x: number, y: number) => boolean;
+  draw: (ctx: CanvasRenderingContext2D) => void;
 };
+
+// Factory function to create a Circle
+const createCircle = (
+  x: number,
+  y: number,
+  radius: number,
+  color: string,
+  isAccept: boolean = false,
+  text: string = ''
+): Circle => ({
+  x,
+  y,
+  radius,
+  color,
+  isAccept,
+  text,
+  mouseOffsetX: 0,
+  mouseOffsetY: 0,
+  setMouseStart: function (x: number, y: number) {
+    this.mouseOffsetX = this.x - x;
+    this.mouseOffsetY = this.y - y;
+  },
+  setAnchorPoint: function (x: number, y: number) {
+    this.x = x + this.mouseOffsetX;
+    this.y = y + this.mouseOffsetY;
+  },
+  
+  closestPointOnCircle: function (x: number, y: number) {
+    const dx = x - this.x;
+    const dy = y - this.y;
+    const scale = Math.sqrt(dx * dx + dy * dy);
+    return {
+      x: this.x + (dx * this.radius) / scale,
+      y: this.y + (dy * this.radius) / scale,
+    };
+  },
+  containsPoint: function (x: number, y: number) {
+    return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < this.radius * this.radius;
+  },
+  draw: function (ctx: CanvasRenderingContext2D) {
+    ctx.strokeStyle = this.color;
+    ctx.fillStyle = this.color;
+    ctx.lineWidth = 1;
+    // Draw circle
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    ctx.stroke();
+    // Draw double circle for accept state
+    if (this.isAccept) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+    // Draw text
+    if (this.text) {
+      ctx.font = '20px "Times New Roman", serif';
+      const width = ctx.measureText(this.text).width;
+      ctx.fillText(this.text, this.x - width / 2, this.y + 6);
+    }
+  },
+});
+
 
 type EntryArrow = {
   type: 'EntryArrow';
@@ -46,6 +118,10 @@ type TemporaryLink = {
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
   const [circles, setCircles] = useState<Circle[]>([]) // Circle storage + access
+  const [selfArrows, setSelfArrows] = useState<SelfArrow[]>([]) // Arrows that start and end at the same node
+  const [entryArrows, setEntryArrows] = useState<EntryArrow[]>([]) // Arrows that signal the entry point into the machine
+  const [arrows, setArrows] = useState<Arrow[]>([]) // Arrows that go from one node to another
+  
   const [isShiftPressed, setIsShiftPressed] = useState(false); // tracking shift key
   const dragStateRef = useRef<{
     selectedCircleIdx: number | null;
@@ -72,13 +148,13 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(true);
-        console.log("shift down");
+        // console.log("shift down");
       }
     };
     const handleKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(false);
-        console.log("shift up");
+        // console.log("shift up");
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -125,29 +201,11 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     ctx.save();
     ctx.translate(0.5, 0.5);
 
-    circles.forEach(({ x, y, radius, color, isAccept }) => {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      if (isAccept) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius - 5, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    });
+    circles.forEach((circle) => circle.draw(ctx));
 
     ctx.restore()
   };
 
-  // Makes all of the circles black again
-  const clearSelection = () => {
-    setCircles((prev) =>
-      prev.map((circle) => ({ ...circle, color: defaultCircleColor}))
-    );
-  };
 
   // Checks if the user clicks inside of a circle
   const collision = (mouseX: number, mouseY: number) => {
@@ -191,31 +249,23 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   // Draw circles on doubleclick
   const handleDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return
+    if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect()
-    const mouseX = event.clientX - rect.left
-    const mouseY = event.clientY - rect.top
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
     const circleIdx = collision(mouseX, mouseY);
 
-    // Make the circle add it to list, make it highlighted (i.e. selected)
     if (circleIdx === null) {
       setCircles((prev) => [
         ...prev,
-        {
-          x: mouseX,
-          y: mouseY,
-          radius: circleRadius,
-          color: circleHighlightColor,
-          isAccept: false,
-        }
+        createCircle(mouseX, mouseY, circleRadius, circleHighlightColor, false, ''),
       ]);
       dragStateRef.current.selectedCircleIdx = circles.length;
     } else {
-      // Toggle accept state
       setCircles((prev) =>
-        prev.map((circle, i) => 
+        prev.map((circle, i) =>
           i === circleIdx ? { ...circle, isAccept: !circle.isAccept } : circle
         )
       );
