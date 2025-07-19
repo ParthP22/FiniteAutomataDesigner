@@ -6,6 +6,7 @@ import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 're
 
 // Circle (aka state node)
 type Circle = {
+  type: string;
   x: number;
   y: number;
   radius: number;
@@ -23,6 +24,7 @@ type Circle = {
 
 // Factory function to create a Circle
 const createCircle = (
+  type: string = 'Circle',
   x: number,
   y: number,
   radius: number,
@@ -30,6 +32,7 @@ const createCircle = (
   isAccept: boolean = false,
   text: string = ''
 ): Circle => ({
+  type: 'Circle',
   x,
   y,
   radius,
@@ -125,10 +128,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const [isShiftPressed, setIsShiftPressed] = useState(false); // tracking shift key
   const dragStateRef = useRef<{
     selectedCircleIdx: number | null;
+    selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null;
     dragging: boolean;
     dragOffset: { x: number; y: number };
   }>({
     selectedCircleIdx: null,
+    selectedObj: null,
     dragging: false,
     dragOffset: { x: 0, y: 0 },
   });
@@ -264,7 +269,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     if (circleIdx === null) {
       setCircles((prev) => [
         ...prev,
-        createCircle(mouseX, mouseY, circleRadius, circleHighlightColor, false, ''),
+        createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, ''),
       ]);
       dragStateRef.current.selectedCircleIdx = circles.length;
     } else {
@@ -320,6 +325,10 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     
     const circleIdx = dragStateRef.current.selectedCircleIdx;
     if (dragStateRef.current.dragging) {
+      // if (circleIdx !== null) {
+      //   console.log(circles[circleIdx].type)
+      // }
+      
       setCircles((prev) =>
         prev.map((circle, i) =>
           i === circleIdx 
