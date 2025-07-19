@@ -127,12 +127,10 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   
   const [isShiftPressed, setIsShiftPressed] = useState(false); // tracking shift key
   const dragStateRef = useRef<{
-    selectedCircleIdx: number | null;
     selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null;
     dragging: boolean;
     dragOffset: { x: number; y: number };
   }>({
-    selectedCircleIdx: null,
     selectedObj: null,
     dragging: false,
     dragOffset: { x: 0, y: 0 },
@@ -211,25 +209,6 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     ctx.restore()
   };
 
-
-  // Checks if the user clicks inside of a circle
-  const collision = (mouseX: number, mouseY: number) => {
-    // Collision check
-    for (let i = 0; i < circles.length; i++) {
-      // const distance = Math.sqrt(
-      //   Math.pow((mouseX - circles[i].x), 2) + Math.pow((mouseY - circles[i].y), 2)
-      // ); // Distance calculation
-      // if (distance < circles[i].radius) {
-      //   return i;
-      // }
-
-      if (circles[i].containsPoint(mouseX, mouseY)) {
-        return i
-      }
-    };
-    return null;
-  };
-
   const collisionObj = (mouseX: number, mouseY: number) => {
     // Circle collision check
     for (let i = 0; i < circles.length; i++) {
@@ -243,24 +222,18 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   
   const updateDragOffset = (
     event: React.MouseEvent<HTMLCanvasElement>,
-    circleIdx: number 
+    collidedObj: Circle | EntryArrow
   ) => {
     const canvas = canvasRef.current;
-    if (!canvas) return
-
+    if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    const circle = circles[circleIdx];
-    dragStateRef.current.dragOffset = {
-      x: mouseX - circle.x,
-      y: mouseY - circle.y
-    };
+    if ('setMouseStart' in collidedObj) {
+      collidedObj.setMouseStart(mouseX, mouseY);
+    }
   };
-
-
-
 
   // CALLED AFTER MOUSE DOWN AND THEN UP
   // const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -279,109 +252,83 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     if (collidedObj == null) {
       const newCircle = createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, '');
-      setCircles((prev) => [ ...prev, newCircle ]);
-      dragStateRef.current.selectedCircleIdx = circles.length;
-      dragStateRef.current.selectedObj = newCircle;
+      setCircles((prev) => { 
+        const updateCircles = [ ...prev, newCircle ]
+        dragStateRef.current.selectedObj = updateCircles[updateCircles.length - 1];
+        return updateCircles;
+      });
     } else if (collidedObj.type == "Circle") {
       setCircles((prev) =>
         prev.map((circle, i) =>
           collidedObj == circle ? { ...circle, isAccept: !circle.isAccept } : circle
         )
       );
+      dragStateRef.current.selectedObj = collidedObj;
     }
-    // if (circleIdx === null) {
-    //   const newCircle = createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, '');
-    //   setCircles((prev) => [ ...prev, newCircle ]);
-    //   dragStateRef.current.selectedCircleIdx = circles.length;
-    //   dragStateRef.current.selectedObj = newCircle;
-    // } else {
-    //   setCircles((prev) =>
-    //     prev.map((circle, i) =>
-    //       i === circleIdx ? { ...circle, isAccept: !circle.isAccept } : circle
-    //     )
-    //   );
-    // }
   };
 
+  // Handle selection and highlighting
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return
-    
+    if (!canvas) return;
+
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-
-    const circleIdx = collision(mouseX, mouseY);
     const collidedObj = collisionObj(mouseX, mouseY);
-    
-    if (circleIdx !== null) {
-      dragStateRef.current.selectedCircleIdx = circleIdx;
-      dragStateRef.current.dragging = true;
-      dragStateRef.current.selectedObj = collidedObj;
-      updateDragOffset(event, circleIdx);
 
+    if (collidedObj !== null && collidedObj.type === 'Circle') {
+      const updatedCircle = { ...collidedObj, color: circleHighlightColor };
+      updateDragOffset(event, updatedCircle);
       setCircles((prev) =>
-        prev.map((circle, i) =>
-          i == circleIdx ? { ...circle, color: circleHighlightColor } : { ...circle, color: defaultCircleColor}
+        prev.map((circle) =>
+          circle === collidedObj ? updatedCircle : { ...circle, color: defaultCircleColor } // Highlights the specific circle
         )
       );
+      // Update references to the circle that was just highlighted
+      dragStateRef.current.selectedObj = updatedCircle;
+      dragStateRef.current.dragging = true;
     } else {
-      dragStateRef.current.selectedCircleIdx = null;
-      dragStateRef.current.selectedObj = null;
-      setCircles((prev) => 
-        prev.map((circle) => ({ ... circle, color: defaultCircleColor}))
+      setCircles((prev) =>
+        prev.map((circle) => ({ ...circle, color: defaultCircleColor }))
       );
+      dragStateRef.current.selectedObj = null;
+      dragStateRef.current.dragging = false;
     }
-    // console.log("dragging");
   };
 
   const handleMouseUp = () => {
-    dragStateRef.current.dragging = false
+    dragStateRef.current.dragging = false;
+    dragStateRef.current.selectedObj = null;
     // console.log("not dragging")
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect()
-    const mouseX = event.clientX - rect.left
-    const mouseY = event.clientY - rect.top
-    
-    const circleIdx = dragStateRef.current.selectedCircleIdx;
-    const collidedObj = dragStateRef.current.selectedObj;
-    if (circleIdx !== null && (dragStateRef.current.dragging)) {
-      // console.log(circles[circleIdx].type)
-      const selectedCircle = circles[circleIdx]
-      setCircles((prev) =>
-        prev.map((circle) =>
-          selectedCircle === circle ? {
-                ...circle,
-                x: mouseX - dragStateRef.current.dragOffset.x,
-                y: mouseY - dragStateRef.current.dragOffset.y,
-            } : circle
-        )
-      )
-    }
-    // if (dragStateRef.current.dragging) {
-    //   if (circleIdx !== null) {
-    //     console.log(circles[circleIdx].type)
-    //   }
-      
-    //   setCircles((prev) =>
-    //     prev.map((circle, i) =>
-    //       i === circleIdx 
-    //         ? {
-    //             ...circle,
-    //             x: mouseX - dragStateRef.current.dragOffset.x,
-    //             y: mouseY - dragStateRef.current.dragOffset.y,
-    //         } :
-    //         circle
-    //     )
-    //   )
-    // }
-  };
 
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    const collidedObj = dragStateRef.current.selectedObj;
+    if (collidedObj !== null && dragStateRef.current.dragging && collidedObj.type === 'Circle') {
+      setCircles((prev) =>
+        prev.map((circle) => {
+          if (circle === collidedObj) {
+            const updatedCircle = {
+              ...circle,
+              x: mouseX + circle.mouseOffsetX,
+              y: mouseY + circle.mouseOffsetY,
+            };
+            dragStateRef.current.selectedObj = updatedCircle;
+            return updatedCircle;
+          }
+          return circle;
+        })
+      );
+    }
+  };
   return (
     <div className="flex justify-center mt-4">
       <canvas
