@@ -8,13 +8,12 @@ import { SelfArrow, createSelfArrow } from './SelfArrow';
 import { TemporaryLink, createTemporaryLink } from './TemporaryLink';
 
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
-  const [circles, setCircles] = useState<Circle[]>([]) // Circle storage + access
-  const [selfArrows, setSelfArrows] = useState<SelfArrow[]>([]) // Arrows that start and end at the same node
-  const [entryArrows, setEntryArrows] = useState<EntryArrow[]>([]) // Arrows that signal the entry point into the machine
-  const [arrows, setArrows] = useState<Arrow[]>([]) // Arrows that go from one node to another
-  
-  const [isShiftPressed, setIsShiftPressed] = useState(false); // tracking shift key
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [circles, setCircles] = useState<Circle[]>([]);
+  const [selfArrows, setSelfArrows] = useState<SelfArrow[]>([]);
+  const [entryArrows, setEntryArrows] = useState<(EntryArrow | TemporaryLink)[]>([]);
+  const [arrows, setArrows] = useState<Arrow[]>([]);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
   const dragStateRef = useRef<{
     selectedObj: Circle | EntryArrow | Arrow | SelfArrow | TemporaryLink | null;
     dragging: boolean;
@@ -25,28 +24,25 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     tempLinkStart: null,
   });
 
-  // Default values for canvas and circle
-  const canvasWidth = 800
-  const canvasHeight = 600
-  const circleRadius = 30
-  const defaultCircleColor: string = "black"
-  const circleHighlightColor: string = "blue"
+  const canvasWidth = 800;
+  const canvasHeight = 600;
+  const circleRadius = 30;
+  const defaultCircleColor: string = "black";
+  const circleHighlightColor: string = "blue";
 
   useEffect(() => {
-    draw()
-  }, [circles]);
+    draw();
+  }, [circles, entryArrows]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(true);
-        // console.log("shift down");
       }
     };
     const handleKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(false);
-        // console.log("shift up");
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -55,9 +51,8 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [])
+  }, []);
 
-  // Expose clear function via ref
   useImperativeHandle(ref, () => ({
     clear,
   }));
@@ -72,20 +67,15 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    if ('setMouseStart' in collidedObj) {
-      collidedObj.setMouseStart(mouseX, mouseY);
-    }
+    collidedObj.setMouseStart(mouseX, mouseY);
   };
 
-  // Draw the canvas
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Maintain pixel smoothness
     const dpr = window.devicePixelRatio || 1;
     canvas.width = canvasWidth * dpr;
     canvas.height = canvasHeight * dpr;
@@ -96,28 +86,28 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     ctx.save();
     ctx.translate(0.5, 0.5);
 
+    entryArrows.forEach((arrow) => {
+      arrow.draw(ctx);
+    });
     circles.forEach((circle) => circle.draw(ctx));
 
-    ctx.restore()
+    ctx.restore();
   };
 
-  const collisionObj = (mouseX: number, mouseY: number) => {
-    // Circle collision check
-    for (let i = 0; i < circles.length; i++) {
-      if (circles[i].containsPoint(mouseX, mouseY)) {
-        return circles[i]
+  const collisionObj = (mouseX: number, mouseY: number): Circle | EntryArrow | null => {
+    for (const circle of circles) {
+      if (circle.containsPoint(mouseX, mouseY)) {
+        return circle;
       }
-    };
-
+    }
+    for (const arrow of entryArrows) {
+      if (arrow instanceof EntryArrow && arrow.containsPoint(mouseX, mouseY)) {
+        return arrow;
+      }
+    }
     return null;
-  }
+  };
 
-
-  // CALLED AFTER MOUSE DOWN AND THEN UP
-  // const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-  // }
-
-  // Draw circles on doubleclick
   const handleDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -129,23 +119,22 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const collidedObj = collisionObj(mouseX, mouseY);
 
     if (collidedObj == null) {
-      const newCircle = createCircle('', mouseX, mouseY, circleRadius, circleHighlightColor, false, '');
-      setCircles((prev) => { 
-        const updateCircles = [ ...prev, newCircle ]
+      const newCircle = createCircle(mouseX, mouseY, circleRadius, circleHighlightColor, false, '');
+      setCircles((prev) => {
+        const updateCircles = [...prev, newCircle];
         dragStateRef.current.selectedObj = updateCircles[updateCircles.length - 1];
         return updateCircles;
       });
-    } else if (collidedObj.type == "Circle") {
+    } else if (collidedObj instanceof Circle) {
       setCircles((prev) =>
-        prev.map((circle, i) =>
-          collidedObj == circle ? { ...circle, isAccept: !circle.isAccept } : circle
+        prev.map((circle) =>
+          circle === collidedObj ? circle.cloneWith({ isAccept: !circle.isAccept }) : circle
         )
       );
       dragStateRef.current.selectedObj = collidedObj;
     }
   };
 
-  // Handle selection and highlighting
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -155,33 +144,78 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseY = event.clientY - rect.top;
 
     const collidedObj = collisionObj(mouseX, mouseY);
-    if (collidedObj !== null && collidedObj.type === 'Circle') {
-      const updatedCircle = { ...collidedObj, color: circleHighlightColor };
+    if (collidedObj instanceof Circle) {
+      const updatedCircle = collidedObj.cloneWith({ color: circleHighlightColor });
       updateDragOffset(event, updatedCircle);
       setCircles((prev) =>
         prev.map((circle) =>
-          circle === collidedObj ? updatedCircle : { ...circle, color: defaultCircleColor } // Highlights the specific circle
+          circle === collidedObj ? updatedCircle : circle.cloneWith({ color: defaultCircleColor })
         )
       );
-      // Update references to the circle that was just highlighted
+      setEntryArrows((prev) =>
+        prev.map((arrow) => arrow.cloneWith({ color: defaultCircleColor }))
+      );
       dragStateRef.current.selectedObj = updatedCircle;
-    } else if (collidedObj === null) {
+      dragStateRef.current.tempLinkStart = null;
+      dragStateRef.current.dragging = true;
+    } else if (collidedObj instanceof EntryArrow) {
+      const updatedArrow = collidedObj.cloneWith({ color: circleHighlightColor });
+      updateDragOffset(event, updatedArrow);
+      setEntryArrows((prev) =>
+        prev.map((arrow) =>
+          arrow === collidedObj ? updatedArrow : arrow.cloneWith({ color: defaultCircleColor })
+        )
+      );
       setCircles((prev) =>
-        prev.map((circle) => ({ ...circle, color: defaultCircleColor }))
+        prev.map((circle) => circle.cloneWith({ color: defaultCircleColor }))
+      );
+      dragStateRef.current.selectedObj = updatedArrow;
+      dragStateRef.current.tempLinkStart = { x: updatedArrow.node.x + updatedArrow.deltaX, y: updatedArrow.node.y + updatedArrow.deltaY };
+      dragStateRef.current.dragging = true;
+    } else if (collidedObj === null && isShiftPressed) {
+      const tempLink = createTemporaryLink({ x: mouseX, y: mouseY }, { x: mouseX, y: mouseY }, defaultCircleColor);
+      setEntryArrows((prev) => [...prev, tempLink]);
+      setCircles((prev) =>
+        prev.map((circle) => circle.cloneWith({ color: defaultCircleColor }))
+      );
+      dragStateRef.current.selectedObj = tempLink;
+      dragStateRef.current.tempLinkStart = { x: mouseX, y: mouseY };
+      dragStateRef.current.dragging = true;
+    } else {
+      setCircles((prev) =>
+        prev.map((circle) => circle.cloneWith({ color: defaultCircleColor }))
+      );
+      setEntryArrows((prev) =>
+        prev.map((arrow) => arrow.cloneWith({ color: defaultCircleColor }))
       );
       dragStateRef.current.selectedObj = null;
-      if (isShiftPressed) {
-        console.log("Shift held and mousedown do something!")
-      }
+      dragStateRef.current.tempLinkStart = null;
+      dragStateRef.current.dragging = false;
     }
-    dragStateRef.current.dragging = true;
-    
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    const collidedObj = collisionObj(mouseX, mouseY);
+    if (dragStateRef.current.tempLinkStart && collidedObj instanceof Circle) {
+      console.log(collidedObj)
+      setEntryArrows((prev) => [
+        ...prev.filter((arrow) => !(arrow instanceof TemporaryLink)),
+        createEntryArrow(collidedObj, dragStateRef.current.tempLinkStart!.x - collidedObj.x, dragStateRef.current.tempLinkStart!.y - collidedObj.y, defaultCircleColor),
+      ]);
+    } else if (dragStateRef.current.tempLinkStart) {
+      setEntryArrows((prev) => prev.filter((arrow) => !(arrow instanceof TemporaryLink)));
+    }
+
     dragStateRef.current.dragging = false;
     dragStateRef.current.selectedObj = null;
-    // console.log("not dragging")
+    dragStateRef.current.tempLinkStart = null;
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -193,32 +227,61 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouseY = event.clientY - rect.top;
 
     const collidedObj = dragStateRef.current.selectedObj;
-    if (collidedObj !== null && dragStateRef.current.dragging && collidedObj.type === 'Circle') {
-      setCircles((prev) =>
-        prev.map((circle) => {
-          if (circle === collidedObj) {
-            const updatedCircle = {
-              ...circle,
-              x: mouseX + circle.mouseOffsetX,
-              y: mouseY + circle.mouseOffsetY,
-            };
-            dragStateRef.current.selectedObj = updatedCircle;
-            return updatedCircle;
-          }
-          return circle;
-        })
-      );
+    if (collidedObj !== null && dragStateRef.current.dragging) {
+      if (collidedObj instanceof Circle) {
+        setCircles((prev) =>
+          prev.map((circle) => {
+            if (circle === collidedObj) {
+              const updatedCircle = circle.cloneWith({
+                x: mouseX + circle.mouseOffsetX,
+                y: mouseY + circle.mouseOffsetY,
+              });
+              dragStateRef.current.selectedObj = updatedCircle;
+              return updatedCircle;
+            }
+            return circle;
+          })
+        );
+      } else if (collidedObj instanceof EntryArrow) {
+        setEntryArrows((prev) =>
+          prev.map((arrow) => {
+            if (arrow === collidedObj) {
+              const updatedArrow = arrow.cloneWith({
+                deltaX: mouseX - arrow.node.x,
+                deltaY: mouseY - arrow.node.y,
+              });
+              dragStateRef.current.selectedObj = updatedArrow;
+              return updatedArrow;
+            }
+            return arrow;
+          })
+        );
+      } else if (collidedObj instanceof TemporaryLink) {
+        setEntryArrows((prev) =>
+          prev.map((arrow) => {
+            if (arrow === collidedObj) {
+              const updatedLink = arrow.cloneWith({
+                to: { x: mouseX, y: mouseY },
+              });
+              dragStateRef.current.selectedObj = updatedLink;
+              return updatedLink;
+            }
+            return arrow;
+          })
+        );
+      }
+      draw();
     }
   };
 
-  // Function to clear the canvas
   const clear = () => {
-    const ctx = canvasRef.current?.getContext('2d')
+    const ctx = canvasRef.current?.getContext('2d');
     if (ctx) {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-      setCircles([]) // Clear state
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      setCircles([]);
+      setEntryArrows([]);
     }
-  }
+  };
 
   return (
     <div className="flex justify-center mt-4">
@@ -226,7 +289,6 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
-        // onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
@@ -234,7 +296,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         className="border border-gray-400"
       />
     </div>
-  )
+  );
 });
 
-export default FiniteAutomataCanvas
+export default FiniteAutomataCanvas;
