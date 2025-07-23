@@ -5,14 +5,7 @@ import { Circle, createCircle } from './Circle';
 import { EntryArrow, createEntryArrow } from './EntryArrow';
 import { Arrow, createArrow } from './Arrow';
 import { SelfArrow, createSelfArrow } from './SelfArrow';
-
-type TemporaryLink = {
-  type: 'TemporaryLink';
-  from: { x: number; y: number };
-  to: { x: number; y: number };
-  color: string;
-};
-
+import { TemporaryLink, createTemporaryLink } from './TemporaryLink';
 
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null) // Canvas ref
@@ -23,11 +16,13 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   
   const [isShiftPressed, setIsShiftPressed] = useState(false); // tracking shift key
   const dragStateRef = useRef<{
-    selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null;
+    selectedObj: Circle | EntryArrow | Arrow | SelfArrow | TemporaryLink | null;
     dragging: boolean;
+    tempLinkStart: { x: number; y: number } | null;
   }>({
     selectedObj: null,
     dragging: false,
+    tempLinkStart: null,
   });
 
   // Default values for canvas and circle
@@ -170,13 +165,17 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       );
       // Update references to the circle that was just highlighted
       dragStateRef.current.selectedObj = updatedCircle;
-    } else {
+    } else if (collidedObj === null) {
       setCircles((prev) =>
         prev.map((circle) => ({ ...circle, color: defaultCircleColor }))
       );
       dragStateRef.current.selectedObj = null;
+      if (isShiftPressed) {
+        console.log("Shift held and mousedown do something!")
+      }
     }
     dragStateRef.current.dragging = true;
+    
   };
 
   const handleMouseUp = () => {
