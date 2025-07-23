@@ -189,7 +189,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         prev.map((arrow) => arrow.cloneWith({ color: defaultCircleColor }))
       );
       dragStateRef.current.selectedObj = null;
-      dragStateRef.current.tempLinkStart = null;
+      // dragStateRef.current.tempLinkStart = null;
       dragStateRef.current.dragging = false;
     }
   };
@@ -205,6 +205,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const collidedObj = collisionObj(mouseX, mouseY);
     if (dragStateRef.current.tempLinkStart && collidedObj instanceof Circle) {
       console.log(collidedObj)
+      console.log(dragStateRef.current.tempLinkStart)
       setEntryArrows((prev) => [
         ...prev.filter((arrow) => !(arrow instanceof TemporaryLink)),
         createEntryArrow(collidedObj, dragStateRef.current.tempLinkStart!.x - collidedObj.x, dragStateRef.current.tempLinkStart!.y - collidedObj.y, defaultCircleColor),
@@ -215,7 +216,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     dragStateRef.current.dragging = false;
     dragStateRef.current.selectedObj = null;
-    dragStateRef.current.tempLinkStart = null;
+    // dragStateRef.current.tempLinkStart = null;
   };
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
