@@ -1,7 +1,6 @@
 import { Circle } from './Circle';
 
 export class SelfArrow {
-  type: 'SelfArrow' = 'SelfArrow';
   node: Circle;
   color: string;
   text: string;

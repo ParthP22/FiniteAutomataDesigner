@@ -1,7 +1,6 @@
 import { Circle } from './Circle';
 
 export class Arrow {
-  type: 'Arrow' = 'Arrow';
   from: Circle;
   to: Circle;
   color: string;

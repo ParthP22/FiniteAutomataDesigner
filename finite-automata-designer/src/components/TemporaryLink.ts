@@ -1,5 +1,4 @@
 export class TemporaryLink {
-  type: 'TemporaryLink' = 'TemporaryLink';
   from: { x: number; y: number };
   to: { x: number; y: number };
   color: string;
