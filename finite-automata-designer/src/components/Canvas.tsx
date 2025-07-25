@@ -6,13 +6,14 @@ import { EntryArrow, createEntryArrow } from './EntryArrow';
 import { Arrow, createArrow } from './Arrow';
 import { SelfArrow, createSelfArrow } from './SelfArrow';
 import { TemporaryLink, createTemporaryLink } from './TemporaryLink';
+import { secureHeapUsed } from 'crypto';
 
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [circles, setCircles] = useState<Circle[]>([]);
   const [arrows, setArrows] = useState<(EntryArrow)[]>([]);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
-  const selectedObj = useRef<Circle | TemporaryLink | Arrow | SelfArrow | EntryArrow>(null);
+  const selectedObj = useRef<Circle | Arrow | SelfArrow | EntryArrow>(null);
   const dragging = useRef<boolean>(false);
   const originalClick = useRef<{
     x: number,
@@ -30,6 +31,15 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   }, [circles, arrows]);
 
   useEffect(() => {
+    const onKeyPress = (event : KeyboardEvent) => {
+      console.log(event.key);
+      if (selectedObj.current !== null) {
+        console.log("not null!")
+      } else {
+        console.log("null!")
+      }
+      
+    }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(true);
@@ -40,9 +50,11 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         setIsShiftPressed(false);
       }
     };
+    window.addEventListener('keypress', onKeyPress);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     return () => {
+      window.removeEventListener('keypress', onKeyPress);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
@@ -140,6 +152,13 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
           selectedObj.current = null;
         }
       }
+    } else {
+      selectedObj.current = null;
+      setCircles((prevCircles) =>
+        prevCircles.map((circle) => 
+          circle.cloneWith({ color: defaultColor })
+        )
+      )
     }
   };
 
@@ -202,9 +221,6 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
           prevCircles.map((circle) => {
             if (circle === collidedObj) {
               collidedObj.setAnchorPoint(mouse.x, mouse.y);
-              // console.log(circle);
-              // const updatedCirc = circle.cloneWith({});
-              // updatedCirc.setAnchorPoint(mouse.x, mouse.y);
               selectedObj.current = collidedObj;
               return collidedObj;
             } 
