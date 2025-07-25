@@ -105,7 +105,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   };
 
   // On left mouse btn down select obj set all other objs to default color, set draggin to true if clicked on not null
-  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const onMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -114,24 +114,31 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     dragging.current = false;
     selectedObj.current = collisionObj(mouse.x, mouse.y);
 
-    if (selectedObj.current instanceof Circle) {
-      const updatedCircle = selectedObj.current.cloneWith({ color: highlight });
-      dragging.current = true;
-      setCircles((prevCircles) =>
-        prevCircles.map((circle) => 
-          circle === selectedObj.current ? updatedCircle : circle.cloneWith({ color: defaultColor })
-        )
-      );
-    } else {
-      setCircles((prevCircles) =>
-        prevCircles.map((circle) => 
-          circle.cloneWith({ color: defaultColor })
-        )
-      )
+    if (selectedObj.current != null) {
+      if (isShiftPressed && selectedObj.current instanceof Circle) {
+        // add self arrow drawing logic
+      } else {
+        dragging.current = true;
+        if (selectedObj.current instanceof Circle) {
+          const updatedCircle = selectedObj.current.cloneWith({ color: highlight });
+          dragging.current = true;
+          setCircles((prevCircles) =>
+            prevCircles.map((circle) => 
+              circle === selectedObj.current ? updatedCircle : circle.cloneWith({ color: defaultColor })
+            )
+          );
+        } else {
+          setCircles((prevCircles) =>
+            prevCircles.map((circle) => 
+              circle.cloneWith({ color: defaultColor })
+            )
+          )
+        }
+      }
     }
   };
 
-  const handleDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const onDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -154,7 +161,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     }
   };
 
-  const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const onMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
     
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -164,7 +171,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     
   };
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const onMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -185,13 +192,13 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
               selectedObj.current = updatedCircle;
               // console.log(mouse);
               return updatedCircle;
+            } else {
+              return circle;
             }
-            return circle;
           })
         );
       }
     }
-    draw();
   };
 
   const clear = () => {
@@ -209,10 +216,10 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
-        onDoubleClick={handleDoubleClick}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
+        onDoubleClick={onDoubleClick}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
         className="border border-gray-400"
       />
     </div>
