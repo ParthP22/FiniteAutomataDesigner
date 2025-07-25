@@ -112,20 +112,26 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouse = relativeMousePos(event);
     originalClick.current = mouse;
     dragging.current = false;
-    selectedObj.current = collisionObj(mouse.x, mouse.y);
-
-    if (selectedObj.current != null) {
-      if (isShiftPressed && selectedObj.current instanceof Circle) {
+    const collidedObj = selectedObj.current = collisionObj(mouse.x, mouse.y);
+    if (collidedObj != null) {
+      if (isShiftPressed && collidedObj instanceof Circle) {
         // add self arrow drawing logic
       } else {
         dragging.current = true;
-        if (selectedObj.current instanceof Circle) {
-          const updatedCircle = selectedObj.current.cloneWith({ color: highlight });
+        if (collidedObj instanceof Circle) {
+          const updatedCircle = collidedObj.cloneWith({ color: highlight });
           dragging.current = true;
           setCircles((prevCircles) =>
-            prevCircles.map((circle) => 
-              circle === selectedObj.current ? updatedCircle : circle.cloneWith({ color: defaultColor })
-            )
+            prevCircles.map((circle) => {
+              if (circle === collidedObj) {
+                selectedObj.current = updatedCircle;
+                return updatedCircle;
+              }
+              return circle.cloneWith({ color: defaultColor })
+
+            })
+              // circle === collidedObj ? updatedCircle : circle.cloneWith({ color: defaultColor })
+            
           );
         } else {
           setCircles((prevCircles) =>
@@ -133,31 +139,47 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
               circle.cloneWith({ color: defaultColor })
             )
           )
+          selectedObj.current = null;
         }
       }
     }
   };
+
 
   const onDoubleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const mouse = relativeMousePos(event);
-    selectedObj.current = collisionObj(mouse.x, mouse.y);
+    const clickedObj = collisionObj(mouse.x, mouse.y);
 
-    if (selectedObj.current == null) {
+    if (clickedObj == null) {
+      // Make the new circle
       const newCircle = createCircle(mouse.x, mouse.y, circleRadius, highlight, false, '');
-      selectedObj.current = newCircle;
+
       setCircles((prev) => {
-        const updateCircles = [...prev, newCircle];
+        // Set all prev circles to black (default color)
+        const resetCircles = prev.map((circle) =>
+          circle.cloneWith({ color: defaultColor })
+        );
+        // Add the new circle to the list
+        const updateCircles = [...resetCircles, newCircle];
         return updateCircles;
       });
-    } else if (selectedObj.current instanceof Circle) {
+      selectedObj.current = newCircle;
+    } else if (clickedObj instanceof Circle) {
+      console.log("Making double circle");
+      const updatedCircle = clickedObj.cloneWith({ isAccept: !clickedObj.isAccept })
       setCircles((prev) =>
-        prev.map((circle) =>
-          circle === selectedObj.current ? circle.cloneWith({ isAccept: !circle.isAccept, color: highlight }) : circle
-        )
+        prev.map((circle) => {
+          if (circle === clickedObj) {
+            console.log("Actually performing the circle changes")
+            return updatedCircle;
+          }
+          return circle;
+        })
       );
+      selectedObj.current = updatedCircle;
     }
   };
 
@@ -176,25 +198,21 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     if (!canvas) return;
 
     const mouse = relativeMousePos(event);
-    const collidedObj =  collisionObj(mouse.x, mouse.y);
+    const collidedObj = selectedObj.current;
 
     if (dragging.current && selectedObj.current) {
-      console.log("Dragging: ", selectedObj.current);
       if (selectedObj.current instanceof Circle) {
         setCircles((prevCircles) => 
           prevCircles.map((circle) => {
             if (circle === collidedObj) {
-              console.log("inside the deeper if iff")
               const updatedCircle = circle.cloneWith({
                 x: mouse.x + circle.mouseOffsetX,
                 y: mouse.y + circle.mouseOffsetY,
               });
               selectedObj.current = updatedCircle;
-              // console.log(mouse);
               return updatedCircle;
-            } else {
-              return circle;
-            }
+            } 
+            return circle;
           })
         );
       }
