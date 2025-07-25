@@ -32,13 +32,18 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
   useEffect(() => {
     const onKeyPress = (event : KeyboardEvent) => {
-      console.log(event.key);
+      const key = event.key;
       if (selectedObj.current !== null) {
-        console.log("not null!")
-      } else {
-        console.log("null!")
+        if (selectedObj.current instanceof Circle) {
+          selectedObj.current.text += key;
+          const updateCirc = selectedObj.current;
+          setCircles((prevCircles) =>
+            prevCircles.map((circle) =>
+              circle === selectedObj.current ? updateCirc : circle
+            )
+          )
+        }
       }
-      
     }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
