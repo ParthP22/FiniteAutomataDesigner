@@ -11,7 +11,9 @@ export class SelfArrow {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    // Placeholder for drawing logic
+    ctx.strokeStyle = this.color;
+    ctx.fillStyle = this.color;
+    ctx.lineWidth = 1;
   }
 
   containsPoint(x: number, y: number): boolean {
@@ -24,6 +26,7 @@ export class SelfArrow {
       props.color ?? this.color
     );
   }
+    
 }
 
 export function createSelfArrow(node: Circle, color: string): SelfArrow {
