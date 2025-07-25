@@ -19,6 +19,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     x: number,
     y: number
   }>(null);
+  const tempArrow = useRef<TemporaryLink>(null);
 
   const canvasWidth = 800;
   const canvasHeight = 600;
@@ -49,8 +50,11 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
             circle === selectedObj.current ? currentCircle : circle
           )
         );
+        selectedObj.current = currentCircle;
       }
+      
     };
+    
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(false);
@@ -86,9 +90,11 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     ctx.save();
     ctx.translate(0.5, 0.5);
 
+    if (tempArrow.current) {
+      tempArrow.current.draw(ctx);
+    }
 
     circles.forEach((circle) => circle.draw(ctx));
-
     arrows.forEach((arrow) => arrow.draw(ctx));
 
     ctx.restore();
@@ -159,12 +165,25 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         }
       }
     } else {
-      selectedObj.current = null;
       setCircles((prevCircles) =>
         prevCircles.map((circle) => 
           circle.cloneWith({ color: defaultColor })
         )
       )
+      selectedObj.current = null;
+      originalClick.current = {
+        x: mouse.x,
+        y: mouse.y
+      }
+      // Temporary arrow logic purely cosmetic for user feedback
+      if (isShiftPressed) {
+        dragging.current = true;
+        tempArrow.current = createTemporaryLink(
+          originalClick.current,
+          originalClick.current,
+          defaultColor
+        )
+      }
     }
   };
 
@@ -211,7 +230,8 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     const mouse = relativeMousePos(event);
     dragging.current = false;
-    
+    tempArrow.current = null;
+    draw();
   };
 
   const onMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -220,8 +240,14 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     const mouse = relativeMousePos(event);
     const collidedObj = selectedObj.current;
-
-    if (dragging.current && selectedObj.current) {
+    if (dragging.current && isShiftPressed && tempArrow.current && originalClick.current) {
+      tempArrow.current = tempArrow.current?.cloneWith({
+        from: { x: originalClick.current.x, y: originalClick.current.y },
+        to: { x: mouse.x, y: mouse.y}
+      })
+      draw(); // Need to manually call for a change on a ref and not state
+    }
+    else if (dragging.current && selectedObj.current) {
       if (selectedObj.current instanceof Circle) {
         setCircles((prevCircles) => 
           prevCircles.map((circle) => {
