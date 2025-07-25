@@ -104,7 +104,7 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     return null;
   };
 
-  // On left mouse btn down select obj set all other objs to default color, set draggin to true if clicked on not null
+  // Select obj set all other objs to default color, set draggin to true if clicked on not null
   const onMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -112,8 +112,8 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     const mouse = relativeMousePos(event);
     originalClick.current = mouse;
     dragging.current = false;
-    const collidedObj = selectedObj.current = collisionObj(mouse.x, mouse.y);
-    if (collidedObj != null) {
+    const collidedObj = collisionObj(mouse.x, mouse.y);
+    if (collidedObj !== null) {
       if (isShiftPressed && collidedObj instanceof Circle) {
         // add self arrow drawing logic
       } else {
@@ -124,14 +124,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
           setCircles((prevCircles) =>
             prevCircles.map((circle) => {
               if (circle === collidedObj) {
+                updatedCircle.setMouseStart(mouse.x, mouse.y);
                 selectedObj.current = updatedCircle;
                 return updatedCircle;
               }
               return circle.cloneWith({ color: defaultColor })
-
-            })
-              // circle === collidedObj ? updatedCircle : circle.cloneWith({ color: defaultColor })
-            
+            })            
           );
         } else {
           setCircles((prevCircles) =>
@@ -168,12 +166,10 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
       });
       selectedObj.current = newCircle;
     } else if (clickedObj instanceof Circle) {
-      console.log("Making double circle");
       const updatedCircle = clickedObj.cloneWith({ isAccept: !clickedObj.isAccept })
       setCircles((prev) =>
         prev.map((circle) => {
           if (circle === clickedObj) {
-            console.log("Actually performing the circle changes")
             return updatedCircle;
           }
           return circle;
@@ -205,12 +201,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         setCircles((prevCircles) => 
           prevCircles.map((circle) => {
             if (circle === collidedObj) {
-              const updatedCircle = circle.cloneWith({
-                x: mouse.x + circle.mouseOffsetX,
-                y: mouse.y + circle.mouseOffsetY,
-              });
-              selectedObj.current = updatedCircle;
-              return updatedCircle;
+              collidedObj.setAnchorPoint(mouse.x, mouse.y);
+              // console.log(circle);
+              // const updatedCirc = circle.cloneWith({});
+              // updatedCirc.setAnchorPoint(mouse.x, mouse.y);
+              selectedObj.current = collidedObj;
+              return collidedObj;
             } 
             return circle;
           })
