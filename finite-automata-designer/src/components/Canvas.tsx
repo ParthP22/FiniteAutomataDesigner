@@ -31,37 +31,38 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
   }, [circles, arrows]);
 
   useEffect(() => {
-    const onKeyPress = (event : KeyboardEvent) => {
-      const key = event.key;
-      if (selectedObj.current !== null) {
-        if (selectedObj.current instanceof Circle) {
-          selectedObj.current.text += key;
-          const updateCirc = selectedObj.current;
-          setCircles((prevCircles) =>
-            prevCircles.map((circle) =>
-              circle === selectedObj.current ? updateCirc : circle
-            )
-          )
-        }
-      }
-    }
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key
       if (event.key === 'Shift') {
         setIsShiftPressed(true);
       }
+      if (selectedObj.current !== null && selectedObj.current instanceof Circle) {
+        const currentCircle = selectedObj.current;
+        if (key === 'Backspace') {
+          event.preventDefault(); // prevent browser from navigating back (apparently...)
+          currentCircle.text = currentCircle.text.slice(0, -1);
+        } else if (key.length === 1) {
+          currentCircle.text += key;
+        }
+        setCircles((prevCircles) =>
+          prevCircles.map((circle) =>
+            circle === selectedObj.current ? currentCircle : circle
+          )
+        );
+      }
     };
-    const handleKeyUp = (event: KeyboardEvent) => {
+    const onKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'Shift') {
         setIsShiftPressed(false);
       }
     };
-    window.addEventListener('keypress', onKeyPress);
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
     return () => {
-      window.removeEventListener('keypress', onKeyPress);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
     };
   }, []);
 
