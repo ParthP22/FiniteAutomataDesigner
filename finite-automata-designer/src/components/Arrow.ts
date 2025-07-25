@@ -5,11 +5,13 @@ export class Arrow {
   from: Circle;
   to: Circle;
   color: string;
+  text: string;
 
   constructor(from: Circle, to: Circle, color: string) {
     this.from = from;
     this.to = to;
     this.color = color;
+    this.text = "";
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

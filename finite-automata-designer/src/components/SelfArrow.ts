@@ -4,10 +4,12 @@ export class SelfArrow {
   type: 'SelfArrow' = 'SelfArrow';
   node: Circle;
   color: string;
+  text: string;
 
   constructor(node: Circle, color: string) {
     this.node = node;
     this.color = color;
+    this.text = "";
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

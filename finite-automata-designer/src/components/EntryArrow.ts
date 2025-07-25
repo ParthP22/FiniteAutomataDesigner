@@ -1,17 +1,18 @@
 import { Circle } from './Circle';
 
 export class EntryArrow {
-  type: 'EntryArrow' = 'EntryArrow';
   node: Circle;
   deltaX: number;
   deltaY: number;
   color: string;
+  text: string;
 
   constructor(node: Circle, deltaX: number, deltaY: number, color: string) {
     this.node = node;
     this.deltaX = deltaX;
     this.deltaY = deltaY;
     this.color = color;
+    this.text = "";
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
