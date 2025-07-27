@@ -4,10 +4,11 @@ var base = 'black';
 var dragging = false;
 var shiftPressed = false;
 var startClick = null;
+var tempArrow = null;
 var selectedObj = null;
 var circles = [];
 var arrows = [];
-var snapToPadding = 6; // pixels
+var snapToPadding = 10; // pixels
 function drawText(ctx, originalText, x, y, angeOrNull) {
     ctx.font = '20px Times New Roman', 'serif';
     var width = ctx.measureText(originalText).width;
@@ -24,6 +25,15 @@ function drawText(ctx, originalText, x, y, angeOrNull) {
     x = Math.round(x);
     y = Math.round(y);
     ctx.fillText(originalText, x, y + 6);
+}
+function drawArrow(ctx, x, y, angle) {
+    var dx = Math.cos(angle);
+    var dy = Math.sin(angle);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
+    ctx.lineTo(x - 10 * dx - 5 * dy, y - 8 * dy + 5 * dx);
+    ctx.fill();
 }
 var Circle = /** @class */ (function () {
     function Circle(x, y) {
@@ -67,6 +77,20 @@ var Circle = /** @class */ (function () {
     };
     return Circle;
 }());
+var TemporaryArrow = /** @class */ (function () {
+    function TemporaryArrow(startPoint, endPoint) {
+        this.startPoint = startPoint;
+        this.endPoint = endPoint;
+    }
+    TemporaryArrow.prototype.draw = function (ctx) {
+        ctx.beginPath();
+        ctx.moveTo(this.endPoint.x, this.endPoint.y);
+        ctx.lineTo(this.startPoint.x, this.startPoint.y);
+        ctx.stroke();
+        drawArrow(ctx, this.endPoint.x, this.endPoint.y, Math.atan2(this.endPoint.y - this.startPoint.y, this.endPoint.x - this.startPoint.x));
+    };
+    return TemporaryArrow;
+}());
 function setupDfaCanvas(canvas) {
     var ctx = canvas.getContext('2d');
     if (!ctx)
@@ -82,13 +106,29 @@ function setupDfaCanvas(canvas) {
             ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? highlight : base;
             circles[circle].draw(ctx);
         }
+        if (tempArrow != null) {
+            ctx.lineWidth = 1;
+            ctx.fillStyle = ctx.strokeStyle = base;
+            tempArrow.draw(ctx);
+        }
     }
-    // /* Event Handlers */
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Shift') {
+            shiftPressed = true;
+        }
+    });
+    document.addEventListener('keyup', function (event) {
+        if (event.key === 'Shift') {
+            shiftPressed = false;
+        }
+    });
+    /* Event Handlers */
     canvas.addEventListener('mousedown', function (event) {
         var mouse = getMousePos(event);
         selectedObj = mouseCollision(mouse.x, mouse.y);
         dragging = false;
         startClick = mouse;
+        console.log(startClick);
         if (selectedObj != null) {
             if (shiftPressed && selectedObj instanceof Circle) {
                 // self link logic
@@ -102,6 +142,7 @@ function setupDfaCanvas(canvas) {
         }
         else if (shiftPressed) {
             // cosmetic arrow logic for users
+            tempArrow = new TemporaryArrow(mouse, mouse);
         }
         draw();
     });
@@ -120,19 +161,30 @@ function setupDfaCanvas(canvas) {
     });
     canvas.addEventListener('mousemove', function (event) {
         var mouse = getMousePos(event);
+        if (tempArrow != null) {
+            // Handle snapping the arrow to circles (later)
+            if (startClick != null) {
+                console.log(startClick);
+                tempArrow = new TemporaryArrow(startClick, mouse);
+                draw();
+            }
+        }
         if (dragging) {
             selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.setAnchorPoint(mouse.x, mouse.y);
             if (selectedObj instanceof Circle) {
-                snapNode(selectedObj);
+                snapAlignCircle(selectedObj);
             }
             draw();
         }
     });
     canvas.addEventListener('mouseup', function (event) {
         dragging = false;
+        if (tempArrow != null) {
+            tempArrow = null;
+        }
         draw();
     });
-    function snapNode(circle) {
+    function snapAlignCircle(circle) {
         for (var circ = 0; circ < circles.length; circ++) {
             if (circles[circ] == circle)
                 continue;
@@ -144,7 +196,7 @@ function setupDfaCanvas(canvas) {
             }
         }
     }
-    /* ---------- helpers ----------- */
+    /* Helpers */
     var getMousePos = function (event) {
         var rect = canvas.getBoundingClientRect();
         return { x: event.clientX - rect.left, y: event.clientY - rect.top };

@@ -3,11 +3,12 @@ var highlight = 'blue';
 var base = 'black';
 var dragging = false;
 var shiftPressed = false;
-var startClick = null;
+var startClick: {x: number, y: number} | null = null;
+var tempArrow: TemporaryArrow | null = null;
 var selectedObj: Circle | null = null;
 var circles: Circle[] = [];
 var arrows = [];
-var snapToPadding = 6; // pixels
+var snapToPadding = 10; // pixels
 
 function drawText(
   ctx: CanvasRenderingContext2D,
@@ -32,6 +33,16 @@ function drawText(
   		x = Math.round(x);
 		y = Math.round(y);
 		ctx.fillText(originalText, x, y + 6);
+}
+
+function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number) {
+  var dx = Math.cos(angle);
+  var dy = Math.sin(angle);
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
+  ctx.lineTo(x - 10 * dx - 5 *dy, y - 8 * dy + 5 * dx);
+  ctx.fill();
 }
 
 class Circle {
@@ -89,6 +100,31 @@ class Circle {
   }
 }
 
+class TemporaryArrow {
+  startPoint: {x: number, y: number};
+  endPoint: {x: number, y: number};
+
+
+  constructor(startPoint: {x: number, y: number}, endPoint: {x: number, y: number}) {
+    this.startPoint = startPoint;
+    this.endPoint = endPoint;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.moveTo(this.endPoint.x, this.endPoint.y);
+    ctx.lineTo(this.startPoint.x, this.startPoint.y);
+    ctx.stroke();
+
+    drawArrow(
+      ctx, 
+      this.endPoint.x, 
+      this.endPoint.y, 
+      Math.atan2(this.endPoint.y - this.startPoint.y, this.endPoint.x - this.startPoint.x)
+    );
+  }
+}
+
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -105,13 +141,34 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       circles[circle].draw(ctx);
     }
 
+    if (tempArrow != null) {
+      ctx.lineWidth = 1;
+      ctx.fillStyle = ctx.strokeStyle = base;
+      tempArrow.draw(ctx);
+    }
   }
-  // /* Event Handlers */
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Shift') {
+      shiftPressed = true;
+
+    }
+  });
+
+  document.addEventListener('keyup', (event) => {
+    if (event.key === 'Shift') {
+      shiftPressed = false;
+    }
+  })
+
+
+  /* Event Handlers */
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
     var mouse = getMousePos(event)
     selectedObj = mouseCollision(mouse.x, mouse.y);
     dragging = false;
     startClick = mouse;
+    console.log(startClick);
 
     if (selectedObj != null) {
       if (shiftPressed && selectedObj instanceof Circle) {
@@ -125,6 +182,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       }
     } else if (shiftPressed) {
       // cosmetic arrow logic for users
+      tempArrow = new TemporaryArrow(mouse, mouse);
     }
 
     draw();
@@ -149,10 +207,19 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   canvas.addEventListener('mousemove', (event) => {
     var mouse = getMousePos(event);
 
+    if (tempArrow != null) {
+      // Handle snapping the arrow to circles (later)
+      if (startClick != null) {
+        console.log(startClick);
+        tempArrow = new TemporaryArrow(startClick, mouse);
+        draw();
+      }
+    }
+
     if (dragging) {
       selectedObj?.setAnchorPoint(mouse.x, mouse.y);
       if (selectedObj instanceof Circle) {
-        snapNode(selectedObj);
+        snapAlignCircle(selectedObj);
       }
       draw();
     }
@@ -160,11 +227,16 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   canvas.addEventListener('mouseup', (event) =>{
     dragging = false;
+
+    if (tempArrow != null) {
+      tempArrow = null;
+    }
+
     draw();
   });
 
 
-  function snapNode(circle: Circle) {
+  function snapAlignCircle(circle: Circle) {
     for(var circ = 0; circ < circles.length; circ++) {
       if(circles[circ] == circle) continue;
 
@@ -178,7 +250,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     }
   }
 
-  /* ---------- helpers ----------- */
+  /* Helpers */
   const getMousePos = (event: MouseEvent) => {
     const rect = canvas.getBoundingClientRect();
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
