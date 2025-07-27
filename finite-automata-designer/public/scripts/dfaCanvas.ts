@@ -1,4 +1,9 @@
 var nodeRadius = 30;
+var highlight = 'blue';
+var base = 'black';
+var dragging = false;
+var shiftPressed = false;
+var startClick = null;
 var selectedObj: Circle | null = null;
 var circles: Circle[] = [];
 var arrows = [];
@@ -83,33 +88,51 @@ class Circle {
   }
 }
 
-
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
   function draw() {
-    ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    ctx?.save();
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
     // ctx?.translate(0.5, 0.5);
 
     for (var circle = 0; circle < circles.length; circle++) {
-      if (ctx) circles[circle].draw(ctx);
+      ctx.lineWidth= 1;
+      ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? highlight : base;
+      circles[circle].draw(ctx);
     }
 
   }
   // /* Event Handlers */
-  //   canvas.addEventListener('mousedown', (ev: MouseEvent) => {
-  //   isDragging = true;
-  //   dragStart = getMousePos(ev);
-  //   console.log("mouse down called")
-  //   draw();
-  // });
+  canvas.addEventListener('mousedown', (event: MouseEvent) => {
+    var mouse = getMousePos(event)
+    selectedObj = mouseCollision(mouse.x, mouse.y);
+    dragging = false;
+    startClick = mouse;
+
+    if (selectedObj != null) {
+      if (shiftPressed && selectedObj instanceof Circle) {
+        // self link logic
+      } else {
+        dragging = true;
+        // if (selectedObj.setAnchorPoint) {
+          
+        // }
+        selectedObj.setMouseStart(mouse.x, mouse.y);
+      }
+    } else if (shiftPressed) {
+      // cosmetic arrow logic for users
+    }
+
+    draw();
+  });
 
 
-  canvas.addEventListener('dblclick', (ev) => {
-    var mouse = getMousePos(ev);
-    selectedObj = selectObject(mouse.x, mouse.y);
+  canvas.addEventListener('dblclick', (event) => {
+    var mouse = getMousePos(event);
+    selectedObj = mouseCollision(mouse.x, mouse.y);
 
     if (selectedObj == null) {
       selectedObj = new Circle(mouse.x, mouse.y);
@@ -138,15 +161,14 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   // let dragStart = { x: 0, y: 0 };
 
   /* ---------- helpers ----------- */
-  const getMousePos = (ev: MouseEvent) => {
+  const getMousePos = (event: MouseEvent) => {
     const rect = canvas.getBoundingClientRect();
-    return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   };
 
-  function selectObject(x: number, y: number) {
+  function mouseCollision(x: number, y: number) {
     for(var circ = 0; circ < circles.length; circ++) {
       if(circles[circ].containsPoint(x, y)) {
-        console.log("hit!");
         return circles[circ];
       }
     }
