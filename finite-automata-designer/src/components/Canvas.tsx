@@ -6,7 +6,6 @@ import { EntryArrow, createEntryArrow } from './EntryArrow';
 import { Arrow, createArrow } from './Arrow';
 import { SelfArrow, createSelfArrow } from './SelfArrow';
 import { TemporaryLink, createTemporaryLink } from './TemporaryLink';
-import { secureHeapUsed } from 'crypto';
 
 const FiniteAutomataCanvas = forwardRef((props, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -134,12 +133,12 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
     if (!canvas) return;
     
     const mouse = relativeMousePos(event);
-    originalClick.current = mouse;
     dragging.current = false;
     const collidedObj = collisionObj(mouse.x, mouse.y);
     if (collidedObj !== null) {
       if (isShiftPressed && collidedObj instanceof Circle) {
         // add self arrow drawing logic
+        dragging.current = false;
       } else {
         dragging.current = true;
         if (collidedObj instanceof Circle) {
@@ -171,18 +170,11 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
         )
       )
       selectedObj.current = null;
-      originalClick.current = {
-        x: mouse.x,
-        y: mouse.y
-      }
       // Temporary arrow logic purely cosmetic for user feedback
       if (isShiftPressed) {
+        originalClick.current = mouse;
         dragging.current = true;
-        tempArrow.current = createTemporaryLink(
-          originalClick.current,
-          originalClick.current,
-          defaultColor
-        )
+        tempArrow.current = createTemporaryLink(mouse, mouse, defaultColor);
       }
     }
   };
@@ -240,10 +232,11 @@ const FiniteAutomataCanvas = forwardRef((props, ref) => {
 
     const mouse = relativeMousePos(event);
     const collidedObj = selectedObj.current;
-    if (dragging.current && isShiftPressed && tempArrow.current && originalClick.current) {
+    console.log(originalClick.current)
+    if (isShiftPressed && tempArrow.current && originalClick.current) {
       tempArrow.current = tempArrow.current?.cloneWith({
         from: { x: originalClick.current.x, y: originalClick.current.y },
-        to: { x: mouse.x, y: mouse.y}
+        to: mouse
       })
       draw(); // Need to manually call for a change on a ref and not state
     }
