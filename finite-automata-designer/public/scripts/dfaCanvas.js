@@ -7,6 +7,7 @@ var startClick = null;
 var selectedObj = null;
 var circles = [];
 var arrows = [];
+var snapToPadding = 6; // pixels
 function drawText(ctx, originalText, x, y, angeOrNull) {
     ctx.font = '20px Times New Roman', 'serif';
     var width = ctx.measureText(originalText).width;
@@ -117,19 +118,32 @@ function setupDfaCanvas(canvas) {
             draw();
         }
     });
-    // canvas.addEventListener('mousemove', (ev) => {
-    //   if (!isDragging) return;
-    //   const { x, y } = getMousePos(ev);
-    //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //   ctx.beginPath();
-    //   ctx.moveTo(dragStart.x, dragStart.y);
-    //   ctx.lineTo(x, y);
-    //   ctx.stroke();
-    // });
-    // canvas.addEventListener('mouseup', () => (isDragging = false));
-    // /* ---------- example state ----------- */
-    // let isDragging = false;
-    // let dragStart = { x: 0, y: 0 };
+    canvas.addEventListener('mousemove', function (event) {
+        var mouse = getMousePos(event);
+        if (dragging) {
+            selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.setAnchorPoint(mouse.x, mouse.y);
+            if (selectedObj instanceof Circle) {
+                snapNode(selectedObj);
+            }
+            draw();
+        }
+    });
+    canvas.addEventListener('mouseup', function (event) {
+        dragging = false;
+        draw();
+    });
+    function snapNode(circle) {
+        for (var circ = 0; circ < circles.length; circ++) {
+            if (circles[circ] == circle)
+                continue;
+            if (Math.abs(circle.x - circles[circ].x) < snapToPadding) {
+                circle.x = circles[circ].x;
+            }
+            if (Math.abs(circle.y - circles[circ].y) < snapToPadding) {
+                circle.y = circles[circ].y;
+            }
+        }
+    }
     /* ---------- helpers ----------- */
     var getMousePos = function (event) {
         var rect = canvas.getBoundingClientRect();
