@@ -2,6 +2,7 @@
 import FiniteAutomataCanvas from "@/components/Canvas";
 import Link from "next/link";
 import { useRef } from "react";
+import Script from 'next/script';
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
@@ -11,7 +12,7 @@ export default function DFAPage() {
     };
 
     return (
-      <main className="bg-blue-100 flex flex-col items-center">
+      <main className="min-h-screen bg-blue-100 flex flex-col items-center">
 
         {/* DFA title at the top */}
         <h1 className="text-5xl font-bold text-center my-2 text-black ">
@@ -20,20 +21,20 @@ export default function DFAPage() {
             </span>
             <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
-        <div id="canvasDiv" className="flex flex-grow gap-8">
+        <div id="canvasDiv" className="">
             {/*Canvas for drawing FSM*/}
             <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none"></canvas>
         </div>
         
-        <div className="mt-4 flex justify-center">
+        {/* <div className="mt-4 flex justify-center">
             <button
                 type="button"
                 onClick={handleClear}
                 className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-500 transition">
-                    Clear Canvas
-                </button>
+                Clear Canvas
+            </button>
                 
-        </div>
+        </div> */}
         <div className="my-4 w-full px-4 flex justify-between items-start gap-5 text-black">
             {/* Back Button to return to Home Page */}
             <Link href="/" className="px-6 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
@@ -80,7 +81,7 @@ export default function DFAPage() {
             </div>
         </div>
 
-        
+        <Script src="/scripts/dfaCanvas.js" strategy="afterInteractive" />
       </main>
       
     );
