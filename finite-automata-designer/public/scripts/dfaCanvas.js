@@ -317,27 +317,6 @@ var Arrow = /** @class */ (function () {
         else {
             drawArrow(ctx, pointInfo.endX, pointInfo.endY, Math.atan2(pointInfo.endY - pointInfo.startY, pointInfo.endX - pointInfo.startX));
         }
-        // draw the text
-        // if (pointInfo.hasCircle) {
-        // 	var startAngle = pointInfo.startAngle;
-        // 	var endAngle = pointInfo.endAngle;
-        //   if (endAngle && startAngle && pointInfo.circleRadius){   
-        //     if (endAngle < startAngle) {
-        //         endAngle += Math.PI * 2;
-        //     }
-        //     var textAngle = (startAngle + endAngle) / 2 + (pointInfo.isReversed ? 1 : 0) * Math.PI;
-        //     var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
-        //     var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
-        //     console.log("draw text 1 called")
-        //     drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
-        //     } else {
-        //     var textX = (pointInfo.startX + pointInfo.endX) / 2;
-        //     var textY = (pointInfo.startY + pointInfo.endY) / 2;
-        //     var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
-        //     console.log("draw text 2 called")
-        //     drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
-        //   }
-        // }
         if (pointInfo.hasCircle) {
             var startAngle = pointInfo.startAngle;
             var endAngle = pointInfo.endAngle;
@@ -348,7 +327,6 @@ var Arrow = /** @class */ (function () {
                 var textAngle = (startAngle + endAngle) / 2 + (pointInfo.isReversed ? 1 : 0) * Math.PI;
                 var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
                 var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
-                console.log("draw text 1 called");
                 drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
             }
         }
@@ -356,7 +334,6 @@ var Arrow = /** @class */ (function () {
             var textX = (pointInfo.startX + pointInfo.endX) / 2;
             var textY = (pointInfo.startY + pointInfo.endY) / 2;
             var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
-            console.log("draw text 2 called");
             drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
         }
     };
@@ -425,26 +402,6 @@ function setupDfaCanvas(canvas) {
             tempArrow.draw(ctx);
         }
     }
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Shift') {
-            shiftPressed = true;
-        }
-        else if (event.key === 'Backspace') {
-            if (selectedObj != null && 'text' in selectedObj) {
-                selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
-                draw();
-            }
-        }
-        else if (selectedObj != null && 'text' in selectedObj) {
-            selectedObj.text += event.key;
-            draw();
-        }
-    });
-    document.addEventListener('keyup', function (event) {
-        if (event.key === 'Shift') {
-            shiftPressed = false;
-        }
-    });
     /* Event Handlers */
     canvas.addEventListener('mousedown', function (event) {
         var mouse = getMousePos(event);
@@ -467,15 +424,6 @@ function setupDfaCanvas(canvas) {
             // Cosmetic arrow logic for interactive response
             tempArrow = new TemporaryArrow(mouse, mouse);
         }
-        // if (selectedObj instanceof Arrow) {
-        //   console.log('selected object is an arrow');
-        //   if ("text" in selectedObj) {
-        //     console.log("selecetd object has text");
-        //     selectedObj.text += "test";
-        //     draw();
-        //     console.log("tried manipulating arrows test from mouse down");
-        //   }
-        // }
         draw();
     });
     canvas.addEventListener('dblclick', function (event) {
@@ -540,6 +488,60 @@ function setupDfaCanvas(canvas) {
         }
         draw();
     });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Shift') {
+            shiftPressed = true;
+            return;
+        }
+        if (selectedObj != null && 'text' in selectedObj) {
+            if (event.key === 'Backspace') {
+                selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
+                draw();
+            }
+            else if (event.key === 'Delete') {
+                for (var circ = 0; circ < circles.length; circ++) {
+                    if (circles[circ] == selectedObj) {
+                        circles.splice(circ--, 1);
+                    }
+                }
+                for (var i = 0; i < arrows.length; i++) {
+                    var arrow = arrows[i];
+                    if (arrow == selectedObj) {
+                        arrows.splice(i--, 1);
+                    }
+                    if (arrow instanceof SelfArrow) {
+                        if (arrow.circle == selectedObj) {
+                            arrows.splice(i--, 1);
+                        }
+                    }
+                    if (arrow instanceof EntryArrow) {
+                        if (arrow.pointsToCircle == selectedObj) {
+                            arrows.splice(i--, 1);
+                        }
+                    }
+                    if (arrow instanceof Arrow) {
+                        if (arrow.startCircle == selectedObj || arrow.endCircle == selectedObj) {
+                            arrows.splice(i--, 1);
+                        }
+                    }
+                }
+                draw();
+            }
+            else {
+                if (/^[a-zA-Z0-9 ]$/.test(event.key)) {
+                    selectedObj.text += event.key;
+                    draw();
+                }
+            }
+        }
+    });
+    document.addEventListener('keyup', function (event) {
+        if (event.key === 'Shift') {
+            shiftPressed = false;
+        }
+    });
+    /* Helper Functions*/
+    // Align the input circle to any circle in the array if x or y absolute is less than padding
     function snapAlignCircle(circle) {
         for (var circ = 0; circ < circles.length; circ++) {
             if (circles[circ] == circle)
@@ -552,11 +554,12 @@ function setupDfaCanvas(canvas) {
             }
         }
     }
-    /* Helpers */
+    // Get the current mouse position inside the canvas
     var getMousePos = function (event) {
         var rect = canvas.getBoundingClientRect();
         return { x: event.clientX - rect.left, y: event.clientY - rect.top };
     };
+    // Get the collided object at the point x, y
     function mouseCollision(x, y) {
         for (var circ = 0; circ < circles.length; circ++) {
             if (circles[circ].containsPoint(x, y)) {
