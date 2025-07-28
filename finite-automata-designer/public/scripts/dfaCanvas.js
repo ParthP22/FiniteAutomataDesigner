@@ -299,43 +299,65 @@ var Arrow = /** @class */ (function () {
         };
     };
     Arrow.prototype.draw = function (ctx) {
-        var stuff = this.getEndPointsAndCircle();
+        var pointInfo = this.getEndPointsAndCircle();
         // draw arc
         ctx.beginPath();
-        if (stuff.hasCircle && stuff.circleX) {
-            ctx.arc(stuff.circleX, stuff.circleY, stuff.circleRadius, stuff.startAngle, stuff.endAngle, stuff.isReversed);
+        if (pointInfo.hasCircle && pointInfo.circleX) {
+            ctx.arc(pointInfo.circleX, pointInfo.circleY, pointInfo.circleRadius, pointInfo.startAngle, pointInfo.endAngle, pointInfo.isReversed);
         }
         else {
-            ctx.moveTo(stuff.startX, stuff.startY);
-            ctx.lineTo(stuff.endX, stuff.endY);
+            ctx.moveTo(pointInfo.startX, pointInfo.startY);
+            ctx.lineTo(pointInfo.endX, pointInfo.endY);
         }
         ctx.stroke();
         // draw the head of the arrow
-        if (stuff.hasCircle && stuff.endAngle) {
-            drawArrow(ctx, stuff.endX, stuff.endY, stuff.endAngle - stuff.reverseScale * (Math.PI / 2));
+        if (pointInfo.hasCircle && pointInfo.endAngle) {
+            drawArrow(ctx, pointInfo.endX, pointInfo.endY, pointInfo.endAngle - pointInfo.reverseScale * (Math.PI / 2));
         }
         else {
-            drawArrow(ctx, stuff.endX, stuff.endY, Math.atan2(stuff.endY - stuff.startY, stuff.endX - stuff.startX));
+            drawArrow(ctx, pointInfo.endX, pointInfo.endY, Math.atan2(pointInfo.endY - pointInfo.startY, pointInfo.endX - pointInfo.startX));
         }
         // draw the text
-        if (stuff.hasCircle) {
-            var startAngle = stuff.startAngle;
-            var endAngle = stuff.endAngle;
-            if (endAngle && startAngle && stuff.circleRadius) {
-                if (endAngle < startAngle) {
-                    endAngle += Math.PI * 2;
-                }
-                var textAngle = (startAngle + endAngle) / 2 + (stuff.isReversed ? 1 : 0) * Math.PI;
-                var textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
-                var textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
+        // if (pointInfo.hasCircle) {
+        // 	var startAngle = pointInfo.startAngle;
+        // 	var endAngle = pointInfo.endAngle;
+        //   if (endAngle && startAngle && pointInfo.circleRadius){   
+        //     if (endAngle < startAngle) {
+        //         endAngle += Math.PI * 2;
+        //     }
+        //     var textAngle = (startAngle + endAngle) / 2 + (pointInfo.isReversed ? 1 : 0) * Math.PI;
+        //     var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
+        //     var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
+        //     console.log("draw text 1 called")
+        //     drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
+        //     } else {
+        //     var textX = (pointInfo.startX + pointInfo.endX) / 2;
+        //     var textY = (pointInfo.startY + pointInfo.endY) / 2;
+        //     var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
+        //     console.log("draw text 2 called")
+        //     drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
+        //   }
+        // }
+        if (pointInfo.hasCircle) {
+            var startAngle = pointInfo.startAngle;
+            var endAngle = pointInfo.endAngle;
+            if (endAngle != null && startAngle != null && endAngle < startAngle) {
+                endAngle += Math.PI * 2;
+            }
+            if (startAngle != null && endAngle != null && pointInfo.circleRadius != null) {
+                var textAngle = (startAngle + endAngle) / 2 + (pointInfo.isReversed ? 1 : 0) * Math.PI;
+                var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
+                var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
+                console.log("draw text 1 called");
                 drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
             }
-            else {
-                var textX = (stuff.startX + stuff.endX) / 2;
-                var textY = (stuff.startY + stuff.endY) / 2;
-                var textAngle = Math.atan2(stuff.endX - stuff.startX, stuff.startY - stuff.endY);
-                drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
-            }
+        }
+        else {
+            var textX = (pointInfo.startX + pointInfo.endX) / 2;
+            var textY = (pointInfo.startY + pointInfo.endY) / 2;
+            var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
+            console.log("draw text 2 called");
+            drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
         }
     };
     Arrow.prototype.containsPoint = function (x, y) {
@@ -407,6 +429,16 @@ function setupDfaCanvas(canvas) {
         if (event.key === 'Shift') {
             shiftPressed = true;
         }
+        else if (event.key === 'Backspace') {
+            if (selectedObj != null && 'text' in selectedObj) {
+                selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
+                draw();
+            }
+        }
+        else if (selectedObj != null && 'text' in selectedObj) {
+            selectedObj.text += event.key;
+            draw();
+        }
     });
     document.addEventListener('keyup', function (event) {
         if (event.key === 'Shift') {
@@ -435,6 +467,15 @@ function setupDfaCanvas(canvas) {
             // Cosmetic arrow logic for interactive response
             tempArrow = new TemporaryArrow(mouse, mouse);
         }
+        // if (selectedObj instanceof Arrow) {
+        //   console.log('selected object is an arrow');
+        //   if ("text" in selectedObj) {
+        //     console.log("selecetd object has text");
+        //     selectedObj.text += "test";
+        //     draw();
+        //     console.log("tried manipulating arrows test from mouse down");
+        //   }
+        // }
         draw();
     });
     canvas.addEventListener('dblclick', function (event) {
