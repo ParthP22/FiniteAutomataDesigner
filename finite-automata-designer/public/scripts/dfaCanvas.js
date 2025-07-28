@@ -36,6 +36,20 @@ function drawArrow(ctx, x, y, angle) {
     ctx.lineTo(x - 10 * dx - 5 * dy, y - 8 * dy + 5 * dx);
     ctx.fill();
 }
+function det(a, b, c, d, e, f, g, h, i) {
+    return a * e * i + b * f * g + c * d * h - a * f * h - b * d * i - c * e * g;
+}
+function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
+    var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
+    var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
+    var by = det(x1 * x1 + y1 * y1, x1, 1, x2 * x2 + y2 * y2, x2, 1, x3 * x3 + y3 * y3, x3, 1);
+    var c = -det(x1 * x1 + y1 * y1, x1, y1, x2 * x2 + y2 * y2, x2, y2, x3 * x3 + y3 * y3, x3, y3);
+    return {
+        'x': -bx / (2 * a),
+        'y': -by / (2 * a),
+        'radius': Math.sqrt(bx * bx + by * by - 4 * a * c) / (2 * Math.abs(a))
+    };
+}
 var Circle = /** @class */ (function () {
     function Circle(x, y) {
         this.x = x,
@@ -144,17 +158,6 @@ var EntryArrow = /** @class */ (function () {
     };
     return EntryArrow;
 }());
-var StartArrow = /** @class */ (function () {
-    function StartArrow() {
-    }
-    StartArrow.prototype.draw = function (ctx) {
-    };
-    StartArrow.prototype.setAnchorPoint = function (x, y) {
-    };
-    StartArrow.prototype.containsPoint = function (x, y) {
-    };
-    return StartArrow;
-}());
 var SelfArrow = /** @class */ (function () {
     function SelfArrow(pointsToCircle, point) {
         this.circle = pointsToCircle;
@@ -235,13 +238,151 @@ var SelfArrow = /** @class */ (function () {
     return SelfArrow;
 }());
 var Arrow = /** @class */ (function () {
-    function Arrow() {
+    function Arrow(startCircle, endCircle) {
+        this.startCircle = startCircle;
+        this.endCircle = endCircle;
+        this.text = '';
+        this.lineAngleAdjust = 0;
+        // Make anchor point relative to the locations of start and end circles
+        this.parallelPart = 0.5; // percent from start to end circle
+        this.perpendicularPart = 0; // pixels from start to end circle
     }
-    Arrow.prototype.draw = function (ctx) {
+    Arrow.prototype.getAnchorPoint = function () {
+        var dx = this.endCircle.x - this.startCircle.x;
+        var dy = this.endCircle.y - this.startCircle.y;
+        var scale = Math.sqrt(dx * dx + dy * dy);
+        return {
+            'x': this.startCircle.x + dx * this.parallelPart - dy * this.perpendicularPart / scale,
+            'y': this.startCircle.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
+        };
     };
     Arrow.prototype.setAnchorPoint = function (x, y) {
+        var dx = this.endCircle.x - this.startCircle.x;
+        var dy = this.endCircle.y - this.startCircle.y;
+        var scale = Math.sqrt(dx * dx + dy * dy);
+        this.parallelPart = (dx * (x - this.startCircle.x) + dy * (y - this.startCircle.y)) / (scale * scale);
+        this.perpendicularPart = (dx * (y - this.startCircle.y) - dy * (x - this.startCircle.x)) / scale;
+        // snap to a straight line
+        if (this.parallelPart > 0 && this.parallelPart < 1 && Math.abs(this.perpendicularPart) < snapToPadding) {
+            this.lineAngleAdjust = (this.perpendicularPart < 0 ? 1 : 0) * Math.PI;
+            this.perpendicularPart = 0;
+        }
+    };
+    Arrow.prototype.getEndPointsAndCircle = function () {
+        if (this.perpendicularPart == 0) {
+            var midX = (this.startCircle.x + this.endCircle.x) / 2;
+            var midY = (this.startCircle.y + this.endCircle.y) / 2;
+            var start = this.startCircle.closestPointOnCircle(midX, midY);
+            var end = this.endCircle.closestPointOnCircle(midX, midY);
+            return {
+                'hasCircle': false,
+                'startX': start.x,
+                'startY': start.y,
+                'endX': end.x,
+                'endY': end.y,
+            };
+        }
+        var anchor = this.getAnchorPoint();
+        var circle = circleFromThreePoints(this.startCircle.x, this.startCircle.y, this.endCircle.x, this.endCircle.y, anchor.x, anchor.y);
+        var isReversed = (this.perpendicularPart > 0);
+        var reverseScale = isReversed ? 1 : -1;
+        var startAngle = Math.atan2(this.startCircle.y - circle.y, this.startCircle.x - circle.x) - reverseScale * nodeRadius / circle.radius;
+        var endAngle = Math.atan2(this.endCircle.y - circle.y, this.endCircle.x - circle.x) + reverseScale * nodeRadius / circle.radius;
+        var startX = circle.x + circle.radius * Math.cos(startAngle);
+        var startY = circle.y + circle.radius * Math.sin(startAngle);
+        var endX = circle.x + circle.radius * Math.cos(endAngle);
+        var endY = circle.y + circle.radius * Math.sin(endAngle);
+        return {
+            'hasCircle': true,
+            'startX': startX,
+            'startY': startY,
+            'endX': endX,
+            'endY': endY,
+            'startAngle': startAngle,
+            'endAngle': endAngle,
+            'circleX': circle.x,
+            'circleY': circle.y,
+            'circleRadius': circle.radius,
+            'reverseScale': reverseScale,
+            'isReversed': isReversed,
+        };
+    };
+    Arrow.prototype.draw = function (ctx) {
+        var stuff = this.getEndPointsAndCircle();
+        // draw arc
+        ctx.beginPath();
+        if (stuff.hasCircle && stuff.circleX) {
+            ctx.arc(stuff.circleX, stuff.circleY, stuff.circleRadius, stuff.startAngle, stuff.endAngle, stuff.isReversed);
+        }
+        else {
+            ctx.moveTo(stuff.startX, stuff.startY);
+            ctx.lineTo(stuff.endX, stuff.endY);
+        }
+        ctx.stroke();
+        // draw the head of the arrow
+        if (stuff.hasCircle && stuff.endAngle) {
+            drawArrow(ctx, stuff.endX, stuff.endY, stuff.endAngle - stuff.reverseScale * (Math.PI / 2));
+        }
+        else {
+            drawArrow(ctx, stuff.endX, stuff.endY, Math.atan2(stuff.endY - stuff.startY, stuff.endX - stuff.startX));
+        }
+        // draw the text
+        if (stuff.hasCircle) {
+            var startAngle = stuff.startAngle;
+            var endAngle = stuff.endAngle;
+            if (endAngle && startAngle && stuff.circleRadius) {
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                var textAngle = (startAngle + endAngle) / 2 + (stuff.isReversed ? 1 : 0) * Math.PI;
+                var textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
+                var textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
+                drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
+            }
+            else {
+                var textX = (stuff.startX + stuff.endX) / 2;
+                var textY = (stuff.startY + stuff.endY) / 2;
+                var textAngle = Math.atan2(stuff.endX - stuff.startX, stuff.startY - stuff.endY);
+                drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
+            }
+        }
     };
     Arrow.prototype.containsPoint = function (x, y) {
+        var stuff = this.getEndPointsAndCircle();
+        if (stuff.hasCircle && stuff.circleX) {
+            var dx = x - stuff.circleX;
+            var dy = y - stuff.circleY;
+            var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
+            if (Math.abs(distance) < hitTargetPadding) {
+                var angle = Math.atan2(dy, dx);
+                var startAngle = stuff.startAngle;
+                var endAngle = stuff.endAngle;
+                if (stuff.isReversed) {
+                    var temp = startAngle;
+                    startAngle = endAngle;
+                    endAngle = temp;
+                }
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                if (angle < startAngle) {
+                    angle += Math.PI * 2;
+                }
+                else if (angle > endAngle) {
+                    angle -= Math.PI * 2;
+                }
+                return (angle > startAngle && angle < endAngle);
+            }
+        }
+        else {
+            var dx = stuff.endX - stuff.startX;
+            var dy = stuff.endY - stuff.startY;
+            var length = Math.sqrt(dx * dx + dy * dy);
+            var percent = (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
+            var distance = (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
+            return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
+        }
+        return false;
     };
     return Arrow;
 }());
@@ -328,8 +469,8 @@ function setupDfaCanvas(canvas) {
                 targetCircle = null;
             }
             if (selectedObj == null && startClick != null) {
-                if (targetCircle != null) {
-                    tempArrow = new StartArrow(); // fix later once startarrow implemented
+                if (targetCircle != null && targetCircle instanceof Circle) {
+                    tempArrow = new EntryArrow(targetCircle, startClick);
                 }
                 else {
                     tempArrow = new TemporaryArrow(startClick, mouse);
@@ -339,8 +480,8 @@ function setupDfaCanvas(canvas) {
                 if (targetCircle == selectedObj && selectedObj instanceof Circle) {
                     tempArrow = new SelfArrow(selectedObj, mouse);
                 }
-                else if (targetCircle != null) {
-                    tempArrow = new Arrow(); // fix later once arrow implemented
+                else if (targetCircle != null && selectedObj instanceof Circle && targetCircle instanceof Circle) {
+                    tempArrow = new Arrow(selectedObj, targetCircle); // fix later once arrow implemented
                 }
                 else if (selectedObj instanceof Circle) {
                     tempArrow = new TemporaryArrow(selectedObj.closestPointOnCircle(mouse.x, mouse.y), mouse);
