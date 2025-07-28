@@ -582,7 +582,6 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Shift') {
       shiftPressed = true;
-      return;
     } 
 
     if (selectedObj != null && 'text' in selectedObj) {
@@ -618,7 +617,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         }
         draw();
       } else {
-        if (/^[a-zA-Z0-9 ]$/.test(event.key)) {
+        if (event.key.length === 1) {
           selectedObj.text += event.key;
           draw()
         }

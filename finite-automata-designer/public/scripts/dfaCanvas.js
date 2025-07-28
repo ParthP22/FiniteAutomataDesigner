@@ -491,7 +491,6 @@ function setupDfaCanvas(canvas) {
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Shift') {
             shiftPressed = true;
-            return;
         }
         if (selectedObj != null && 'text' in selectedObj) {
             if (event.key === 'Backspace') {
@@ -528,7 +527,7 @@ function setupDfaCanvas(canvas) {
                 draw();
             }
             else {
-                if (/^[a-zA-Z0-9 ]$/.test(event.key)) {
+                if (event.key.length === 1) {
                     selectedObj.text += event.key;
                     draw();
                 }
