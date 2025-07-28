@@ -142,6 +142,23 @@ class EntryArrow {
       this.setAnchorPoint(startPoint.x, startPoint.y);
     }
   }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    var points = this.getEndPoints();
+
+    ctx.beginPath();
+    ctx.moveTo(points.startX, points.startY);
+    ctx.lineTo(points.endX, points.endY);
+    ctx.stroke();
+    
+    // Draw the text at the end without the arrow
+    var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
+    drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
+
+    // Draw the head of the arrow
+    drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
+  }
+
   setAnchorPoint(x: number, y: number) {
     this.deltaX = x - this.pointsToCircle.x;
     this.deltaY = y - this.pointsToCircle.y;
@@ -162,20 +179,14 @@ class EntryArrow {
 		};
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    var points = this.getEndPoints();
-
-    ctx.beginPath();
-    ctx.moveTo(points.startX, points.startY);
-    ctx.lineTo(points.endX, points.endY);
-    ctx.stroke();
-    
-    // Draw the text at the end without the arrow
-    var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
-    drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
-
-    // Draw the head of the arrow
-    drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
+  containsPoint(x: number, y: number) {
+    var lineInfo = this.getEndPoints();
+    var dx = lineInfo.endX - lineInfo.startX;
+		var dy = lineInfo.endY - lineInfo.startY;
+		var length = Math.sqrt(dx * dx + dy * dy);
+		var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
+		var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
+		return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding); 
   }
 
 }
@@ -187,6 +198,10 @@ class StartArrow {
   }
 
   setAnchorPoint(x: number, y: number): void {
+
+  }
+
+  containsPoint(x: number, y: number) {
 
   }
 
@@ -207,7 +222,6 @@ class SelfArrow {
     if (point) {
       this.setAnchorPoint(point.x, point.y);
     }
-
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -286,6 +300,10 @@ class Arrow {
   setAnchorPoint(x: number, y: number): void {
 
   }
+
+  containsPoint(x: number, y: number) {
+
+  }
 }
 
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
@@ -340,7 +358,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
     if (selectedObj != null) {
       if (shiftPressed && selectedObj instanceof Circle) {
-        // self link logic
+        // Draw a SelfArrow to the selected circle
         tempArrow = new SelfArrow(selectedObj, mouse);
       } else {
         dragging = true;
@@ -379,11 +397,27 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     var mouse = getMousePos(event);
 
     if (tempArrow != null) {
-      // Handle snapping the arrow to circles (later)
-      if (startClick != null) {
-        tempArrow = new TemporaryArrow(startClick, mouse);
-        draw();
+      var targetCircle = mouseCollision(mouse.x, mouse.y);
+      if (!(targetCircle instanceof Circle)) {
+        targetCircle = null;
       }
+
+      if (selectedObj == null && startClick != null) {
+        if (targetCircle != null) {
+          tempArrow = new StartArrow(); // fix later once startarrow implemented
+        } else {
+          tempArrow = new TemporaryArrow(startClick, mouse);
+        }
+      } else {
+        if (targetCircle == selectedObj && selectedObj instanceof Circle) {
+          tempArrow = new SelfArrow(selectedObj, mouse);
+        } else if (targetCircle != null) {
+          tempArrow = new Arrow(); // fix later once arrow implemented
+        } else if (selectedObj instanceof Circle) {
+          tempArrow = new TemporaryArrow(selectedObj.closestPointOnCircle(mouse.x, mouse.y), mouse);
+        }
+      }
+      draw();
     }
 
     if (dragging) {
@@ -399,6 +433,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     dragging = false;
 
     if (tempArrow != null) {
+      if(!(tempArrow instanceof TemporaryArrow)) {
+        selectedObj = tempArrow;
+        arrows.push(tempArrow);
+      }
       tempArrow = null;
     }
 
@@ -432,6 +470,13 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         return circles[circ];
       }
     }
+
+    for(var arrow = 0; arrow < arrows.length; arrow++) {
+      if (arrows[arrow].containsPoint(x, y)) {
+        return arrows[arrow];
+      }
+    }
+
     return null;
   }
 }

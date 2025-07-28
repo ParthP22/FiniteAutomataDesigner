@@ -9,6 +9,7 @@ var selectedObj = null;
 var circles = [];
 var arrows = [];
 var snapToPadding = 10; // pixels
+var hitTargetPadding = 6; // pixels
 function drawText(ctx, originalText, x, y, angeOrNull, isSelected) {
     ctx.font = '20px Times New Roman', 'serif';
     var width = ctx.measureText(originalText).width;
@@ -101,6 +102,18 @@ var EntryArrow = /** @class */ (function () {
             this.setAnchorPoint(startPoint.x, startPoint.y);
         }
     }
+    EntryArrow.prototype.draw = function (ctx) {
+        var points = this.getEndPoints();
+        ctx.beginPath();
+        ctx.moveTo(points.startX, points.startY);
+        ctx.lineTo(points.endX, points.endY);
+        ctx.stroke();
+        // Draw the text at the end without the arrow
+        var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
+        drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
+        // Draw the head of the arrow
+        drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
+    };
     EntryArrow.prototype.setAnchorPoint = function (x, y) {
         this.deltaX = x - this.pointsToCircle.x;
         this.deltaY = y - this.pointsToCircle.y;
@@ -120,17 +133,14 @@ var EntryArrow = /** @class */ (function () {
             'endY': end.y,
         };
     };
-    EntryArrow.prototype.draw = function (ctx) {
-        var points = this.getEndPoints();
-        ctx.beginPath();
-        ctx.moveTo(points.startX, points.startY);
-        ctx.lineTo(points.endX, points.endY);
-        ctx.stroke();
-        // Draw the text at the end without the arrow
-        var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
-        drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
-        // Draw the head of the arrow
-        drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
+    EntryArrow.prototype.containsPoint = function (x, y) {
+        var lineInfo = this.getEndPoints();
+        var dx = lineInfo.endX - lineInfo.startX;
+        var dy = lineInfo.endY - lineInfo.startY;
+        var length = Math.sqrt(dx * dx + dy * dy);
+        var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
+        var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
+        return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
     };
     return EntryArrow;
 }());
@@ -141,16 +151,86 @@ var StartArrow = /** @class */ (function () {
     };
     StartArrow.prototype.setAnchorPoint = function (x, y) {
     };
+    StartArrow.prototype.containsPoint = function (x, y) {
+    };
     return StartArrow;
 }());
 var SelfArrow = /** @class */ (function () {
-    function SelfArrow() {
+    function SelfArrow(pointsToCircle, point) {
+        this.circle = pointsToCircle;
+        this.anchorAngle = 0;
+        this.mouseOffsetAngle = 0;
+        this.text = '';
+        if (point) {
+            this.setAnchorPoint(point.x, point.y);
+        }
     }
     SelfArrow.prototype.draw = function (ctx) {
+        var arcInfo = this.getEndPointsAndCircle();
+        // draw arc
+        ctx.beginPath();
+        ctx.arc(arcInfo.circleX, arcInfo.circleY, arcInfo.circleRadius, arcInfo.startAngle, arcInfo.endAngle, false);
+        ctx.stroke();
+        // Draw the text on the loop farthest from the circle
+        var textX = arcInfo.circleX + arcInfo.circleRadius * Math.cos(this.anchorAngle);
+        var textY = arcInfo.circleY + arcInfo.circleRadius * Math.sin(this.anchorAngle);
+        drawText(ctx, this.text, textX, textY, this.anchorAngle, selectedObj == this);
+        // draw the head of the arrow
+        drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
     };
     SelfArrow.prototype.setMouseStart = function (x, y) {
+        this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
+        // Snap to 90 degrees
+        var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
+        if (Math.abs(this.anchorAngle - snap) < 0.1)
+            this.anchorAngle = snap;
+        // Keep in the range -pi to pi so our containsPoint() function always works
+        if (this.anchorAngle < -Math.PI)
+            this.anchorAngle += 2 * Math.PI;
+        if (this.anchorAngle > Math.PI)
+            this.anchorAngle -= 2 * Math.PI;
     };
     SelfArrow.prototype.setAnchorPoint = function (x, y) {
+        this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
+        // snap to 90 degrees
+        var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
+        if (Math.abs(this.anchorAngle - snap) < 0.1)
+            this.anchorAngle = snap;
+        // keep in the range -pi to pi so our containsPoint() function always works
+        if (this.anchorAngle < -Math.PI)
+            this.anchorAngle += 2 * Math.PI;
+        if (this.anchorAngle > Math.PI)
+            this.anchorAngle -= 2 * Math.PI;
+    };
+    SelfArrow.prototype.getEndPointsAndCircle = function () {
+        var circleX = this.circle.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
+        var circleY = this.circle.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
+        var circleRadius = 0.75 * nodeRadius;
+        var startAngle = this.anchorAngle - Math.PI * 0.8;
+        var endAngle = this.anchorAngle + Math.PI * 0.8;
+        var startX = circleX + circleRadius * Math.cos(startAngle);
+        var startY = circleY + circleRadius * Math.sin(startAngle);
+        var endX = circleX + circleRadius * Math.cos(endAngle);
+        var endY = circleY + circleRadius * Math.sin(endAngle);
+        return {
+            'hasCircle': true,
+            'startX': startX,
+            'startY': startY,
+            'endX': endX,
+            'endY': endY,
+            'startAngle': startAngle,
+            'endAngle': endAngle,
+            'circleX': circleX,
+            'circleY': circleY,
+            'circleRadius': circleRadius
+        };
+    };
+    SelfArrow.prototype.containsPoint = function (x, y) {
+        var stuff = this.getEndPointsAndCircle();
+        var dx = x - stuff.circleX;
+        var dy = y - stuff.circleY;
+        var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
+        return (Math.abs(distance) < hitTargetPadding);
     };
     return SelfArrow;
 }());
@@ -160,6 +240,8 @@ var Arrow = /** @class */ (function () {
     Arrow.prototype.draw = function (ctx) {
     };
     Arrow.prototype.setAnchorPoint = function (x, y) {
+    };
+    Arrow.prototype.containsPoint = function (x, y) {
     };
     return Arrow;
 }());
@@ -207,7 +289,8 @@ function setupDfaCanvas(canvas) {
         startClick = mouse;
         if (selectedObj != null) {
             if (shiftPressed && selectedObj instanceof Circle) {
-                // self link logic
+                // Draw a SelfArrow to the selected circle
+                tempArrow = new SelfArrow(selectedObj, mouse);
             }
             else {
                 dragging = true;
@@ -217,7 +300,7 @@ function setupDfaCanvas(canvas) {
             }
         }
         else if (shiftPressed) {
-            // cosmetic arrow logic for users
+            // Cosmetic arrow logic for interactive response
             tempArrow = new TemporaryArrow(mouse, mouse);
         }
         draw();
@@ -240,11 +323,30 @@ function setupDfaCanvas(canvas) {
     canvas.addEventListener('mousemove', function (event) {
         var mouse = getMousePos(event);
         if (tempArrow != null) {
-            // Handle snapping the arrow to circles (later)
-            if (startClick != null) {
-                tempArrow = new TemporaryArrow(startClick, mouse);
-                draw();
+            var targetCircle = mouseCollision(mouse.x, mouse.y);
+            if (!(targetCircle instanceof Circle)) {
+                targetCircle = null;
             }
+            if (selectedObj == null && startClick != null) {
+                if (targetCircle != null) {
+                    tempArrow = new StartArrow(); // fix later once startarrow implemented
+                }
+                else {
+                    tempArrow = new TemporaryArrow(startClick, mouse);
+                }
+            }
+            else {
+                if (targetCircle == selectedObj && selectedObj instanceof Circle) {
+                    tempArrow = new SelfArrow(selectedObj, mouse);
+                }
+                else if (targetCircle != null) {
+                    tempArrow = new Arrow(); // fix later once arrow implemented
+                }
+                else if (selectedObj instanceof Circle) {
+                    tempArrow = new TemporaryArrow(selectedObj.closestPointOnCircle(mouse.x, mouse.y), mouse);
+                }
+            }
+            draw();
         }
         if (dragging) {
             selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.setAnchorPoint(mouse.x, mouse.y);
@@ -257,6 +359,10 @@ function setupDfaCanvas(canvas) {
     canvas.addEventListener('mouseup', function (event) {
         dragging = false;
         if (tempArrow != null) {
+            if (!(tempArrow instanceof TemporaryArrow)) {
+                selectedObj = tempArrow;
+                arrows.push(tempArrow);
+            }
             tempArrow = null;
         }
         draw();
@@ -282,6 +388,11 @@ function setupDfaCanvas(canvas) {
         for (var circ = 0; circ < circles.length; circ++) {
             if (circles[circ].containsPoint(x, y)) {
                 return circles[circ];
+            }
+        }
+        for (var arrow = 0; arrow < arrows.length; arrow++) {
+            if (arrows[arrow].containsPoint(x, y)) {
+                return arrows[arrow];
             }
         }
         return null;
