@@ -9,7 +9,7 @@ var selectedObj = null;
 var circles = [];
 var arrows = [];
 var snapToPadding = 10; // pixels
-function drawText(ctx, originalText, x, y, angeOrNull) {
+function drawText(ctx, originalText, x, y, angeOrNull, isSelected) {
     ctx.font = '20px Times New Roman', 'serif';
     var width = ctx.measureText(originalText).width;
     x -= width / 2;
@@ -56,7 +56,7 @@ var Circle = /** @class */ (function () {
         ctx.beginPath();
         ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
         ctx.stroke();
-        drawText(ctx, this.text, this.x, this.y, null);
+        drawText(ctx, this.text, this.x, this.y, null, selectedObj == this);
         if (this.isAccept) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
@@ -91,6 +91,78 @@ var TemporaryArrow = /** @class */ (function () {
     };
     return TemporaryArrow;
 }());
+var EntryArrow = /** @class */ (function () {
+    function EntryArrow(pointsToCircle, startPoint) {
+        this.pointsToCircle = pointsToCircle;
+        this.deltaX = 0;
+        this.deltaY = 0;
+        this.text = '';
+        if (startPoint) {
+            this.setAnchorPoint(startPoint.x, startPoint.y);
+        }
+    }
+    EntryArrow.prototype.setAnchorPoint = function (x, y) {
+        this.deltaX = x - this.pointsToCircle.x;
+        this.deltaY = y - this.pointsToCircle.y;
+        if (Math.abs(this.deltaX) < snapToPadding)
+            this.deltaX = 0;
+        if (Math.abs(this.deltaY) < snapToPadding)
+            this.deltaY = 0;
+    };
+    EntryArrow.prototype.getEndPoints = function () {
+        var startX = this.pointsToCircle.x + this.deltaX;
+        var startY = this.pointsToCircle.y + this.deltaY;
+        var end = this.pointsToCircle.closestPointOnCircle(startX, startY);
+        return {
+            'startX': startX,
+            'startY': startY,
+            'endX': end.x,
+            'endY': end.y,
+        };
+    };
+    EntryArrow.prototype.draw = function (ctx) {
+        var points = this.getEndPoints();
+        ctx.beginPath();
+        ctx.moveTo(points.startX, points.startY);
+        ctx.lineTo(points.endX, points.endY);
+        ctx.stroke();
+        // Draw the text at the end without the arrow
+        var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
+        drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
+        // Draw the head of the arrow
+        drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
+    };
+    return EntryArrow;
+}());
+var StartArrow = /** @class */ (function () {
+    function StartArrow() {
+    }
+    StartArrow.prototype.draw = function (ctx) {
+    };
+    StartArrow.prototype.setAnchorPoint = function (x, y) {
+    };
+    return StartArrow;
+}());
+var SelfArrow = /** @class */ (function () {
+    function SelfArrow() {
+    }
+    SelfArrow.prototype.draw = function (ctx) {
+    };
+    SelfArrow.prototype.setMouseStart = function (x, y) {
+    };
+    SelfArrow.prototype.setAnchorPoint = function (x, y) {
+    };
+    return SelfArrow;
+}());
+var Arrow = /** @class */ (function () {
+    function Arrow() {
+    }
+    Arrow.prototype.draw = function (ctx) {
+    };
+    Arrow.prototype.setAnchorPoint = function (x, y) {
+    };
+    return Arrow;
+}());
 function setupDfaCanvas(canvas) {
     var ctx = canvas.getContext('2d');
     if (!ctx)
@@ -105,6 +177,11 @@ function setupDfaCanvas(canvas) {
             ctx.lineWidth = 1;
             ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? highlight : base;
             circles[circle].draw(ctx);
+        }
+        for (var arrow = 0; arrow < arrows.length; arrow++) {
+            ctx.lineWidth = 1;
+            ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? highlight : base;
+            arrows[arrow].draw(ctx);
         }
         if (tempArrow != null) {
             ctx.lineWidth = 1;
@@ -128,16 +205,15 @@ function setupDfaCanvas(canvas) {
         selectedObj = mouseCollision(mouse.x, mouse.y);
         dragging = false;
         startClick = mouse;
-        console.log(startClick);
         if (selectedObj != null) {
             if (shiftPressed && selectedObj instanceof Circle) {
                 // self link logic
             }
             else {
                 dragging = true;
-                // if (selectedObj.setAnchorPoint) {
-                // }
-                selectedObj.setMouseStart(mouse.x, mouse.y);
+                if (selectedObj instanceof Circle || selectedObj instanceof SelfArrow) {
+                    selectedObj.setMouseStart(mouse.x, mouse.y);
+                }
             }
         }
         else if (shiftPressed) {
@@ -151,8 +227,10 @@ function setupDfaCanvas(canvas) {
         selectedObj = mouseCollision(mouse.x, mouse.y);
         if (selectedObj == null) {
             selectedObj = new Circle(mouse.x, mouse.y);
-            circles.push(selectedObj);
-            draw();
+            if (selectedObj instanceof Circle) {
+                circles.push(selectedObj);
+                draw();
+            }
         }
         else if (selectedObj instanceof Circle) {
             selectedObj.isAccept = !selectedObj.isAccept;
@@ -164,7 +242,6 @@ function setupDfaCanvas(canvas) {
         if (tempArrow != null) {
             // Handle snapping the arrow to circles (later)
             if (startClick != null) {
-                console.log(startClick);
                 tempArrow = new TemporaryArrow(startClick, mouse);
                 draw();
             }
