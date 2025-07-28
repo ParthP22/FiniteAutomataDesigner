@@ -252,17 +252,10 @@ class SelfArrow {
 		drawText(ctx, this.text, textX, textY, this.anchorAngle, selectedObj == this);
 		// draw the head of the arrow
 		drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
-
   }
 
   setMouseStart(x: number, y: number): void {
-    this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
-    // Snap to 90 degrees
-		var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
-		if (Math.abs(this.anchorAngle - snap) < 0.1) this.anchorAngle = snap;
-		// Keep in the range -pi to pi so our containsPoint() function always works
-		if (this.anchorAngle < -Math.PI) this.anchorAngle += 2 * Math.PI;
-		if (this.anchorAngle > Math.PI) this.anchorAngle -= 2 * Math.PI;
+    this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.circle.y, x - this.circle.x);
   }
 
 	setAnchorPoint(x: number, y: number) {
@@ -297,7 +290,6 @@ class SelfArrow {
 			'circleRadius': circleRadius
 		};
 	}
-
   containsPoint(x: number, y:number) {
 		var stuff = this.getEndPointsAndCircle();
 		var dx = x - stuff.circleX;
@@ -540,7 +532,6 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         circles.push(selectedObj);
         draw();
       }
-      
     } else if (selectedObj instanceof Circle) {
       selectedObj.isAccept = !selectedObj.isAccept;
       draw();
@@ -564,10 +555,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           tempArrow = new TemporaryArrow(startClick, mouse);
         }
       } else {
-        if (targetCircle == selectedObj && selectedObj instanceof Circle) {
-          tempArrow = new SelfArrow(selectedObj, mouse);
+        if (targetCircle == selectedObj && targetCircle instanceof Circle) {
+          tempArrow = new SelfArrow(targetCircle, mouse);
         } else if (targetCircle != null && selectedObj instanceof Circle && targetCircle instanceof Circle) {
-          tempArrow = new Arrow(selectedObj, targetCircle); // fix later once arrow implemented
+          tempArrow = new Arrow(selectedObj, targetCircle);
         } else if (selectedObj instanceof Circle) {
           tempArrow = new TemporaryArrow(selectedObj.closestPointOnCircle(mouse.x, mouse.y), mouse);
         }

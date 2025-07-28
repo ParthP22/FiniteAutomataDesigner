@@ -182,16 +182,7 @@ var SelfArrow = /** @class */ (function () {
         drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
     };
     SelfArrow.prototype.setMouseStart = function (x, y) {
-        this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
-        // Snap to 90 degrees
-        var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
-        if (Math.abs(this.anchorAngle - snap) < 0.1)
-            this.anchorAngle = snap;
-        // Keep in the range -pi to pi so our containsPoint() function always works
-        if (this.anchorAngle < -Math.PI)
-            this.anchorAngle += 2 * Math.PI;
-        if (this.anchorAngle > Math.PI)
-            this.anchorAngle -= 2 * Math.PI;
+        this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.circle.y, x - this.circle.x);
     };
     SelfArrow.prototype.setAnchorPoint = function (x, y) {
         this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
@@ -477,11 +468,11 @@ function setupDfaCanvas(canvas) {
                 }
             }
             else {
-                if (targetCircle == selectedObj && selectedObj instanceof Circle) {
-                    tempArrow = new SelfArrow(selectedObj, mouse);
+                if (targetCircle == selectedObj && targetCircle instanceof Circle) {
+                    tempArrow = new SelfArrow(targetCircle, mouse);
                 }
                 else if (targetCircle != null && selectedObj instanceof Circle && targetCircle instanceof Circle) {
-                    tempArrow = new Arrow(selectedObj, targetCircle); // fix later once arrow implemented
+                    tempArrow = new Arrow(selectedObj, targetCircle);
                 }
                 else if (selectedObj instanceof Circle) {
                     tempArrow = new TemporaryArrow(selectedObj.closestPointOnCircle(mouse.x, mouse.y), mouse);
