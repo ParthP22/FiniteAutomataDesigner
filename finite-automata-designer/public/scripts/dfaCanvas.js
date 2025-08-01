@@ -10,9 +10,18 @@ var circles = [];
 var arrows = [];
 var snapToPadding = 10; // pixels
 var hitTargetPadding = 6; // pixels
+// Creates subscript text to the input string using underscores before 0-9 as the regex
+function subscriptText(text) {
+    var subscriptText = text;
+    for (var i = 0; i < 10; i++) {
+        subscriptText = subscriptText.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+    }
+    return subscriptText;
+}
 function drawText(ctx, originalText, x, y, angeOrNull, isSelected) {
     ctx.font = '20px Times New Roman', 'serif';
-    var width = ctx.measureText(originalText).width;
+    var text = subscriptText(originalText);
+    var width = ctx.measureText(text).width;
     x -= width / 2;
     if (angeOrNull != null) {
         var cos = Math.cos(angeOrNull);
@@ -25,7 +34,7 @@ function drawText(ctx, originalText, x, y, angeOrNull, isSelected) {
     }
     x = Math.round(x);
     y = Math.round(y);
-    ctx.fillText(originalText, x, y + 6);
+    ctx.fillText(text, x, y + 6);
 }
 function drawArrow(ctx, x, y, angle) {
     var dx = Math.cos(angle);
@@ -483,8 +492,8 @@ function setupDfaCanvas(canvas) {
             if (!(tempArrow instanceof TemporaryArrow)) {
                 // When adding the tempArrow to the arrows array, 
                 // Check if a self arrow points to the selected circle already
-                var hasSelfArrow = false;
                 if (tempArrow instanceof SelfArrow) {
+                    var hasSelfArrow = false;
                     for (var i = 0; i < arrows.length; i++) {
                         var arrow = arrows[i];
                         if (arrow instanceof SelfArrow) {
@@ -495,6 +504,19 @@ function setupDfaCanvas(canvas) {
                         }
                     }
                     if (!hasSelfArrow) {
+                        selectedObj = tempArrow;
+                        arrows.push(tempArrow);
+                    }
+                }
+                else if (tempArrow instanceof EntryArrow) {
+                    var hasEntryArrow = false;
+                    for (var i = 0; i < arrows.length; i++) {
+                        if (arrows[i] instanceof EntryArrow) {
+                            hasEntryArrow = true;
+                            break;
+                        }
+                    }
+                    if (!hasEntryArrow) {
                         selectedObj = tempArrow;
                         arrows.push(tempArrow);
                     }
