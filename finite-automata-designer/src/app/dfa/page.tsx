@@ -1,5 +1,4 @@
 'use client';
-import FiniteAutomataCanvas from "@/components/Canvas";
 import Link from "next/link";
 import { useRef } from "react";
 import Script from 'next/script';
