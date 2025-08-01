@@ -481,8 +481,28 @@ function setupDfaCanvas(canvas) {
         dragging = false;
         if (tempArrow != null) {
             if (!(tempArrow instanceof TemporaryArrow)) {
-                selectedObj = tempArrow;
-                arrows.push(tempArrow);
+                // When adding the tempArrow to the arrows array, 
+                // Check if a self arrow points to the selected circle already
+                var hasSelfArrow = false;
+                if (tempArrow instanceof SelfArrow) {
+                    for (var i = 0; i < arrows.length; i++) {
+                        var arrow = arrows[i];
+                        if (arrow instanceof SelfArrow) {
+                            if (arrow.circle == selectedObj) {
+                                hasSelfArrow = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasSelfArrow) {
+                        selectedObj = tempArrow;
+                        arrows.push(tempArrow);
+                    }
+                }
+                else {
+                    selectedObj = tempArrow;
+                    arrows.push(tempArrow);
+                }
             }
             tempArrow = null;
         }
