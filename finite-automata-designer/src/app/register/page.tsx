@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { ddbDocClient } from "@/lib/dynamodb";
 
 export default function Form() {
   // States for registration
@@ -45,43 +46,58 @@ export default function Form() {
   };
 
   // Handling the form submission
-  const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (name === "" || email === "" || password === "") {
       setError(true);
     } else {
       setSubmitted(true);
       setError(false);
-      
+      try {
+        const res = await fetch("/api/register-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userID: userName, name, email, password }),
+        });
+
+        if (!res.ok) throw new Error("Network response was not ok");
+
+        const data = await res.json();
+        console.log("User saved:", data);
+        setSubmitted(true);
+        setError(false);
+      } catch (err) {
+        console.error("Failed to save user:", err);
+      }
     }
   };
 
   // Showing success message
   const successMessage = () => {
-      return (
-          <div
-              className="success"
-              style={{
-                  display: submitted ? "" : "none",
-              }}
-          >
-              <h1>User {name} successfully registered!!</h1>
-          </div>
-      );
+    return (
+      <div
+        className="success"
+        style={{
+          display: submitted ? "" : "none",
+        }}
+      >
+        <h1>User {userName} successfully registered!!</h1>
+      </div>
+    );
   };
 
   // Showing error message if error is true
   const errorMessage = () => {
-      return (
-          <div
-              className="error"
-              style={{
-                  display: error ? "" : "none",
-              }}
-          >
-              <h1>Please enter all the fields</h1>
-          </div>
-      );
+    return (
+      <div
+        className="error"
+        style={{
+            display: error ? "" : "none",
+        }}
+      >
+        <h1>Please enter all the fields</h1>
+      </div>
+    );
   };
 
   return (
@@ -94,7 +110,6 @@ export default function Form() {
         </span>
         <span className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
       </h1>
-        (isClient) ? (
         {/* Form container */}
         <div className="flex-grow flex items-center justify-center px-4">
           <form
@@ -163,7 +178,7 @@ export default function Form() {
               Submit
             </button>
           </form>
-          )
+          
       </div>
     </main>
   );
