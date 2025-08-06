@@ -6,8 +6,8 @@ var shiftPressed = false;
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
-var circles: Circle[] = [];
-var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
+export var circles: Circle[] = [];
+export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 var snapToPadding = 10; // pixels
 var hitTargetPadding = 6; // pixels
 
@@ -90,7 +90,7 @@ function circleFromThreePoints(
 	};
 }
 
-class Circle {
+export class Circle {
   x: number;
   y: number;
   mouseOffsetX: number;
@@ -170,7 +170,7 @@ class TemporaryArrow {
   }
 }
 
-class EntryArrow {
+export class EntryArrow {
   pointsToCircle: Circle;
   deltaX: number;
   deltaY: number;
@@ -234,7 +234,7 @@ class EntryArrow {
 
 }
 
-class SelfArrow {
+export class SelfArrow {
   circle: Circle;
   anchorAngle: number;
   mouseOffsetAngle: number;
@@ -310,7 +310,7 @@ class SelfArrow {
 	}
 }
 
-class Arrow {
+export class Arrow {
   startCircle: Circle;
   endCircle: Circle;
   text: string;
