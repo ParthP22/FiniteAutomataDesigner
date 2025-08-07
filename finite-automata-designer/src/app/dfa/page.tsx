@@ -66,6 +66,8 @@ export default function DFAPage() {
                     type="text"
                     placeholder="Enter a string..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={inputString}
+                    onChange={(e) => setInputString(e.target.value)}
                 />
                 {/* Textbox for inputting the alphabet */}
                 <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
