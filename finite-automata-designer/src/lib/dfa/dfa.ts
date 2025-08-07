@@ -1,2 +1,2 @@
-import { circles } from "../../../public/scripts/dfaCanvas"
+import { circles, arrows } from "../../../public/scripts/dfaCanvas"
 
