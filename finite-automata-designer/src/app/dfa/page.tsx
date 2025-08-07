@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import Script from 'next/script';
+import {} from '../../lib/dfa/dfa'
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
