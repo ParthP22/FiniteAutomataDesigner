@@ -77,6 +77,8 @@ export default function DFAPage() {
                     type="text"
                     placeholder="Enter an alphabet..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={alphabet}
+                    onChange={(e) => setAlphabet(e.target.value)}
                 />
             </div>
             </div>
