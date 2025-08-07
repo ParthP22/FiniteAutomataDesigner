@@ -1,10 +1,16 @@
 'use client';
 import Link from "next/link";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import Script from 'next/script';
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
+
+    const [inputString, setInputString] = useState("");
+    const [alphabet, setAlphabet] = useState("");
+    const [result, setResult] = useState<null | boolean>(null);
+
+    
 
     const handleClear = () => {
         canvasRef.current?.clear(); // safe call if the ref is defined
