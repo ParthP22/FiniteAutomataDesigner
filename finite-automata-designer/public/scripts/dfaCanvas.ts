@@ -97,7 +97,7 @@ export class Circle {
   mouseOffsetY: number;
   isAccept: boolean;
   text: string;
-  arrows: Arrow[];
+  outArrows: Arrow[];
   loop: boolean;
 
   constructor(x: number, y: number) {
@@ -107,7 +107,7 @@ export class Circle {
     this.mouseOffsetY = 0;
     this.isAccept = false;
     this.text = '';
-    this.arrows = [];
+    this.outArrows = [];
     this.loop = false;
   }
 
@@ -246,6 +246,7 @@ export class SelfArrow {
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
+    this.circle.loop = true;
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
     this.text = '';
@@ -326,6 +327,9 @@ export class Arrow {
   constructor(startCircle: Circle, endCircle: Circle) {
     this.startCircle = startCircle;
     this.endCircle = endCircle;
+
+    startCircle.outArrows.push(this);
+
     this.text = '';
     this.lineAngleAdjust = 0;
     // Make anchor point relative to the locations of start and end circles
