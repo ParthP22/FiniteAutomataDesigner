@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import Script from 'next/script';
-import {} from '../../lib/dfa/dfa'
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
@@ -11,7 +10,10 @@ export default function DFAPage() {
     const [alphabet, setAlphabet] = useState("");
     const [result, setResult] = useState<null | boolean>(null);
 
-    
+    const handleRun = () => {
+        
+        setInputString("");
+    };
 
     const handleClear = () => {
         canvasRef.current?.clear(); // safe call if the ref is defined
