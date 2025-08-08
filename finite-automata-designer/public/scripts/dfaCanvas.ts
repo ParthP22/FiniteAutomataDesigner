@@ -1,3 +1,5 @@
+// import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
+
 var nodeRadius = 30;
 var highlight = 'blue';
 var base = 'black';
@@ -6,10 +8,11 @@ var shiftPressed = false;
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
-export var circles: Circle[] = [];
-export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
+var circles: Circle[] = [];
+var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 var snapToPadding = 10; // pixels
 var hitTargetPadding = 6; // pixels
+var alphabet: string[] = ["0","1"];
 
 // Creates subscript text to the input string using underscores before 0-9 as the regex
 function subscriptText(text: string) {
@@ -28,6 +31,8 @@ function drawText(
   angeOrNull: number | null,
   isSelected: boolean
 ) {
+
+
   ctx.font = '20px Times New Roman', 'serif';
   var text = subscriptText(originalText)
   var width = ctx.measureText(text).width;
@@ -90,7 +95,7 @@ function circleFromThreePoints(
 	};
 }
 
-export class Circle {
+class Circle {
   x: number;
   y: number;
   mouseOffsetX: number;
@@ -174,7 +179,7 @@ class TemporaryArrow {
   }
 }
 
-export class EntryArrow {
+class EntryArrow {
   pointsToCircle: Circle;
   deltaX: number;
   deltaY: number;
@@ -238,11 +243,12 @@ export class EntryArrow {
 
 }
 
-export class SelfArrow {
+class SelfArrow {
   circle: Circle;
   anchorAngle: number;
   mouseOffsetAngle: number;
   text: string;
+  transition: string[];
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
@@ -250,6 +256,7 @@ export class SelfArrow {
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
     this.text = '';
+    this.transition = [];
 
     if (point) {
       this.setAnchorPoint(point.x, point.y);
@@ -315,13 +322,14 @@ export class SelfArrow {
 	}
 }
 
-export class Arrow {
+class Arrow {
   startCircle: Circle;
   endCircle: Circle;
   text: string;
   lineAngleAdjust: number; // value to add to textAngle when link is straight line
   parallelPart: number;
   perpendicularPart: number;
+  transition: string[];
 
 
   constructor(startCircle: Circle, endCircle: Circle) {
@@ -335,6 +343,8 @@ export class Arrow {
     // Make anchor point relative to the locations of start and end circles
     this.parallelPart = 0.5; // percent from start to end circle
     this.perpendicularPart = 0; // pixels from start to end circle
+
+    this.transition = [];
   }
 
 	getAnchorPoint() {
@@ -402,6 +412,7 @@ export class Arrow {
 	}
 
 	draw(ctx: CanvasRenderingContext2D) {
+
 		var pointInfo = this.getEndPointsAndCircle();
 		// draw arc
 		ctx.beginPath();
@@ -429,12 +440,21 @@ export class Arrow {
         var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
         var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
         drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
+        // if(!transitionDeterminismCheck(this.startCircle,this.text)){
+        //   this.text = "";
+        //   alert("This transition fails the determinism check!");
+        // }
       }
     } else {
       var textX = (pointInfo.startX + pointInfo.endX) / 2;
       var textY = (pointInfo.startY + pointInfo.endY) / 2;
       var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
       drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
+      // if(!transitionDeterminismCheck(this.startCircle,this.text)){
+      //   this.text = "";
+      //   alert("This transition fails the determinism check!");
+
+      // }
     }
 	}
 
@@ -475,6 +495,21 @@ export class Arrow {
     }
   }
 
+function transitionDeterminismCheck(circle: Circle, newTransition: string){
+    const transition = newTransition.trim().split(",");
+
+    circle.outArrows.forEach((arrow: Arrow) => {
+        const oldTransition = arrow.transition;
+        oldTransition.forEach((oldTransition: string) => {
+            transition.forEach((newTransition: string) => {
+                if(newTransition === oldTransition){
+                    return false;
+                }
+            });
+        });
+    });
+    return true;
+}
 
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
