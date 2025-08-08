@@ -511,6 +511,39 @@ function transitionDeterminismCheck(circle: Circle, newTransition: string){
     return true;
 }
 
+function inputDeterminismCheck(input: string){
+  for(let char of input){
+    if(!(char in alphabet)){
+      alert("Input contains " + char + ", which is not in the alphabet!");
+      return false;
+    }
+  }
+
+  for(let node of circles){
+    const outArrows = node.outArrows;
+    for(let char of alphabet){
+      var exists: boolean = false;
+      for(let arrow of outArrows){
+        for(let transition of arrow.transition){
+          if (char === transition){
+            exists = true;
+            break;
+          }
+          if(!(transition in alphabet)){
+            alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
+            return false;
+          }
+        }
+      }
+      if(!exists){
+        alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
