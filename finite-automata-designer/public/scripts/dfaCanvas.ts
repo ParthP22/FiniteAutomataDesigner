@@ -97,6 +97,8 @@ export class Circle {
   mouseOffsetY: number;
   isAccept: boolean;
   text: string;
+  arrows: Arrow[];
+  loop: boolean;
 
   constructor(x: number, y: number) {
     this.x = x,
@@ -105,6 +107,8 @@ export class Circle {
     this.mouseOffsetY = 0;
     this.isAccept = false;
     this.text = '';
+    this.arrows = [];
+    this.loop = false;
   }
 
   setMouseStart(x: number, y: number): void {
