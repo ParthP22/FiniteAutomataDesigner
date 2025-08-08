@@ -1,3 +1,4 @@
+// import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
 var nodeRadius = 30;
 var highlight = 'blue';
 var base = 'black';
@@ -10,6 +11,7 @@ var circles = [];
 var arrows = [];
 var snapToPadding = 10; // pixels
 var hitTargetPadding = 6; // pixels
+var alphabet = ["0", "1"];
 // Creates subscript text to the input string using underscores before 0-9 as the regex
 function subscriptText(text) {
     var subscriptText = text;
@@ -67,6 +69,8 @@ var Circle = /** @class */ (function () {
         this.mouseOffsetY = 0;
         this.isAccept = false;
         this.text = '';
+        this.outArrows = [];
+        this.loop = false;
     }
     Circle.prototype.setMouseStart = function (x, y) {
         this.mouseOffsetX = this.x - x;
@@ -170,9 +174,11 @@ var EntryArrow = /** @class */ (function () {
 var SelfArrow = /** @class */ (function () {
     function SelfArrow(pointsToCircle, point) {
         this.circle = pointsToCircle;
+        this.circle.loop = true;
         this.anchorAngle = 0;
         this.mouseOffsetAngle = 0;
         this.text = '';
+        this.transition = [];
         if (point) {
             this.setAnchorPoint(point.x, point.y);
         }
@@ -241,11 +247,13 @@ var Arrow = /** @class */ (function () {
     function Arrow(startCircle, endCircle) {
         this.startCircle = startCircle;
         this.endCircle = endCircle;
+        startCircle.outArrows.push(this);
         this.text = '';
         this.lineAngleAdjust = 0;
         // Make anchor point relative to the locations of start and end circles
         this.parallelPart = 0.5; // percent from start to end circle
         this.perpendicularPart = 0; // pixels from start to end circle
+        this.transition = [];
     }
     Arrow.prototype.getAnchorPoint = function () {
         var dx = this.endCircle.x - this.startCircle.x;
@@ -337,6 +345,10 @@ var Arrow = /** @class */ (function () {
                 var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
                 var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
                 drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
+                // if(!transitionDeterminismCheck(this.startCircle,this.text)){
+                //   this.text = "";
+                //   alert("This transition fails the determinism check!");
+                // }
             }
         }
         else {
@@ -344,6 +356,10 @@ var Arrow = /** @class */ (function () {
             var textY = (pointInfo.startY + pointInfo.endY) / 2;
             var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
             drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
+            // if(!transitionDeterminismCheck(this.startCircle,this.text)){
+            //   this.text = "";
+            //   alert("This transition fails the determinism check!");
+            // }
         }
     };
     Arrow.prototype.containsPoint = function (x, y) {
@@ -385,6 +401,20 @@ var Arrow = /** @class */ (function () {
     };
     return Arrow;
 }());
+function transitionDeterminismCheck(circle, newTransition) {
+    var transition = newTransition.trim().split(",");
+    circle.outArrows.forEach(function (arrow) {
+        var oldTransition = arrow.transition;
+        oldTransition.forEach(function (oldTransition) {
+            transition.forEach(function (newTransition) {
+                if (newTransition === oldTransition) {
+                    return false;
+                }
+            });
+        });
+    });
+    return true;
+}
 function setupDfaCanvas(canvas) {
     var ctx = canvas.getContext('2d');
     if (!ctx)
