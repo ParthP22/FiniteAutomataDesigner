@@ -7,11 +7,11 @@ var shiftPressed = false;
 var startClick = null;
 var tempArrow = null;
 var selectedObj = null;
-var circles = [];
-var arrows = [];
+export var circles = [];
+export var arrows = [];
 var snapToPadding = 10; // pixels
 var hitTargetPadding = 6; // pixels
-var alphabet = ["0", "1"];
+export var alphabet = ["0", "1"];
 // Creates subscript text to the input string using underscores before 0-9 as the regex
 function subscriptText(text) {
     var subscriptText = text;
@@ -61,8 +61,8 @@ function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         'radius': Math.sqrt(bx * bx + by * by - 4 * a * c) / (2 * Math.abs(a))
     };
 }
-var Circle = /** @class */ (function () {
-    function Circle(x, y) {
+export class Circle {
+    constructor(x, y) {
         this.x = x,
             this.y = y;
         this.mouseOffsetX = 0;
@@ -72,15 +72,15 @@ var Circle = /** @class */ (function () {
         this.outArrows = [];
         this.loop = false;
     }
-    Circle.prototype.setMouseStart = function (x, y) {
+    setMouseStart(x, y) {
         this.mouseOffsetX = this.x - x;
         this.mouseOffsetY = this.y - y;
-    };
-    Circle.prototype.setAnchorPoint = function (x, y) {
+    }
+    setAnchorPoint(x, y) {
         this.x = x + this.mouseOffsetX;
         this.y = y + this.mouseOffsetY;
-    };
-    Circle.prototype.draw = function (ctx) {
+    }
+    draw(ctx) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
         ctx.stroke();
@@ -90,8 +90,8 @@ var Circle = /** @class */ (function () {
             ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
             ctx.stroke();
         }
-    };
-    Circle.prototype.closestPointOnCircle = function (x, y) {
+    }
+    closestPointOnCircle(x, y) {
         var dx = x - this.x;
         var dy = y - this.y;
         var scale = Math.sqrt(dx * dx + dy * dy);
@@ -99,28 +99,26 @@ var Circle = /** @class */ (function () {
             'x': this.x + dx * nodeRadius / scale,
             'y': this.y + dy * nodeRadius / scale
         };
-    };
-    Circle.prototype.containsPoint = function (x, y) {
+    }
+    containsPoint(x, y) {
         return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
-    };
-    return Circle;
-}());
-var TemporaryArrow = /** @class */ (function () {
-    function TemporaryArrow(startPoint, endPoint) {
+    }
+}
+class TemporaryArrow {
+    constructor(startPoint, endPoint) {
         this.startPoint = startPoint;
         this.endPoint = endPoint;
     }
-    TemporaryArrow.prototype.draw = function (ctx) {
+    draw(ctx) {
         ctx.beginPath();
         ctx.moveTo(this.endPoint.x, this.endPoint.y);
         ctx.lineTo(this.startPoint.x, this.startPoint.y);
         ctx.stroke();
         drawArrow(ctx, this.endPoint.x, this.endPoint.y, Math.atan2(this.endPoint.y - this.startPoint.y, this.endPoint.x - this.startPoint.x));
-    };
-    return TemporaryArrow;
-}());
-var EntryArrow = /** @class */ (function () {
-    function EntryArrow(pointsToCircle, startPoint) {
+    }
+}
+class EntryArrow {
+    constructor(pointsToCircle, startPoint) {
         this.pointsToCircle = pointsToCircle;
         this.deltaX = 0;
         this.deltaY = 0;
@@ -129,7 +127,7 @@ var EntryArrow = /** @class */ (function () {
             this.setAnchorPoint(startPoint.x, startPoint.y);
         }
     }
-    EntryArrow.prototype.draw = function (ctx) {
+    draw(ctx) {
         var points = this.getEndPoints();
         ctx.beginPath();
         ctx.moveTo(points.startX, points.startY);
@@ -140,16 +138,16 @@ var EntryArrow = /** @class */ (function () {
         drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
         // Draw the head of the arrow
         drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
-    };
-    EntryArrow.prototype.setAnchorPoint = function (x, y) {
+    }
+    setAnchorPoint(x, y) {
         this.deltaX = x - this.pointsToCircle.x;
         this.deltaY = y - this.pointsToCircle.y;
         if (Math.abs(this.deltaX) < snapToPadding)
             this.deltaX = 0;
         if (Math.abs(this.deltaY) < snapToPadding)
             this.deltaY = 0;
-    };
-    EntryArrow.prototype.getEndPoints = function () {
+    }
+    getEndPoints() {
         var startX = this.pointsToCircle.x + this.deltaX;
         var startY = this.pointsToCircle.y + this.deltaY;
         var end = this.pointsToCircle.closestPointOnCircle(startX, startY);
@@ -159,8 +157,8 @@ var EntryArrow = /** @class */ (function () {
             'endX': end.x,
             'endY': end.y,
         };
-    };
-    EntryArrow.prototype.containsPoint = function (x, y) {
+    }
+    containsPoint(x, y) {
         var lineInfo = this.getEndPoints();
         var dx = lineInfo.endX - lineInfo.startX;
         var dy = lineInfo.endY - lineInfo.startY;
@@ -168,11 +166,10 @@ var EntryArrow = /** @class */ (function () {
         var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
         var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
         return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
-    };
-    return EntryArrow;
-}());
-var SelfArrow = /** @class */ (function () {
-    function SelfArrow(pointsToCircle, point) {
+    }
+}
+export class SelfArrow {
+    constructor(pointsToCircle, point) {
         this.circle = pointsToCircle;
         this.circle.loop = true;
         this.anchorAngle = 0;
@@ -183,7 +180,7 @@ var SelfArrow = /** @class */ (function () {
             this.setAnchorPoint(point.x, point.y);
         }
     }
-    SelfArrow.prototype.draw = function (ctx) {
+    draw(ctx) {
         var arcInfo = this.getEndPointsAndCircle();
         // draw arc
         ctx.beginPath();
@@ -195,11 +192,11 @@ var SelfArrow = /** @class */ (function () {
         drawText(ctx, this.text, textX, textY, this.anchorAngle, selectedObj == this);
         // draw the head of the arrow
         drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
-    };
-    SelfArrow.prototype.setMouseStart = function (x, y) {
+    }
+    setMouseStart(x, y) {
         this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.circle.y, x - this.circle.x);
-    };
-    SelfArrow.prototype.setAnchorPoint = function (x, y) {
+    }
+    setAnchorPoint(x, y) {
         this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
         // snap to 90 degrees
         var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
@@ -210,8 +207,8 @@ var SelfArrow = /** @class */ (function () {
             this.anchorAngle += 2 * Math.PI;
         if (this.anchorAngle > Math.PI)
             this.anchorAngle -= 2 * Math.PI;
-    };
-    SelfArrow.prototype.getEndPointsAndCircle = function () {
+    }
+    getEndPointsAndCircle() {
         var circleX = this.circle.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
         var circleY = this.circle.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
         var circleRadius = 0.75 * nodeRadius;
@@ -233,18 +230,17 @@ var SelfArrow = /** @class */ (function () {
             'circleY': circleY,
             'circleRadius': circleRadius
         };
-    };
-    SelfArrow.prototype.containsPoint = function (x, y) {
+    }
+    containsPoint(x, y) {
         var stuff = this.getEndPointsAndCircle();
         var dx = x - stuff.circleX;
         var dy = y - stuff.circleY;
         var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
         return (Math.abs(distance) < hitTargetPadding);
-    };
-    return SelfArrow;
-}());
-var Arrow = /** @class */ (function () {
-    function Arrow(startCircle, endCircle) {
+    }
+}
+export class Arrow {
+    constructor(startCircle, endCircle) {
         this.startCircle = startCircle;
         this.endCircle = endCircle;
         startCircle.outArrows.push(this);
@@ -255,7 +251,7 @@ var Arrow = /** @class */ (function () {
         this.perpendicularPart = 0; // pixels from start to end circle
         this.transition = [];
     }
-    Arrow.prototype.getAnchorPoint = function () {
+    getAnchorPoint() {
         var dx = this.endCircle.x - this.startCircle.x;
         var dy = this.endCircle.y - this.startCircle.y;
         var scale = Math.sqrt(dx * dx + dy * dy);
@@ -263,8 +259,8 @@ var Arrow = /** @class */ (function () {
             'x': this.startCircle.x + dx * this.parallelPart - dy * this.perpendicularPart / scale,
             'y': this.startCircle.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
         };
-    };
-    Arrow.prototype.setAnchorPoint = function (x, y) {
+    }
+    setAnchorPoint(x, y) {
         var dx = this.endCircle.x - this.startCircle.x;
         var dy = this.endCircle.y - this.startCircle.y;
         var scale = Math.sqrt(dx * dx + dy * dy);
@@ -275,8 +271,8 @@ var Arrow = /** @class */ (function () {
             this.lineAngleAdjust = (this.perpendicularPart < 0 ? 1 : 0) * Math.PI;
             this.perpendicularPart = 0;
         }
-    };
-    Arrow.prototype.getEndPointsAndCircle = function () {
+    }
+    getEndPointsAndCircle() {
         if (this.perpendicularPart == 0) {
             var midX = (this.startCircle.x + this.endCircle.x) / 2;
             var midY = (this.startCircle.y + this.endCircle.y) / 2;
@@ -314,8 +310,8 @@ var Arrow = /** @class */ (function () {
             'reverseScale': reverseScale,
             'isReversed': isReversed,
         };
-    };
-    Arrow.prototype.draw = function (ctx) {
+    }
+    draw(ctx) {
         var pointInfo = this.getEndPointsAndCircle();
         // draw arc
         ctx.beginPath();
@@ -361,8 +357,8 @@ var Arrow = /** @class */ (function () {
             //   alert("This transition fails the determinism check!");
             // }
         }
-    };
-    Arrow.prototype.containsPoint = function (x, y) {
+    }
+    containsPoint(x, y) {
         var stuff = this.getEndPointsAndCircle();
         if (stuff.hasCircle && stuff.circleX) {
             var dx = x - stuff.circleX;
@@ -398,25 +394,55 @@ var Arrow = /** @class */ (function () {
             return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
         }
         return false;
-    };
-    return Arrow;
-}());
-function transitionDeterminismCheck(circle, newTransition) {
-    var transition = newTransition.trim().split(",");
-    circle.outArrows.forEach(function (arrow) {
-        var oldTransition = arrow.transition;
-        oldTransition.forEach(function (oldTransition) {
-            transition.forEach(function (newTransition) {
-                if (newTransition === oldTransition) {
-                    return false;
-                }
-            });
-        });
-    });
-    return true;
+    }
 }
+// function transitionDeterminismCheck(circle: Circle, newTransition: string){
+//     const transition = newTransition.trim().split(",");
+//     circle.outArrows.forEach((arrow: Arrow) => {
+//         const oldTransition = arrow.transition;
+//         oldTransition.forEach((oldTransition: string) => {
+//             transition.forEach((newTransition: string) => {
+//                 if(newTransition === oldTransition){
+//                     return false;
+//                 }
+//             });
+//         });
+//     });
+//     return true;
+// }
+// function inputDeterminismCheck(input: string){
+//   for(let char of input){
+//     if(!(char in alphabet)){
+//       alert("Input contains " + char + ", which is not in the alphabet!");
+//       return false;
+//     }
+//   }
+//   for(let node of circles){
+//     const outArrows = node.outArrows;
+//     for(let char of alphabet){
+//       var exists: boolean = false;
+//       for(let arrow of outArrows){
+//         for(let transition of arrow.transition){
+//           if (char === transition){
+//             exists = true;
+//             break;
+//           }
+//           if(!(transition in alphabet)){
+//             alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
+//             return false;
+//           }
+//         }
+//       }
+//       if(!exists){
+//         alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
+//         return false;
+//       }
+//     }
+//   }
+//   return true;
+// }
 function setupDfaCanvas(canvas) {
-    var ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx)
         return;
     function draw() {
@@ -442,7 +468,7 @@ function setupDfaCanvas(canvas) {
         }
     }
     /* Event Handlers */
-    canvas.addEventListener('mousedown', function (event) {
+    canvas.addEventListener('mousedown', (event) => {
         var mouse = getMousePos(event);
         selectedObj = mouseCollision(mouse.x, mouse.y);
         dragging = false;
@@ -465,7 +491,7 @@ function setupDfaCanvas(canvas) {
         }
         draw();
     });
-    canvas.addEventListener('dblclick', function (event) {
+    canvas.addEventListener('dblclick', (event) => {
         var mouse = getMousePos(event);
         selectedObj = mouseCollision(mouse.x, mouse.y);
         if (selectedObj == null) {
@@ -480,7 +506,7 @@ function setupDfaCanvas(canvas) {
             draw();
         }
     });
-    canvas.addEventListener('mousemove', function (event) {
+    canvas.addEventListener('mousemove', (event) => {
         var mouse = getMousePos(event);
         if (tempArrow != null) {
             var targetCircle = mouseCollision(mouse.x, mouse.y);
@@ -516,7 +542,7 @@ function setupDfaCanvas(canvas) {
             draw();
         }
     });
-    canvas.addEventListener('mouseup', function (event) {
+    canvas.addEventListener('mouseup', (event) => {
         dragging = false;
         if (tempArrow != null) {
             if (!(tempArrow instanceof TemporaryArrow)) {
@@ -560,7 +586,7 @@ function setupDfaCanvas(canvas) {
         }
         draw();
     });
-    document.addEventListener('keydown', function (event) {
+    document.addEventListener('keydown', (event) => {
         if (event.key === 'Shift') {
             shiftPressed = true;
         }
@@ -576,7 +602,7 @@ function setupDfaCanvas(canvas) {
                     }
                 }
                 for (var i = 0; i < arrows.length; i++) {
-                    var arrow = arrows[i];
+                    const arrow = arrows[i];
                     if (arrow == selectedObj) {
                         arrows.splice(i--, 1);
                     }
@@ -606,7 +632,7 @@ function setupDfaCanvas(canvas) {
             }
         }
     });
-    document.addEventListener('keyup', function (event) {
+    document.addEventListener('keyup', (event) => {
         if (event.key === 'Shift') {
             shiftPressed = false;
         }
@@ -626,8 +652,8 @@ function setupDfaCanvas(canvas) {
         }
     }
     // Get the current mouse position inside the canvas
-    var getMousePos = function (event) {
-        var rect = canvas.getBoundingClientRect();
+    const getMousePos = (event) => {
+        const rect = canvas.getBoundingClientRect();
         return { x: event.clientX - rect.left, y: event.clientY - rect.top };
     };
     // Get the collided object at the point x, y
@@ -649,8 +675,8 @@ function setupDfaCanvas(canvas) {
  * Attach automatically when DOM is ready.
  * --------------------------------------------------------- */
 function attachWhenReady() {
-    var run = function () {
-        var canvas = document.getElementById('DFACanvas');
+    const run = () => {
+        const canvas = document.getElementById('DFACanvas');
         if (canvas) {
             setupDfaCanvas(canvas);
         }
