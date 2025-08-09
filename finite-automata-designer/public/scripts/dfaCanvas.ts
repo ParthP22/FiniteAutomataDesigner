@@ -8,11 +8,11 @@ var shiftPressed = false;
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
-var circles: Circle[] = [];
-var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
+export var circles: Circle[] = [];
+export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 var snapToPadding = 10; // pixels
 var hitTargetPadding = 6; // pixels
-var alphabet: string[] = ["0","1"];
+export var alphabet: string[] = ["0","1"];
 
 // Creates subscript text to the input string using underscores before 0-9 as the regex
 function subscriptText(text: string) {
@@ -95,7 +95,7 @@ function circleFromThreePoints(
 	};
 }
 
-class Circle {
+export class Circle {
   x: number;
   y: number;
   mouseOffsetX: number;
@@ -243,7 +243,7 @@ class EntryArrow {
 
 }
 
-class SelfArrow {
+export class SelfArrow {
   circle: Circle;
   anchorAngle: number;
   mouseOffsetAngle: number;
@@ -322,7 +322,7 @@ class SelfArrow {
 	}
 }
 
-class Arrow {
+export class Arrow {
   startCircle: Circle;
   endCircle: Circle;
   text: string;
@@ -495,54 +495,54 @@ class Arrow {
     }
   }
 
-function transitionDeterminismCheck(circle: Circle, newTransition: string){
-    const transition = newTransition.trim().split(",");
+// function transitionDeterminismCheck(circle: Circle, newTransition: string){
+//     const transition = newTransition.trim().split(",");
 
-    circle.outArrows.forEach((arrow: Arrow) => {
-        const oldTransition = arrow.transition;
-        oldTransition.forEach((oldTransition: string) => {
-            transition.forEach((newTransition: string) => {
-                if(newTransition === oldTransition){
-                    return false;
-                }
-            });
-        });
-    });
-    return true;
-}
+//     circle.outArrows.forEach((arrow: Arrow) => {
+//         const oldTransition = arrow.transition;
+//         oldTransition.forEach((oldTransition: string) => {
+//             transition.forEach((newTransition: string) => {
+//                 if(newTransition === oldTransition){
+//                     return false;
+//                 }
+//             });
+//         });
+//     });
+//     return true;
+// }
 
-function inputDeterminismCheck(input: string){
-  for(let char of input){
-    if(!(char in alphabet)){
-      alert("Input contains " + char + ", which is not in the alphabet!");
-      return false;
-    }
-  }
+// function inputDeterminismCheck(input: string){
+//   for(let char of input){
+//     if(!(char in alphabet)){
+//       alert("Input contains " + char + ", which is not in the alphabet!");
+//       return false;
+//     }
+//   }
 
-  for(let node of circles){
-    const outArrows = node.outArrows;
-    for(let char of alphabet){
-      var exists: boolean = false;
-      for(let arrow of outArrows){
-        for(let transition of arrow.transition){
-          if (char === transition){
-            exists = true;
-            break;
-          }
-          if(!(transition in alphabet)){
-            alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
-            return false;
-          }
-        }
-      }
-      if(!exists){
-        alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
-        return false;
-      }
-    }
-  }
-  return true;
-}
+//   for(let node of circles){
+//     const outArrows = node.outArrows;
+//     for(let char of alphabet){
+//       var exists: boolean = false;
+//       for(let arrow of outArrows){
+//         for(let transition of arrow.transition){
+//           if (char === transition){
+//             exists = true;
+//             break;
+//           }
+//           if(!(transition in alphabet)){
+//             alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
+//             return false;
+//           }
+//         }
+//       }
+//       if(!exists){
+//         alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
+//         return false;
+//       }
+//     }
+//   }
+//   return true;
+// }
 
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
