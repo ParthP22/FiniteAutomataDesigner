@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import Script from 'next/script';
+// import { inputDeterminismCheck } from "../../../public/scripts/dfaCanvas";
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
@@ -93,7 +94,7 @@ export default function DFAPage() {
             </div>
         </div>
 
-        <Script src="/scripts/dfaCanvas.js" strategy="afterInteractive" />
+        <Script src="/scripts/dfaCanvas.js" type="module" strategy="afterInteractive" />
       </main>
       
     );
