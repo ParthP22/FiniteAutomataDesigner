@@ -1,13 +1,7 @@
 // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
 
 // Command to compile this file into JS
-//
-// First, go into terminal and cd into this directory.
-// Then, run the command below:
-// npx tsc -p tsconfig.json
-//
-// Make sure to delete the dfaCanvas.js file and the tsconfig.tsbuildinfo files
-// before running that command, else it doesn't compile properly (idk why as of 8/8/2025)
+// npm run build:canvas
 
 import {Circle, circles} from "./circle";
 import {Arrow, arrows} from "./arrow";
@@ -27,25 +21,6 @@ var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
 
 export var alphabet: string[] = ["0","1"];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // function transitionDeterminismCheck(circle: Circle, newTransition: string){
 //     const transition = newTransition.trim().split(",");
