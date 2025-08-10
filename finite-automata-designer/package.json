@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:canvas": "cd public/scripts && rollup -c rollup.config.js",
     "start": "next start",
     "lint": "next lint"
   },
@@ -17,12 +18,15 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "rollup": "^4.46.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
