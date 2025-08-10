@@ -225,46 +225,100 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     draw();
   });
 
+  // Whenever a key is pressed on the user's keyboard
   document.addEventListener('keydown', (event) => {
+    // If the "Shift" key is pressed, set
+    // shiftPressed = true, since it'll be used for
+    // other functions on the canvas.
     if (event.key === 'Shift') {
       shiftPressed = true;
     } 
 
+    // If we are currently selecting an object AND
+    // if the currently selected object has a "text"
+    // attribute, we will enter this if-statement
     if (selectedObj != null && 'text' in selectedObj) {
+
+      // This is for backspacing one letter at a time
       if(event.key === 'Backspace') {
         selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
         draw();
-      } else if (event.key === 'Delete') {
+      }
+
+      // If the "Delete" key is pressed on your keyboard
+      else if (event.key === 'Delete') {
+
+        // Iterate through all circles that are present
         for (var circ = 0; circ < circles.length; circ++) {
+          // If a circle is selected when "Delete" is pressed, 
+          // then delete that specific circle
           if (circles[circ] == selectedObj) {
             circles.splice(circ--, 1);
           }
         }
+
+        // Iterate through all arrows that are present
         for (var i = 0; i < arrows.length; i++) {
           const arrow = arrows[i];
+
+          // If an arrow is selected when "Delete" is pressed,
+          // then delete that specific arrow
           if (arrow == selectedObj) {
             arrows.splice(i--, 1);
           }
+
+          // If an arrow is a SelfArrow (looped arrow)
           if (arrow instanceof SelfArrow) {
+
+            // If the circle that the SelfArrow is looped
+            // on is the object being currently selected, then
+            // delete that SelfArrow as well since its associated
+            // circle is being deleted
             if (arrow.circle == selectedObj){
               arrows.splice(i--, 1);
             }
           }
+
+          // If an arrow is an EntryArrow
           if (arrow instanceof EntryArrow) {
+
+            // If the circle that the EntryArrow is being
+            // pointed to is the object being currently selected,
+            // then delete that EntryArrow as well since its
+            // associated circle is being deleted
             if (arrow.pointsToCircle == selectedObj) {
               arrows.splice(i--, 1);
             }
           }
+
+          // If an arrow is a regular Arrow
           if (arrow instanceof Arrow) {
+
+            // If either the startCircle or the endCircle of
+            // this Arrow is the object being currently selected,
+            // then delete the Arrow, since it will no longer
+            // have two safe endpoints to be connected to
             if (arrow.startCircle == selectedObj || arrow.endCircle == selectedObj) {
               arrows.splice(i--, 1)
             }
           } 
         }
+
+        // After all the arrows and circles present have been
+        // checked, we can draw the canvas again
         draw();
-      } else {
+      }
+      else {
+
+        // If a key of length 1 was pressed (such as a number or
+        // letter), we will append that character to the end of the 
+        // "text" attribute of that object, which will then be 
+        // displayed on the canvas
         if (event.key.length === 1) {
           selectedObj.text += event.key;
+
+          // After the new character has been appended to the object's
+          // "text" attribute, we will draw the canvas again
           draw()
         }
       }
