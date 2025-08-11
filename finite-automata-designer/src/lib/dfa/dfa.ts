@@ -3,23 +3,23 @@ import { alphabet } from "../../../public/scripts/dfaCanvas";
 import { Arrow } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
 
-function transitionDeterminismCheck(circle: Circle, newTransition: string){
+export function transitionDeterminismCheck(arrow: Arrow | SelfArrow | null, newTransition: string){
     const transition = newTransition.trim().split(",");
 
-    circle.outArrows.forEach((arrow: Arrow) => {
-        const oldTransition = arrow.transition;
-        oldTransition.forEach((oldTransition: string) => {
-            transition.forEach((newTransition: string) => {
-                if(newTransition === oldTransition){
-                    return false;
-                }
-            });
-        });
-    });
+    // circle.outArrows.forEach((arrow: Arrow) => {
+    //     const oldTransition = arrow.transition;
+    //     oldTransition.forEach((oldTransition: string) => {
+    //         transition.forEach((newTransition: string) => {
+    //             if(newTransition === oldTransition){
+    //                 return false;
+    //             }
+    //         });
+    //     });
+    // });
     return true;
 }
 
-function inputDeterminismCheck(input: string){
+export function inputDeterminismCheck(input: string){
   for(let char of input){
     if(!(char in alphabet)){
       alert("Input contains " + char + ", which is not in the alphabet!");
