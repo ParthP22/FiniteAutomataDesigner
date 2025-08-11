@@ -2,10 +2,11 @@ import { Circle, circles } from "../../../public/scripts/circle";
 import { alphabet } from "../../../public/scripts/dfaCanvas";
 import { Arrow } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
+import { lastEditedArrow } from "../../../public/scripts/dfaCanvas";
 
-export function transitionDeterminismCheck(arrow: Arrow | SelfArrow | null, newTransition: string){
-    const transition = newTransition.trim().split(",");
-
+export function transitionDeterminismCheck(){
+    const transition = lastEditedArrow?.text.trim().split(",");
+    alert(transition);
     // circle.outArrows.forEach((arrow: Arrow) => {
     //     const oldTransition = arrow.transition;
     //     oldTransition.forEach((oldTransition: string) => {
