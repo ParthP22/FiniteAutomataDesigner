@@ -1,7 +1,9 @@
 'use client';
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Script from 'next/script';
+import { typingMode, lastEditedArrow } from "../../../public/scripts/dfaCanvas";
+import { transitionDeterminismCheck } from "@/lib/dfa/dfa";
 // import { inputDeterminismCheck } from "../../../public/scripts/dfaCanvas";
 
 export default function DFAPage() {
@@ -10,6 +12,17 @@ export default function DFAPage() {
     const [inputString, setInputString] = useState("");
     const [alphabet, setAlphabet] = useState("");
     const [result, setResult] = useState<null | boolean>(null);
+    // const [typingMode, setTypingMode] = useState(false);
+    
+    // This piece of commented out code below throws an error on NextJS
+    // for dfaCanvas.ts, saying 'document' is not defined for the piece
+    // of code at the end of that file where you attach the canvas to
+    // this file.
+    // useEffect(() => {
+    //     if(typingMode === false){
+    //         transitionDeterminismCheck(lastEditedArrow,inputString);
+    //     }
+    // }, [typingMode]);
 
     const handleRun = () => {
         
