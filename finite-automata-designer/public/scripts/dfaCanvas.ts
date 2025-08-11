@@ -13,7 +13,8 @@ import { snapToPadding, selectedObj as selectedObject } from "./draw";
 // Cannot assign the import itself, so I'm setting it as a new variable here
 var selectedObj = selectedObject;
 
-var highlight = 'blue';
+var hightlightSelected = 'blue';
+var highlightTyping = 'red'
 var base = 'black';
 var dragging = false;
 var shiftPressed = false;
@@ -84,13 +85,15 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
     for (var circle = 0; circle < circles.length; circle++) {
       ctx.lineWidth= 1;
-      ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? highlight : base;
+                                                                            // If we're in typing mode, use the red highlight, else blue highlight
+      ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
       circles[circle].draw(ctx);
     }
 
     for (var arrow = 0; arrow < arrows.length; arrow++) {
       ctx.lineWidth = 1;
-      ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? highlight : base;
+                                                                            // If we're in typing mode, use the red highlight, else blue highlight
+      ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
       arrows[arrow].draw(ctx);
     }
 
