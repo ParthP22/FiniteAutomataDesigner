@@ -17,6 +17,7 @@ var highlight = 'blue';
 var base = 'black';
 var dragging = false;
 var shiftPressed = false;
+var typingMode = false;
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
 
@@ -225,6 +226,18 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     draw();
   });
 
+  
+
+  // Whenever you right an object with your mouse
+  canvas.addEventListener('contextmenu', (event) => {
+    if(selectedObj !== null && (
+      selectedObj instanceof Arrow || 
+      selectedObj instanceof SelfArrow ||
+      selectedObj instanceof Circle)){
+        typingMode = true;
+    }
+  });
+
   // Whenever a key is pressed on the user's keyboard
   document.addEventListener('keydown', (event) => {
     // If the "Shift" key is pressed, set
@@ -240,7 +253,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     if (selectedObj != null && 'text' in selectedObj) {
 
       // This is for backspacing one letter at a time
-      if(event.key === 'Backspace') {
+      if(event.key === 'Backspace' && typingMode) {
         selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
         draw();
       }
@@ -314,7 +327,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         // letter), we will append that character to the end of the 
         // "text" attribute of that object, which will then be 
         // displayed on the canvas
-        if (event.key.length === 1) {
+        if (event.key.length === 1 && typingMode) {
           selectedObj.text += event.key;
 
           // After the new character has been appended to the object's
