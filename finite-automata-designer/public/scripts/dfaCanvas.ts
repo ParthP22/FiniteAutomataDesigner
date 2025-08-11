@@ -103,6 +103,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   /* Event Handlers */
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
+    event.preventDefault();
     switch(event.button){
       case 0:
         typingMode = false;
@@ -242,17 +243,9 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     draw();
   });
 
-
-
-  // Whenever you right an object with your mouse
-  // canvas.addEventListener('contextmenu', (event) => {
-  //   if(selectedObj !== null && (
-  //     selectedObj instanceof Arrow || 
-  //     selectedObj instanceof SelfArrow ||
-  //     selectedObj instanceof Circle)){
-  //       typingMode = true;
-  //   }
-  // });
+  // This disables the default context menu on the canvas, since it was getting annoying
+  // having to press Esc every time I right-clicked on an object when I wanted to type.
+  canvas.addEventListener('contextmenu', event => event.preventDefault());
 
   // Whenever a key is pressed on the user's keyboard
   document.addEventListener('keydown', (event) => {
