@@ -103,6 +103,22 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   /* Event Handlers */
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
+    switch(event.button){
+      case 0:
+        typingMode = false;
+        break;
+      case 2:
+        if(selectedObj !== null && (
+          selectedObj instanceof Arrow || 
+          selectedObj instanceof SelfArrow ||
+          selectedObj instanceof Circle)){
+
+            typingMode = true;
+        }
+        break;
+    }
+
+
     var mouse = getMousePos(event)
     selectedObj = mouseCollision(mouse.x, mouse.y);
     dragging = false;
@@ -226,17 +242,17 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     draw();
   });
 
-  
+
 
   // Whenever you right an object with your mouse
-  canvas.addEventListener('contextmenu', (event) => {
-    if(selectedObj !== null && (
-      selectedObj instanceof Arrow || 
-      selectedObj instanceof SelfArrow ||
-      selectedObj instanceof Circle)){
-        typingMode = true;
-    }
-  });
+  // canvas.addEventListener('contextmenu', (event) => {
+  //   if(selectedObj !== null && (
+  //     selectedObj instanceof Arrow || 
+  //     selectedObj instanceof SelfArrow ||
+  //     selectedObj instanceof Circle)){
+  //       typingMode = true;
+  //   }
+  // });
 
   // Whenever a key is pressed on the user's keyboard
   document.addEventListener('keydown', (event) => {
