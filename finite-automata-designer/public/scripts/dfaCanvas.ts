@@ -295,7 +295,21 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         // "text" attribute of that object, which will then be 
         // displayed on the canvas
         if (event.key.length === 1 && typingMode) {
-          selectedObj.text += event.key;
+          // If the current object that is being typed on is an Arrow or SelfArrow,
+          // then we will check if the character being typed is defined in the alphabet.
+          // If not, we will alert the user.
+          if(selectedObj instanceof Arrow || selectedObj instanceof SelfArrow){
+            if(event.key in alphabet || event.key === ','){
+              selectedObj.text += event.key;
+            }
+            else{
+              alert(event.key + " is not defined in the alphabet!");
+            }
+          }
+          else{
+            selectedObj.text += event.key;
+          }
+          
 
           // After the new character has been appended to the object's
           // "text" attribute, we will draw the canvas again
