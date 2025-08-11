@@ -407,10 +407,12 @@ var DfaCanvas = (function (exports) {
     // npm run build:canvas
     // Cannot assign the import itself, so I'm setting it as a new variable here
     var selectedObj = selectedObj$1;
-    var highlight = 'blue';
+    var hightlightSelected = 'blue';
+    var highlightTyping = 'red';
     var base = 'black';
     var dragging = false;
     var shiftPressed = false;
+    var typingMode = false;
     var startClick = null;
     var tempArrow = null;
     var alphabet = ["0", "1"];
@@ -471,12 +473,14 @@ var DfaCanvas = (function (exports) {
             // ctx?.translate(0.5, 0.5);
             for (var circle = 0; circle < circles.length; circle++) {
                 ctx.lineWidth = 1;
-                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? highlight : base;
+                // If we're in typing mode, use the red highlight, else blue highlight
+                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
                 circles[circle].draw(ctx);
             }
             for (var arrow = 0; arrow < arrows.length; arrow++) {
                 ctx.lineWidth = 1;
-                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? highlight : base;
+                // If we're in typing mode, use the red highlight, else blue highlight
+                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
                 arrows[arrow].draw(ctx);
             }
             if (tempArrow != null) {
@@ -487,6 +491,19 @@ var DfaCanvas = (function (exports) {
         }
         /* Event Handlers */
         canvas.addEventListener('mousedown', function (event) {
+            event.preventDefault();
+            switch (event.button) {
+                case 0:
+                    typingMode = false;
+                    break;
+                case 2:
+                    if (selectedObj !== null && (selectedObj instanceof Arrow ||
+                        selectedObj instanceof SelfArrow ||
+                        selectedObj instanceof Circle)) {
+                        typingMode = true;
+                    }
+                    break;
+            }
             var mouse = getMousePos(event);
             selectedObj = mouseCollision(mouse.x, mouse.y);
             dragging = false;
@@ -604,47 +621,88 @@ var DfaCanvas = (function (exports) {
             }
             draw();
         });
+        // This disables the default context menu on the canvas, since it was getting annoying
+        // having to press Esc every time I right-clicked on an object when I wanted to type.
+        canvas.addEventListener('contextmenu', function (event) { return event.preventDefault(); });
+        // Whenever a key is pressed on the user's keyboard
         document.addEventListener('keydown', function (event) {
+            // If the "Shift" key is pressed, set
+            // shiftPressed = true, since it'll be used for
+            // other functions on the canvas.
             if (event.key === 'Shift') {
                 shiftPressed = true;
             }
+            // If we are currently selecting an object AND
+            // if the currently selected object has a "text"
+            // attribute, we will enter this if-statement
             if (selectedObj != null && 'text' in selectedObj) {
-                if (event.key === 'Backspace') {
+                // This is for backspacing one letter at a time
+                if (event.key === 'Backspace' && typingMode) {
                     selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
                     draw();
                 }
+                // If the "Delete" key is pressed on your keyboard
                 else if (event.key === 'Delete') {
+                    // Iterate through all circles that are present
                     for (var circ = 0; circ < circles.length; circ++) {
+                        // If a circle is selected when "Delete" is pressed, 
+                        // then delete that specific circle
                         if (circles[circ] == selectedObj) {
                             circles.splice(circ--, 1);
                         }
                     }
+                    // Iterate through all arrows that are present
                     for (var i = 0; i < arrows.length; i++) {
                         var arrow = arrows[i];
+                        // If an arrow is selected when "Delete" is pressed,
+                        // then delete that specific arrow
                         if (arrow == selectedObj) {
                             arrows.splice(i--, 1);
                         }
+                        // If an arrow is a SelfArrow (looped arrow)
                         if (arrow instanceof SelfArrow) {
+                            // If the circle that the SelfArrow is looped
+                            // on is the object being currently selected, then
+                            // delete that SelfArrow as well since its associated
+                            // circle is being deleted
                             if (arrow.circle == selectedObj) {
                                 arrows.splice(i--, 1);
                             }
                         }
+                        // If an arrow is an EntryArrow
                         if (arrow instanceof EntryArrow) {
+                            // If the circle that the EntryArrow is being
+                            // pointed to is the object being currently selected,
+                            // then delete that EntryArrow as well since its
+                            // associated circle is being deleted
                             if (arrow.pointsToCircle == selectedObj) {
                                 arrows.splice(i--, 1);
                             }
                         }
+                        // If an arrow is a regular Arrow
                         if (arrow instanceof Arrow) {
+                            // If either the startCircle or the endCircle of
+                            // this Arrow is the object being currently selected,
+                            // then delete the Arrow, since it will no longer
+                            // have two safe endpoints to be connected to
                             if (arrow.startCircle == selectedObj || arrow.endCircle == selectedObj) {
                                 arrows.splice(i--, 1);
                             }
                         }
                     }
+                    // After all the arrows and circles present have been
+                    // checked, we can draw the canvas again
                     draw();
                 }
                 else {
-                    if (event.key.length === 1) {
+                    // If a key of length 1 was pressed (such as a number or
+                    // letter), we will append that character to the end of the 
+                    // "text" attribute of that object, which will then be 
+                    // displayed on the canvas
+                    if (event.key.length === 1 && typingMode) {
                         selectedObj.text += event.key;
+                        // After the new character has been appended to the object's
+                        // "text" attribute, we will draw the canvas again
                         draw();
                     }
                 }
