@@ -10,15 +10,16 @@ import {EntryArrow} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding, selectedObj as selectedObject } from "./draw";
 
-// Cannot assign the import itself, so I'm setting it as a new variable here
+// Cannot assign the import itself to a new value, so I'm setting it as a new variable here
+// so we can modify it later
 var selectedObj = selectedObject;
-
+export var lastEditedArrow: Arrow | SelfArrow | null = null;
 var hightlightSelected = 'blue';
 var highlightTyping = 'red'
 var base = 'black';
 var dragging = false;
 var shiftPressed = false;
-var typingMode = false;
+export var typingMode = false;
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
 
@@ -67,7 +68,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           selectedObj instanceof Arrow || 
           selectedObj instanceof SelfArrow ||
           selectedObj instanceof Circle)){
-
+            // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
+            // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
+            // to verify if the transition is valid for the DFA.
+            lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : lastEditedArrow);
             typingMode = true;
         }
         break;
