@@ -1,12 +1,14 @@
 import { Circle, circles } from "../../../public/scripts/circle";
-import { alphabet } from "../../../public/scripts/dfaCanvas";
+import { alphabet } from "../../../public/scripts/alphabet";
 import { Arrow } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
-import { lastEditedArrow } from "../../../public/scripts/dfaCanvas";
 
-export function transitionDeterminismCheck(){
-    const transition = lastEditedArrow?.text.trim().split(",");
-    alert(transition);
+export function transitionDeterminismCheck(newTransition: Arrow | SelfArrow | null){
+    if(newTransition === null){
+      return;
+    }
+    const transition = newTransition.text.trim().split(",");
+    alert("The transitionDeterminismCheck is running!!");
     // circle.outArrows.forEach((arrow: Arrow) => {
     //     const oldTransition = arrow.transition;
     //     oldTransition.forEach((oldTransition: string) => {
