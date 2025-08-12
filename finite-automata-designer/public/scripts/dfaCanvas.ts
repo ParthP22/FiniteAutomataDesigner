@@ -9,6 +9,8 @@ import {SelfArrow} from "./SelfArrow";
 import {EntryArrow} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding, selectedObj as selectedObject } from "./draw";
+// import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa";
+import { alphabet } from "./alphabet";
 
 // Cannot assign the import itself to a new value, so I'm setting it as a new variable here
 // so we can modify it later
@@ -22,8 +24,6 @@ var shiftPressed = false;
 export var typingMode = false;
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
-
-export var alphabet: string[] = ["0","1"];
 
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
@@ -61,7 +61,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     event.preventDefault();
     switch(event.button){
       case 0:
-        typingMode = false;
+        if(typingMode){
+          // transitionDeterminismCheck(lastEditedArrow);
+          typingMode = false;
+        }
         break;
       case 2:
         if(selectedObj !== null && (
