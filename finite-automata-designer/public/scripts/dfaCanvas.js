@@ -402,65 +402,23 @@ var DfaCanvas = (function (exports) {
         return TemporaryArrow;
     }());
 
+    var alphabet = ["0", "1"];
+
     // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
     // Command to compile this file into JS
     // npm run build:canvas
-    // Cannot assign the import itself, so I'm setting it as a new variable here
+    // Cannot assign the import itself to a new value, so I'm setting it as a new variable here
+    // so we can modify it later
     var selectedObj = selectedObj$1;
+    exports.lastEditedArrow = null;
     var hightlightSelected = 'blue';
     var highlightTyping = 'red';
     var base = 'black';
     var dragging = false;
     var shiftPressed = false;
-    var typingMode = false;
+    exports.typingMode = false;
     var startClick = null;
     var tempArrow = null;
-    var alphabet = ["0", "1"];
-    // function transitionDeterminismCheck(circle: Circle, newTransition: string){
-    //     const transition = newTransition.trim().split(",");
-    //     circle.outArrows.forEach((arrow: Arrow) => {
-    //         const oldTransition = arrow.transition;
-    //         oldTransition.forEach((oldTransition: string) => {
-    //             transition.forEach((newTransition: string) => {
-    //                 if(newTransition === oldTransition){
-    //                     return false;
-    //                 }
-    //             });
-    //         });
-    //     });
-    //     return true;
-    // }
-    // function inputDeterminismCheck(input: string){
-    //   for(let char of input){
-    //     if(!(char in alphabet)){
-    //       alert("Input contains " + char + ", which is not in the alphabet!");
-    //       return false;
-    //     }
-    //   }
-    //   for(let node of circles){
-    //     const outArrows = node.outArrows;
-    //     for(let char of alphabet){
-    //       var exists: boolean = false;
-    //       for(let arrow of outArrows){
-    //         for(let transition of arrow.transition){
-    //           if (char === transition){
-    //             exists = true;
-    //             break;
-    //           }
-    //           if(!(transition in alphabet)){
-    //             alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
-    //             return false;
-    //           }
-    //         }
-    //       }
-    //       if(!exists){
-    //         alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
-    //         return false;
-    //       }
-    //     }
-    //   }
-    //   return true;
-    // }
     function setupDfaCanvas(canvas) {
         var ctx = canvas.getContext('2d');
         if (!ctx)
@@ -474,13 +432,13 @@ var DfaCanvas = (function (exports) {
             for (var circle = 0; circle < circles.length; circle++) {
                 ctx.lineWidth = 1;
                 // If we're in typing mode, use the red highlight, else blue highlight
-                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
+                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((exports.typingMode) ? highlightTyping : hightlightSelected) : base;
                 circles[circle].draw(ctx);
             }
             for (var arrow = 0; arrow < arrows.length; arrow++) {
                 ctx.lineWidth = 1;
                 // If we're in typing mode, use the red highlight, else blue highlight
-                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
+                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((exports.typingMode) ? highlightTyping : hightlightSelected) : base;
                 arrows[arrow].draw(ctx);
             }
             if (tempArrow != null) {
@@ -494,13 +452,20 @@ var DfaCanvas = (function (exports) {
             event.preventDefault();
             switch (event.button) {
                 case 0:
-                    typingMode = false;
+                    if (exports.typingMode) {
+                        // transitionDeterminismCheck(lastEditedArrow);
+                        exports.typingMode = false;
+                    }
                     break;
                 case 2:
                     if (selectedObj !== null && (selectedObj instanceof Arrow ||
                         selectedObj instanceof SelfArrow ||
                         selectedObj instanceof Circle)) {
-                        typingMode = true;
+                        // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
+                        // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
+                        // to verify if the transition is valid for the DFA.
+                        exports.lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : exports.lastEditedArrow);
+                        exports.typingMode = true;
                     }
                     break;
             }
@@ -637,7 +602,7 @@ var DfaCanvas = (function (exports) {
             // attribute, we will enter this if-statement
             if (selectedObj != null && 'text' in selectedObj) {
                 // This is for backspacing one letter at a time
-                if (event.key === 'Backspace' && typingMode) {
+                if (event.key === 'Backspace' && exports.typingMode) {
                     selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
                     draw();
                 }
@@ -699,8 +664,21 @@ var DfaCanvas = (function (exports) {
                     // letter), we will append that character to the end of the 
                     // "text" attribute of that object, which will then be 
                     // displayed on the canvas
-                    if (event.key.length === 1 && typingMode) {
-                        selectedObj.text += event.key;
+                    if (event.key.length === 1 && exports.typingMode) {
+                        // If the current object that is being typed on is an Arrow or SelfArrow,
+                        // then we will check if the character being typed is defined in the alphabet.
+                        // If not, we will alert the user.
+                        if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
+                            if (event.key in alphabet || event.key === ',') {
+                                selectedObj.text += event.key;
+                            }
+                            else {
+                                alert(event.key + " is not defined in the alphabet!");
+                            }
+                        }
+                        else {
+                            selectedObj.text += event.key;
+                        }
                         // After the new character has been appended to the object's
                         // "text" attribute, we will draw the canvas again
                         draw();
@@ -765,8 +743,6 @@ var DfaCanvas = (function (exports) {
         }
     }
     attachWhenReady();
-
-    exports.alphabet = alphabet;
 
     return exports;
 
