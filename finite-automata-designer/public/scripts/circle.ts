@@ -11,6 +11,7 @@ export class Circle {
   isAccept: boolean;
   text: string;
   outArrows: Arrow[];
+  inArrows: Arrow[];
   loop: boolean;
 
   constructor(x: number, y: number) {
@@ -21,6 +22,7 @@ export class Circle {
     this.isAccept = false;
     this.text = '';
     this.outArrows = [];
+    this.inArrows = [];
     this.loop = false;
   }
 
