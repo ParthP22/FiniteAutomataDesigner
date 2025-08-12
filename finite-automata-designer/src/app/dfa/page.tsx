@@ -25,7 +25,7 @@ export default function DFAPage() {
     // this file.
     useEffect(() => {
         if(typingMode === false){
-            transitionDeterminismCheck(lastEditedArrow);
+            transitionDeterminismCheck(/*lastEditedArrow*/);
             //alert("The transitionDeterminismCheck is running!!");
         }
     }, [typingMode]);
