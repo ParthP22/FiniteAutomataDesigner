@@ -4,6 +4,7 @@ import { EntryArrow } from "./EntryArrow";
 import { snapToPadding, nodeRadius, drawArrow, drawText, selectedObj, hitTargetPadding } from "./draw";
 
 export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
+export var lastEditedArrow: Arrow | SelfArrow | null = null;
 
 function circleFromThreePoints(
   x1: number, 
@@ -52,6 +53,7 @@ export class Arrow {
     this.endCircle = endCircle;
 
     startCircle.outArrows.push(this);
+    endCircle.inArrows.push(this);
 
     this.text = '';
     this.lineAngleAdjust = 0;
