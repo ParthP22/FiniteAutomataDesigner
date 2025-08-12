@@ -1,0 +1,1 @@
+export var alphabet: string[] = ["0","1"];
