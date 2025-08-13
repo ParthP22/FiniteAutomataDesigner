@@ -41,8 +41,8 @@
     }
 
     var circles = [];
-    var Circle = /** @class */ (function () {
-        function Circle(x, y) {
+    class Circle {
+        constructor(x, y) {
             this.x = x,
                 this.y = y;
             this.mouseOffsetX = 0;
@@ -53,15 +53,15 @@
             this.inArrows = [];
             this.loop = false;
         }
-        Circle.prototype.setMouseStart = function (x, y) {
+        setMouseStart(x, y) {
             this.mouseOffsetX = this.x - x;
             this.mouseOffsetY = this.y - y;
-        };
-        Circle.prototype.setAnchorPoint = function (x, y) {
+        }
+        setAnchorPoint(x, y) {
             this.x = x + this.mouseOffsetX;
             this.y = y + this.mouseOffsetY;
-        };
-        Circle.prototype.draw = function (ctx) {
+        }
+        draw(ctx) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
             ctx.stroke();
@@ -71,8 +71,8 @@
                 ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
                 ctx.stroke();
             }
-        };
-        Circle.prototype.closestPointOnCircle = function (x, y) {
+        }
+        closestPointOnCircle(x, y) {
             var dx = x - this.x;
             var dy = y - this.y;
             var scale = Math.sqrt(dx * dx + dy * dy);
@@ -80,14 +80,25 @@
                 'x': this.x + dx * nodeRadius / scale,
                 'y': this.y + dy * nodeRadius / scale
             };
-        };
-        Circle.prototype.containsPoint = function (x, y) {
+        }
+        containsPoint(x, y) {
             return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
-        };
-        return Circle;
-    }());
+        }
+    }
 
     var arrows = [];
+    // export var lastEditedArrow: Arrow | SelfArrow | null = null;
+    // export interface SharedState {
+    //     lastEditedArrow: Arrow | SelfArrow | null;
+    // }  
+    // export var sharedState: {
+    //     lastEditedArrow: Arrow | SelfArrow | null;
+    // } = {
+    //     lastEditedArrow: null,
+    // };
+    // export var sharedState = {
+    //     {lastEditedArrow: lastEditedArrowType;} = {lastEditedArrow = null}
+    // };
     function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
         var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
@@ -102,8 +113,8 @@
     function det(a, b, c, d, e, f, g, h, i) {
         return a * e * i + b * f * g + c * d * h - a * f * h - b * d * i - c * e * g;
     }
-    var Arrow = /** @class */ (function () {
-        function Arrow(startCircle, endCircle) {
+    class Arrow {
+        constructor(startCircle, endCircle) {
             this.startCircle = startCircle;
             this.endCircle = endCircle;
             startCircle.outArrows.push(this);
@@ -115,7 +126,7 @@
             this.perpendicularPart = 0; // pixels from start to end circle
             this.transition = [];
         }
-        Arrow.prototype.getAnchorPoint = function () {
+        getAnchorPoint() {
             var dx = this.endCircle.x - this.startCircle.x;
             var dy = this.endCircle.y - this.startCircle.y;
             var scale = Math.sqrt(dx * dx + dy * dy);
@@ -123,8 +134,8 @@
                 'x': this.startCircle.x + dx * this.parallelPart - dy * this.perpendicularPart / scale,
                 'y': this.startCircle.y + dy * this.parallelPart + dx * this.perpendicularPart / scale
             };
-        };
-        Arrow.prototype.setAnchorPoint = function (x, y) {
+        }
+        setAnchorPoint(x, y) {
             var dx = this.endCircle.x - this.startCircle.x;
             var dy = this.endCircle.y - this.startCircle.y;
             var scale = Math.sqrt(dx * dx + dy * dy);
@@ -135,8 +146,8 @@
                 this.lineAngleAdjust = (this.perpendicularPart < 0 ? 1 : 0) * Math.PI;
                 this.perpendicularPart = 0;
             }
-        };
-        Arrow.prototype.getEndPointsAndCircle = function () {
+        }
+        getEndPointsAndCircle() {
             if (this.perpendicularPart == 0) {
                 var midX = (this.startCircle.x + this.endCircle.x) / 2;
                 var midY = (this.startCircle.y + this.endCircle.y) / 2;
@@ -174,8 +185,8 @@
                 'reverseScale': reverseScale,
                 'isReversed': isReversed,
             };
-        };
-        Arrow.prototype.draw = function (ctx) {
+        }
+        draw(ctx) {
             var pointInfo = this.getEndPointsAndCircle();
             // draw arc
             ctx.beginPath();
@@ -221,8 +232,8 @@
                 //   alert("This transition fails the determinism check!");
                 // }
             }
-        };
-        Arrow.prototype.containsPoint = function (x, y) {
+        }
+        containsPoint(x, y) {
             var stuff = this.getEndPointsAndCircle();
             if (stuff.hasCircle && stuff.circleX) {
                 var dx = x - stuff.circleX;
@@ -258,12 +269,11 @@
                 return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
             }
             return false;
-        };
-        return Arrow;
-    }());
+        }
+    }
 
-    var SelfArrow = /** @class */ (function () {
-        function SelfArrow(pointsToCircle, point) {
+    class SelfArrow {
+        constructor(pointsToCircle, point) {
             this.circle = pointsToCircle;
             this.circle.loop = true;
             this.anchorAngle = 0;
@@ -274,7 +284,7 @@
                 this.setAnchorPoint(point.x, point.y);
             }
         }
-        SelfArrow.prototype.draw = function (ctx) {
+        draw(ctx) {
             var arcInfo = this.getEndPointsAndCircle();
             // draw arc
             ctx.beginPath();
@@ -286,11 +296,11 @@
             drawText(ctx, this.text, textX, textY, this.anchorAngle);
             // draw the head of the arrow
             drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
-        };
-        SelfArrow.prototype.setMouseStart = function (x, y) {
+        }
+        setMouseStart(x, y) {
             this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.circle.y, x - this.circle.x);
-        };
-        SelfArrow.prototype.setAnchorPoint = function (x, y) {
+        }
+        setAnchorPoint(x, y) {
             this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
             // snap to 90 degrees
             var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
@@ -301,8 +311,8 @@
                 this.anchorAngle += 2 * Math.PI;
             if (this.anchorAngle > Math.PI)
                 this.anchorAngle -= 2 * Math.PI;
-        };
-        SelfArrow.prototype.getEndPointsAndCircle = function () {
+        }
+        getEndPointsAndCircle() {
             var circleX = this.circle.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
             var circleY = this.circle.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
             var circleRadius = 0.75 * nodeRadius;
@@ -324,19 +334,18 @@
                 'circleY': circleY,
                 'circleRadius': circleRadius
             };
-        };
-        SelfArrow.prototype.containsPoint = function (x, y) {
+        }
+        containsPoint(x, y) {
             var stuff = this.getEndPointsAndCircle();
             var dx = x - stuff.circleX;
             var dy = y - stuff.circleY;
             var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
             return (Math.abs(distance) < hitTargetPadding);
-        };
-        return SelfArrow;
-    }());
+        }
+    }
 
-    var EntryArrow = /** @class */ (function () {
-        function EntryArrow(pointsToCircle, startPoint) {
+    class EntryArrow {
+        constructor(pointsToCircle, startPoint) {
             this.pointsToCircle = pointsToCircle;
             this.deltaX = 0;
             this.deltaY = 0;
@@ -345,7 +354,7 @@
                 this.setAnchorPoint(startPoint.x, startPoint.y);
             }
         }
-        EntryArrow.prototype.draw = function (ctx) {
+        draw(ctx) {
             var points = this.getEndPoints();
             ctx.beginPath();
             ctx.moveTo(points.startX, points.startY);
@@ -356,16 +365,16 @@
             drawText(ctx, this.text, points.startX, points.startY, textAngle);
             // Draw the head of the arrow
             drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
-        };
-        EntryArrow.prototype.setAnchorPoint = function (x, y) {
+        }
+        setAnchorPoint(x, y) {
             this.deltaX = x - this.pointsToCircle.x;
             this.deltaY = y - this.pointsToCircle.y;
             if (Math.abs(this.deltaX) < snapToPadding)
                 this.deltaX = 0;
             if (Math.abs(this.deltaY) < snapToPadding)
                 this.deltaY = 0;
-        };
-        EntryArrow.prototype.getEndPoints = function () {
+        }
+        getEndPoints() {
             var startX = this.pointsToCircle.x + this.deltaX;
             var startY = this.pointsToCircle.y + this.deltaY;
             var end = this.pointsToCircle.closestPointOnCircle(startX, startY);
@@ -375,8 +384,8 @@
                 'endX': end.x,
                 'endY': end.y,
             };
-        };
-        EntryArrow.prototype.containsPoint = function (x, y) {
+        }
+        containsPoint(x, y) {
             var lineInfo = this.getEndPoints();
             var dx = lineInfo.endX - lineInfo.startX;
             var dy = lineInfo.endY - lineInfo.startY;
@@ -384,31 +393,91 @@
             var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
             var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
             return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
-        };
-        return EntryArrow;
-    }());
+        }
+    }
 
-    var TemporaryArrow = /** @class */ (function () {
-        function TemporaryArrow(startPoint, endPoint) {
+    class TemporaryArrow {
+        constructor(startPoint, endPoint) {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
         }
-        TemporaryArrow.prototype.draw = function (ctx) {
+        draw(ctx) {
             ctx.beginPath();
             ctx.moveTo(this.endPoint.x, this.endPoint.y);
             ctx.lineTo(this.startPoint.x, this.startPoint.y);
             ctx.stroke();
             drawArrow(ctx, this.endPoint.x, this.endPoint.y, Math.atan2(this.endPoint.y - this.startPoint.y, this.endPoint.x - this.startPoint.x));
-        };
-        return TemporaryArrow;
-    }());
+        }
+    }
 
     var alphabet = ["0", "1"];
+
+    // I haven't figured out how to stop compiling the imports into JS, so here's a command
+    // to get rid of them once you cd into their directory lol:
+    // rm alphabet.js && rm arrow.js && rm circle.js && rm draw.js && rm EntryArrow.js && rm SelfArrow.js
+    function transitionDeterminismCheck(lastEditedArrow) {
+        if (lastEditedArrow == null) {
+            console.log("null");
+            return;
+        }
+        else {
+            alert("The transitionDeterminismCheck is running!!");
+            console.log(lastEditedArrow.constructor.name);
+        }
+        const newTransitions = lastEditedArrow.text.trim().split(",");
+        // (from Parth): I just realized a trick for this. I was thinking about checking all the inArrows
+        // and outArrows of both the startCircle and endCircle, but I'm just going to be checking the
+        // outArrows of the endCircle and the inArrows of the startCircle. This way, every single inArrow
+        // for the endCircle and every single outArrow of the startCircle will be checked by this function.
+        // I can't come up with a better explanation right now, but if I come up with one later, I will
+        // jot it down here.
+        if (lastEditedArrow instanceof Arrow) {
+            const outArrows = lastEditedArrow.endCircle.outArrows;
+            for (let arrow of outArrows) {
+                const oldTransitions = arrow.transition;
+                for (let oldTransition of oldTransitions) {
+                    for (let newTransition of newTransitions) {
+                        if (newTransition === oldTransition) {
+                            alert("This translation violates determinism since " + newTransition + " is already present for this terminal node of this arrow");
+                            return false;
+                        }
+                    }
+                }
+            }
+            const inArrows = lastEditedArrow.startCircle.inArrows;
+            for (let arrow of inArrows) {
+                const oldTransitions = arrow.transition;
+                for (let oldTransition of oldTransitions) {
+                    for (let newTransition of newTransitions) {
+                        if (newTransition === oldTransition) {
+                            alert("This translation violates determinism since " + newTransition + " is already present for this start node of this arrow");
+                            return false;
+                        }
+                    }
+                }
+            }
+            alert("This transition works!");
+            return true;
+            // lastEditedArrow.startCircle.outArrows.forEach((arrow: Arrow) => {
+            //     const oldTransition = arrow.transition;
+            //     oldTransition.forEach((oldTransition: string) => {
+            //         transition.forEach((newTransition: string) => {
+            //             if(newTransition === oldTransition){
+            //                 return false;
+            //             }
+            //         });
+            //     });
+            // });
+        }
+        // else if(lastEditedArrow instanceof SelfArrow){
+        // }
+        return true;
+    }
 
     // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
     // Command to compile this file into JS
     // npm run build:canvas
-    // export var lastEditedArrow: Arrow | SelfArrow | null = null;
+    var lastEditedArrow = null;
     var selectedObj = null;
     var hightlightSelected = 'blue';
     var highlightTyping = 'red';
@@ -419,7 +488,7 @@
     var startClick = null;
     var tempArrow = null;
     function setupDfaCanvas(canvas) {
-        var ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
         if (!ctx)
             return;
         function draw() {
@@ -447,12 +516,13 @@
             }
         }
         /* Event Handlers */
-        canvas.addEventListener('mousedown', function (event) {
+        canvas.addEventListener('mousedown', (event) => {
             event.preventDefault();
             switch (event.button) {
                 case 0:
                     if (typingMode) {
-                        // transitionDeterminismCheck(lastEditedArrow);
+                        // alert("transitionDeterminismCheck is running!!");
+                        transitionDeterminismCheck(lastEditedArrow);
                         typingMode = false;
                     }
                     break;
@@ -463,7 +533,14 @@
                         // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
                         // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
                         // to verify if the transition is valid for the DFA.
-                        console.log("setting lasteditedarrow");
+                        // console.log("setting lasteditedarrow");
+                        // setLastEditedArrow(((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : getLastEditedArrow()));
+                        // const lastEditedArrow = getLastEditedArrow();
+                        // if(lastEditedArrow){  
+                        //   // console.log("LastEditedArrowRef from DFACanvas:" + lastEditedArrow);
+                        //   console.log(lastEditedArrow.constructor.name);
+                        // }
+                        lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : lastEditedArrow);
                         typingMode = true;
                     }
                     break;
@@ -490,7 +567,7 @@
             }
             draw();
         });
-        canvas.addEventListener('dblclick', function (event) {
+        canvas.addEventListener('dblclick', (event) => {
             var mouse = getMousePos(event);
             selectedObj = mouseCollision(mouse.x, mouse.y);
             if (selectedObj == null) {
@@ -505,7 +582,7 @@
                 draw();
             }
         });
-        canvas.addEventListener('mousemove', function (event) {
+        canvas.addEventListener('mousemove', (event) => {
             var mouse = getMousePos(event);
             if (tempArrow != null) {
                 var targetCircle = mouseCollision(mouse.x, mouse.y);
@@ -534,14 +611,14 @@
                 draw();
             }
             if (dragging) {
-                selectedObj === null || selectedObj === void 0 ? void 0 : selectedObj.setAnchorPoint(mouse.x, mouse.y);
+                selectedObj?.setAnchorPoint(mouse.x, mouse.y);
                 if (selectedObj instanceof Circle) {
                     snapAlignCircle(selectedObj);
                 }
                 draw();
             }
         });
-        canvas.addEventListener('mouseup', function (event) {
+        canvas.addEventListener('mouseup', (event) => {
             dragging = false;
             if (tempArrow != null) {
                 if (!(tempArrow instanceof TemporaryArrow)) {
@@ -587,9 +664,9 @@
         });
         // This disables the default context menu on the canvas, since it was getting annoying
         // having to press Esc every time I right-clicked on an object when I wanted to type.
-        canvas.addEventListener('contextmenu', function (event) { return event.preventDefault(); });
+        canvas.addEventListener('contextmenu', event => event.preventDefault());
         // Whenever a key is pressed on the user's keyboard
-        document.addEventListener('keydown', function (event) {
+        document.addEventListener('keydown', (event) => {
             // If the "Shift" key is pressed, set
             // shiftPressed = true, since it'll be used for
             // other functions on the canvas.
@@ -617,7 +694,7 @@
                     }
                     // Iterate through all arrows that are present
                     for (var i = 0; i < arrows.length; i++) {
-                        var arrow = arrows[i];
+                        const arrow = arrows[i];
                         // If an arrow is selected when "Delete" is pressed,
                         // then delete that specific arrow
                         if (arrow == selectedObj) {
@@ -685,7 +762,7 @@
                 }
             }
         });
-        document.addEventListener('keyup', function (event) {
+        document.addEventListener('keyup', (event) => {
             if (event.key === 'Shift') {
                 shiftPressed = false;
             }
@@ -705,8 +782,8 @@
             }
         }
         // Get the current mouse position inside the canvas
-        var getMousePos = function (event) {
-            var rect = canvas.getBoundingClientRect();
+        const getMousePos = (event) => {
+            const rect = canvas.getBoundingClientRect();
             return { x: event.clientX - rect.left, y: event.clientY - rect.top };
         };
         // Get the collided object at the point x, y
@@ -728,8 +805,8 @@
      * Attach automatically when DOM is ready.
      * --------------------------------------------------------- */
     function attachWhenReady() {
-        var run = function () {
-            var canvas = document.getElementById('DFACanvas');
+        const run = () => {
+            const canvas = document.getElementById('DFACanvas');
             if (canvas) {
                 setupDfaCanvas(canvas);
             }
