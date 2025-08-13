@@ -10,7 +10,7 @@ export class SelfArrow {
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
-    this.circle.loop = true;
+    this.circle.loop = this;
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
     this.text = '';
