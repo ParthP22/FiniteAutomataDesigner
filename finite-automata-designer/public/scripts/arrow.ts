@@ -4,11 +4,24 @@ import { EntryArrow } from "./EntryArrow";
 import { snapToPadding, nodeRadius, drawArrow, drawText, hitTargetPadding } from "./draw";
 
 export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
-export var lastEditedArrow: Arrow | SelfArrow | null = null;
+// export var lastEditedArrow: Arrow | SelfArrow | null = null;
 
-export function setLastEditedArrow(updatedArrow: Arrow | SelfArrow | null){
-    lastEditedArrow = updatedArrow;
-}
+// export interface SharedState {
+//     lastEditedArrow: Arrow | SelfArrow | null;
+// }  
+
+// export var sharedState: {
+//     lastEditedArrow: Arrow | SelfArrow | null;
+// } = {
+//     lastEditedArrow: null,
+// };
+
+// export var sharedState = {
+//     {lastEditedArrow: lastEditedArrowType;} = {lastEditedArrow = null}
+// };
+
+
+
 
 function circleFromThreePoints(
   x1: number, 
