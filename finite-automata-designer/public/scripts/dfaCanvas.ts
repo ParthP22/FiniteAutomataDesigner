@@ -4,16 +4,16 @@
 // npm run build:canvas
 
 import {Circle, circles} from "./circle";
-import {Arrow, arrows, lastEditedArrow, setLastEditedArrow} from "./arrow";
+import {Arrow, arrows} from "./arrow";
 import {SelfArrow} from "./SelfArrow";
 import {EntryArrow} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
-// import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa";
+import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa";
 import { alphabet } from "./alphabet";
 
 
-// export var lastEditedArrow: Arrow | SelfArrow | null = null;
+var lastEditedArrow: Arrow | SelfArrow | null = null;
 
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
 var hightlightSelected = 'blue';
@@ -62,7 +62,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     switch(event.button){
       case 0:
         if(typingMode){
-          // transitionDeterminismCheck(lastEditedArrow);
+          // alert("transitionDeterminismCheck is running!!");
+          transitionDeterminismCheck(lastEditedArrow);
           typingMode = false;
         }
         break;
@@ -74,8 +75,14 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
             // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
             // to verify if the transition is valid for the DFA.
-            console.log("setting lasteditedarrow");
-            setLastEditedArrow(((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : lastEditedArrow));
+            // console.log("setting lasteditedarrow");
+            // setLastEditedArrow(((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : getLastEditedArrow()));
+            // const lastEditedArrow = getLastEditedArrow();
+            // if(lastEditedArrow){  
+            //   // console.log("LastEditedArrowRef from DFACanvas:" + lastEditedArrow);
+            //   console.log(lastEditedArrow.constructor.name);
+            // }
+            lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : lastEditedArrow)
             typingMode = true;
         }
         break;
