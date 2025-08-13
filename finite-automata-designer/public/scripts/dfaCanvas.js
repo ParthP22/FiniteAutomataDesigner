@@ -49,9 +49,9 @@
             this.mouseOffsetY = 0;
             this.isAccept = false;
             this.text = '';
-            this.outArrows = [];
-            this.inArrows = [];
-            this.loop = false;
+            this.outArrows = new Set();
+            this.inArrows = new Set();
+            this.loop = null;
         }
         setMouseStart(x, y) {
             this.mouseOffsetX = this.x - x;
@@ -117,8 +117,8 @@
         constructor(startCircle, endCircle) {
             this.startCircle = startCircle;
             this.endCircle = endCircle;
-            startCircle.outArrows.push(this);
-            endCircle.inArrows.push(this);
+            startCircle.outArrows.add(this);
+            endCircle.inArrows.add(this);
             this.text = '';
             this.lineAngleAdjust = 0;
             // Make anchor point relative to the locations of start and end circles
@@ -275,7 +275,7 @@
     class SelfArrow {
         constructor(pointsToCircle, point) {
             this.circle = pointsToCircle;
-            this.circle.loop = true;
+            this.circle.loop = this;
             this.anchorAngle = 0;
             this.mouseOffsetAngle = 0;
             this.text = '';
@@ -424,53 +424,131 @@
             alert("The transitionDeterminismCheck is running!!");
             console.log(lastEditedArrow.constructor.name);
         }
+        // You don't want to check the transition for this current arrow
+        // when iterating through all the arrows, so just empty it here.
+        // If the transition is incorrect, then it'll remain empty.
+        // If the transition is correct, then we'll reassign it to a new
+        // value after all the checks.
+        lastEditedArrow.transition = [];
         const newTransitions = lastEditedArrow.text.trim().split(",");
-        // (from Parth): I just realized a trick for this. I was thinking about checking all the inArrows
-        // and outArrows of both the startCircle and endCircle, but I'm just going to be checking the
-        // outArrows of the endCircle and the inArrows of the startCircle. This way, every single inArrow
-        // for the endCircle and every single outArrow of the startCircle will be checked by this function.
-        // I can't come up with a better explanation right now, but if I come up with one later, I will
-        // jot it down here.
+        console.log(newTransitions);
         if (lastEditedArrow instanceof Arrow) {
-            const outArrows = lastEditedArrow.endCircle.outArrows;
-            for (let arrow of outArrows) {
+            // Check the outArrows of the initial node
+            const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
+            for (let arrow of startCircOutArrows) {
                 const oldTransitions = arrow.transition;
+                console.log("Old trans: " + oldTransitions);
                 for (let oldTransition of oldTransitions) {
                     for (let newTransition of newTransitions) {
                         if (newTransition === oldTransition) {
-                            alert("This translation violates determinism since " + newTransition + " is already present for this terminal node of this arrow");
+                            lastEditedArrow.text = "";
+                            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
                             return false;
                         }
                     }
                 }
             }
-            const inArrows = lastEditedArrow.startCircle.inArrows;
-            for (let arrow of inArrows) {
+            // Check the inArrows of the initial node
+            const startCircInArrows = lastEditedArrow.startCircle.inArrows;
+            for (let arrow of startCircInArrows) {
                 const oldTransitions = arrow.transition;
                 for (let oldTransition of oldTransitions) {
                     for (let newTransition of newTransitions) {
                         if (newTransition === oldTransition) {
-                            alert("This translation violates determinism since " + newTransition + " is already present for this start node of this arrow");
+                            lastEditedArrow.text = "";
+                            alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the start node of this arrow");
+                            return false;
+                        }
+                    }
+                }
+            }
+            // Check the outArrows of the terminal node
+            const endCircOutArrows = lastEditedArrow.endCircle.outArrows;
+            for (let arrow of endCircOutArrows) {
+                const oldTransitions = arrow.transition;
+                for (let oldTransition of oldTransitions) {
+                    for (let newTransition of newTransitions) {
+                        if (newTransition === oldTransition) {
+                            lastEditedArrow.text = "";
+                            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the end node of this arrow");
+                            return false;
+                        }
+                    }
+                }
+            }
+            // Check the inArrows of the terminal node
+            const endCircInArrows = lastEditedArrow.endCircle.inArrows;
+            for (let arrow of endCircInArrows) {
+                const oldTransitions = arrow.transition;
+                for (let oldTransition of oldTransitions) {
+                    for (let newTransition of newTransitions) {
+                        if (newTransition === oldTransition) {
+                            lastEditedArrow.text = "";
+                            alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the end node of this arrow");
+                            return false;
+                        }
+                    }
+                }
+            }
+            // Check the loops for the start and end circles
+            const startCirc = lastEditedArrow.startCircle;
+            const endCirc = lastEditedArrow.endCircle;
+            if (startCirc.loop) {
+                const loopTransition = startCirc.loop.transition;
+                for (let newTransition of newTransitions) {
+                    if (newTransition in loopTransition) {
+                        lastEditedArrow.text = "";
+                        alert("This translation violates determinism since " + newTransition + " is already present for the loop of the start node of this arrow");
+                        return false;
+                    }
+                }
+            }
+            if (endCirc.loop) {
+                const loopTransition = endCirc.loop.transition;
+                for (let newTransition of newTransitions) {
+                    if (newTransition in loopTransition) {
+                        lastEditedArrow.text = "";
+                        alert("This translation violates determinism since " + newTransition + " is already present for the loop of the end node of this arrow");
+                        return false;
+                    }
+                }
+            }
+            alert("This transition works!");
+            lastEditedArrow.transition = newTransitions;
+            return true;
+        }
+        else if (lastEditedArrow instanceof SelfArrow) {
+            const circOutArrows = lastEditedArrow.circle.outArrows;
+            for (let arrow of circOutArrows) {
+                const oldTransitions = arrow.transition;
+                console.log("Old trans: " + oldTransitions);
+                for (let oldTransition of oldTransitions) {
+                    for (let newTransition of newTransitions) {
+                        if (newTransition === oldTransition) {
+                            lastEditedArrow.text = "";
+                            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the node of this looped arrow");
+                            return false;
+                        }
+                    }
+                }
+            }
+            const circInArrows = lastEditedArrow.circle.inArrows;
+            for (let arrow of circInArrows) {
+                const oldTransitions = arrow.transition;
+                for (let oldTransition of oldTransitions) {
+                    for (let newTransition of newTransitions) {
+                        if (newTransition === oldTransition) {
+                            lastEditedArrow.text = "";
+                            alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the node of this looped arrow");
                             return false;
                         }
                     }
                 }
             }
             alert("This transition works!");
+            lastEditedArrow.transition = newTransitions;
             return true;
-            // lastEditedArrow.startCircle.outArrows.forEach((arrow: Arrow) => {
-            //     const oldTransition = arrow.transition;
-            //     oldTransition.forEach((oldTransition: string) => {
-            //         transition.forEach((newTransition: string) => {
-            //             if(newTransition === oldTransition){
-            //                 return false;
-            //             }
-            //         });
-            //     });
-            // });
         }
-        // else if(lastEditedArrow instanceof SelfArrow){
-        // }
         return true;
     }
 
@@ -630,6 +708,8 @@
                             var arrow = arrows[i];
                             if (arrow instanceof SelfArrow) {
                                 if (arrow.circle == selectedObj) {
+                                    arrows.push(arrow);
+                                    console.log(arrows);
                                     hasSelfArrow = true;
                                     break;
                                 }
@@ -638,6 +718,7 @@
                         if (!hasSelfArrow) {
                             selectedObj = tempArrow;
                             arrows.push(tempArrow);
+                            console.log(arrows);
                         }
                     }
                     else if (tempArrow instanceof EntryArrow) {
@@ -651,11 +732,13 @@
                         if (!hasEntryArrow) {
                             selectedObj = tempArrow;
                             arrows.push(tempArrow);
+                            console.log(arrows);
                         }
                     }
                     else {
                         selectedObj = tempArrow;
                         arrows.push(tempArrow);
+                        console.log(arrows);
                     }
                 }
                 tempArrow = null;
@@ -698,7 +781,7 @@
                         // If an arrow is selected when "Delete" is pressed,
                         // then delete that specific arrow
                         if (arrow == selectedObj) {
-                            arrows.splice(i--, 1);
+                            deleteArrow(arrow, i--);
                         }
                         // If an arrow is a SelfArrow (looped arrow)
                         if (arrow instanceof SelfArrow) {
@@ -707,7 +790,7 @@
                             // delete that SelfArrow as well since its associated
                             // circle is being deleted
                             if (arrow.circle == selectedObj) {
-                                arrows.splice(i--, 1);
+                                deleteArrow(arrow, i--);
                             }
                         }
                         // If an arrow is an EntryArrow
@@ -717,7 +800,7 @@
                             // then delete that EntryArrow as well since its
                             // associated circle is being deleted
                             if (arrow.pointsToCircle == selectedObj) {
-                                arrows.splice(i--, 1);
+                                deleteArrow(arrow, i--);
                             }
                         }
                         // If an arrow is a regular Arrow
@@ -727,13 +810,14 @@
                             // then delete the Arrow, since it will no longer
                             // have two safe endpoints to be connected to
                             if (arrow.startCircle == selectedObj || arrow.endCircle == selectedObj) {
-                                arrows.splice(i--, 1);
+                                deleteArrow(arrow, i--);
                             }
                         }
                     }
                     // After all the arrows and circles present have been
                     // checked, we can draw the canvas again
                     draw();
+                    console.log(arrows);
                 }
                 else {
                     // If a key of length 1 was pressed (such as a number or
@@ -762,6 +846,18 @@
                 }
             }
         });
+        // If the arrow is being deleted, then update the
+        // circles that it is associated with
+        function deleteArrow(arrow, index) {
+            if (arrow instanceof Arrow) {
+                arrow.startCircle.outArrows.delete(arrow);
+                arrow.endCircle.inArrows.delete(arrow);
+            }
+            else if (arrow instanceof SelfArrow) {
+                arrow.circle.loop = null;
+            }
+            arrows.splice(index, 1);
+        }
         document.addEventListener('keyup', (event) => {
             if (event.key === 'Shift') {
                 shiftPressed = false;
