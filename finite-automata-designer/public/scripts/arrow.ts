@@ -69,8 +69,8 @@ export class Arrow {
     this.startCircle = startCircle;
     this.endCircle = endCircle;
 
-    startCircle.outArrows.push(this);
-    endCircle.inArrows.push(this);
+    startCircle.outArrows.add(this);
+    endCircle.inArrows.add(this);
 
     this.text = '';
     this.lineAngleAdjust = 0;
