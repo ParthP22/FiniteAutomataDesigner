@@ -1,5 +1,5 @@
 import {Circle} from "./circle";
-import { drawArrow, drawText, selectedObj, snapToPadding, hitTargetPadding } from "./draw";
+import { drawArrow, drawText, snapToPadding, hitTargetPadding } from "./draw";
 
 export class EntryArrow {
   pointsToCircle: Circle;
@@ -27,7 +27,7 @@ export class EntryArrow {
     
     // Draw the text at the end without the arrow
     var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
-    drawText(ctx, this.text, points.startX, points.startY, textAngle, selectedObj == this);
+    drawText(ctx, this.text, points.startX, points.startY, textAngle);
 
     // Draw the head of the arrow
     drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
