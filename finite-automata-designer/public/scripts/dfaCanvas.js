@@ -1,8 +1,7 @@
-var DfaCanvas = (function (exports) {
+(function () {
     'use strict';
 
     var nodeRadius = 30;
-    var selectedObj$1 = null;
     var snapToPadding = 10; // pixels
     var hitTargetPadding = 6; // pixels
     // Creates subscript text to the input string using underscores before 0-9 as the regex
@@ -13,7 +12,7 @@ var DfaCanvas = (function (exports) {
         }
         return subscriptText;
     }
-    function drawText(ctx, originalText, x, y, angeOrNull, isSelected) {
+    function drawText(ctx, originalText, x, y, angeOrNull) {
         ctx.font = '20px Times New Roman';
         var text = subscriptText(originalText);
         var width = ctx.measureText(text).width;
@@ -51,6 +50,7 @@ var DfaCanvas = (function (exports) {
             this.isAccept = false;
             this.text = '';
             this.outArrows = [];
+            this.inArrows = [];
             this.loop = false;
         }
         Circle.prototype.setMouseStart = function (x, y) {
@@ -107,6 +107,7 @@ var DfaCanvas = (function (exports) {
             this.startCircle = startCircle;
             this.endCircle = endCircle;
             startCircle.outArrows.push(this);
+            endCircle.inArrows.push(this);
             this.text = '';
             this.lineAngleAdjust = 0;
             // Make anchor point relative to the locations of start and end circles
@@ -407,16 +408,14 @@ var DfaCanvas = (function (exports) {
     // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
     // Command to compile this file into JS
     // npm run build:canvas
-    // Cannot assign the import itself to a new value, so I'm setting it as a new variable here
-    // so we can modify it later
-    var selectedObj = selectedObj$1;
-    exports.lastEditedArrow = null;
+    // export var lastEditedArrow: Arrow | SelfArrow | null = null;
+    var selectedObj = null;
     var hightlightSelected = 'blue';
     var highlightTyping = 'red';
     var base = 'black';
     var dragging = false;
     var shiftPressed = false;
-    exports.typingMode = false;
+    var typingMode = false;
     var startClick = null;
     var tempArrow = null;
     function setupDfaCanvas(canvas) {
@@ -432,13 +431,13 @@ var DfaCanvas = (function (exports) {
             for (var circle = 0; circle < circles.length; circle++) {
                 ctx.lineWidth = 1;
                 // If we're in typing mode, use the red highlight, else blue highlight
-                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((exports.typingMode) ? highlightTyping : hightlightSelected) : base;
+                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
                 circles[circle].draw(ctx);
             }
             for (var arrow = 0; arrow < arrows.length; arrow++) {
                 ctx.lineWidth = 1;
                 // If we're in typing mode, use the red highlight, else blue highlight
-                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((exports.typingMode) ? highlightTyping : hightlightSelected) : base;
+                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
                 arrows[arrow].draw(ctx);
             }
             if (tempArrow != null) {
@@ -452,9 +451,9 @@ var DfaCanvas = (function (exports) {
             event.preventDefault();
             switch (event.button) {
                 case 0:
-                    if (exports.typingMode) {
+                    if (typingMode) {
                         // transitionDeterminismCheck(lastEditedArrow);
-                        exports.typingMode = false;
+                        typingMode = false;
                     }
                     break;
                 case 2:
@@ -464,8 +463,8 @@ var DfaCanvas = (function (exports) {
                         // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
                         // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
                         // to verify if the transition is valid for the DFA.
-                        exports.lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : exports.lastEditedArrow);
-                        exports.typingMode = true;
+                        console.log("setting lasteditedarrow");
+                        typingMode = true;
                     }
                     break;
             }
@@ -602,7 +601,7 @@ var DfaCanvas = (function (exports) {
             // attribute, we will enter this if-statement
             if (selectedObj != null && 'text' in selectedObj) {
                 // This is for backspacing one letter at a time
-                if (event.key === 'Backspace' && exports.typingMode) {
+                if (event.key === 'Backspace' && typingMode) {
                     selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
                     draw();
                 }
@@ -664,7 +663,7 @@ var DfaCanvas = (function (exports) {
                     // letter), we will append that character to the end of the 
                     // "text" attribute of that object, which will then be 
                     // displayed on the canvas
-                    if (event.key.length === 1 && exports.typingMode) {
+                    if (event.key.length === 1 && typingMode) {
                         // If the current object that is being typed on is an Arrow or SelfArrow,
                         // then we will check if the character being typed is defined in the alphabet.
                         // If not, we will alert the user.
@@ -744,6 +743,4 @@ var DfaCanvas = (function (exports) {
     }
     attachWhenReady();
 
-    return exports;
-
-})({});
+})();
