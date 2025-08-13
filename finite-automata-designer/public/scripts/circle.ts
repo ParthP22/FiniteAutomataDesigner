@@ -1,7 +1,10 @@
 import {Arrow} from "./arrow";
 import { nodeRadius, drawText } from "./draw";
+import {SelfArrow} from "./SelfArrow";
 
 export var circles: Circle[] = [];
+
+var set = new Set();
 
 export class Circle {
   x: number;
@@ -10,9 +13,9 @@ export class Circle {
   mouseOffsetY: number;
   isAccept: boolean;
   text: string;
-  outArrows: Arrow[];
-  inArrows: Arrow[];
-  loop: boolean;
+  outArrows: Set<Arrow>;
+  inArrows: Set<Arrow>;
+  loop: SelfArrow | null;
 
   constructor(x: number, y: number) {
     this.x = x,
@@ -21,9 +24,9 @@ export class Circle {
     this.mouseOffsetY = 0;
     this.isAccept = false;
     this.text = '';
-    this.outArrows = [];
-    this.inArrows = [];
-    this.loop = false;
+    this.outArrows = new Set();
+    this.inArrows = new Set();
+    this.loop = null;
   }
 
   setMouseStart(x: number, y: number): void {
