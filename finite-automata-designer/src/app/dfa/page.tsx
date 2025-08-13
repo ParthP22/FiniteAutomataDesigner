@@ -2,9 +2,13 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import Script from 'next/script';
-import { lastEditedArrow } from "../../../public/scripts/dfaCanvas";
-import { transitionDeterminismCheck } from "@/lib/dfa/dfa";
+// import { lastEditedArrow } from "../../../public/scripts/dfaCanvas";
+// import { transitionDeterminismCheck } from "@/lib/dfa/dfa";
 // import { inputDeterminismCheck } from "../../../public/scripts/dfaCanvas";
+// import { getLastEditedArrow } from "../../../public/scripts/arrow";
+
+// To build canvas and dfa simulataneously:
+// npm run build:dfa && npm run build:canvas
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
@@ -12,37 +16,41 @@ export default function DFAPage() {
     const [inputString, setInputString] = useState("");
     const [alphabet, setAlphabet] = useState("");
     // const [result, setResult] = useState<null | boolean>(null);
-    const [typingMode, setTypingMode] = useState(false);
+    // const [typingMode, setTypingMode] = useState(false);
 
-    const handleTypingModeOn = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        event.preventDefault();
-        setTypingMode(true);
-    };
+    // const handleTypingModeOn = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    //     event.preventDefault();
+    //     setTypingMode(true);
+    // };
     
     // This piece of commented out code below throws an error on NextJS
     // for dfaCanvas.ts, saying 'document' is not defined for the piece
     // of code at the end of that file where you attach the canvas to
     // this file.
-    useEffect(() => {
-        if(typingMode === false){
-            transitionDeterminismCheck(/*lastEditedArrow*/);
-            //alert("The transitionDeterminismCheck is running!!");
-        }
-    }, [typingMode]);
+    // useEffect(() => {
+    //     if(typingMode === false){
+    //         // var tempArrow = getLastEditedArrow();
+    //         // if(tempArrow != null){
+    //         //     console.log(tempArrow.constructor.name);
+    //         // }
+    //         transitionDeterminismCheck();
+    //         // alert("The transitionDeterminismCheck is running!!");
+    //     }
+    // }, [typingMode]);
 
-    useEffect(() => {
-        const handleLeftClick = (event: MouseEvent) => {
-        if (event.button === 0) {  // left mouse button
-            setTypingMode(false);
-        }
-        };
+    // useEffect(() => {
+    //     const handleLeftClick = (event: MouseEvent) => {
+    //     if (event.button === 0) {  // left mouse button
+    //         setTypingMode(false);
+    //     }
+    //     };
 
-        document.addEventListener("mousedown", handleLeftClick);
+    //     document.addEventListener("mousedown", handleLeftClick);
 
-        return () => {
-        document.removeEventListener("mousedown", handleLeftClick);
-        };
-    }, []);
+    //     return () => {
+    //     document.removeEventListener("mousedown", handleLeftClick);
+    //     };
+    // }, []);
 
     const handleRun = () => {
         
@@ -65,7 +73,7 @@ export default function DFAPage() {
         </h1>
         <div id="canvasDiv" className="">
             {/*Canvas for drawing FSM*/}
-            <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none" onContextMenu={handleTypingModeOn}></canvas>
+            <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none" /*onContextMenu={handleTypingModeOn}*/></canvas>
         </div>
         
         {/* <div className="mt-4 flex justify-center">
