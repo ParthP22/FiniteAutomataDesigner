@@ -4,7 +4,6 @@ import {SelfArrow} from "./SelfArrow";
 import {EntryArrow} from "./EntryArrow";
 
 export var nodeRadius = 30;
-export var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
 export var snapToPadding = 10; // pixels
 export var hitTargetPadding = 6; // pixels
 
@@ -23,7 +22,6 @@ export function drawText(
   x: number,
   y: number,
   angeOrNull: number | null,
-  isSelected: boolean
 ) {
 
 
