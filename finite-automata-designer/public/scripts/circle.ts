@@ -1,5 +1,5 @@
 import {Arrow} from "./arrow";
-import { selectedObj, nodeRadius, drawText } from "./draw";
+import { nodeRadius, drawText } from "./draw";
 
 export var circles: Circle[] = [];
 
@@ -40,7 +40,7 @@ export class Circle {
     ctx.beginPath();
     ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
     ctx.stroke();
-    drawText(ctx, this.text, this.x, this.y, null, selectedObj == this);
+    drawText(ctx, this.text, this.x, this.y, null);
 
     if (this.isAccept) {
       ctx.beginPath();
