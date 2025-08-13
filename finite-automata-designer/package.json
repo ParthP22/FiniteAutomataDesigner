@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "build:canvas": "cd public/scripts && rollup -c rollup.config.js",
+    "build:canvas": "rollup -c rollup.config.js",
     "build:dfa": "cd src/lib/dfa && tsc -p tsconfig.dfa.json",
     "start": "next start",
     "lint": "next lint"
@@ -29,6 +29,6 @@
     "eslint-config-next": "15.3.3",
     "rollup": "^4.46.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5.9.2"
   }
 }
