@@ -1,10 +1,14 @@
 import {Circle} from "./circle";
 import { SelfArrow } from "./SelfArrow";
 import { EntryArrow } from "./EntryArrow";
-import { snapToPadding, nodeRadius, drawArrow, drawText, selectedObj, hitTargetPadding } from "./draw";
+import { snapToPadding, nodeRadius, drawArrow, drawText, hitTargetPadding } from "./draw";
 
 export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 export var lastEditedArrow: Arrow | SelfArrow | null = null;
+
+export function setLastEditedArrow(updatedArrow: Arrow | SelfArrow | null){
+    lastEditedArrow = updatedArrow;
+}
 
 function circleFromThreePoints(
   x1: number, 
@@ -156,7 +160,7 @@ export class Arrow {
         var textAngle = (startAngle + endAngle) / 2 + (pointInfo.isReversed ? 1 : 0) * Math.PI;
         var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
         var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
-        drawText(ctx, this.text, textX, textY, textAngle, selectedObj == this);
+        drawText(ctx, this.text, textX, textY, textAngle);
         // if(!transitionDeterminismCheck(this.startCircle,this.text)){
         //   this.text = "";
         //   alert("This transition fails the determinism check!");
@@ -166,7 +170,7 @@ export class Arrow {
       var textX = (pointInfo.startX + pointInfo.endX) / 2;
       var textY = (pointInfo.startY + pointInfo.endY) / 2;
       var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
-      drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust, selectedObj == this);
+      drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust);
       // if(!transitionDeterminismCheck(this.startCircle,this.text)){
       //   this.text = "";
       //   alert("This transition fails the determinism check!");
