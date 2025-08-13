@@ -179,6 +179,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             var arrow = arrows[i];
             if (arrow instanceof SelfArrow) {
               if (arrow.circle == selectedObj) {
+                arrows.push(arrow);
+                console.log(arrows);
                 hasSelfArrow = true;
                 break;
               }
@@ -187,6 +189,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (!hasSelfArrow) {
             selectedObj = tempArrow;
             arrows.push(tempArrow);
+            console.log(arrows);
           }
         } else if (tempArrow instanceof EntryArrow) {
           var hasEntryArrow = false;
@@ -199,10 +202,12 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (!hasEntryArrow) {
             selectedObj = tempArrow;
             arrows.push(tempArrow);
+            console.log(arrows);
           }
         } else {
           selectedObj = tempArrow;
           arrows.push(tempArrow);
+          console.log(arrows);
         }
         
       }
@@ -255,7 +260,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // If an arrow is selected when "Delete" is pressed,
           // then delete that specific arrow
           if (arrow == selectedObj) {
-            arrows.splice(i--, 1);
+            deleteArrow(arrow,i--);
           }
 
           // If an arrow is a SelfArrow (looped arrow)
@@ -266,7 +271,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             // delete that SelfArrow as well since its associated
             // circle is being deleted
             if (arrow.circle == selectedObj){
-              arrows.splice(i--, 1);
+              deleteArrow(arrow,i--);
             }
           }
 
@@ -278,7 +283,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             // then delete that EntryArrow as well since its
             // associated circle is being deleted
             if (arrow.pointsToCircle == selectedObj) {
-              arrows.splice(i--, 1);
+              deleteArrow(arrow,i--);
             }
           }
 
@@ -290,7 +295,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             // then delete the Arrow, since it will no longer
             // have two safe endpoints to be connected to
             if (arrow.startCircle == selectedObj || arrow.endCircle == selectedObj) {
-              arrows.splice(i--, 1)
+              deleteArrow(arrow,i--);
             }
           } 
         }
@@ -298,6 +303,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         // After all the arrows and circles present have been
         // checked, we can draw the canvas again
         draw();
+
+        console.log(arrows);
       }
       else {
 
@@ -330,6 +337,19 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     }
     
   });
+
+  // If the arrow is being deleted, then update the
+  // circles that it is associated with
+  function deleteArrow(arrow: Arrow | SelfArrow | EntryArrow, index: number){
+    if(arrow instanceof Arrow){
+      arrow.startCircle.outArrows.delete(arrow);
+      arrow.endCircle.inArrows.delete(arrow);
+    }
+    else if(arrow instanceof SelfArrow){
+      arrow.circle.loop = null;
+    }
+    arrows.splice(index,1);
+  }
 
   document.addEventListener('keyup', (event) => {
     if (event.key === 'Shift') {
