@@ -13,7 +13,7 @@ import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
 
 
-var lastEditedArrow: Arrow | SelfArrow | null = null;
+var lastEditedObject: Arrow | SelfArrow | Circle | null = null;
 
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
 var hightlightSelected = 'blue';
@@ -65,11 +65,23 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   /* Event Handlers */
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
     event.preventDefault();
+    
+    var mouse = getMousePos(event)
+    selectedObj = mouseCollision(mouse.x, mouse.y);
+    dragging = false;
+    startClick = mouse;
+
     switch(event.button){
       case 0:
         if(typingMode){
           // alert("transitionDeterminismCheck is running!!");
-          transitionDeterminismCheck(lastEditedArrow);
+
+          // If we left-click and the previous edited object was an Arrow or SelfArrow, run
+          // the transition check since it means the transition has been submitted
+          if(lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow){
+            alert("transDetCheck 1 running!!");
+            transitionDeterminismCheck(lastEditedObject);
+          }
           typingMode = false;
         }
         break;
@@ -78,27 +90,37 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           selectedObj instanceof Arrow || 
           selectedObj instanceof SelfArrow ||
           selectedObj instanceof Circle)){
-            // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
-            // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
-            // to verify if the transition is valid for the DFA.
-            // console.log("setting lasteditedarrow");
-            // setLastEditedArrow(((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : getLastEditedArrow()));
-            // const lastEditedArrow = getLastEditedArrow();
-            // if(lastEditedArrow){  
-            //   // console.log("LastEditedArrowRef from DFACanvas:" + lastEditedArrow);
-            //   console.log(lastEditedArrow.constructor.name);
-            // }
-            lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : lastEditedArrow)
+            
+            // In the event that the user right clicks on something else that is NOT the previously edited
+            // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
+            // it would indicate that the user has submitted
+            if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject){
+              alert("transDetCheck 2 running!!");
+              transitionDeterminismCheck(lastEditedObject);
+              typingMode = false;
+            }
+            
+            // Update the previously edited object
+            lastEditedObject = selectedObj;
+
+            // Set typing mode to true, since the object that was currently right-clicked on is an Arrow
+            // or SelfArrow or Circle, which means it can be typed on
             typingMode = true;
+        }
+        // If the selected object is null (meaning nothing is selected) or if the currently selected object is
+        // not an Arrow or SelfArrow or Circle, then enter this else-block
+        else{
+          // If it is currently on typing mode and the previously edited object was an Arrow or SelfArrow,
+          // we will run the transitionDeterminismCheck, since right-clicking anything but an Arrow, SelfArrow,
+          // or Circle means the user has submitted their transition
+          if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow)){
+              alert("transDetCheck 3 running!!");
+              transitionDeterminismCheck(lastEditedObject);
+              typingMode = false;
+            }
         }
         break;
     }
-
-
-    var mouse = getMousePos(event)
-    selectedObj = mouseCollision(mouse.x, mouse.y);
-    dragging = false;
-    startClick = mouse;
 
     if (selectedObj != null) {
       if (shiftPressed && selectedObj instanceof Circle) {
@@ -454,7 +476,7 @@ function attachWhenReady() {
           event.preventDefault();
           console.log("Submitting inputString:", inputString.value);
 
-          const newInput = inputString.value;
+          var newInput = inputString.value;
           for(let char of newInput){
             if(!alphabet.has(char)){
               // Note to self: maybe make it so it goes through the entire string
