@@ -344,12 +344,17 @@
         }
     }
 
+    var startState = null;
+    function setStartState(newEntryArrow) {
+        startState = newEntryArrow;
+    }
     class EntryArrow {
+        // text: string;
         constructor(pointsToCircle, startPoint) {
             this.pointsToCircle = pointsToCircle;
             this.deltaX = 0;
             this.deltaY = 0;
-            this.text = '';
+            // this.text = ''
             if (startPoint) {
                 this.setAnchorPoint(startPoint.x, startPoint.y);
             }
@@ -362,7 +367,7 @@
             ctx.stroke();
             // Draw the text at the end without the arrow
             var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
-            drawText(ctx, this.text, points.startX, points.startY, textAngle);
+            drawText(ctx, "", points.startX, points.startY, textAngle);
             // Draw the head of the arrow
             drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
         }
@@ -410,7 +415,10 @@
         }
     }
 
-    var alphabet = ["0", "1"];
+    var alphabet = new Set(["0", "1"]);
+    function setAlphabet(newAlphabet) {
+        alphabet = newAlphabet;
+    }
 
     // I haven't figured out how to stop compiling the imports into JS, so here's a command
     // to get rid of them once you cd into their directory lol:
@@ -587,6 +595,11 @@
                 ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
                 arrows[arrow].draw(ctx);
             }
+            if (startState) {
+                ctx.lineWidth = 1;
+                ctx.fillStyle = ctx.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
+                startState.draw(ctx);
+            }
             if (tempArrow != null) {
                 ctx.lineWidth = 1;
                 ctx.fillStyle = ctx.strokeStyle = base;
@@ -722,17 +735,18 @@
                         }
                     }
                     else if (tempArrow instanceof EntryArrow) {
-                        var hasEntryArrow = false;
-                        for (var i = 0; i < arrows.length; i++) {
-                            if (arrows[i] instanceof EntryArrow) {
-                                hasEntryArrow = true;
-                                break;
-                            }
-                        }
-                        if (!hasEntryArrow) {
+                        // var hasEntryArrow = false;
+                        // for (var i = 0; i < arrows.length; i++) {
+                        //   if (arrows[i] instanceof EntryArrow) {
+                        //     hasEntryArrow = true;
+                        //     break;
+                        //   }
+                        // }
+                        if (startState === null) {
                             selectedObj = tempArrow;
-                            arrows.push(tempArrow);
-                            console.log(arrows);
+                            setStartState(tempArrow);
+                            // arrows.push(tempArrow);
+                            console.log("Curr arrows" + arrows);
                         }
                     }
                     else {
@@ -759,14 +773,43 @@
             // If we are currently selecting an object AND
             // if the currently selected object has a "text"
             // attribute, we will enter this if-statement
-            if (selectedObj != null && 'text' in selectedObj) {
-                // This is for backspacing one letter at a time
-                if (event.key === 'Backspace' && typingMode) {
-                    selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
-                    draw();
+            if (selectedObj != null) {
+                if ('text' in selectedObj) {
+                    // This is for backspacing one letter at a time
+                    if (event.key === 'Backspace' && typingMode) {
+                        selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
+                        draw();
+                    }
+                    else {
+                        // If a key of length 1 was pressed (such as a number or
+                        // letter), we will append that character to the end of the 
+                        // "text" attribute of that object, which will then be 
+                        // displayed on the canvas
+                        if (event.key.length === 1 && typingMode) {
+                            // If the current object that is being typed on is an Arrow or SelfArrow,
+                            // then we will check if the character being typed is defined in the alphabet.
+                            // If not, we will alert the user.
+                            if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
+                                if (alphabet.has(event.key) || event.key === ',') {
+                                    selectedObj.text += event.key;
+                                }
+                                else {
+                                    console.log(alphabet);
+                                    console.log(event.key.constructor.name);
+                                    alert(event.key + " is not defined in the alphabet!");
+                                }
+                            }
+                            else {
+                                selectedObj.text += event.key;
+                            }
+                            // After the new character has been appended to the object's
+                            // "text" attribute, we will draw the canvas again
+                            draw();
+                        }
+                    }
                 }
                 // If the "Delete" key is pressed on your keyboard
-                else if (event.key === 'Delete') {
+                if (event.key === 'Delete') {
                     // Iterate through all circles that are present
                     for (var circ = 0; circ < circles.length; circ++) {
                         // If a circle is selected when "Delete" is pressed, 
@@ -774,6 +817,9 @@
                         if (circles[circ] == selectedObj) {
                             circles.splice(circ--, 1);
                         }
+                    }
+                    if (startState == selectedObj || startState?.pointsToCircle == selectedObj) {
+                        setStartState(null);
                     }
                     // Iterate through all arrows that are present
                     for (var i = 0; i < arrows.length; i++) {
@@ -793,16 +839,16 @@
                                 deleteArrow(arrow, i--);
                             }
                         }
-                        // If an arrow is an EntryArrow
-                        if (arrow instanceof EntryArrow) {
-                            // If the circle that the EntryArrow is being
-                            // pointed to is the object being currently selected,
-                            // then delete that EntryArrow as well since its
-                            // associated circle is being deleted
-                            if (arrow.pointsToCircle == selectedObj) {
-                                deleteArrow(arrow, i--);
-                            }
-                        }
+                        // // If an arrow is an EntryArrow
+                        // if (arrow instanceof EntryArrow) {
+                        //   // If the circle that the EntryArrow is being
+                        //   // pointed to is the object being currently selected,
+                        //   // then delete that EntryArrow as well since its
+                        //   // associated circle is being deleted
+                        //   if (arrow.pointsToCircle == selectedObj) {
+                        //     deleteArrow(arrow,i--);
+                        //   }
+                        // }
                         // If an arrow is a regular Arrow
                         if (arrow instanceof Arrow) {
                             // If either the startCircle or the endCircle of
@@ -819,33 +865,20 @@
                     draw();
                     console.log(arrows);
                 }
-                else {
-                    // If a key of length 1 was pressed (such as a number or
-                    // letter), we will append that character to the end of the 
-                    // "text" attribute of that object, which will then be 
-                    // displayed on the canvas
-                    if (event.key.length === 1 && typingMode) {
-                        // If the current object that is being typed on is an Arrow or SelfArrow,
-                        // then we will check if the character being typed is defined in the alphabet.
-                        // If not, we will alert the user.
-                        if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
-                            if (event.key in alphabet || event.key === ',') {
-                                selectedObj.text += event.key;
-                            }
-                            else {
-                                alert(event.key + " is not defined in the alphabet!");
-                            }
-                        }
-                        else {
-                            selectedObj.text += event.key;
-                        }
-                        // After the new character has been appended to the object's
-                        // "text" attribute, we will draw the canvas again
-                        draw();
-                    }
-                }
             }
         });
+        // Note to self: define inputString and alphabet down in the function at the bottom of
+        // this page. It will make it easier to finish this code.
+        // inputString.addEventListener("input", () => {
+        //       console.log("Input String:", inputString.value);
+        //     });
+        //   }
+        //   if (alphabet) {
+        //     alphabet.addEventListener("input", () => {
+        //       console.log("Alphabet:", alphabet.value);
+        //     });
+        //   }
+        // });
         // If the arrow is being deleted, then update the
         // circles that it is associated with
         function deleteArrow(arrow, index) {
@@ -894,6 +927,9 @@
                     return arrows[arrow];
                 }
             }
+            if (startState && startState.containsPoint(x, y)) {
+                return startState;
+            }
             return null;
         }
     }
@@ -902,9 +938,45 @@
      * --------------------------------------------------------- */
     function attachWhenReady() {
         const run = () => {
+            const inputString = document.getElementById("inputString");
+            const alphabetInput = document.getElementById("alphabet");
             const canvas = document.getElementById('DFACanvas');
             if (canvas) {
                 setupDfaCanvas(canvas);
+            }
+            if (inputString) {
+                inputString.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        console.log("Submitting inputString:", inputString.value);
+                        const newInput = inputString.value;
+                        for (let char of newInput) {
+                            if (!(char in alphabet)) {
+                                // Note to self: maybe make it so it goes through the entire string
+                                // first and collects every character that is wrong? Then give an alert
+                                // afterwards with every character that was wrong
+                                alert(char + " is not in the alphabet, this input is invalid!");
+                                break;
+                            }
+                        }
+                        // Add code to run DFA algo stuff below:
+                        // put your handling logic here
+                        inputString.value = ""; // optional clear
+                    }
+                });
+            }
+            if (alphabetInput) {
+                alphabetInput.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        console.log("Submitting alphabet:", alphabetInput.value);
+                        const newAlphabet = new Set(alphabetInput.value.trim().split(","));
+                        setAlphabet(newAlphabet);
+                        console.log(alphabet);
+                        // put your handling logic here
+                        alphabetInput.value = ""; // optional clear
+                    }
+                });
             }
         };
         if (document.readyState === 'loading') {
