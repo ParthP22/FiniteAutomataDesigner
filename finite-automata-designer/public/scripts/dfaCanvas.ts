@@ -6,7 +6,7 @@
 import {Circle, circles} from "./circle";
 import {Arrow, arrows} from "./arrow";
 import {SelfArrow} from "./SelfArrow";
-import {EntryArrow} from "./EntryArrow";
+import {EntryArrow,startState, setStartState} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
 import { transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
@@ -47,6 +47,12 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
                                                                             // If we're in typing mode, use the red highlight, else blue highlight
       ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
       arrows[arrow].draw(ctx);
+    }
+
+    if(startState){
+      ctx.lineWidth = 1;
+      ctx.fillStyle = ctx.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
+      startState.draw(ctx);
     }
 
     if (tempArrow != null) {
@@ -192,17 +198,19 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             console.log(arrows);
           }
         } else if (tempArrow instanceof EntryArrow) {
-          var hasEntryArrow = false;
-          for (var i = 0; i < arrows.length; i++) {
-            if (arrows[i] instanceof EntryArrow) {
-              hasEntryArrow = true;
-              break;
-            }
-          }
-          if (!hasEntryArrow) {
+          // var hasEntryArrow = false;
+          // for (var i = 0; i < arrows.length; i++) {
+          //   if (arrows[i] instanceof EntryArrow) {
+          //     hasEntryArrow = true;
+          //     break;
+          //   }
+
+          // }
+          if (startState === null) {
             selectedObj = tempArrow;
-            arrows.push(tempArrow);
-            console.log(arrows);
+            setStartState(tempArrow);
+            // arrows.push(tempArrow);
+            console.log("Curr arrows" + arrows);
           }
         } else {
           selectedObj = tempArrow;
@@ -233,16 +241,48 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     // If we are currently selecting an object AND
     // if the currently selected object has a "text"
     // attribute, we will enter this if-statement
-    if (selectedObj != null && 'text' in selectedObj) {
+    if (selectedObj != null ) {
+      if('text' in selectedObj){
+        // This is for backspacing one letter at a time
+        if(event.key === 'Backspace' && typingMode) {
+          selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
+          draw();
+        }
+        else {
 
-      // This is for backspacing one letter at a time
-      if(event.key === 'Backspace' && typingMode) {
-        selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
-        draw();
+          // If a key of length 1 was pressed (such as a number or
+          // letter), we will append that character to the end of the 
+          // "text" attribute of that object, which will then be 
+          // displayed on the canvas
+          if (event.key.length === 1 && typingMode) {
+            // If the current object that is being typed on is an Arrow or SelfArrow,
+            // then we will check if the character being typed is defined in the alphabet.
+            // If not, we will alert the user.
+            if(selectedObj instanceof Arrow || selectedObj instanceof SelfArrow){
+              if(alphabet.has(event.key) || event.key === ','){
+                
+                selectedObj.text += event.key;
+              }
+              else{
+                console.log(alphabet);
+                console.log(event.key.constructor.name);
+                alert(event.key + " is not defined in the alphabet!");
+              }
+            }
+            else{
+              selectedObj.text += event.key;
+            }
+            
+
+            // After the new character has been appended to the object's
+            // "text" attribute, we will draw the canvas again
+            draw()
+          }
+        }
       }
 
       // If the "Delete" key is pressed on your keyboard
-      else if (event.key === 'Delete') {
+      if (event.key === 'Delete') {
 
         // Iterate through all circles that are present
         for (var circ = 0; circ < circles.length; circ++) {
@@ -251,6 +291,11 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (circles[circ] == selectedObj) {
             circles.splice(circ--, 1);
           }
+          
+        }
+
+        if(startState == selectedObj || startState?.pointsToCircle == selectedObj){
+          setStartState(null);
         }
 
         // Iterate through all arrows that are present
@@ -275,17 +320,17 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             }
           }
 
-          // If an arrow is an EntryArrow
-          if (arrow instanceof EntryArrow) {
+          // // If an arrow is an EntryArrow
+          // if (arrow instanceof EntryArrow) {
 
-            // If the circle that the EntryArrow is being
-            // pointed to is the object being currently selected,
-            // then delete that EntryArrow as well since its
-            // associated circle is being deleted
-            if (arrow.pointsToCircle == selectedObj) {
-              deleteArrow(arrow,i--);
-            }
-          }
+          //   // If the circle that the EntryArrow is being
+          //   // pointed to is the object being currently selected,
+          //   // then delete that EntryArrow as well since its
+          //   // associated circle is being deleted
+          //   if (arrow.pointsToCircle == selectedObj) {
+          //     deleteArrow(arrow,i--);
+          //   }
+          // }
 
           // If an arrow is a regular Arrow
           if (arrow instanceof Arrow) {
@@ -306,37 +351,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
         console.log(arrows);
       }
-      else {
-
-        // If a key of length 1 was pressed (such as a number or
-        // letter), we will append that character to the end of the 
-        // "text" attribute of that object, which will then be 
-        // displayed on the canvas
-        if (event.key.length === 1 && typingMode) {
-          // If the current object that is being typed on is an Arrow or SelfArrow,
-          // then we will check if the character being typed is defined in the alphabet.
-          // If not, we will alert the user.
-          if(selectedObj instanceof Arrow || selectedObj instanceof SelfArrow){
-            if(alphabet.has(event.key) || event.key === ','){
-              
-              selectedObj.text += event.key;
-            }
-            else{
-              console.log(alphabet);
-              console.log(event.key.constructor.name);
-              alert(event.key + " is not defined in the alphabet!");
-            }
-          }
-          else{
-            selectedObj.text += event.key;
-          }
-          
-
-          // After the new character has been appended to the object's
-          // "text" attribute, we will draw the canvas again
-          draw()
-        }
-      }
+      
     }
     
   });
@@ -409,6 +424,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       if (arrows[arrow].containsPoint(x, y)) {
         return arrows[arrow];
       }
+    }
+
+    if(startState && startState.containsPoint(x,y)){
+      return startState;
     }
 
     return null;
