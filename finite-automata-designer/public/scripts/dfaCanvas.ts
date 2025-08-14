@@ -9,7 +9,7 @@ import {SelfArrow} from "./SelfArrow";
 import {EntryArrow,startState, setStartState} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
-import { transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
+import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
 
 
@@ -455,7 +455,7 @@ function attachWhenReady() {
 
           const newInput = inputString.value;
           for(let char of newInput){
-            if(!(char in alphabet)){
+            if(!alphabet.has(char)){
               // Note to self: maybe make it so it goes through the entire string
               // first and collects every character that is wrong? Then give an alert
               // afterwards with every character that was wrong
@@ -465,7 +465,7 @@ function attachWhenReady() {
           }
           
           // Add code to run DFA algo stuff below:
-
+          dfaAlgo(newInput);
 
           // put your handling logic here
           inputString.value = ""; // optional clear
