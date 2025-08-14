@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:all": "npm run build:canvas && npm run dev",
     "build": "next build",
     "build:canvas": "rollup -c rollup.config.js",
     "build:dfa": "cd src/lib/dfa && tsc -p tsconfig.dfa.json",
