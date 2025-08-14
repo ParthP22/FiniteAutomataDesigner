@@ -164,7 +164,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
       //     }
       //   }
       // }
-      
+
       alert("This transition works!");
       lastEditedArrow.transition = newTransitions;
       return true;
@@ -207,8 +207,9 @@ export function inputDeterminismCheck(){
           // If the transition does not exist in the alphabet,
 					// then immediately return false, since it violates
 					// determinism.
-          if(!(transition in alphabet)){
-            alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
+          if(!alphabet.has(transition)){
+            alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
+            console.log("The transition in question: " + arrow.transition);
             return false;
           }
         }
@@ -218,7 +219,13 @@ export function inputDeterminismCheck(){
 			// arrows of this state, and the current character in the alphabet
 			// was not found to be a transition at all, then it fails determinism
       if(!exists){
-        alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
+        alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
+        console.log("The transitions:");
+        for(let arrow of node.outArrows){
+            console.log(arrow.transition);
+          
+        }
+        
         return false;
       }
     }
@@ -271,17 +278,23 @@ export function dfaAlgo(input: string){
     // We go through every outgoing arrow for the 
 		// current state.
     const currOutArrows = curr.outArrows;
+    console.log("Char: " + char);
     for(let arrow of currOutArrows){
+      console.log("At: " + curr.text);
+      console.log("Transition: " + arrow.transition);
 
       // If the current character from the input string
 			// is found in one of the transitions, then we 
 			// use that transition to move to the next state.
       if(char in arrow.transition){
+        console.log("Taking transition: " + arrow.transition);
         curr = arrow.endCircle;
         break;
       }
     }
   }
+
+  console.log("At: " + curr.text);
 
   // If the final state that we arrived at is the end state,
 	// that means the string was accepted.
@@ -293,7 +306,7 @@ export function dfaAlgo(input: string){
   // Else, the final state we arrived at is not the end state,
 	// which means the string was rejected.
   else{
-    alert("The string was accepted!");
+    alert("The string was rejected!");
     console.log("Rejected!");
   }
 
