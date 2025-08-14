@@ -9,7 +9,7 @@ import {SelfArrow} from "./SelfArrow";
 import {EntryArrow} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
-import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa";
+import { transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet } from "./alphabet";
 
 
@@ -338,6 +338,21 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     
   });
 
+  // Note to self: define inputString and alphabet down in the function at the bottom of
+  // this page. It will make it easier to finish this code.
+
+// inputString.addEventListener("input", () => {
+//       console.log("Input String:", inputString.value);
+//     });
+//   }
+
+//   if (alphabet) {
+//     alphabet.addEventListener("input", () => {
+//       console.log("Alphabet:", alphabet.value);
+//     });
+//   }
+// });
+
   // If the arrow is being deleted, then update the
   // circles that it is associated with
   function deleteArrow(arrow: Arrow | SelfArrow | EntryArrow, index: number){
@@ -402,10 +417,35 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
  * --------------------------------------------------------- */
 function attachWhenReady() {
   const run = () => {
+    const inputString = document.getElementById("inputString") as HTMLInputElement | null;
+    const alphabet = document.getElementById("alphabet") as HTMLInputElement | null;
     const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
+
     if (canvas)  {
       setupDfaCanvas(canvas)
     };
+
+    if (inputString) {
+      inputString.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          console.log("Submitting inputString:", inputString.value);
+          // put your handling logic here
+          inputString.value = ""; // optional clear
+        }
+      });
+    }
+
+    if (alphabet) {
+      alphabet.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          console.log("Submitting alphabet:", alphabet.value);
+          // put your handling logic here
+          alphabet.value = ""; // optional clear
+        }
+      });
+    }
   };
 
   if (document.readyState === 'loading') {
