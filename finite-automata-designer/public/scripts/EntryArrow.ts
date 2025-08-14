@@ -1,17 +1,23 @@
 import {Circle} from "./circle";
 import { drawArrow, drawText, snapToPadding, hitTargetPadding } from "./draw";
 
+export var startState: EntryArrow|null = null;
+
+export function setStartState(newEntryArrow: EntryArrow | null){
+  startState = newEntryArrow;
+}
+
 export class EntryArrow {
   pointsToCircle: Circle;
   deltaX: number;
   deltaY: number;
-  text: string;
+  // text: string;
 
   constructor(pointsToCircle: Circle, startPoint: {x: number, y: number}) {
     this.pointsToCircle = pointsToCircle;
     this.deltaX = 0
     this.deltaY = 0;
-    this.text = ''
+    // this.text = ''
     if (startPoint) {
       this.setAnchorPoint(startPoint.x, startPoint.y);
     }
@@ -27,7 +33,7 @@ export class EntryArrow {
     
     // Draw the text at the end without the arrow
     var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
-    drawText(ctx, this.text, points.startX, points.startY, textAngle);
+    drawText(ctx, "", points.startX, points.startY, textAngle);
 
     // Draw the head of the arrow
     drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
