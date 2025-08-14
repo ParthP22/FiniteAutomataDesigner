@@ -50,7 +50,7 @@
             this.isAccept = false;
             this.text = '';
             this.outArrows = new Set();
-            this.inArrows = new Set();
+            // this.inArrows = new Set();
             this.loop = null;
         }
         setMouseStart(x, y) {
@@ -118,7 +118,7 @@
             this.startCircle = startCircle;
             this.endCircle = endCircle;
             startCircle.outArrows.add(this);
-            endCircle.inArrows.add(this);
+            // endCircle.inArrows.add(this);
             this.text = '';
             this.lineAngleAdjust = 0;
             // Make anchor point relative to the locations of start and end circles
@@ -275,11 +275,14 @@
     class SelfArrow {
         constructor(pointsToCircle, point) {
             this.circle = pointsToCircle;
+            this.startCircle = pointsToCircle;
+            this.endCircle = pointsToCircle;
             this.circle.loop = this;
             this.anchorAngle = 0;
             this.mouseOffsetAngle = 0;
             this.text = '';
             this.transition = [];
+            this.circle.outArrows.add(this);
             if (point) {
                 this.setAnchorPoint(point.x, point.y);
             }
@@ -423,6 +426,9 @@
     // I haven't figured out how to stop compiling the imports into JS, so here's a command
     // to get rid of them once you cd into their directory lol:
     // rm alphabet.js && rm arrow.js && rm circle.js && rm draw.js && rm EntryArrow.js && rm SelfArrow.js
+    // This is a "correctness" check: does the new transition coincide
+    // with other transitions going out from that state? If it does,
+    // then it fails determinism.
     function transitionDeterminismCheck(lastEditedArrow) {
         if (lastEditedArrow == null) {
             console.log("null");
@@ -443,11 +449,17 @@
         if (lastEditedArrow instanceof Arrow) {
             // Check the outArrows of the initial node
             const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
+            // You iterate through every arrow that goes outwards from this current node
             for (let arrow of startCircOutArrows) {
                 const oldTransitions = arrow.transition;
+                // Then, you iterate through each of the old transitions for each arrow
                 console.log("Old trans: " + oldTransitions);
                 for (let oldTransition of oldTransitions) {
+                    // Next, you iterate through each transition in the new
+                    // transition, and compare it against each transition
+                    // in the original transition for that arrow
                     for (let newTransition of newTransitions) {
+                        // If a transition already exists, then it fails determinism
                         if (newTransition === oldTransition) {
                             lastEditedArrow.text = "";
                             alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
@@ -456,71 +468,71 @@
                     }
                 }
             }
-            // Check the inArrows of the initial node
-            const startCircInArrows = lastEditedArrow.startCircle.inArrows;
-            for (let arrow of startCircInArrows) {
-                const oldTransitions = arrow.transition;
-                for (let oldTransition of oldTransitions) {
-                    for (let newTransition of newTransitions) {
-                        if (newTransition === oldTransition) {
-                            lastEditedArrow.text = "";
-                            alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the start node of this arrow");
-                            return false;
-                        }
-                    }
-                }
-            }
+            // // Check the inArrows of the initial node
+            // const startCircInArrows = lastEditedArrow.startCircle.inArrows;
+            // for(let arrow of startCircInArrows){
+            //   const oldTransitions = arrow.transition;
+            //   for(let oldTransition of oldTransitions){
+            //     for(let newTransition of newTransitions){
+            //       if(newTransition === oldTransition){
+            //         lastEditedArrow.text = "";
+            //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the start node of this arrow");
+            //         return false;
+            //       }
+            //     }
+            //   }
+            // }
             // Check the outArrows of the terminal node
-            const endCircOutArrows = lastEditedArrow.endCircle.outArrows;
-            for (let arrow of endCircOutArrows) {
-                const oldTransitions = arrow.transition;
-                for (let oldTransition of oldTransitions) {
-                    for (let newTransition of newTransitions) {
-                        if (newTransition === oldTransition) {
-                            lastEditedArrow.text = "";
-                            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the end node of this arrow");
-                            return false;
-                        }
-                    }
-                }
-            }
+            // const endCircOutArrows = lastEditedArrow.endCircle.outArrows;
+            // for(let arrow of endCircOutArrows){
+            //   const oldTransitions = arrow.transition;
+            //   for(let oldTransition of oldTransitions){
+            //     for(let newTransition of newTransitions){
+            //       if(newTransition === oldTransition){
+            //         lastEditedArrow.text = "";
+            //         alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the end node of this arrow");
+            //         return false;
+            //       }
+            //     }
+            //   }
+            // }
             // Check the inArrows of the terminal node
-            const endCircInArrows = lastEditedArrow.endCircle.inArrows;
-            for (let arrow of endCircInArrows) {
-                const oldTransitions = arrow.transition;
-                for (let oldTransition of oldTransitions) {
-                    for (let newTransition of newTransitions) {
-                        if (newTransition === oldTransition) {
-                            lastEditedArrow.text = "";
-                            alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the end node of this arrow");
-                            return false;
-                        }
-                    }
-                }
-            }
+            // const endCircInArrows = lastEditedArrow.endCircle.inArrows;
+            // for(let arrow of endCircInArrows){
+            //   const oldTransitions = arrow.transition;
+            //   for(let oldTransition of oldTransitions){
+            //     for(let newTransition of newTransitions){
+            //       if(newTransition === oldTransition){
+            //         lastEditedArrow.text = "";
+            //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the end node of this arrow");
+            //         return false;
+            //       }
+            //     }
+            //   }
+            // }
             // Check the loops for the start and end circles
-            const startCirc = lastEditedArrow.startCircle;
-            const endCirc = lastEditedArrow.endCircle;
-            if (startCirc.loop) {
-                const loopTransition = startCirc.loop.transition;
-                for (let newTransition of newTransitions) {
-                    if (newTransition in loopTransition) {
-                        lastEditedArrow.text = "";
-                        alert("This translation violates determinism since " + newTransition + " is already present for the loop of the start node of this arrow");
-                        return false;
-                    }
-                }
-            }
-            if (endCirc.loop) {
-                const loopTransition = endCirc.loop.transition;
-                for (let newTransition of newTransitions) {
-                    if (newTransition in loopTransition) {
-                        lastEditedArrow.text = "";
-                        alert("This translation violates determinism since " + newTransition + " is already present for the loop of the end node of this arrow");
-                        return false;
-                    }
-                }
-            }
+            // const startCirc = lastEditedArrow.startCircle;
+            // const endCirc = lastEditedArrow.endCircle;
+            // if(startCirc.loop){
+            //   const loopTransition = startCirc.loop.transition;
+            //   for(let newTransition of newTransitions){
+            //     if(newTransition in loopTransition){
+            //       lastEditedArrow.text = "";
+            //       alert("This translation violates determinism since " + newTransition + " is already present for the loop of the start node of this arrow");
+            //       return false;
+            //     }
+            //   }
+            // }
+            // if(endCirc.loop){
+            //   const loopTransition = endCirc.loop.transition;
+            //   for(let newTransition of newTransitions){
+            //     if(newTransition in loopTransition){
+            //       lastEditedArrow.text = "";
+            //       alert("This translation violates determinism since " + newTransition + " is already present for the loop of the end node of this arrow");
+            //       return false;
+            //     }
+            //   }
+            // }
             alert("This transition works!");
             lastEditedArrow.transition = newTransitions;
             return true;
@@ -540,30 +552,150 @@
                     }
                 }
             }
-            const circInArrows = lastEditedArrow.circle.inArrows;
-            for (let arrow of circInArrows) {
-                const oldTransitions = arrow.transition;
-                for (let oldTransition of oldTransitions) {
-                    for (let newTransition of newTransitions) {
-                        if (newTransition === oldTransition) {
-                            lastEditedArrow.text = "";
-                            alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the node of this looped arrow");
-                            return false;
-                        }
-                    }
-                }
-            }
+            // const circInArrows = lastEditedArrow.circle.inArrows;
+            // for(let arrow of circInArrows){
+            //   const oldTransitions = arrow.transition;
+            //   for(let oldTransition of oldTransitions){
+            //     for(let newTransition of newTransitions){
+            //       if(newTransition === oldTransition){
+            //         lastEditedArrow.text = "";
+            //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the node of this looped arrow");
+            //         return false;
+            //       }
+            //     }
+            //   }
+            // }
             alert("This transition works!");
             lastEditedArrow.transition = newTransitions;
             return true;
         }
         return true;
     }
+    // This is a "completeness" check: were all characters of the
+    // alphabet used when building the DFA? This is processed
+    // every time we input a string.
+    function inputDeterminismCheck() {
+        // We iterate over every single state
+        for (let node of circles) {
+            // We retrieve the outgoing arrows from the current state
+            const outArrows = node.outArrows;
+            for (let char of alphabet) {
+                // The "exists" variable will be used to track if
+                // this specific character in the alphabet has been
+                // used as a transition or not for this specific state
+                var exists = false;
+                // We iterate over all the outgoing arrows from the
+                // current state
+                for (let arrow of outArrows) {
+                    // Then, for each arrow, we iterate over every
+                    // transition for it.
+                    for (let transition of arrow.transition) {
+                        // If the current character in the alphabet
+                        // does exist as a transition for this current
+                        // state, then exists = true and we break out
+                        // of this loop.
+                        if (char === transition) {
+                            exists = true;
+                            break;
+                        }
+                        // If the transition does not exist in the alphabet,
+                        // then immediately return false, since it violates
+                        // determinism.
+                        if (!alphabet.has(transition)) {
+                            alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
+                            console.log("The transition in question: " + arrow.transition);
+                            return false;
+                        }
+                    }
+                }
+                // If we iterated over all the transitions for all the outgoing
+                // arrows of this state, and the current character in the alphabet
+                // was not found to be a transition at all, then it fails determinism
+                if (!exists) {
+                    alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
+                    console.log("The transitions:");
+                    for (let arrow of node.outArrows) {
+                        console.log(arrow.transition);
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    function dfaAlgo(input) {
+        var acceptStateExists = false;
+        for (let circle of circles) {
+            if (circle.isAccept) {
+                acceptStateExists = true;
+                break;
+            }
+        }
+        if (startState === null && !acceptStateExists) {
+            alert("Start state and accept states are both undefined!");
+            return false;
+        }
+        else if (startState === null) {
+            alert("Start state undefined!");
+            return false;
+        }
+        else if (!acceptStateExists) {
+            alert("Accept state undefined!");
+            return false;
+        }
+        // First, we make sure the input string is legal. If it contains
+        // characters not defined in the alphabet, then we return false immediately.
+        for (let char of input) {
+            if (!alphabet.has(char)) {
+                alert("Input contains \'" + char + "\', which is not in the alphabet");
+                return false;
+            }
+        }
+        // This "curr" variable will be used to traverse over the whole DFA
+        var curr = startState.pointsToCircle;
+        // We check if the DFA has been defined correctly. If not, then return false.
+        if (!inputDeterminismCheck()) {
+            return false;
+        }
+        // We begin traversing the input string.
+        for (let char of input) {
+            // We go through every outgoing arrow for the 
+            // current state.
+            const currOutArrows = curr.outArrows;
+            console.log("Char: " + char);
+            for (let arrow of currOutArrows) {
+                console.log("At: " + curr.text);
+                console.log("Transition: " + arrow.transition);
+                // If the current character from the input string
+                // is found in one of the transitions, then we 
+                // use that transition to move to the next state.
+                if (char in arrow.transition) {
+                    console.log("Taking transition: " + arrow.transition);
+                    curr = arrow.endCircle;
+                    break;
+                }
+            }
+        }
+        console.log("At: " + curr.text);
+        // If the final state that we arrived at is the end state,
+        // that means the string was accepted.
+        if (curr.isAccept) {
+            alert("The string was accepted!");
+            console.log("Accepted!");
+            return true;
+        }
+        // Else, the final state we arrived at is not the end state,
+        // which means the string was rejected.
+        else {
+            alert("The string was rejected!");
+            console.log("Rejected!");
+        }
+    }
 
     // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
     // Command to compile this file into JS
     // npm run build:canvas
-    var lastEditedArrow = null;
+    var lastEditedObject = null;
     var selectedObj = null;
     var hightlightSelected = 'blue';
     var highlightTyping = 'red';
@@ -609,11 +741,20 @@
         /* Event Handlers */
         canvas.addEventListener('mousedown', (event) => {
             event.preventDefault();
+            var mouse = getMousePos(event);
+            selectedObj = mouseCollision(mouse.x, mouse.y);
+            dragging = false;
+            startClick = mouse;
             switch (event.button) {
                 case 0:
                     if (typingMode) {
                         // alert("transitionDeterminismCheck is running!!");
-                        transitionDeterminismCheck(lastEditedArrow);
+                        // If we left-click and the previous edited object was an Arrow or SelfArrow, run
+                        // the transition check since it means the transition has been submitted
+                        if (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) {
+                            alert("transDetCheck 1 running!!");
+                            transitionDeterminismCheck(lastEditedObject);
+                        }
                         typingMode = false;
                     }
                     break;
@@ -621,25 +762,34 @@
                     if (selectedObj !== null && (selectedObj instanceof Arrow ||
                         selectedObj instanceof SelfArrow ||
                         selectedObj instanceof Circle)) {
-                        // If the object that is being edited is an Arrow or SelfArrow, we will store it in lastEditedArrow.
-                        // Once the user leaves typingMode, we will need to run the transitionDeterminismCheck on the arrow
-                        // to verify if the transition is valid for the DFA.
-                        // console.log("setting lasteditedarrow");
-                        // setLastEditedArrow(((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : getLastEditedArrow()));
-                        // const lastEditedArrow = getLastEditedArrow();
-                        // if(lastEditedArrow){  
-                        //   // console.log("LastEditedArrowRef from DFACanvas:" + lastEditedArrow);
-                        //   console.log(lastEditedArrow.constructor.name);
-                        // }
-                        lastEditedArrow = ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) ? selectedObj : lastEditedArrow);
+                        // In the event that the user right clicks on something else that is NOT the previously edited
+                        // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
+                        // it would indicate that the user has submitted
+                        if (typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject) {
+                            alert("transDetCheck 2 running!!");
+                            transitionDeterminismCheck(lastEditedObject);
+                            typingMode = false;
+                        }
+                        // Update the previously edited object
+                        lastEditedObject = selectedObj;
+                        // Set typing mode to true, since the object that was currently right-clicked on is an Arrow
+                        // or SelfArrow or Circle, which means it can be typed on
                         typingMode = true;
+                    }
+                    // If the selected object is null (meaning nothing is selected) or if the currently selected object is
+                    // not an Arrow or SelfArrow or Circle, then enter this else-block
+                    else {
+                        // If it is currently on typing mode and the previously edited object was an Arrow or SelfArrow,
+                        // we will run the transitionDeterminismCheck, since right-clicking anything but an Arrow, SelfArrow,
+                        // or Circle means the user has submitted their transition
+                        if (typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow)) {
+                            alert("transDetCheck 3 running!!");
+                            transitionDeterminismCheck(lastEditedObject);
+                            typingMode = false;
+                        }
                     }
                     break;
             }
-            var mouse = getMousePos(event);
-            selectedObj = mouseCollision(mouse.x, mouse.y);
-            dragging = false;
-            startClick = mouse;
             if (selectedObj != null) {
                 if (shiftPressed && selectedObj instanceof Circle) {
                     // Draw a SelfArrow to the selected circle
@@ -884,9 +1034,10 @@
         function deleteArrow(arrow, index) {
             if (arrow instanceof Arrow) {
                 arrow.startCircle.outArrows.delete(arrow);
-                arrow.endCircle.inArrows.delete(arrow);
+                // arrow.endCircle.inArrows.delete(arrow);
             }
             else if (arrow instanceof SelfArrow) {
+                arrow.circle.outArrows.delete(arrow);
                 arrow.circle.loop = null;
             }
             arrows.splice(index, 1);
@@ -949,9 +1100,9 @@
                     if (event.key === "Enter") {
                         event.preventDefault();
                         console.log("Submitting inputString:", inputString.value);
-                        const newInput = inputString.value;
+                        var newInput = inputString.value;
                         for (let char of newInput) {
-                            if (!(char in alphabet)) {
+                            if (!alphabet.has(char)) {
                                 // Note to self: maybe make it so it goes through the entire string
                                 // first and collects every character that is wrong? Then give an alert
                                 // afterwards with every character that was wrong
@@ -960,6 +1111,7 @@
                             }
                         }
                         // Add code to run DFA algo stuff below:
+                        dfaAlgo(newInput);
                         // put your handling logic here
                         inputString.value = ""; // optional clear
                     }
