@@ -70,7 +70,7 @@ export class Arrow {
     this.endCircle = endCircle;
 
     startCircle.outArrows.add(this);
-    endCircle.inArrows.add(this);
+    // endCircle.inArrows.add(this);
 
     this.text = '';
     this.lineAngleAdjust = 0;
