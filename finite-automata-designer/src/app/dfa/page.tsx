@@ -13,8 +13,8 @@ import Script from 'next/script';
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
 
-    const [inputString, setInputString] = useState("");
-    const [alphabet, setAlphabet] = useState("");
+    // const [inputString, setInputString] = useState("");
+    // const [alphabet, setAlphabet] = useState("");
     // const [result, setResult] = useState<null | boolean>(null);
     // const [typingMode, setTypingMode] = useState(false);
 
@@ -52,14 +52,14 @@ export default function DFAPage() {
     //     };
     // }, []);
 
-    const handleRun = () => {
+    // const handleRun = () => {
         
-        setInputString("");
-    };
+    //     setInputString("");
+    // };
 
-    const handleClear = () => {
-        canvasRef.current?.clear(); // safe call if the ref is defined
-    };
+    // const handleClear = () => {
+    //     canvasRef.current?.clear(); // safe call if the ref is defined
+    // };
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
@@ -108,22 +108,24 @@ export default function DFAPage() {
                     Input:
                 </label>
                 <input
+                    id="inputString"
                     type="text"
                     placeholder="Enter a string..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={inputString}
-                    onChange={(e) => setInputString(e.target.value)}
+                    // value={inputString}
+                    // onChange={(e) => setInputString(e.target.value)}
                 />
                 {/* Textbox for inputting the alphabet */}
                 <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
                     Alphabet:
                 </label>
                 <input
+                    id="alphabet"
                     type="text"
                     placeholder="Enter an alphabet..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={alphabet}
-                    onChange={(e) => setAlphabet(e.target.value)}
+                    // value={alphabet}
+                    // onChange={(e) => setAlphabet(e.target.value)}
                 />
             </div>
             </div>
