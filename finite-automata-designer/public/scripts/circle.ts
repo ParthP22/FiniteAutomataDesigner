@@ -13,8 +13,8 @@ export class Circle {
   mouseOffsetY: number;
   isAccept: boolean;
   text: string;
-  outArrows: Set<Arrow>;
-  inArrows: Set<Arrow>;
+  outArrows: Set<Arrow | SelfArrow>;
+  // inArrows: Set<Arrow>;
   loop: SelfArrow | null;
 
   constructor(x: number, y: number) {
@@ -25,7 +25,7 @@ export class Circle {
     this.isAccept = false;
     this.text = '';
     this.outArrows = new Set();
-    this.inArrows = new Set();
+    // this.inArrows = new Set();
     this.loop = null;
   }
 
