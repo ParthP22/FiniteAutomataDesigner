@@ -10,7 +10,7 @@ import {EntryArrow} from "./EntryArrow";
 import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
 import { transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
-import { alphabet } from "./alphabet";
+import { alphabet, setAlphabet } from "./alphabet";
 
 
 var lastEditedArrow: Arrow | SelfArrow | null = null;
@@ -317,10 +317,13 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // then we will check if the character being typed is defined in the alphabet.
           // If not, we will alert the user.
           if(selectedObj instanceof Arrow || selectedObj instanceof SelfArrow){
-            if(event.key in alphabet || event.key === ','){
+            if(alphabet.has(event.key) || event.key === ','){
+              
               selectedObj.text += event.key;
             }
             else{
+              console.log(alphabet);
+              console.log(event.key.constructor.name);
               alert(event.key + " is not defined in the alphabet!");
             }
           }
@@ -418,7 +421,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 function attachWhenReady() {
   const run = () => {
     const inputString = document.getElementById("inputString") as HTMLInputElement | null;
-    const alphabet = document.getElementById("alphabet") as HTMLInputElement | null;
+    const alphabetInput = document.getElementById("alphabet") as HTMLInputElement | null;
     const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
 
     if (canvas)  {
@@ -430,19 +433,40 @@ function attachWhenReady() {
         if (event.key === "Enter") {
           event.preventDefault();
           console.log("Submitting inputString:", inputString.value);
+
+          const newInput = inputString.value;
+          for(let char of newInput){
+            if(!(char in alphabet)){
+              // Note to self: maybe make it so it goes through the entire string
+              // first and collects every character that is wrong? Then give an alert
+              // afterwards with every character that was wrong
+              alert(char + " is not in the alphabet, this input is invalid!");
+              break;
+            }
+          }
+          
+          // Add code to run DFA algo stuff below:
+
+
           // put your handling logic here
           inputString.value = ""; // optional clear
         }
       });
     }
 
-    if (alphabet) {
-      alphabet.addEventListener("keydown", (event) => {
+    if (alphabetInput) {
+      alphabetInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           event.preventDefault();
-          console.log("Submitting alphabet:", alphabet.value);
+          console.log("Submitting alphabet:", alphabetInput.value);
+
+          const newAlphabet = new Set(alphabetInput.value.trim().split(","));
+          setAlphabet(newAlphabet);
+
+          console.log(alphabet);
+
           // put your handling logic here
-          alphabet.value = ""; // optional clear
+          alphabetInput.value = ""; // optional clear
         }
       });
     }
