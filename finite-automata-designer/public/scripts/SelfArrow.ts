@@ -3,6 +3,8 @@ import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
 
 export class SelfArrow {
   circle: Circle;
+  startCircle: Circle;
+  endCircle: Circle;
   anchorAngle: number;
   mouseOffsetAngle: number;
   text: string;
@@ -10,11 +12,14 @@ export class SelfArrow {
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
+    this.startCircle = pointsToCircle;
+    this.endCircle = pointsToCircle;
     this.circle.loop = this;
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
     this.text = '';
     this.transition = [];
+    this.circle.outArrows.add(this);
 
     if (point) {
       this.setAnchorPoint(point.x, point.y);
