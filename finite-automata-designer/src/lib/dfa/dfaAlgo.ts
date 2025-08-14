@@ -2,11 +2,16 @@ import { Circle, circles } from "../../../public/scripts/circle";
 import { alphabet } from "../../../public/scripts/alphabet";
 import { Arrow } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
+import { startState } from "../../../public/scripts/EntryArrow";
+import { start } from "repl";
 
 // I haven't figured out how to stop compiling the imports into JS, so here's a command
 // to get rid of them once you cd into their directory lol:
 // rm alphabet.js && rm arrow.js && rm circle.js && rm draw.js && rm EntryArrow.js && rm SelfArrow.js
 
+// This is a "correctness" check: does the new transition coincide
+// with other transitions going out from that state? If it does,
+// then it fails determinism.
 export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| null){
     if(lastEditedArrow == null){
       console.log("null");
@@ -31,11 +36,21 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
 
       // Check the outArrows of the initial node
       const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
+      
+      // You iterate through every arrow that goes outwards from this current node
       for(let arrow of startCircOutArrows){
         const oldTransitions = arrow.transition;
+
+        // Then, you iterate through each of the old transitions for each arrow
         console.log("Old trans: " + oldTransitions);
         for(let oldTransition of oldTransitions){
+          
+          // Next, you iterate through each transition in the new
+          // transition, and compare it against each transition
+          // in the original transition for that arrow
           for(let newTransition of newTransitions){
+
+            // If a transition already exists, then it fails determinism
             if(newTransition === oldTransition){
               lastEditedArrow.text = "";
               alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
@@ -156,30 +171,51 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
     return true;
 }
 
-export function inputDeterminismCheck(input: string){
-  for(let char of input){
-    if(!(char in alphabet)){
-      alert("Input contains " + char + ", which is not in the alphabet!");
-      return false;
-    }
-  }
-
+// This is a "completeness" check: were all characters of the
+// alphabet used when building the DFA? This is processed
+// every time we input a string.
+export function inputDeterminismCheck(){
+  
+  // We iterate over every single state
   for(let node of circles){
+    // We retrieve the outgoing arrows from the current state
     const outArrows = node.outArrows;
     for(let char of alphabet){
+      // The "exists" variable will be used to track if
+			// this specific character in the alphabet has been
+			// used as a transition or not for this specific state
       var exists: boolean = false;
+
+      // We iterate over all the outgoing arrows from the
+			// current state
       for(let arrow of outArrows){
+
+        // Then, for each arrow, we iterate over every
+				// transition for it.
         for(let transition of arrow.transition){
+
+          // If the current character in the alphabet
+					// does exist as a transition for this current
+					// state, then exists = true and we break out
+					// of this loop.
           if (char === transition){
             exists = true;
             break;
           }
+
+          // If the transition does not exist in the alphabet,
+					// then immediately return false, since it violates
+					// determinism.
           if(!(transition in alphabet)){
             alert("Transition " + transition + "for state " + node + " has not been defined in the alphabet");
             return false;
           }
         }
       }
+
+      // If we iterated over all the transitions for all the outgoing
+			// arrows of this state, and the current character in the alphabet
+			// was not found to be a transition at all, then it fails determinism
       if(!exists){
         alert(char + " has not been implemented for this state: " + node + "; not all characters from alphabet were used");
         return false;
@@ -187,4 +223,78 @@ export function inputDeterminismCheck(input: string){
     }
   }
   return true;
+}
+
+export function dfaAlgo(input: string){
+  var acceptStateExists: boolean = false;
+  for(let circle of circles){
+    if(circle.isAccept){
+      acceptStateExists = true;
+      break;
+    }
+  }
+
+  if(startState === null && !acceptStateExists){
+    alert("Start state and accept states are both undefined!");
+    return false;
+  }
+  else if(startState === null){
+    alert("Start state undefined!");
+    return false;
+  }
+  else if(!acceptStateExists){
+    alert("Accept state undefined!");
+    return false;
+  }
+
+  // First, we make sure the input string is legal. If it contains
+	// characters not defined in the alphabet, then we return false immediately.
+  for(let char of input){
+    if(!alphabet.has(char)){
+      alert("Input contains \'" + char + "\', which is not in the alphabet");
+      return false;
+    }
+  }
+
+  // This "curr" variable will be used to traverse over the whole DFA
+  var curr: Circle = startState.pointsToCircle;
+
+  // We check if the DFA has been defined correctly. If not, then return false.
+  if(!inputDeterminismCheck()){
+    return false;
+  }
+
+  // We begin traversing the input string.
+  for(let char of input){
+
+    // We go through every outgoing arrow for the 
+		// current state.
+    const currOutArrows = curr.outArrows;
+    for(let arrow of currOutArrows){
+
+      // If the current character from the input string
+			// is found in one of the transitions, then we 
+			// use that transition to move to the next state.
+      if(char in arrow.transition){
+        curr = arrow.endCircle;
+        break;
+      }
+    }
+  }
+
+  // If the final state that we arrived at is the end state,
+	// that means the string was accepted.
+  if(curr.isAccept){
+    alert("The string was accepted!");
+    console.log("Accepted!");
+    return true;
+  }
+  // Else, the final state we arrived at is not the end state,
+	// which means the string was rejected.
+  else{
+    alert("The string was accepted!");
+    console.log("Rejected!");
+  }
+
+
 }
