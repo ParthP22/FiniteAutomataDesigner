@@ -376,9 +376,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   function deleteArrow(arrow: Arrow | SelfArrow | EntryArrow, index: number){
     if(arrow instanceof Arrow){
       arrow.startCircle.outArrows.delete(arrow);
-      arrow.endCircle.inArrows.delete(arrow);
+      // arrow.endCircle.inArrows.delete(arrow);
     }
     else if(arrow instanceof SelfArrow){
+      arrow.circle.outArrows.delete(arrow);
       arrow.circle.loop = null;
     }
     arrows.splice(index,1);
