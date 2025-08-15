@@ -14,7 +14,7 @@
     }
     function drawText(ctx, originalText, x, y, angeOrNull) {
         ctx.font = '20px Times New Roman';
-        var text = subscriptText(originalText);
+        var text = subscriptText(originalText); // Add subscript to text if indicated
         var width = ctx.measureText(text).width;
         x -= width / 2;
         if (angeOrNull != null) {
@@ -50,8 +50,6 @@
             this.isAccept = false;
             this.text = '';
             this.outArrows = new Set();
-            console.log("Initial size of circle: " + this.outArrows.size);
-            // this.inArrows = new Set();
             this.loop = null;
         }
         setMouseStart(x, y) {
@@ -88,18 +86,6 @@
     }
 
     var arrows = [];
-    // export var lastEditedArrow: Arrow | SelfArrow | null = null;
-    // export interface SharedState {
-    //     lastEditedArrow: Arrow | SelfArrow | null;
-    // }  
-    // export var sharedState: {
-    //     lastEditedArrow: Arrow | SelfArrow | null;
-    // } = {
-    //     lastEditedArrow: null,
-    // };
-    // export var sharedState = {
-    //     {lastEditedArrow: lastEditedArrowType;} = {lastEditedArrow = null}
-    // };
     function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
         var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
@@ -118,9 +104,6 @@
         constructor(startCircle, endCircle) {
             this.startCircle = startCircle;
             this.endCircle = endCircle;
-            // startCircle.outArrows.add(this);
-            // console.log("outArrows size of start node after creating arrow: " + startCircle.outArrows.size);
-            // endCircle.inArrows.add(this);
             this.text = '';
             this.lineAngleAdjust = 0;
             // Make anchor point relative to the locations of start and end circles
@@ -218,10 +201,6 @@
                     var textX = pointInfo.circleX + pointInfo.circleRadius * Math.cos(textAngle);
                     var textY = pointInfo.circleY + pointInfo.circleRadius * Math.sin(textAngle);
                     drawText(ctx, this.text, textX, textY, textAngle);
-                    // if(!transitionDeterminismCheck(this.startCircle,this.text)){
-                    //   this.text = "";
-                    //   alert("This transition fails the determinism check!");
-                    // }
                 }
             }
             else {
@@ -229,10 +208,6 @@
                 var textY = (pointInfo.startY + pointInfo.endY) / 2;
                 var textAngle = Math.atan2(pointInfo.endX - pointInfo.startX, pointInfo.startY - pointInfo.endY);
                 drawText(ctx, this.text, textX, textY, textAngle + this.lineAngleAdjust);
-                // if(!transitionDeterminismCheck(this.startCircle,this.text)){
-                //   this.text = "";
-                //   alert("This transition fails the determinism check!");
-                // }
             }
         }
         containsPoint(x, y) {
@@ -279,7 +254,6 @@
             this.circle = pointsToCircle;
             this.startCircle = pointsToCircle;
             this.endCircle = pointsToCircle;
-            this.circle.loop = this;
             this.anchorAngle = 0;
             this.mouseOffsetAngle = 0;
             this.text = '';
@@ -348,7 +322,15 @@
         }
     }
 
+    // The startState will be an EntryArrow. If you wish to
+    // access the start state node itself, you can use the
+    // pointsToCircle attribute of the EntryArrow to do so.
+    // Since we are not storing the EntryArrow itself as an
+    // attribute for Circles, it was best that the startState
+    // was set to the EntryArrow instead of its Circle
     var startState = null;
+    // Since the startState will be imported, it cannot be reassigned
+    // as usual, so this setter method will enable you to do so
     function setStartState(newEntryArrow) {
         startState = newEntryArrow;
     }
@@ -419,7 +401,11 @@
         }
     }
 
+    // The alphabet defines every character that can be used in the DFA.
+    // For easier usage, it has been defined as a Set.
     var alphabet = new Set(["0", "1"]);
+    // Since the alphabet is being imported, it cannot be reassigned
+    // directly. So, this is a setter method for it.
     function setAlphabet(newAlphabet) {
         alphabet = newAlphabet;
     }
@@ -433,8 +419,15 @@
     function transitionDeterminismCheck(lastEditedArrow) {
         if (lastEditedArrow == null) {
             console.log("null");
-            return;
+            return false;
         }
+        // Leaving this here commented-out, for debugging purposes if the
+        // need for it arises.
+        // printTransitions();
+        // Note: the code below will cover both the Arrow and the SelfArrow.
+        // We won't need to split them into two separate cases.
+        // This is because Arrow and SelfArrow both contain the startCircle
+        // and endCircle attributes.
         // You don't want to check the transition for this current arrow
         // when iterating through all the arrows, so just empty it here.
         // If the transition is incorrect, then it'll remain empty.
@@ -443,133 +436,29 @@
         lastEditedArrow.transition = new Set();
         const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
         console.log(newTransitions);
-        if (lastEditedArrow instanceof Arrow) {
-            // Check the outArrows of the initial node
-            const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
-            // You iterate through every arrow that goes outwards from this current node
-            for (let arrow of startCircOutArrows) {
-                const oldTransitions = arrow.transition;
-                // Then, you iterate through each of the old transitions for each arrow
-                console.log("Old trans: " + oldTransitions);
-                for (let oldTransition of oldTransitions) {
-                    // Next, you iterate through each transition in the new
-                    // transition, and compare it against each transition
-                    // in the original transition for that arrow
-                    for (let newTransition of newTransitions) {
-                        // If a transition already exists, then it fails determinism
-                        if (newTransition === oldTransition) {
-                            lastEditedArrow.text = "";
-                            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
-                            return false;
-                        }
+        // Check the outArrows of the initial node
+        const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
+        // You iterate through every arrow that goes outwards from this current node
+        for (let arrow of startCircOutArrows) {
+            const oldTransitions = arrow.transition;
+            // Then, you iterate through each of the old transitions for each arrow
+            console.log("Old trans: " + oldTransitions);
+            for (let oldTransition of oldTransitions) {
+                // Next, you iterate through each transition in the new
+                // transition, and compare it against each transition
+                // in the original transition for that arrow
+                for (let newTransition of newTransitions) {
+                    // If a transition already exists, then it fails determinism
+                    if (newTransition === oldTransition) {
+                        lastEditedArrow.text = "";
+                        alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
+                        return false;
                     }
                 }
             }
-            // // Check the inArrows of the initial node
-            // const startCircInArrows = lastEditedArrow.startCircle.inArrows;
-            // for(let arrow of startCircInArrows){
-            //   const oldTransitions = arrow.transition;
-            //   for(let oldTransition of oldTransitions){
-            //     for(let newTransition of newTransitions){
-            //       if(newTransition === oldTransition){
-            //         lastEditedArrow.text = "";
-            //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the start node of this arrow");
-            //         return false;
-            //       }
-            //     }
-            //   }
-            // }
-            // Check the outArrows of the terminal node
-            // const endCircOutArrows = lastEditedArrow.endCircle.outArrows;
-            // for(let arrow of endCircOutArrows){
-            //   const oldTransitions = arrow.transition;
-            //   for(let oldTransition of oldTransitions){
-            //     for(let newTransition of newTransitions){
-            //       if(newTransition === oldTransition){
-            //         lastEditedArrow.text = "";
-            //         alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the end node of this arrow");
-            //         return false;
-            //       }
-            //     }
-            //   }
-            // }
-            // Check the inArrows of the terminal node
-            // const endCircInArrows = lastEditedArrow.endCircle.inArrows;
-            // for(let arrow of endCircInArrows){
-            //   const oldTransitions = arrow.transition;
-            //   for(let oldTransition of oldTransitions){
-            //     for(let newTransition of newTransitions){
-            //       if(newTransition === oldTransition){
-            //         lastEditedArrow.text = "";
-            //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the end node of this arrow");
-            //         return false;
-            //       }
-            //     }
-            //   }
-            // }
-            // Check the loops for the start and end circles
-            // const startCirc = lastEditedArrow.startCircle;
-            // const endCirc = lastEditedArrow.endCircle;
-            // if(startCirc.loop){
-            //   const loopTransition = startCirc.loop.transition;
-            //   for(let newTransition of newTransitions){
-            //     if(newTransition in loopTransition){
-            //       lastEditedArrow.text = "";
-            //       alert("This translation violates determinism since " + newTransition + " is already present for the loop of the start node of this arrow");
-            //       return false;
-            //     }
-            //   }
-            // }
-            // if(endCirc.loop){
-            //   const loopTransition = endCirc.loop.transition;
-            //   for(let newTransition of newTransitions){
-            //     if(newTransition in loopTransition){
-            //       lastEditedArrow.text = "";
-            //       alert("This translation violates determinism since " + newTransition + " is already present for the loop of the end node of this arrow");
-            //       return false;
-            //     }
-            //   }
-            // }
-            //alert("This transition works!");
-            lastEditedArrow.transition = newTransitions;
-            //console.log("Added transition 1");
-            //printTransitions();
-            return true;
         }
-        else if (lastEditedArrow instanceof SelfArrow) {
-            const circOutArrows = lastEditedArrow.circle.outArrows;
-            for (let arrow of circOutArrows) {
-                const oldTransitions = arrow.transition;
-                console.log("Old trans: " + oldTransitions);
-                for (let oldTransition of oldTransitions) {
-                    for (let newTransition of newTransitions) {
-                        if (newTransition === oldTransition) {
-                            lastEditedArrow.text = "";
-                            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the node of this looped arrow");
-                            return false;
-                        }
-                    }
-                }
-            }
-            // const circInArrows = lastEditedArrow.circle.inArrows;
-            // for(let arrow of circInArrows){
-            //   const oldTransitions = arrow.transition;
-            //   for(let oldTransition of oldTransitions){
-            //     for(let newTransition of newTransitions){
-            //       if(newTransition === oldTransition){
-            //         lastEditedArrow.text = "";
-            //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the node of this looped arrow");
-            //         return false;
-            //       }
-            //     }
-            //   }
-            // }
-            //alert("This transition works!");
-            lastEditedArrow.transition = newTransitions;
-            //console.log("Added transition 1");
-            //printTransitions();
-            return true;
-        }
+        // Update the transition with the new one
+        lastEditedArrow.transition = newTransitions;
         return true;
     }
     // This is a "completeness" check: were all characters of the
@@ -604,7 +493,6 @@
                         // determinism.
                         if (!alphabet.has(transition)) {
                             alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
-                            console.log("The transition in question: " + arrow.transition);
                             return false;
                         }
                     }
@@ -614,10 +502,6 @@
                 // was not found to be a transition at all, then it fails determinism
                 if (!exists) {
                     alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
-                    console.log("The transitions:");
-                    for (let arrow of node.outArrows) {
-                        console.log(arrow.transition);
-                    }
                     return false;
                 }
             }
@@ -663,36 +547,33 @@
             // We go through every outgoing arrow for the 
             // current state.
             const currOutArrows = curr.outArrows;
-            console.log("Char: " + char);
+            //console.log("Char: " + char);
             for (let arrow of currOutArrows) {
-                console.log("At: " + curr.text);
-                console.log("Checking transition: " + arrow.transition);
+                //console.log("At: " + curr.text);
+                //console.log("Checking transition: " + arrow.transition);
                 // If the current character from the input string
                 // is found in one of the transitions, then we 
                 // use that transition to move to the next state.
                 if (arrow.transition.has(char)) {
-                    console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
+                    //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
                     curr = arrow.endCircle;
                     break;
                 }
-                else {
-                    console.log("Not taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
-                }
             }
         }
-        console.log("Finally at: " + curr.text);
+        //console.log("Finally at: " + curr.text);
         // If the final state that we arrived at is the end state,
         // that means the string was accepted.
         if (curr.isAccept) {
             alert("The string was accepted!");
-            console.log("Accepted!");
+            //console.log("Accepted!");
             return true;
         }
         // Else, the final state we arrived at is not the end state,
         // which means the string was rejected.
         else {
             alert("The string was rejected!");
-            console.log("Rejected!");
+            //console.log("Rejected!");
             return false;
         }
     }
@@ -700,16 +581,20 @@
     // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
     // Command to compile this file into JS
     // npm run build:canvas
+    // The previously edited object, which is determined by the object that was last
+    // under typing mode.
+    // This variable is crucial to determine when the transition determinism check
+    // needs to be ran, since exiting typing mode on an Arrow or SelfArrow will
+    // indicate that the user has submitted their transition.
     var lastEditedObject = null;
-    var selectedObj = null;
-    var hightlightSelected = 'blue';
-    var highlightTyping = 'red';
-    var base = 'black';
-    var dragging = false;
-    var shiftPressed = false;
-    var typingMode = false;
+    var oldText = "";
+    var selectedObj = null; // Currently selected object
+    var hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
+    var base = 'black'; // Black highlight for objects to indicate that they are not being selected
+    var dragging = false; // True dragging objects is enabled, false otherwise
+    var shiftPressed = false; // True if shift is pressed, false otherwise
     var startClick = null;
-    var tempArrow = null;
+    var tempArrow = null; // A new arrow being created
     function setupDfaCanvas(canvas) {
         const ctx = canvas.getContext('2d');
         if (!ctx)
@@ -720,23 +605,25 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             // ctx?.translate(0.5, 0.5);
+            // Iterate through ALL circles and draw each one
             for (var circle = 0; circle < circles.length; circle++) {
                 ctx.lineWidth = 1;
-                // If we're in typing mode, use the red highlight, else blue highlight
-                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
+                ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
                 circles[circle].draw(ctx);
             }
+            // Iterate through ALL Arrows and SelfArrows and draw each one
             for (var arrow = 0; arrow < arrows.length; arrow++) {
                 ctx.lineWidth = 1;
-                // If we're in typing mode, use the red highlight, else blue highlight
-                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
+                ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
                 arrows[arrow].draw(ctx);
             }
+            // If there is an EntryArrow, then draw it
             if (startState) {
                 ctx.lineWidth = 1;
                 ctx.fillStyle = ctx.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
                 startState.draw(ctx);
             }
+            // If there is a TemporaryArrow being created, then draw it
             if (tempArrow != null) {
                 ctx.lineWidth = 1;
                 ctx.fillStyle = ctx.strokeStyle = base;
@@ -744,56 +631,40 @@
             }
         }
         /* Event Handlers */
+        // If a mouse button is pressed down
         canvas.addEventListener('mousedown', (event) => {
             event.preventDefault();
             var mouse = getMousePos(event);
+            // Check if the mouse has clicked on an object.
+            // If true, then selectedObj will be updated.
             selectedObj = mouseCollision(mouse.x, mouse.y);
             dragging = false;
             startClick = mouse;
-            switch (event.button) {
-                case 0:
-                    if (typingMode) {
-                        // alert("transitionDeterminismCheck is running!!");
-                        // If we left-click and the previous edited object was an Arrow or SelfArrow, run
-                        // the transition check since it means the transition has been submitted
-                        if (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) {
-                            //alert("transDetCheck 1 running!!");
-                            transitionDeterminismCheck(lastEditedObject);
-                        }
-                        typingMode = false;
-                    }
-                    break;
-                case 2:
-                    if (selectedObj !== null && (selectedObj instanceof Arrow ||
-                        selectedObj instanceof SelfArrow ||
-                        selectedObj instanceof Circle)) {
-                        // In the event that the user right clicks on something else that is NOT the previously edited
-                        // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
-                        // it would indicate that the user has submitted
-                        if (typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject) {
-                            //alert("transDetCheck 2 running!!");
-                            transitionDeterminismCheck(lastEditedObject);
-                            typingMode = false;
-                        }
-                        // Update the previously edited object
-                        lastEditedObject = selectedObj;
-                        // Set typing mode to true, since the object that was currently right-clicked on is an Arrow
-                        // or SelfArrow or Circle, which means it can be typed on
-                        typingMode = true;
-                    }
-                    // If the selected object is null (meaning nothing is selected) or if the currently selected object is
-                    // not an Arrow or SelfArrow or Circle, then enter this else-block
-                    else {
-                        // If it is currently on typing mode and the previously edited object was an Arrow or SelfArrow,
-                        // we will run the transitionDeterminismCheck, since right-clicking anything but an Arrow, SelfArrow,
-                        // or Circle means the user has submitted their transition
-                        if (typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow)) {
-                            //alert("transDetCheck 3 running!!");
-                            transitionDeterminismCheck(lastEditedObject);
-                            typingMode = false;
-                        }
-                    }
-                    break;
+            // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
+            // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
+            // then we will run the transitionDeterminismCheck
+            if ((lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && oldText !== lastEditedObject.text && selectedObj !== lastEditedObject) {
+                // If the transitionDeterminismCheck returns true, that means the transition is valid.
+                // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
+                // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+                // the text of the lastEditedObject will be equal
+                if (transitionDeterminismCheck(lastEditedObject)) {
+                    oldText = lastEditedObject.text;
+                }
+                // If the transitionDeterminismCheck returns false, that means the transition is not valid.
+                // So, we set oldText equal to the empty string, since the arrow's text will also have been
+                // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
+                // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+                // the text of the lastEditedObject will be equal
+                else {
+                    oldText = "";
+                }
+            }
+            // Update the previously edited object here
+            if (selectedObj !== null && (selectedObj instanceof Arrow ||
+                selectedObj instanceof SelfArrow ||
+                selectedObj instanceof Circle)) {
+                lastEditedObject = selectedObj;
             }
             if (selectedObj != null) {
                 if (shiftPressed && selectedObj instanceof Circle) {
@@ -813,9 +684,12 @@
             }
             draw();
         });
+        // If mouse is double-clicked
         canvas.addEventListener('dblclick', (event) => {
             var mouse = getMousePos(event);
             selectedObj = mouseCollision(mouse.x, mouse.y);
+            // If the mouse double-clicks an empty space, then
+            // create a new Circle.
             if (selectedObj == null) {
                 selectedObj = new Circle(mouse.x, mouse.y);
                 if (selectedObj instanceof Circle) {
@@ -823,13 +697,18 @@
                     draw();
                 }
             }
+            // If the mouse double-clicks a Circle, then make that
+            // Circle an accept state
             else if (selectedObj instanceof Circle) {
                 selectedObj.isAccept = !selectedObj.isAccept;
                 draw();
             }
         });
+        // If mouse moves
         canvas.addEventListener('mousemove', (event) => {
             var mouse = getMousePos(event);
+            // If a new TemporaryArrow has been created, the
+            // canvas must draw where it is going
             if (tempArrow != null) {
                 var targetCircle = mouseCollision(mouse.x, mouse.y);
                 if (!(targetCircle instanceof Circle)) {
@@ -864,6 +743,8 @@
                 draw();
             }
         });
+        // If the mouse was originally clicked and now
+        // the user let go
         canvas.addEventListener('mouseup', (event) => {
             dragging = false;
             if (tempArrow != null) {
@@ -871,48 +752,35 @@
                     // When adding the tempArrow to the arrows array, 
                     // Check if a self arrow points to the selected circle already
                     if (tempArrow instanceof SelfArrow) {
-                        var hasSelfArrow = false;
-                        for (var i = 0; i < arrows.length; i++) {
-                            var arrow = arrows[i];
-                            if (arrow instanceof SelfArrow) {
-                                if (arrow.circle == selectedObj) {
-                                    arrows.push(arrow);
-                                    console.log(arrows);
-                                    hasSelfArrow = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!hasSelfArrow) {
+                        // Check to see if the circle that you are trying to 
+                        // create the SelfArrow on already has one
+                        if (!tempArrow.circle.loop) {
+                            // If the SelfArrow doesn't already exist for a state, 
+                            // but it is being created, then add it for that state
                             selectedObj = tempArrow;
                             arrows.push(tempArrow);
+                            // Set the pointer for the loop variable of the Circle
+                            // to the newly created SelfArrow
+                            tempArrow.circle.loop = tempArrow;
                             // Add the arrow into the outArrows Set of its starting node
                             tempArrow.circle.outArrows.add(tempArrow);
-                            // console.log(arrows);
                         }
                     }
                     else if (tempArrow instanceof EntryArrow) {
-                        // var hasEntryArrow = false;
-                        // for (var i = 0; i < arrows.length; i++) {
-                        //   if (arrows[i] instanceof EntryArrow) {
-                        //     hasEntryArrow = true;
-                        //     break;
-                        //   }
-                        // }
+                        // If the EntryArrow doesn't already exist, then
+                        // create one and set it as the new start state
                         if (startState === null) {
                             selectedObj = tempArrow;
                             setStartState(tempArrow);
-                            // arrows.push(tempArrow);
-                            // console.log("Curr arrows" + arrows);
                         }
                     }
+                    // If the tempArrow isn't a SelfArrow or an EntryArrow
+                    // then it must be a regular arrow 
                     else {
                         selectedObj = tempArrow;
                         arrows.push(tempArrow);
                         // Add the arrow into the outArrows Set of its starting node
                         tempArrow.startCircle.outArrows.add(tempArrow);
-                        // console.log("outArrows size of start node after creating arrow: " + tempArrow.startCircle.outArrows.size);
-                        // console.log(arrows);
                     }
                 }
                 tempArrow = null;
@@ -935,8 +803,12 @@
             // attribute, we will enter this if-statement
             if (selectedObj != null) {
                 if ('text' in selectedObj) {
+                    // Store the text of the object before it changes, since
+                    // the 'text' attribute of the object will be directly modified
+                    // by this keydown listener
+                    oldText = selectedObj.text;
                     // This is for backspacing one letter at a time
-                    if (event.key === 'Backspace' && typingMode) {
+                    if (event.key === 'Backspace') {
                         selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
                         draw();
                     }
@@ -945,7 +817,7 @@
                         // letter), we will append that character to the end of the 
                         // "text" attribute of that object, which will then be 
                         // displayed on the canvas
-                        if (event.key.length === 1 && typingMode) {
+                        if (event.key.length === 1) {
                             // If the current object that is being typed on is an Arrow or SelfArrow,
                             // then we will check if the character being typed is defined in the alphabet.
                             // If not, we will alert the user.
@@ -959,6 +831,7 @@
                                     alert(event.key + " is not defined in the alphabet!");
                                 }
                             }
+                            // Else, the selectedObj must be Circle, which we can type anything for
                             else {
                                 selectedObj.text += event.key;
                             }
@@ -978,6 +851,8 @@
                             circles.splice(circ--, 1);
                         }
                     }
+                    // If the EntryArrow is the selected objected or if the circle that the
+                    // EntryArrow points to is the selected object, then delete the EntryArrow
                     if (startState == selectedObj || startState?.pointsToCircle == selectedObj) {
                         setStartState(null);
                     }
@@ -999,16 +874,6 @@
                                 deleteArrow(arrow, i--);
                             }
                         }
-                        // // If an arrow is an EntryArrow
-                        // if (arrow instanceof EntryArrow) {
-                        //   // If the circle that the EntryArrow is being
-                        //   // pointed to is the object being currently selected,
-                        //   // then delete that EntryArrow as well since its
-                        //   // associated circle is being deleted
-                        //   if (arrow.pointsToCircle == selectedObj) {
-                        //     deleteArrow(arrow,i--);
-                        //   }
-                        // }
                         // If an arrow is a regular Arrow
                         if (arrow instanceof Arrow) {
                             // If either the startCircle or the endCircle of
@@ -1027,24 +892,11 @@
                 }
             }
         });
-        // Note to self: define inputString and alphabet down in the function at the bottom of
-        // this page. It will make it easier to finish this code.
-        // inputString.addEventListener("input", () => {
-        //       console.log("Input String:", inputString.value);
-        //     });
-        //   }
-        //   if (alphabet) {
-        //     alphabet.addEventListener("input", () => {
-        //       console.log("Alphabet:", alphabet.value);
-        //     });
-        //   }
-        // });
         // If the arrow is being deleted, then update the
         // circles that it is associated with
         function deleteArrow(arrow, index) {
             if (arrow instanceof Arrow) {
                 arrow.startCircle.outArrows.delete(arrow);
-                // arrow.endCircle.inArrows.delete(arrow);
             }
             else if (arrow instanceof SelfArrow) {
                 arrow.circle.outArrows.delete(arrow);
@@ -1076,18 +928,28 @@
             const rect = canvas.getBoundingClientRect();
             return { x: event.clientX - rect.left, y: event.clientY - rect.top };
         };
-        // Get the collided object at the point x, y
+        // Get the collided object at the point x, y.
+        // Basically checks to see if the cursor is touching an object.
+        // If it is, then return that specific object.
+        // This function is used to set the selectedObj variable in the
+        // mousedown eventListener and dblclick eventListener.
         function mouseCollision(x, y) {
+            // Iterate through all circles. If a circle is selected by
+            // the mouse, return that specific circle.
             for (var circ = 0; circ < circles.length; circ++) {
                 if (circles[circ].containsPoint(x, y)) {
                     return circles[circ];
                 }
             }
+            // Iterate through all Arrows and SelfArrows. If one of them is selected by
+            // the mouse, return that specific Arrow or SelfArrow.
             for (var arrow = 0; arrow < arrows.length; arrow++) {
                 if (arrows[arrow].containsPoint(x, y)) {
                     return arrows[arrow];
                 }
             }
+            // Check if the startState is being selected by the mouse.
+            // If it is, then return it.
             if (startState && startState.containsPoint(x, y)) {
                 return startState;
             }
@@ -1099,18 +961,25 @@
      * --------------------------------------------------------- */
     function attachWhenReady() {
         const run = () => {
+            // Get the input tag for the input string of the DFA
             const inputString = document.getElementById("inputString");
+            // Get the input tag for the alphabet input of the DFA
             const alphabetInput = document.getElementById("alphabet");
+            // Get the canvas tag for the canvas of the DFA
             const canvas = document.getElementById('DFACanvas');
             if (canvas) {
                 setupDfaCanvas(canvas);
             }
             if (inputString) {
                 inputString.addEventListener("keydown", (event) => {
+                    // If the "Enter" key is pressed on the input string
                     if (event.key === "Enter") {
                         event.preventDefault();
                         console.log("Submitting inputString:", inputString.value);
-                        var newInput = inputString.value;
+                        // Obtain the value entered
+                        var newInput = inputString.value.trim();
+                        // Check to see if it contains anything not defined in the alphabet.
+                        // If it contains undefined characters, alert the user
                         for (let char of newInput) {
                             if (!alphabet.has(char)) {
                                 // Note to self: maybe make it so it goes through the entire string
@@ -1120,23 +989,24 @@
                                 break;
                             }
                         }
-                        // Add code to run DFA algo stuff below:
+                        // Run the DFA algorithm
                         dfaAlgo(newInput);
-                        // put your handling logic here
-                        inputString.value = ""; // optional clear
+                        // Reset the input tag
+                        inputString.value = "";
                     }
                 });
             }
             if (alphabetInput) {
                 alphabetInput.addEventListener("keydown", (event) => {
+                    // If the "Enter" key is pressed on the alphabet input
                     if (event.key === "Enter") {
                         event.preventDefault();
                         console.log("Submitting alphabet:", alphabetInput.value);
+                        // Obtain the input and update the alphabet variable
                         const newAlphabet = new Set(alphabetInput.value.trim().split(","));
                         setAlphabet(newAlphabet);
                         console.log(alphabet);
-                        // put your handling logic here
-                        alphabetInput.value = ""; // optional clear
+                        alphabetInput.value = "";
                     }
                 });
             }
