@@ -1,6 +1,6 @@
 import { Circle, circles } from "../../../public/scripts/circle";
 import { alphabet } from "../../../public/scripts/alphabet";
-import { Arrow } from "../../../public/scripts/arrow";
+import { Arrow, arrows } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
 import { startState } from "../../../public/scripts/EntryArrow";
 import { start } from "repl";
@@ -18,17 +18,19 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
       return;
     }
     else{
-      alert("The transitionDeterminismCheck is running!!");
-      console.log(lastEditedArrow.constructor.name);
+      //alert("The transitionDeterminismCheck is running!!");
+      //console.log(lastEditedArrow.constructor.name);
     }
+
+    
 
     // You don't want to check the transition for this current arrow
     // when iterating through all the arrows, so just empty it here.
     // If the transition is incorrect, then it'll remain empty.
     // If the transition is correct, then we'll reassign it to a new
     // value after all the checks.
-    lastEditedArrow.transition = [];
-    const newTransitions = lastEditedArrow.text.trim().split(",");
+    lastEditedArrow.transition = new Set();
+    const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
     console.log(newTransitions);
     
     
@@ -130,8 +132,11 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
       //   }
       // }
 
-      alert("This transition works!");
+      //alert("This transition works!");
       lastEditedArrow.transition = newTransitions;
+      //console.log("Added transition 1");
+      //printTransitions();
+
       return true;
     }
     else if(lastEditedArrow instanceof SelfArrow){
@@ -165,11 +170,28 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
       //   }
       // }
 
-      alert("This transition works!");
+      //alert("This transition works!");
       lastEditedArrow.transition = newTransitions;
+      //console.log("Added transition 1");
+      //printTransitions();
+      
       return true;
     }
     return true;
+}
+
+function printTransitions(){
+  console.log("Printing transitions");
+  
+  for(let circle of circles){
+    console.log("Num of trans for circle " + circle.text + " is: " + circle.outArrows.size);
+    console.log("Trans for circle: " + circle.text + "{ ");
+    const outArrows = circle.outArrows;
+    for(let arrow of outArrows){
+      console.log(arrow.transition);
+    }
+    console.log("}");
+  }
 }
 
 // This is a "completeness" check: were all characters of the
@@ -230,6 +252,9 @@ export function inputDeterminismCheck(){
       }
     }
   }
+
+
+
   return true;
 }
 
@@ -281,20 +306,23 @@ export function dfaAlgo(input: string){
     console.log("Char: " + char);
     for(let arrow of currOutArrows){
       console.log("At: " + curr.text);
-      console.log("Transition: " + arrow.transition);
+      console.log("Checking transition: " + arrow.transition.);
 
       // If the current character from the input string
 			// is found in one of the transitions, then we 
 			// use that transition to move to the next state.
-      if(char in arrow.transition){
-        console.log("Taking transition: " + arrow.transition);
+      if(arrow.transition.has(char)){
+        console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
         curr = arrow.endCircle;
         break;
+      }
+      else{
+        console.log("Not taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
       }
     }
   }
 
-  console.log("At: " + curr.text);
+  console.log("Finally at: " + curr.text);
 
   // If the final state that we arrived at is the end state,
 	// that means the string was accepted.
@@ -308,6 +336,7 @@ export function dfaAlgo(input: string){
   else{
     alert("The string was rejected!");
     console.log("Rejected!");
+    return false;
   }
 
 
