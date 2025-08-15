@@ -17,6 +17,11 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
       console.log("null");
       return;
     }
+
+    // Note: the code below will cover both the Arrow and the SelfArrow.
+    // We won't need to split them into two separate cases.
+    // This is because Arrow and SelfArrow both contain the startCircle
+    // and endCircle attributes.
     
     // You don't want to check the transition for this current arrow
     // when iterating through all the arrows, so just empty it here.
@@ -27,57 +32,35 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
     const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
     console.log(newTransitions);
     
+
+    // Check the outArrows of the initial node
+    const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
     
-    if(lastEditedArrow instanceof Arrow){
+    // You iterate through every arrow that goes outwards from this current node
+    for(let arrow of startCircOutArrows){
+      const oldTransitions = arrow.transition;
 
-      // Check the outArrows of the initial node
-      const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
-      
-      // You iterate through every arrow that goes outwards from this current node
-      for(let arrow of startCircOutArrows){
-        const oldTransitions = arrow.transition;
+      // Then, you iterate through each of the old transitions for each arrow
+      console.log("Old trans: " + oldTransitions);
+      for(let oldTransition of oldTransitions){
+        
+        // Next, you iterate through each transition in the new
+        // transition, and compare it against each transition
+        // in the original transition for that arrow
+        for(let newTransition of newTransitions){
 
-        // Then, you iterate through each of the old transitions for each arrow
-        console.log("Old trans: " + oldTransitions);
-        for(let oldTransition of oldTransitions){
-          
-          // Next, you iterate through each transition in the new
-          // transition, and compare it against each transition
-          // in the original transition for that arrow
-          for(let newTransition of newTransitions){
-
-            // If a transition already exists, then it fails determinism
-            if(newTransition === oldTransition){
-              lastEditedArrow.text = "";
-              alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
-              return false;
-            }
+          // If a transition already exists, then it fails determinism
+          if(newTransition === oldTransition){
+            lastEditedArrow.text = "";
+            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
+            return false;
           }
         }
       }
-
-      lastEditedArrow.transition = newTransitions;
-      return true;
     }
-    else if(lastEditedArrow instanceof SelfArrow){
-      const circOutArrows = lastEditedArrow.circle.outArrows;
-      for(let arrow of circOutArrows){
-        const oldTransitions = arrow.transition;
-        console.log("Old trans: " + oldTransitions);
-        for(let oldTransition of oldTransitions){
-          for(let newTransition of newTransitions){
-            if(newTransition === oldTransition){
-              lastEditedArrow.text = "";
-              alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the node of this looped arrow");
-              return false;
-            }
-          }
-        }
-      }
 
-      lastEditedArrow.transition = newTransitions;
-      return true;
-    }
+    // Update the transition with the new one
+    lastEditedArrow.transition = newTransitions;
     return true;
 }
 
