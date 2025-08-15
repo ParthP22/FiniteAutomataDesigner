@@ -8,7 +8,7 @@ export class SelfArrow {
   anchorAngle: number;
   mouseOffsetAngle: number;
   text: string;
-  transition: string[];
+  transition: Set<string>;
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
@@ -18,8 +18,8 @@ export class SelfArrow {
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
     this.text = '';
-    this.transition = [];
-    this.circle.outArrows.add(this);
+    this.transition = new Set();
+    
 
     if (point) {
       this.setAnchorPoint(point.x, point.y);
