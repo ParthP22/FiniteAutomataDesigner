@@ -1,14 +1,22 @@
 import {Circle} from "./circle";
 import { drawArrow, drawText, snapToPadding, hitTargetPadding } from "./draw";
 
+// The startState will be an EntryArrow. If you wish to
+// access the start state node itself, you can use the
+// pointsToCircle attribute of the EntryArrow to do so.
+// Since we are not storing the EntryArrow itself as an
+// attribute for Circles, it was best that the startState
+// was set to the EntryArrow instead of its Circle
 export var startState: EntryArrow|null = null;
 
+// Since the startState will be imported, it cannot be reassigned
+// as usual, so this setter method will enable you to do so
 export function setStartState(newEntryArrow: EntryArrow | null){
   startState = newEntryArrow;
 }
 
 export class EntryArrow {
-  pointsToCircle: Circle;
+  pointsToCircle: Circle; // The startState of the DFA which this arrow points to
   deltaX: number;
   deltaY: number;
   // text: string;
