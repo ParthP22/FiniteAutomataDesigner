@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import Script from 'next/script';
+import { alphabet } from "../../../public/scripts/alphabet";
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
@@ -40,11 +41,17 @@ export default function DFAPage() {
                 <p className="underline font-bold">Instructions</p>
                 <ul className="list-disc text-left">
                     <li><p className="font-semibold inline">Add a state: </p>Double-click on the canvas</li>
-                    <li><p className="font-semibold inline">Add an arrow: </p>Shift + Drag the mouse on the canvas</li>
-                    <li><p className="font-semibold inline">Move anything: </p>Drag it around</li>
+                    <li><p className="font-semibold inline">Define start state: </p>Shift + Click empty space on canvas + Drag your desired start state</li>
+                    <li><p className="font-semibold inline">Add an arrow between states: </p>Shift + Click initial state + Drag the mouse to your desired terminal state</li>
+                    <li><p className="font-semibold inline">Add a looped arrow on a state: </p>Shift + Click existing state</li>
+                    <li><p className="font-semibold inline">Curve arrows: </p>Click your desired arrow and drag in the direction you wish to curve it</li>
+                    <li><p className="font-semibold inline">Move anything: </p>Click + Drag it around</li>
                     <li><p className="font-semibold inline">Delete anything: </p>Click it and press the delete key (not backspace)</li>
                     <li><p className="font-semibold inline">Make accept state: </p>Double-click an existing state</li>
+                    <li><p className="font-semibold inline">Type onto arrow or state: </p>Click on desired state, then begin typing. Click again anywhere else to submit</li>
                     <li><p className="font-semibold inline">Type numeric subscript: </p>Put an underscore before the number (ex: "q_0")</li>
+                    <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your DFA. Press Enter to submit</li>
+                    <li><p className="font-semibold inline">Run DFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
                 </ul>
             </div>
             <div id='inputDiv'className="flex flex-col self-center">
@@ -60,7 +67,7 @@ export default function DFAPage() {
                 />
                 {/* Textbox for inputting the alphabet */}
                 <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
-                    Alphabet:
+                    Alphabet: {alphabet}
                 </label>
                 <input
                     id="alphabet"
