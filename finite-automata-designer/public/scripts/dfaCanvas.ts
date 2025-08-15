@@ -19,6 +19,11 @@ import { alphabet, setAlphabet } from "./alphabet";
 // indicate that the user has submitted their transition.
 var lastEditedObject: Arrow | SelfArrow | Circle | null = null; 
 
+// This will store the previous text of an object before it is modified by the
+// keydown listener.
+// This variable is crucial for determining when to run the transitionDeterminismCheck,
+// because if the text changes on an arrow, the transitionDeterminismCheck must run.
+// If the text never changed, then no need to run the check.
 var oldText: string = "";
 
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null; // Currently selected object
