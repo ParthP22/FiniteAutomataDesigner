@@ -290,20 +290,60 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
                 selectedObj.text += event.key;
               }
               else{
-                console.log(alphabet);
-                console.log(event.key.constructor.name);
-                alert(event.key + " is not defined in the alphabet!");
+                // console.log(alphabet);
+                // console.log(event.key.constructor.name);
+                alert("\'" + event.key + "\' is not defined in the alphabet!");
               }
             }
             // Else, the selectedObj must be Circle, which we can type anything for
             else{
               selectedObj.text += event.key;
             }
-            
-            // After the new character has been appended to the object's
-            // "text" attribute, we will draw the canvas again
-            draw()
           }
+
+          // There is a strange edge-case where if you're typing a transition onto
+          // an arrow, and if you press a key whose length is greater than 1 and has
+          // not been defined in this nested if-statement (such as "Enter" or "Shift"),
+          // it will allow the user to type certain strings that are not defined in
+          // the alphabet. 
+          // For example, let's say alphabet = {"0","1"}, and the user types "0,111,0"
+          // as their transition for an arrow. Let's say before they click anywhere else,
+          // they press Shift or Enter or some other key whose name is longer than 1
+          // character, it will actually allow the transition "0,111,0" to be set as
+          // the text of that arrow. This is wrong, since "111" is not defined in the 
+          // alphabet. 
+          // However, that transition won't be passed into the transition determinism 
+          // check, so the transition Set  of the arrow still remains the same as it 
+          // was before. This is clearly a problem and needs to be addressed. How to 
+          // effectively to do it, I (Parth) am unsure as of right now.
+          else{
+            // if(selectedObj !== null && (
+            //   selectedObj instanceof Arrow ||
+            //   selectedObj instanceof SelfArrow)){
+
+            //   lastEditedObject = selectedObj;
+
+            //   // When you're typing the transition, the keydown listener checks if the
+            //   // key pressed is in the alphabet. However, this is not enough.
+            //   // This for-loop here will check if the entire transition itself is defined
+            //   // in the alphabet.
+            //   // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
+            //   // it should not work, since "00" and "01" are not in the alphabet.
+            //   const newTransitions = selectedObj.text.trim().split(",");
+
+            //   for(let newTransition of newTransitions){
+            //     if(!alphabet.has(newTransition)){
+            //       lastEditedObject.text = "";
+            //       alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+            //       return false;
+            //     }
+            //   }
+            // }
+          }
+
+          // After the new character has been appended to the object's
+          // "text" attribute, we will draw the canvas again
+          draw();
         }
       }
 
@@ -480,7 +520,7 @@ function attachWhenReady() {
               // Note to self: maybe make it so it goes through the entire string
               // first and collects every character that is wrong? Then give an alert
               // afterwards with every character that was wrong
-              alert(char + " is not in the alphabet, this input is invalid!");
+              alert("\'" + char + "\' is not in the alphabet, this input is invalid!");
               break;
             }
           }
