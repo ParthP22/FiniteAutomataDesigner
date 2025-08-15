@@ -50,6 +50,7 @@
             this.isAccept = false;
             this.text = '';
             this.outArrows = new Set();
+            console.log("Initial size of circle: " + this.outArrows.size);
             // this.inArrows = new Set();
             this.loop = null;
         }
@@ -117,14 +118,15 @@
         constructor(startCircle, endCircle) {
             this.startCircle = startCircle;
             this.endCircle = endCircle;
-            startCircle.outArrows.add(this);
+            // startCircle.outArrows.add(this);
+            // console.log("outArrows size of start node after creating arrow: " + startCircle.outArrows.size);
             // endCircle.inArrows.add(this);
             this.text = '';
             this.lineAngleAdjust = 0;
             // Make anchor point relative to the locations of start and end circles
             this.parallelPart = 0.5; // percent from start to end circle
             this.perpendicularPart = 0; // pixels from start to end circle
-            this.transition = [];
+            this.transition = new Set();
         }
         getAnchorPoint() {
             var dx = this.endCircle.x - this.startCircle.x;
@@ -281,8 +283,7 @@
             this.anchorAngle = 0;
             this.mouseOffsetAngle = 0;
             this.text = '';
-            this.transition = [];
-            this.circle.outArrows.add(this);
+            this.transition = new Set();
             if (point) {
                 this.setAnchorPoint(point.x, point.y);
             }
@@ -434,17 +435,13 @@
             console.log("null");
             return;
         }
-        else {
-            alert("The transitionDeterminismCheck is running!!");
-            console.log(lastEditedArrow.constructor.name);
-        }
         // You don't want to check the transition for this current arrow
         // when iterating through all the arrows, so just empty it here.
         // If the transition is incorrect, then it'll remain empty.
         // If the transition is correct, then we'll reassign it to a new
         // value after all the checks.
-        lastEditedArrow.transition = [];
-        const newTransitions = lastEditedArrow.text.trim().split(",");
+        lastEditedArrow.transition = new Set();
+        const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
         console.log(newTransitions);
         if (lastEditedArrow instanceof Arrow) {
             // Check the outArrows of the initial node
@@ -533,8 +530,10 @@
             //     }
             //   }
             // }
-            alert("This transition works!");
+            //alert("This transition works!");
             lastEditedArrow.transition = newTransitions;
+            //console.log("Added transition 1");
+            //printTransitions();
             return true;
         }
         else if (lastEditedArrow instanceof SelfArrow) {
@@ -565,8 +564,10 @@
             //     }
             //   }
             // }
-            alert("This transition works!");
+            //alert("This transition works!");
             lastEditedArrow.transition = newTransitions;
+            //console.log("Added transition 1");
+            //printTransitions();
             return true;
         }
         return true;
@@ -665,18 +666,21 @@
             console.log("Char: " + char);
             for (let arrow of currOutArrows) {
                 console.log("At: " + curr.text);
-                console.log("Transition: " + arrow.transition);
+                console.log("Checking transition: " + arrow.transition);
                 // If the current character from the input string
                 // is found in one of the transitions, then we 
                 // use that transition to move to the next state.
-                if (char in arrow.transition) {
-                    console.log("Taking transition: " + arrow.transition);
+                if (arrow.transition.has(char)) {
+                    console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
                     curr = arrow.endCircle;
                     break;
                 }
+                else {
+                    console.log("Not taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
+                }
             }
         }
-        console.log("At: " + curr.text);
+        console.log("Finally at: " + curr.text);
         // If the final state that we arrived at is the end state,
         // that means the string was accepted.
         if (curr.isAccept) {
@@ -689,6 +693,7 @@
         else {
             alert("The string was rejected!");
             console.log("Rejected!");
+            return false;
         }
     }
 
@@ -752,7 +757,7 @@
                         // If we left-click and the previous edited object was an Arrow or SelfArrow, run
                         // the transition check since it means the transition has been submitted
                         if (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) {
-                            alert("transDetCheck 1 running!!");
+                            //alert("transDetCheck 1 running!!");
                             transitionDeterminismCheck(lastEditedObject);
                         }
                         typingMode = false;
@@ -766,7 +771,7 @@
                         // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
                         // it would indicate that the user has submitted
                         if (typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject) {
-                            alert("transDetCheck 2 running!!");
+                            //alert("transDetCheck 2 running!!");
                             transitionDeterminismCheck(lastEditedObject);
                             typingMode = false;
                         }
@@ -783,7 +788,7 @@
                         // we will run the transitionDeterminismCheck, since right-clicking anything but an Arrow, SelfArrow,
                         // or Circle means the user has submitted their transition
                         if (typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow)) {
-                            alert("transDetCheck 3 running!!");
+                            //alert("transDetCheck 3 running!!");
                             transitionDeterminismCheck(lastEditedObject);
                             typingMode = false;
                         }
@@ -881,7 +886,9 @@
                         if (!hasSelfArrow) {
                             selectedObj = tempArrow;
                             arrows.push(tempArrow);
-                            console.log(arrows);
+                            // Add the arrow into the outArrows Set of its starting node
+                            tempArrow.circle.outArrows.add(tempArrow);
+                            // console.log(arrows);
                         }
                     }
                     else if (tempArrow instanceof EntryArrow) {
@@ -896,13 +903,16 @@
                             selectedObj = tempArrow;
                             setStartState(tempArrow);
                             // arrows.push(tempArrow);
-                            console.log("Curr arrows" + arrows);
+                            // console.log("Curr arrows" + arrows);
                         }
                     }
                     else {
                         selectedObj = tempArrow;
                         arrows.push(tempArrow);
-                        console.log(arrows);
+                        // Add the arrow into the outArrows Set of its starting node
+                        tempArrow.startCircle.outArrows.add(tempArrow);
+                        // console.log("outArrows size of start node after creating arrow: " + tempArrow.startCircle.outArrows.size);
+                        // console.log(arrows);
                     }
                 }
                 tempArrow = null;
