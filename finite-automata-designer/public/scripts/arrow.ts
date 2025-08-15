@@ -38,26 +38,25 @@ function det(
 }
 
 export class Arrow {
-  startCircle: Circle;
-  endCircle: Circle;
-  text: string;
-  lineAngleAdjust: number; // value to add to textAngle when link is straight line
-  parallelPart: number;
-  perpendicularPart: number;
-  transition: Set<string>;
+    startCircle: Circle; // The initial node of the Arrow
+    endCircle: Circle; // The terminal node of the Arrow
+    text: string; // The text (transition) of the Arrow that will be displayed
+    lineAngleAdjust: number; // value to add to textAngle when link is straight line
+    parallelPart: number;
+    perpendicularPart: number;
+    transition: Set<string>; // Set containing the transition of this arrow
 
 
-  constructor(startCircle: Circle, endCircle: Circle) {
-    this.startCircle = startCircle;
-    this.endCircle = endCircle;
-    this.text = '';
-    this.lineAngleAdjust = 0;
-    // Make anchor point relative to the locations of start and end circles
-    this.parallelPart = 0.5; // percent from start to end circle
-    this.perpendicularPart = 0; // pixels from start to end circle
-
-    this.transition = new Set();
-  }
+    constructor(startCircle: Circle, endCircle: Circle) {
+        this.startCircle = startCircle;
+        this.endCircle = endCircle;
+        this.text = '';
+        this.lineAngleAdjust = 0;
+        // Make anchor point relative to the locations of start and end circles
+        this.parallelPart = 0.5; // percent from start to end circle
+        this.perpendicularPart = 0; // pixels from start to end circle
+        this.transition = new Set();
+    }
 
     getAnchorPoint() {
         var dx = this.endCircle.x - this.startCircle.x;
