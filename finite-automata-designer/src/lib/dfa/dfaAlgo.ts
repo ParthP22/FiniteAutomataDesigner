@@ -11,11 +11,15 @@ import { startState } from "../../../public/scripts/EntryArrow";
 // This is a "correctness" check: does the new transition coincide
 // with other transitions going out from that state? If it does,
 // then it fails determinism.
-export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| null){
+export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | null){
     if(lastEditedArrow == null){
       console.log("null");
-      return;
+      return false;
     }
+
+    // Leaving this here commented-out, for debugging purposes if the
+    // need for it arises.
+    // printTransitions();
 
     // Note: the code below will cover both the Arrow and the SelfArrow.
     // We won't need to split them into two separate cases.
