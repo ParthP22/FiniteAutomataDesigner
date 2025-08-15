@@ -33,7 +33,22 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     // value after all the checks.
     lastEditedArrow.transition = new Set();
     const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
-    console.log(newTransitions);
+
+    // When you're typing the transition, the keydown listener checks if the
+    // key pressed is in the alphabet. However, this is not enough.
+    // This for-loop here will check if the entire transition itself is defined
+    // in the alphabet.
+    // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
+    // it should not work, since "00" and "01" are not in the alphabet.
+    for(let newTransition of newTransitions){
+      if(!alphabet.has(newTransition)){
+        lastEditedArrow.text = "";
+        alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+        return false;
+      }
+    }
+
+    // console.log(newTransitions);
     
 
     // Check the outArrows of the initial node
@@ -55,7 +70,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
           // If a transition already exists, then it fails determinism
           if(newTransition === oldTransition){
             lastEditedArrow.text = "";
-            alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
+            alert("This translation violates determinism since \'" + newTransition + "\' is already present for an outgoing arrow of the start node of this arrow");
             return false;
           }
         }
