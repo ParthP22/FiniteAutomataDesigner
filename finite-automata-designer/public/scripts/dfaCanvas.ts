@@ -12,18 +12,22 @@ import { snapToPadding} from "./draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
 
+// The previously edited object, which is determined by the object that was last
+// under typing mode.
+// This variable is crucial to determine when the transition determinism check
+// needs to be ran, since exiting typing mode on an Arrow or SelfArrow will
+// indicate that the user has submitted their transition.
+var lastEditedObject: Arrow | SelfArrow | Circle | null = null; 
 
-var lastEditedObject: Arrow | SelfArrow | Circle | null = null;
-
-var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null;
-var hightlightSelected = 'blue';
-var highlightTyping = 'red'
-var base = 'black';
-var dragging = false;
-var shiftPressed = false;
-var typingMode = false;
+var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null; // Currently selected object
+var hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
+var highlightTyping = 'red'; // Red highlight for objects to indicate typing mode
+var base = 'black'; // Black highlight for objects to indicate that they are not being selected
+var dragging = false; // True dragging objects is enabled, false otherwise
+var shiftPressed = false; // True if shift is pressed, false otherwise
+var typingMode = false; // True if typing mode for Arrows, SelfArrows, or Circles is enabled, false otherwise
 var startClick: {x: number, y: number} | null = null;
-var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null;
+var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
 
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
@@ -35,6 +39,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     ctx.save();
     // ctx?.translate(0.5, 0.5);
 
+    // Iterate through ALL circles and draw each one
     for (var circle = 0; circle < circles.length; circle++) {
       ctx.lineWidth= 1;
                                                                             // If we're in typing mode, use the red highlight, else blue highlight
@@ -42,6 +47,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       circles[circle].draw(ctx);
     }
 
+    // Iterate through ALL Arrows and SelfArrows and draw each one
     for (var arrow = 0; arrow < arrows.length; arrow++) {
       ctx.lineWidth = 1;
                                                                             // If we're in typing mode, use the red highlight, else blue highlight
@@ -49,12 +55,14 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       arrows[arrow].draw(ctx);
     }
 
+    // If there is an EntryArrow, then draw it
     if(startState){
       ctx.lineWidth = 1;
       ctx.fillStyle = ctx.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
       startState.draw(ctx);
     }
 
+    // If there is a TemporaryArrow being created, then draw it
     if (tempArrow != null) {
       ctx.lineWidth = 1;
       ctx.fillStyle = ctx.strokeStyle = base;
@@ -63,15 +71,21 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   }
 
   /* Event Handlers */
+  // If a mouse button is pressed down
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
     event.preventDefault();
     
-    var mouse = getMousePos(event)
+    var mouse = getMousePos(event);
+    
+    // Check if the mouse has clicked on an object.
+    // If true, then selectedObj will be updated.
     selectedObj = mouseCollision(mouse.x, mouse.y);
     dragging = false;
     startClick = mouse;
 
+    // This switch will determine typingMode
     switch(event.button){
+      // Detects mouse left-click
       case 0:
         if(typingMode){
           // If we left-click and the previous edited object was an Arrow or SelfArrow, run
@@ -83,6 +97,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           typingMode = false;
         }
         break;
+
+      // Detects mouse right-click
       case 2:
         if(selectedObj !== null && (
           selectedObj instanceof Arrow || 
@@ -91,7 +107,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             
             // In the event that the user right clicks on something else that is NOT the previously edited
             // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
-            // it would indicate that the user has submitted
+            // it would indicate that the user has submitted.
+            // Note: this means if the user is currently in typing mode on an arrow and if they right-click 
+            // that same arrow again, then it won't submit the transition. They must left-click or right-click
+            // elsewhere to submit it.
             if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject){
               //alert("transDetCheck 2 running!!");
               transitionDeterminismCheck(lastEditedObject);
@@ -134,30 +153,37 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       // Cosmetic arrow logic for interactive response
       tempArrow = new TemporaryArrow(mouse, mouse);
     }
-
     draw();
   });
 
-
+  // If mouse is double-clicked
   canvas.addEventListener('dblclick', (event) => {
     var mouse = getMousePos(event);
     selectedObj = mouseCollision(mouse.x, mouse.y);
 
+    // If the mouse double-clicks an empty space, then
+    // create a new Circle.
     if (selectedObj == null) {
       selectedObj = new Circle(mouse.x, mouse.y);
       if (selectedObj instanceof Circle) {
         circles.push(selectedObj);
         draw();
       }
-    } else if (selectedObj instanceof Circle) {
+    } 
+    // If the mouse double-clicks a Circle, then make that
+    // Circle an accept state
+    else if (selectedObj instanceof Circle) {
       selectedObj.isAccept = !selectedObj.isAccept;
       draw();
     }
   });
 
+  // If mouse moves
   canvas.addEventListener('mousemove', (event) => {
     var mouse = getMousePos(event);
 
+    // If a new TemporaryArrow has been created, the
+    // canvas must draw where it is going
     if (tempArrow != null) {
       var targetCircle = mouseCollision(mouse.x, mouse.y);
       if (!(targetCircle instanceof Circle)) {
@@ -191,6 +217,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     }
   });
 
+  // If the mouse was originally clicked and now
+  // the user let go
   canvas.addEventListener('mouseup', (event) =>{
     dragging = false;
 
@@ -200,38 +228,39 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         // Check if a self arrow points to the selected circle already
         
         if (tempArrow instanceof SelfArrow) {
-          var hasSelfArrow = false
-          for (var i = 0; i < arrows.length; i++) {
-            var arrow = arrows[i];
-            if (arrow instanceof SelfArrow) {
-              if (arrow.circle == selectedObj) {
-                arrows.push(arrow);
-                console.log(arrows);
-                hasSelfArrow = true;
-                break;
-              }
-            }
-          }
-          if (!hasSelfArrow) {
+          // Check to see if the circle that you are trying to 
+          // create the SelfArrow on already has one
+          if (!tempArrow.circle.loop) {
+            // If the SelfArrow doesn't already exist for a state, 
+            // but it is being created, then add it for that state
             selectedObj = tempArrow;
             arrows.push(tempArrow);
+
+            // Set the pointer for the loop variable of the Circle
+            // to the newly created SelfArrow
+            tempArrow.circle.loop = tempArrow;
 
             // Add the arrow into the outArrows Set of its starting node
             tempArrow.circle.outArrows.add(tempArrow);            
           }
-        } else if (tempArrow instanceof EntryArrow) {
+        } 
+        else if (tempArrow instanceof EntryArrow) {
+          // If the EntryArrow doesn't already exist, then
+          // create one and set it as the new start state
           if (startState === null) {
             selectedObj = tempArrow;
             setStartState(tempArrow);
           }
-        } else {
+        }
+        // If the tempArrow isn't a SelfArrow or an EntryArrow
+        // then it must be a regular arrow 
+        else {
           selectedObj = tempArrow;
           arrows.push(tempArrow);
 
           // Add the arrow into the outArrows Set of its starting node
           tempArrow.startCircle.outArrows.add(tempArrow);
         }
-        
       }
       tempArrow = null;
     }
