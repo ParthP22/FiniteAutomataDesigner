@@ -39,9 +39,10 @@ export function drawText(
 		x += cornerPointX - sin * slide;
 		y += cornerPointY + cos * slide;
   }
-    x = Math.round(x);
-    y = Math.round(y);
-		ctx.fillText(text, x, y + 6);
+  
+  x = Math.round(x);
+  y = Math.round(y);
+  ctx.fillText(text, x, y + 6);
 }
 
 export function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number) {
