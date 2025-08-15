@@ -1,8 +1,3 @@
-import {Circle} from "./circle";
-import {Arrow} from "./arrow";
-import {SelfArrow} from "./SelfArrow";
-import {EntryArrow} from "./EntryArrow";
-
 export var nodeRadius = 30;
 export var snapToPadding = 10; // pixels
 export var hitTargetPadding = 6; // pixels
@@ -26,7 +21,7 @@ export function drawText(
 
 
   ctx.font = '20px Times New Roman', 'serif';
-  var text = subscriptText(originalText)
+  var text = subscriptText(originalText); // Add subscript to text if indicated
   var width = ctx.measureText(text).width;
   x -= width / 2;
 
@@ -39,7 +34,7 @@ export function drawText(
 		x += cornerPointX - sin * slide;
 		y += cornerPointY + cos * slide;
   }
-  
+
   x = Math.round(x);
   y = Math.round(y);
   ctx.fillText(text, x, y + 6);
