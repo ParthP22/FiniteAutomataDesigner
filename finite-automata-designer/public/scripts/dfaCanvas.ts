@@ -79,7 +79,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // If we left-click and the previous edited object was an Arrow or SelfArrow, run
           // the transition check since it means the transition has been submitted
           if(lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow){
-            alert("transDetCheck 1 running!!");
+            //alert("transDetCheck 1 running!!");
             transitionDeterminismCheck(lastEditedObject);
           }
           typingMode = false;
@@ -95,7 +95,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
             // it would indicate that the user has submitted
             if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject){
-              alert("transDetCheck 2 running!!");
+              //alert("transDetCheck 2 running!!");
               transitionDeterminismCheck(lastEditedObject);
               typingMode = false;
             }
@@ -114,7 +114,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // we will run the transitionDeterminismCheck, since right-clicking anything but an Arrow, SelfArrow,
           // or Circle means the user has submitted their transition
           if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow)){
-              alert("transDetCheck 3 running!!");
+              //alert("transDetCheck 3 running!!");
               transitionDeterminismCheck(lastEditedObject);
               typingMode = false;
             }
@@ -217,7 +217,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (!hasSelfArrow) {
             selectedObj = tempArrow;
             arrows.push(tempArrow);
-            console.log(arrows);
+            // Add the arrow into the outArrows Set of its starting node
+            tempArrow.circle.outArrows.add(tempArrow);
+            
+            // console.log(arrows);
           }
         } else if (tempArrow instanceof EntryArrow) {
           // var hasEntryArrow = false;
@@ -231,13 +234,18 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (startState === null) {
             selectedObj = tempArrow;
             setStartState(tempArrow);
+
             // arrows.push(tempArrow);
-            console.log("Curr arrows" + arrows);
+            // console.log("Curr arrows" + arrows);
           }
         } else {
           selectedObj = tempArrow;
           arrows.push(tempArrow);
-          console.log(arrows);
+          // Add the arrow into the outArrows Set of its starting node
+          tempArrow.startCircle.outArrows.add(tempArrow);
+
+          // console.log("outArrows size of start node after creating arrow: " + tempArrow.startCircle.outArrows.size);
+          // console.log(arrows);
         }
         
       }
