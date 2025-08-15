@@ -21,7 +21,6 @@ export class SelfArrow {
     this.circle = pointsToCircle;
     this.startCircle = pointsToCircle;
     this.endCircle = pointsToCircle;
-    this.circle.loop = this;
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
     this.text = ''; 
