@@ -17,13 +17,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
       console.log("null");
       return;
     }
-    else{
-      //alert("The transitionDeterminismCheck is running!!");
-      //console.log(lastEditedArrow.constructor.name);
-    }
-
     
-
     // You don't want to check the transition for this current arrow
     // when iterating through all the arrows, so just empty it here.
     // If the transition is incorrect, then it'll remain empty.
@@ -62,81 +56,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
         }
       }
 
-      // // Check the inArrows of the initial node
-      // const startCircInArrows = lastEditedArrow.startCircle.inArrows;
-      // for(let arrow of startCircInArrows){
-      //   const oldTransitions = arrow.transition;
-      //   for(let oldTransition of oldTransitions){
-      //     for(let newTransition of newTransitions){
-      //       if(newTransition === oldTransition){
-      //         lastEditedArrow.text = "";
-      //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the start node of this arrow");
-      //         return false;
-      //       }
-      //     }
-      //   }
-      // }
-
-      // Check the outArrows of the terminal node
-      // const endCircOutArrows = lastEditedArrow.endCircle.outArrows;
-      // for(let arrow of endCircOutArrows){
-      //   const oldTransitions = arrow.transition;
-      //   for(let oldTransition of oldTransitions){
-      //     for(let newTransition of newTransitions){
-      //       if(newTransition === oldTransition){
-      //         lastEditedArrow.text = "";
-      //         alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the end node of this arrow");
-      //         return false;
-      //       }
-      //     }
-      //   }
-      // }
-
-      // Check the inArrows of the terminal node
-      // const endCircInArrows = lastEditedArrow.endCircle.inArrows;
-      // for(let arrow of endCircInArrows){
-      //   const oldTransitions = arrow.transition;
-      //   for(let oldTransition of oldTransitions){
-      //     for(let newTransition of newTransitions){
-      //       if(newTransition === oldTransition){
-      //         lastEditedArrow.text = "";
-      //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the end node of this arrow");
-      //         return false;
-      //       }
-      //     }
-      //   }
-      // }
-
-
-      // Check the loops for the start and end circles
-      // const startCirc = lastEditedArrow.startCircle;
-      // const endCirc = lastEditedArrow.endCircle;
-      // if(startCirc.loop){
-      //   const loopTransition = startCirc.loop.transition;
-      //   for(let newTransition of newTransitions){
-      //     if(newTransition in loopTransition){
-      //       lastEditedArrow.text = "";
-      //       alert("This translation violates determinism since " + newTransition + " is already present for the loop of the start node of this arrow");
-      //       return false;
-      //     }
-      //   }
-      // }
-      // if(endCirc.loop){
-      //   const loopTransition = endCirc.loop.transition;
-      //   for(let newTransition of newTransitions){
-      //     if(newTransition in loopTransition){
-      //       lastEditedArrow.text = "";
-      //       alert("This translation violates determinism since " + newTransition + " is already present for the loop of the end node of this arrow");
-      //       return false;
-      //     }
-      //   }
-      // }
-
-      //alert("This transition works!");
       lastEditedArrow.transition = newTransitions;
-      //console.log("Added transition 1");
-      //printTransitions();
-
       return true;
     }
     else if(lastEditedArrow instanceof SelfArrow){
@@ -155,26 +75,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow| n
         }
       }
 
-      // const circInArrows = lastEditedArrow.circle.inArrows;
-
-      // for(let arrow of circInArrows){
-      //   const oldTransitions = arrow.transition;
-      //   for(let oldTransition of oldTransitions){
-      //     for(let newTransition of newTransitions){
-      //       if(newTransition === oldTransition){
-      //         lastEditedArrow.text = "";
-      //         alert("This translation violates determinism since " + newTransition + " is already present for an incoming arrow of the node of this looped arrow");
-      //         return false;
-      //       }
-      //     }
-      //   }
-      // }
-
-      //alert("This transition works!");
       lastEditedArrow.transition = newTransitions;
-      //console.log("Added transition 1");
-      //printTransitions();
-      
       return true;
     }
     return true;
@@ -231,7 +132,6 @@ export function inputDeterminismCheck(){
 					// determinism.
           if(!alphabet.has(transition)){
             alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
-            console.log("The transition in question: " + arrow.transition);
             return false;
           }
         }
@@ -242,18 +142,10 @@ export function inputDeterminismCheck(){
 			// was not found to be a transition at all, then it fails determinism
       if(!exists){
         alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
-        console.log("The transitions:");
-        for(let arrow of node.outArrows){
-            console.log(arrow.transition);
-          
-        }
-        
         return false;
       }
     }
   }
-
-
 
   return true;
 }
@@ -303,39 +195,39 @@ export function dfaAlgo(input: string){
     // We go through every outgoing arrow for the 
 		// current state.
     const currOutArrows = curr.outArrows;
-    console.log("Char: " + char);
+    //console.log("Char: " + char);
     for(let arrow of currOutArrows){
-      console.log("At: " + curr.text);
-      console.log("Checking transition: " + arrow.transition);
+      //console.log("At: " + curr.text);
+      //console.log("Checking transition: " + arrow.transition);
 
       // If the current character from the input string
 			// is found in one of the transitions, then we 
 			// use that transition to move to the next state.
       if(arrow.transition.has(char)){
-        console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
+        //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
         curr = arrow.endCircle;
         break;
       }
       else{
-        console.log("Not taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
+        //console.log("Not taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
       }
     }
   }
 
-  console.log("Finally at: " + curr.text);
+  //console.log("Finally at: " + curr.text);
 
   // If the final state that we arrived at is the end state,
 	// that means the string was accepted.
   if(curr.isAccept){
     alert("The string was accepted!");
-    console.log("Accepted!");
+    //console.log("Accepted!");
     return true;
   }
   // Else, the final state we arrived at is not the end state,
 	// which means the string was rejected.
   else{
     alert("The string was rejected!");
-    console.log("Rejected!");
+    //console.log("Rejected!");
     return false;
   }
 
