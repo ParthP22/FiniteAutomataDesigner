@@ -314,6 +314,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
                 alert(event.key + " is not defined in the alphabet!");
               }
             }
+            // Else, the selectedObj must be Circle, which we can type anything for
             else{
               selectedObj.text += event.key;
             }
@@ -335,9 +336,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (circles[circ] == selectedObj) {
             circles.splice(circ--, 1);
           }
-          
         }
 
+        // If the EntryArrow is the selected objected or if the circle that the
+        // EntryArrow points to is the selected object, then delete the EntryArrow
         if(startState == selectedObj || startState?.pointsToCircle == selectedObj){
           setStartState(null);
         }
@@ -431,19 +433,31 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   };
 
-  // Get the collided object at the point x, y
+  // Get the collided object at the point x, y.
+  // Basically checks to see if the cursor is touching an object.
+  // If it is, then return that specific object.
+  // This function is used to set the selectedObj variable in the
+  // mousedown eventListener and dblclick eventListener.
   function mouseCollision(x: number, y: number) {
+
+    // Iterate through all circles. If a circle is selected by
+    // the mouse, return that specific circle.
     for(var circ = 0; circ < circles.length; circ++) {
       if(circles[circ].containsPoint(x, y)) {
         return circles[circ];
       }
     }
+
+    // Iterate through all Arrows and SelfArrows. If one of them is selected by
+    // the mouse, return that specific Arrow or SelfArrow.
     for(var arrow = 0; arrow < arrows.length; arrow++) {
       if (arrows[arrow].containsPoint(x, y)) {
         return arrows[arrow];
       }
     }
 
+    // Check if the startState is being selected by the mouse.
+    // If it is, then return it.
     if(startState && startState.containsPoint(x,y)){
       return startState;
     }
@@ -457,8 +471,11 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
  * --------------------------------------------------------- */
 function attachWhenReady() {
   const run = () => {
+    // Get the input tag for the input string of the DFA
     const inputString = document.getElementById("inputString") as HTMLInputElement | null;
+    // Get the input tag for the alphabet input of the DFA
     const alphabetInput = document.getElementById("alphabet") as HTMLInputElement | null;
+    // Get the canvas tag for the canvas of the DFA
     const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
 
     if (canvas)  {
@@ -467,11 +484,16 @@ function attachWhenReady() {
 
     if (inputString) {
       inputString.addEventListener("keydown", (event) => {
+        // If the "Enter" key is pressed on the input string
         if (event.key === "Enter") {
           event.preventDefault();
           console.log("Submitting inputString:", inputString.value);
 
-          var newInput = inputString.value;
+          // Obtain the value entered
+          var newInput = inputString.value.trim();
+
+          // Check to see if it contains anything not defined in the alphabet.
+          // If it contains undefined characters, alert the user
           for(let char of newInput){
             if(!alphabet.has(char)){
               // Note to self: maybe make it so it goes through the entire string
@@ -482,8 +504,10 @@ function attachWhenReady() {
             }
           }
           
+          // Run the DFA algorithm
           dfaAlgo(newInput);
-
+          
+          // Reset the input tag
           inputString.value = "";
         }
       });
@@ -491,10 +515,12 @@ function attachWhenReady() {
 
     if (alphabetInput) {
       alphabetInput.addEventListener("keydown", (event) => {
+        // If the "Enter" key is pressed on the alphabet input
         if (event.key === "Enter") {
           event.preventDefault();
           console.log("Submitting alphabet:", alphabetInput.value);
 
+          // Obtain the input and update the alphabet variable
           const newAlphabet = new Set(alphabetInput.value.trim().split(","));
           setAlphabet(newAlphabet);
 
