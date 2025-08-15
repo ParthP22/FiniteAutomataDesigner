@@ -1,9 +1,8 @@
 import { Circle, circles } from "../../../public/scripts/circle";
 import { alphabet } from "../../../public/scripts/alphabet";
-import { Arrow, arrows } from "../../../public/scripts/arrow";
+import { Arrow } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
 import { startState } from "../../../public/scripts/EntryArrow";
-import { start } from "repl";
 
 // I haven't figured out how to stop compiling the imports into JS, so here's a command
 // to get rid of them once you cd into their directory lol:
