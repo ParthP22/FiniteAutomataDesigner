@@ -74,8 +74,6 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     switch(event.button){
       case 0:
         if(typingMode){
-          // alert("transitionDeterminismCheck is running!!");
-
           // If we left-click and the previous edited object was an Arrow or SelfArrow, run
           // the transition check since it means the transition has been submitted
           if(lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow){
@@ -217,35 +215,21 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           if (!hasSelfArrow) {
             selectedObj = tempArrow;
             arrows.push(tempArrow);
+
             // Add the arrow into the outArrows Set of its starting node
-            tempArrow.circle.outArrows.add(tempArrow);
-            
-            // console.log(arrows);
+            tempArrow.circle.outArrows.add(tempArrow);            
           }
         } else if (tempArrow instanceof EntryArrow) {
-          // var hasEntryArrow = false;
-          // for (var i = 0; i < arrows.length; i++) {
-          //   if (arrows[i] instanceof EntryArrow) {
-          //     hasEntryArrow = true;
-          //     break;
-          //   }
-
-          // }
           if (startState === null) {
             selectedObj = tempArrow;
             setStartState(tempArrow);
-
-            // arrows.push(tempArrow);
-            // console.log("Curr arrows" + arrows);
           }
         } else {
           selectedObj = tempArrow;
           arrows.push(tempArrow);
+
           // Add the arrow into the outArrows Set of its starting node
           tempArrow.startCircle.outArrows.add(tempArrow);
-
-          // console.log("outArrows size of start node after creating arrow: " + tempArrow.startCircle.outArrows.size);
-          // console.log(arrows);
         }
         
       }
@@ -273,6 +257,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     // attribute, we will enter this if-statement
     if (selectedObj != null ) {
       if('text' in selectedObj){
+
         // This is for backspacing one letter at a time
         if(event.key === 'Backspace' && typingMode) {
           selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
@@ -285,6 +270,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // "text" attribute of that object, which will then be 
           // displayed on the canvas
           if (event.key.length === 1 && typingMode) {
+
             // If the current object that is being typed on is an Arrow or SelfArrow,
             // then we will check if the character being typed is defined in the alphabet.
             // If not, we will alert the user.
@@ -303,7 +289,6 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
               selectedObj.text += event.key;
             }
             
-
             // After the new character has been appended to the object's
             // "text" attribute, we will draw the canvas again
             draw()
@@ -350,18 +335,6 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             }
           }
 
-          // // If an arrow is an EntryArrow
-          // if (arrow instanceof EntryArrow) {
-
-          //   // If the circle that the EntryArrow is being
-          //   // pointed to is the object being currently selected,
-          //   // then delete that EntryArrow as well since its
-          //   // associated circle is being deleted
-          //   if (arrow.pointsToCircle == selectedObj) {
-          //     deleteArrow(arrow,i--);
-          //   }
-          // }
-
           // If an arrow is a regular Arrow
           if (arrow instanceof Arrow) {
 
@@ -386,27 +359,12 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     
   });
 
-  // Note to self: define inputString and alphabet down in the function at the bottom of
-  // this page. It will make it easier to finish this code.
-
-// inputString.addEventListener("input", () => {
-//       console.log("Input String:", inputString.value);
-//     });
-//   }
-
-//   if (alphabet) {
-//     alphabet.addEventListener("input", () => {
-//       console.log("Alphabet:", alphabet.value);
-//     });
-//   }
-// });
-
+  
   // If the arrow is being deleted, then update the
   // circles that it is associated with
   function deleteArrow(arrow: Arrow | SelfArrow | EntryArrow, index: number){
     if(arrow instanceof Arrow){
       arrow.startCircle.outArrows.delete(arrow);
-      // arrow.endCircle.inArrows.delete(arrow);
     }
     else if(arrow instanceof SelfArrow){
       arrow.circle.outArrows.delete(arrow);
@@ -495,11 +453,9 @@ function attachWhenReady() {
             }
           }
           
-          // Add code to run DFA algo stuff below:
           dfaAlgo(newInput);
 
-          // put your handling logic here
-          inputString.value = ""; // optional clear
+          inputString.value = "";
         }
       });
     }
@@ -515,8 +471,7 @@ function attachWhenReady() {
 
           console.log(alphabet);
 
-          // put your handling logic here
-          alphabetInput.value = ""; // optional clear
+          alphabetInput.value = ""; 
         }
       });
     }
