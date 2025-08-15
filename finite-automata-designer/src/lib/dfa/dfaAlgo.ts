@@ -306,7 +306,7 @@ export function dfaAlgo(input: string){
     console.log("Char: " + char);
     for(let arrow of currOutArrows){
       console.log("At: " + curr.text);
-      console.log("Checking transition: " + arrow.transition.);
+      console.log("Checking transition: " + arrow.transition);
 
       // If the current character from the input string
 			// is found in one of the transitions, then we 
