@@ -19,13 +19,13 @@ import { alphabet, setAlphabet } from "./alphabet";
 // indicate that the user has submitted their transition.
 var lastEditedObject: Arrow | SelfArrow | Circle | null = null; 
 
+var oldText: string = "";
+
 var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null; // Currently selected object
 var hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
-var highlightTyping = 'red'; // Red highlight for objects to indicate typing mode
 var base = 'black'; // Black highlight for objects to indicate that they are not being selected
 var dragging = false; // True dragging objects is enabled, false otherwise
 var shiftPressed = false; // True if shift is pressed, false otherwise
-var typingMode = false; // True if typing mode for Arrows, SelfArrows, or Circles is enabled, false otherwise
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
 
@@ -42,16 +42,14 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     // Iterate through ALL circles and draw each one
     for (var circle = 0; circle < circles.length; circle++) {
       ctx.lineWidth= 1;
-                                                                            // If we're in typing mode, use the red highlight, else blue highlight
-      ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
+      ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
       circles[circle].draw(ctx);
     }
 
     // Iterate through ALL Arrows and SelfArrows and draw each one
     for (var arrow = 0; arrow < arrows.length; arrow++) {
       ctx.lineWidth = 1;
-                                                                            // If we're in typing mode, use the red highlight, else blue highlight
-      ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? ((typingMode) ? highlightTyping : hightlightSelected) : base;
+      ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
       arrows[arrow].draw(ctx);
     }
 
@@ -83,61 +81,35 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     dragging = false;
     startClick = mouse;
 
-    // This switch will determine typingMode
-    switch(event.button){
-      // Detects mouse left-click
-      case 0:
-        if(typingMode){
-          // If we left-click and the previous edited object was an Arrow or SelfArrow, run
-          // the transition check since it means the transition has been submitted
-          if(lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow){
-            //alert("transDetCheck 1 running!!");
-            transitionDeterminismCheck(lastEditedObject);
-          }
-          typingMode = false;
-        }
-        break;
-
-      // Detects mouse right-click
-      case 2:
-        if(selectedObj !== null && (
-          selectedObj instanceof Arrow || 
-          selectedObj instanceof SelfArrow ||
-          selectedObj instanceof Circle)){
-            
-            // In the event that the user right clicks on something else that is NOT the previously edited
-            // arrow, then it will run the transitionDeterminismCheck and set typingMode to false, because
-            // it would indicate that the user has submitted.
-            // Note: this means if the user is currently in typing mode on an arrow and if they right-click 
-            // that same arrow again, then it won't submit the transition. They must left-click or right-click
-            // elsewhere to submit it.
-            if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && selectedObj !== lastEditedObject){
-              //alert("transDetCheck 2 running!!");
-              transitionDeterminismCheck(lastEditedObject);
-              typingMode = false;
-            }
-            
-            // Update the previously edited object
-            lastEditedObject = selectedObj;
-
-            // Set typing mode to true, since the object that was currently right-clicked on is an Arrow
-            // or SelfArrow or Circle, which means it can be typed on
-            typingMode = true;
-        }
-        // If the selected object is null (meaning nothing is selected) or if the currently selected object is
-        // not an Arrow or SelfArrow or Circle, then enter this else-block
-        else{
-          // If it is currently on typing mode and the previously edited object was an Arrow or SelfArrow,
-          // we will run the transitionDeterminismCheck, since right-clicking anything but an Arrow, SelfArrow,
-          // or Circle means the user has submitted their transition
-          if(typingMode && (lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow)){
-              //alert("transDetCheck 3 running!!");
-              transitionDeterminismCheck(lastEditedObject);
-              typingMode = false;
-            }
-        }
-        break;
+    // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
+    // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
+    // then we will run the transitionDeterminismCheck
+    if((lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && oldText !== lastEditedObject.text && selectedObj !== lastEditedObject){
+      // If the transitionDeterminismCheck returns true, that means the transition is valid.
+      // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
+      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+      // the text of the lastEditedObject will be equal
+      if(transitionDeterminismCheck(lastEditedObject)){
+        oldText = lastEditedObject.text;
+      }
+      // If the transitionDeterminismCheck returns false, that means the transition is not valid.
+      // So, we set oldText equal to the empty string, since the arrow's text will also have been
+      // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
+      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+      // the text of the lastEditedObject will be equal
+      else{
+        oldText = "";
+      }
     }
+
+    // Update the previously edited object here
+    if(selectedObj !== null && (
+      selectedObj instanceof Arrow ||
+      selectedObj instanceof SelfArrow ||
+      selectedObj instanceof Circle)){
+      lastEditedObject = selectedObj;
+    }
+
 
     if (selectedObj != null) {
       if (shiftPressed && selectedObj instanceof Circle) {
@@ -284,11 +256,15 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     // If we are currently selecting an object AND
     // if the currently selected object has a "text"
     // attribute, we will enter this if-statement
-    if (selectedObj != null ) {
+    if (selectedObj != null) {
       if('text' in selectedObj){
+        // Store the text of the object before it changes, since
+        // the 'text' attribute of the object will be directly modified
+        // by this keydown listener
+        oldText = selectedObj.text;
 
         // This is for backspacing one letter at a time
-        if(event.key === 'Backspace' && typingMode) {
+        if(event.key === 'Backspace') {
           selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
           draw();
         }
@@ -298,7 +274,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // letter), we will append that character to the end of the 
           // "text" attribute of that object, which will then be 
           // displayed on the canvas
-          if (event.key.length === 1 && typingMode) {
+          if (event.key.length === 1 ) {
 
             // If the current object that is being typed on is an Arrow or SelfArrow,
             // then we will check if the character being typed is defined in the alphabet.
