@@ -25,6 +25,7 @@ export class Circle {
     this.isAccept = false;
     this.text = '';
     this.outArrows = new Set();
+    console.log("Initial size of circle: " + this.outArrows.size);
     // this.inArrows = new Set();
     this.loop = null;
   }
