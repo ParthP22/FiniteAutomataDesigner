@@ -4,28 +4,25 @@ import {SelfArrow} from "./SelfArrow";
 
 export var circles: Circle[] = [];
 
-var set = new Set();
-
 export class Circle {
   x: number;
   y: number;
   mouseOffsetX: number;
   mouseOffsetY: number;
-  isAccept: boolean;
-  text: string;
-  outArrows: Set<Arrow | SelfArrow>;
-  loop: SelfArrow | null;
+  isAccept: boolean; // Whether or not this state is an accept state
+  text: string; // The name of this state that will be displayed
+  outArrows: Set<Arrow | SelfArrow>; // The outgoing transitions of this state
+  loop: SelfArrow | null; // The SelfArrow which loops back to this state, if it exists
 
   constructor(x: number, y: number) {
     this.x = x,
     this.y = y;
     this.mouseOffsetX = 0;
     this.mouseOffsetY = 0;
-    this.isAccept = false;
-    this.text = '';
-    this.outArrows = new Set();
-    console.log("Initial size of circle: " + this.outArrows.size);
-    this.loop = null;
+    this.isAccept = false; 
+    this.text = ''; 
+    this.outArrows = new Set(); 
+    this.loop = null; 
   }
 
   setMouseStart(x: number, y: number): void {
