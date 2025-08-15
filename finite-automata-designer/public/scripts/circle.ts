@@ -14,7 +14,6 @@ export class Circle {
   isAccept: boolean;
   text: string;
   outArrows: Set<Arrow | SelfArrow>;
-  // inArrows: Set<Arrow>;
   loop: SelfArrow | null;
 
   constructor(x: number, y: number) {
@@ -26,7 +25,6 @@ export class Circle {
     this.text = '';
     this.outArrows = new Set();
     console.log("Initial size of circle: " + this.outArrows.size);
-    // this.inArrows = new Set();
     this.loop = null;
   }
 
