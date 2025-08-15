@@ -2,64 +2,9 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import Script from 'next/script';
-// import { lastEditedArrow } from "../../../public/scripts/dfaCanvas";
-// import { transitionDeterminismCheck } from "@/lib/dfa/dfa";
-// import { inputDeterminismCheck } from "../../../public/scripts/dfaCanvas";
-// import { getLastEditedArrow } from "../../../public/scripts/arrow";
-
-// To build canvas and dfa simulataneously:
-// npm run build:dfa && npm run build:canvas
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
-
-    // const [inputString, setInputString] = useState("");
-    // const [alphabet, setAlphabet] = useState("");
-    // const [result, setResult] = useState<null | boolean>(null);
-    // const [typingMode, setTypingMode] = useState(false);
-
-    // const handleTypingModeOn = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    //     event.preventDefault();
-    //     setTypingMode(true);
-    // };
-    
-    // This piece of commented out code below throws an error on NextJS
-    // for dfaCanvas.ts, saying 'document' is not defined for the piece
-    // of code at the end of that file where you attach the canvas to
-    // this file.
-    // useEffect(() => {
-    //     if(typingMode === false){
-    //         // var tempArrow = getLastEditedArrow();
-    //         // if(tempArrow != null){
-    //         //     console.log(tempArrow.constructor.name);
-    //         // }
-    //         transitionDeterminismCheck();
-    //         // alert("The transitionDeterminismCheck is running!!");
-    //     }
-    // }, [typingMode]);
-
-    // useEffect(() => {
-    //     const handleLeftClick = (event: MouseEvent) => {
-    //     if (event.button === 0) {  // left mouse button
-    //         setTypingMode(false);
-    //     }
-    //     };
-
-    //     document.addEventListener("mousedown", handleLeftClick);
-
-    //     return () => {
-    //     document.removeEventListener("mousedown", handleLeftClick);
-    //     };
-    // }, []);
-
-    // const handleRun = () => {
-        
-    //     setInputString("");
-    // };
-
-    // const handleClear = () => {
-    //     canvasRef.current?.clear(); // safe call if the ref is defined
-    // };
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
@@ -73,7 +18,7 @@ export default function DFAPage() {
         </h1>
         <div id="canvasDiv" className="">
             {/*Canvas for drawing FSM*/}
-            <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none" /*onContextMenu={handleTypingModeOn}*/></canvas>
+            <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none"></canvas>
         </div>
         
         {/* <div className="mt-4 flex justify-center">
@@ -112,8 +57,6 @@ export default function DFAPage() {
                     type="text"
                     placeholder="Enter a string..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    // value={inputString}
-                    // onChange={(e) => setInputString(e.target.value)}
                 />
                 {/* Textbox for inputting the alphabet */}
                 <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
@@ -124,8 +67,6 @@ export default function DFAPage() {
                     type="text"
                     placeholder="Enter an alphabet..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    // value={alphabet}
-                    // onChange={(e) => setAlphabet(e.target.value)}
                 />
             </div>
             </div>
