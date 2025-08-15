@@ -62,14 +62,15 @@ export class Arrow {
   lineAngleAdjust: number; // value to add to textAngle when link is straight line
   parallelPart: number;
   perpendicularPart: number;
-  transition: string[];
+  transition: Set<string>;
 
 
   constructor(startCircle: Circle, endCircle: Circle) {
     this.startCircle = startCircle;
     this.endCircle = endCircle;
 
-    startCircle.outArrows.add(this);
+    // startCircle.outArrows.add(this);
+    // console.log("outArrows size of start node after creating arrow: " + startCircle.outArrows.size);
     // endCircle.inArrows.add(this);
 
     this.text = '';
@@ -78,7 +79,7 @@ export class Arrow {
     this.parallelPart = 0.5; // percent from start to end circle
     this.perpendicularPart = 0; // pixels from start to end circle
 
-    this.transition = [];
+    this.transition = new Set();
   }
 
     getAnchorPoint() {
