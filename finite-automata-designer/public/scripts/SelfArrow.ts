@@ -2,13 +2,20 @@ import {Circle} from "./circle";
 import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
 
 export class SelfArrow {
-  circle: Circle;
-  startCircle: Circle;
-  endCircle: Circle;
+  circle: Circle; // The state which this SelfArrow loops back to
+
+  // These two attributes are not really necessary.
+  // However, since the DFA algorithm will check the startCircle
+  // and endCircle of each state, it makes it a lot simpler if the
+  // SelfArrow has these attributes as well, so that we don't 
+  // have to create an entirely separate case for it in the algo.
+  startCircle: Circle; // The state which this SelfArrow loops back to
+  endCircle: Circle; // The state which this SelfArrow loops back to
+
   anchorAngle: number;
   mouseOffsetAngle: number;
-  text: string;
-  transition: Set<string>;
+  text: string; // The text (transition) of the Arrow that will be displayed
+  transition: Set<string>; // Set containing the transition of this arrow
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
@@ -17,7 +24,7 @@ export class SelfArrow {
     this.circle.loop = this;
     this.anchorAngle = 0;
     this.mouseOffsetAngle = 0;
-    this.text = '';
+    this.text = ''; 
     this.transition = new Set();
     
 
