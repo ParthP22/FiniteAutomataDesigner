@@ -34,10 +34,10 @@ export class SelfArrow {
     ctx.stroke();
     // Draw the text on the loop farthest from the circle
     var textX = arcInfo.circleX + arcInfo.circleRadius * Math.cos(this.anchorAngle);
-        var textY = arcInfo.circleY + arcInfo.circleRadius * Math.sin(this.anchorAngle);
-        drawText(ctx, this.text, textX, textY, this.anchorAngle);
-        // draw the head of the arrow
-        drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
+    var textY = arcInfo.circleY + arcInfo.circleRadius * Math.sin(this.anchorAngle);
+    drawText(ctx, this.text, textX, textY, this.anchorAngle);
+    // draw the head of the arrow
+    drawArrow(ctx, arcInfo.endX, arcInfo.endY, arcInfo.endAngle + Math.PI * 0.4);
   }
 
   setMouseStart(x: number, y: number): void {
