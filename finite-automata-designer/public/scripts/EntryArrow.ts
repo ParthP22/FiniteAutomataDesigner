@@ -56,17 +56,17 @@ export class EntryArrow {
             'startY': startY,
             'endX': end.x,
             'endY': end.y,
-        };
+          };
   }
 
   containsPoint(x: number, y: number) {
     var lineInfo = this.getEndPoints();
     var dx = lineInfo.endX - lineInfo.startX;
-        var dy = lineInfo.endY - lineInfo.startY;
-        var length = Math.sqrt(dx * dx + dy * dy);
-        var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
-        var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
-        return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding); 
+    var dy = lineInfo.endY - lineInfo.startY;
+    var length = Math.sqrt(dx * dx + dy * dy);
+    var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
+    var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
+    return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding); 
   }
 
 }
