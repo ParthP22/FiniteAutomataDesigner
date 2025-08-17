@@ -1,11 +1,11 @@
 'use client';
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, use } from "react";
 import Script from 'next/script';
-import { alphabet } from "../../../public/scripts/alphabet";
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
+    
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
@@ -66,8 +66,8 @@ export default function DFAPage() {
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 {/* Textbox for inputting the alphabet */}
-                <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
-                    Alphabet: {alphabet}
+                <label id="alphabetLabel" htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
+                    Alphabet: {"{0,1}"}
                 </label>
                 <input
                     id="alphabet"
