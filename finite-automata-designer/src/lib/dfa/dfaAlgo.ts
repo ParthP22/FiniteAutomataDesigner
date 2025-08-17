@@ -31,7 +31,9 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     // If the transition is correct, then we'll reassign it to a new
     // value after all the checks.
     lastEditedArrow.transition = new Set();
-    const newTransitions = lastEditedArrow.text.trim().split(",");
+
+    // The regex will remove any trailing/leading commas and whitespace
+    const newTransitions = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",");
 
     // When you're typing the transition, the keydown listener checks if the
     // key pressed is in the alphabet. However, this is not enough.
