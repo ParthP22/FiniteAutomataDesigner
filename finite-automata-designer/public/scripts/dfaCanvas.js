@@ -418,7 +418,6 @@
     // then it fails determinism.
     function transitionDeterminismCheck(lastEditedArrow) {
         if (lastEditedArrow === null || lastEditedArrow.text === "") {
-            console.log((lastEditedArrow === null) ? "null" : "empty");
             return false;
         }
         // Leaving this here commented-out, for debugging purposes if the
@@ -434,7 +433,8 @@
         // If the transition is correct, then we'll reassign it to a new
         // value after all the checks.
         lastEditedArrow.transition = new Set();
-        const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
+        // The regex will remove any trailing/leading commas and whitespace
+        const newTransitions = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",");
         // When you're typing the transition, the keydown listener checks if the
         // key pressed is in the alphabet. However, this is not enough.
         // This for-loop here will check if the entire transition itself is defined
@@ -450,11 +450,12 @@
         }
         // Check the outArrows of the initial node
         const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
+        // Keep track of all invalid transitions to be printed to the user later
+        const duplicateTransitions = [];
         // You iterate through every arrow that goes outwards from this current node
         for (let arrow of startCircOutArrows) {
             const oldTransitions = arrow.transition;
             // Then, you iterate through each of the old transitions for each arrow
-            console.log("Old trans: " + oldTransitions);
             for (let oldTransition of oldTransitions) {
                 // Next, you iterate through each transition in the new
                 // transition, and compare it against each transition
@@ -463,15 +464,24 @@
                     // If a transition already exists, then it fails determinism
                     if (newTransition === oldTransition) {
                         lastEditedArrow.text = "";
-                        alert("This translation violates determinism since \'" + newTransition + "\' is already present for an outgoing arrow of the start node of this arrow");
-                        return false;
+                        duplicateTransitions.push(newTransition);
                     }
                 }
             }
         }
-        // Update the transition with the new one
-        lastEditedArrow.transition = newTransitions;
-        return true;
+        if (duplicateTransitions.length == 1) {
+            alert("This translation violates determinism since \'" + duplicateTransitions[0] + "\' is already present for an outgoing arrow of this node");
+            return false;
+        }
+        else if (duplicateTransitions.length > 1) {
+            alert("This translation violates determinism since \'" + duplicateTransitions.toString() + "\' are already present for an outgoing arrows of this node");
+            return false;
+        }
+        else {
+            // Update the transition with the new one
+            lastEditedArrow.transition = new Set(newTransitions);
+            return true;
+        }
     }
     // This is a "completeness" check: were all characters of the
     // alphabet used when building the DFA? This is processed
@@ -666,6 +676,9 @@
                 // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
                 // the text of the lastEditedArrow will be equal
                 if (transitionDeterminismCheck(lastEditedArrow)) {
+                    // This will sort the string in ascending order and assign it to the arrow's text,
+                    // which makes it more visually appealing for the user
+                    lastEditedArrow.text = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",").sort().join(",");
                     oldText = lastEditedArrow.text;
                 }
                 // If the transitionDeterminismCheck returns false, that means the transition is not valid.
@@ -980,6 +993,8 @@
             const alphabetInput = document.getElementById("alphabet");
             // Get the canvas tag for the canvas of the DFA
             const canvas = document.getElementById('DFACanvas');
+            // Get label tag for alphabet label of DFA
+            const alphabetLabel = document.getElementById("alphabetLabel");
             if (canvas) {
                 setupDfaCanvas(canvas);
             }
@@ -1022,11 +1037,15 @@
                     if (event.key === "Enter") {
                         event.preventDefault();
                         console.log("Submitting alphabet:", alphabetInput.value);
-                        // Obtain the input and update the alphabet variable
-                        const newAlphabet = new Set(alphabetInput.value.trim().split(","));
+                        // Obtain the input and update the alphabet variable.
+                        // The regex also removes any trailing/leading commas and whitespace
+                        const newAlphabet = new Set(alphabetInput.value.replace(/^[,\s]+|[,\s]+$/g, "").split(","));
                         setAlphabet(newAlphabet);
                         console.log(alphabet);
                         alphabetInput.value = "";
+                        if (alphabetLabel) {
+                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
+                        }
                     }
                 });
             }
