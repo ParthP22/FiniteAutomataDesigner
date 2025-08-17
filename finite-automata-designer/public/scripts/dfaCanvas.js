@@ -417,8 +417,8 @@
     // with other transitions going out from that state? If it does,
     // then it fails determinism.
     function transitionDeterminismCheck(lastEditedArrow) {
-        if (lastEditedArrow == null) {
-            console.log("null");
+        if (lastEditedArrow === null || lastEditedArrow.text === "") {
+            console.log((lastEditedArrow === null) ? "null" : "empty");
             return false;
         }
         // Leaving this here commented-out, for debugging purposes if the
@@ -435,7 +435,19 @@
         // value after all the checks.
         lastEditedArrow.transition = new Set();
         const newTransitions = new Set(lastEditedArrow.text.trim().split(","));
-        console.log(newTransitions);
+        // When you're typing the transition, the keydown listener checks if the
+        // key pressed is in the alphabet. However, this is not enough.
+        // This for-loop here will check if the entire transition itself is defined
+        // in the alphabet.
+        // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
+        // it should not work, since "00" and "01" are not in the alphabet.
+        for (let newTransition of newTransitions) {
+            if (!alphabet.has(newTransition)) {
+                lastEditedArrow.text = "";
+                alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+                return false;
+            }
+        }
         // Check the outArrows of the initial node
         const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
         // You iterate through every arrow that goes outwards from this current node
@@ -451,7 +463,7 @@
                     // If a transition already exists, then it fails determinism
                     if (newTransition === oldTransition) {
                         lastEditedArrow.text = "";
-                        alert("This translation violates determinism since " + newTransition + " is already present for an outgoing arrow of the start node of this arrow");
+                        alert("This translation violates determinism since \'" + newTransition + "\' is already present for an outgoing arrow of the start node of this arrow");
                         return false;
                     }
                 }
@@ -586,7 +598,12 @@
     // This variable is crucial to determine when the transition determinism check
     // needs to be ran, since exiting typing mode on an Arrow or SelfArrow will
     // indicate that the user has submitted their transition.
-    var lastEditedObject = null;
+    var lastEditedArrow = null;
+    // This will store the previous text of an object before it is modified by the
+    // keydown listener.
+    // This variable is crucial for determining when to run the transitionDeterminismCheck,
+    // because if the text changes on an arrow, the transitionDeterminismCheck must run.
+    // If the text never changed, then no need to run the check.
     var oldText = "";
     var selectedObj = null; // Currently selected object
     var hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
@@ -643,28 +660,27 @@
             // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
             // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
             // then we will run the transitionDeterminismCheck
-            if ((lastEditedObject instanceof Arrow || lastEditedObject instanceof SelfArrow) && oldText !== lastEditedObject.text && selectedObj !== lastEditedObject) {
+            if (lastEditedArrow && oldText !== lastEditedArrow.text && selectedObj !== lastEditedArrow) {
                 // If the transitionDeterminismCheck returns true, that means the transition is valid.
                 // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
                 // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-                // the text of the lastEditedObject will be equal
-                if (transitionDeterminismCheck(lastEditedObject)) {
-                    oldText = lastEditedObject.text;
+                // the text of the lastEditedArrow will be equal
+                if (transitionDeterminismCheck(lastEditedArrow)) {
+                    oldText = lastEditedArrow.text;
                 }
                 // If the transitionDeterminismCheck returns false, that means the transition is not valid.
                 // So, we set oldText equal to the empty string, since the arrow's text will also have been
                 // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
                 // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-                // the text of the lastEditedObject will be equal
+                // the text of the lastEditedArrow will be equal
                 else {
                     oldText = "";
                 }
             }
             // Update the previously edited object here
-            if (selectedObj !== null && (selectedObj instanceof Arrow ||
-                selectedObj instanceof SelfArrow ||
-                selectedObj instanceof Circle)) {
-                lastEditedObject = selectedObj;
+            if (selectedObj instanceof Arrow ||
+                selectedObj instanceof SelfArrow) {
+                lastEditedArrow = selectedObj;
             }
             if (selectedObj != null) {
                 if (shiftPressed && selectedObj instanceof Circle) {
@@ -692,10 +708,8 @@
             // create a new Circle.
             if (selectedObj == null) {
                 selectedObj = new Circle(mouse.x, mouse.y);
-                if (selectedObj instanceof Circle) {
-                    circles.push(selectedObj);
-                    draw();
-                }
+                circles.push(selectedObj);
+                draw();
             }
             // If the mouse double-clicks a Circle, then make that
             // Circle an accept state
@@ -758,6 +772,7 @@
                             // If the SelfArrow doesn't already exist for a state, 
                             // but it is being created, then add it for that state
                             selectedObj = tempArrow;
+                            lastEditedArrow = selectedObj;
                             arrows.push(tempArrow);
                             // Set the pointer for the loop variable of the Circle
                             // to the newly created SelfArrow
@@ -778,6 +793,7 @@
                     // then it must be a regular arrow 
                     else {
                         selectedObj = tempArrow;
+                        lastEditedArrow = selectedObj;
                         arrows.push(tempArrow);
                         // Add the arrow into the outArrows Set of its starting node
                         tempArrow.startCircle.outArrows.add(tempArrow);
@@ -803,41 +819,39 @@
             // attribute, we will enter this if-statement
             if (selectedObj != null) {
                 if ('text' in selectedObj) {
-                    // Store the text of the object before it changes, since
-                    // the 'text' attribute of the object will be directly modified
-                    // by this keydown listener
-                    oldText = selectedObj.text;
                     // This is for backspacing one letter at a time
                     if (event.key === 'Backspace') {
+                        // If the currently selected object is an Arrow or SelfArrow,
+                        // then save the old text of the object so you can determine later
+                        // if a determinism check needs to be ran
+                        if ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow)) {
+                            oldText = selectedObj.text;
+                        }
                         selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
                         draw();
                     }
-                    else {
-                        // If a key of length 1 was pressed (such as a number or
-                        // letter), we will append that character to the end of the 
-                        // "text" attribute of that object, which will then be 
-                        // displayed on the canvas
-                        if (event.key.length === 1) {
+                    // We will only allow characters of length 1 to be typed on the arrows
+                    if (event.key.length === 1) {
+                        if ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow)) {
                             // If the current object that is being typed on is an Arrow or SelfArrow,
                             // then we will check if the character being typed is defined in the alphabet.
                             // If not, we will alert the user.
-                            if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
-                                if (alphabet.has(event.key) || event.key === ',') {
-                                    selectedObj.text += event.key;
-                                }
-                                else {
-                                    console.log(alphabet);
-                                    console.log(event.key.constructor.name);
-                                    alert(event.key + " is not defined in the alphabet!");
-                                }
-                            }
-                            // Else, the selectedObj must be Circle, which we can type anything for
-                            else {
+                            if (alphabet.has(event.key) || event.key === ',') {
+                                // Store the text of the object before it changes, since
+                                // the 'text' attribute of the object will be directly modified
+                                // by this keydown listener
+                                oldText = selectedObj.text;
                                 selectedObj.text += event.key;
                             }
-                            // After the new character has been appended to the object's
-                            // "text" attribute, we will draw the canvas again
-                            draw();
+                            else {
+                                alert("\'" + event.key + "\' is not defined in the alphabet!");
+                            }
+                        }
+                        // Else, the selectedObj must be Circle, which we can type anything for
+                        // as long as the key we're pressing is of length 1 (so we can't press
+                        // enter or anything like that)
+                        else {
+                            selectedObj.text += event.key;
                         }
                     }
                 }
@@ -885,11 +899,10 @@
                             }
                         }
                     }
-                    // After all the arrows and circles present have been
-                    // checked, we can draw the canvas again
-                    draw();
-                    console.log(arrows);
                 }
+                // After all the arrows and circles present have been
+                // checked, we can draw the canvas again
+                draw();
             }
         });
         // If the arrow is being deleted, then update the
@@ -975,22 +988,29 @@
                     // If the "Enter" key is pressed on the input string
                     if (event.key === "Enter") {
                         event.preventDefault();
-                        console.log("Submitting inputString:", inputString.value);
                         // Obtain the value entered
                         var newInput = inputString.value.trim();
                         // Check to see if it contains anything not defined in the alphabet.
                         // If it contains undefined characters, alert the user
+                        var notDefined = [];
                         for (let char of newInput) {
                             if (!alphabet.has(char)) {
                                 // Note to self: maybe make it so it goes through the entire string
                                 // first and collects every character that is wrong? Then give an alert
                                 // afterwards with every character that was wrong
-                                alert(char + " is not in the alphabet, this input is invalid!");
-                                break;
+                                notDefined.push(char);
                             }
                         }
-                        // Run the DFA algorithm
-                        dfaAlgo(newInput);
+                        if (notDefined.length == 1) {
+                            alert("\'" + notDefined[0] + "\' is not in the alphabet, this input is invalid!");
+                        }
+                        else if (notDefined.length > 1) {
+                            alert("\'" + notDefined.toString() + "\' is not in the alphabet, this input is invalid!");
+                        }
+                        else {
+                            // Run the DFA algorithm
+                            dfaAlgo(newInput);
+                        }
                         // Reset the input tag
                         inputString.value = "";
                     }
