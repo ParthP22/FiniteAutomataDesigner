@@ -13,7 +13,6 @@ import { startState } from "../../../public/scripts/EntryArrow";
 // then it fails determinism.
 export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | null){
     if(lastEditedArrow === null || lastEditedArrow.text === ""){
-      console.log((lastEditedArrow === null) ? "null" : "empty");
       return false;
     }
 
@@ -57,7 +56,6 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
       const oldTransitions = arrow.transition;
 
       // Then, you iterate through each of the old transitions for each arrow
-      console.log("Old trans: " + oldTransitions);
       for(let oldTransition of oldTransitions){
         
         // Next, you iterate through each transition in the new
