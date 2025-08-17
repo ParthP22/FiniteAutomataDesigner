@@ -97,6 +97,9 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
       // the text of the lastEditedArrow will be equal
       if(transitionDeterminismCheck(lastEditedArrow)){
+        // This will sort the string in ascending order and assign it to the arrow's text,
+        // which makes it more visually appealing for the user
+        lastEditedArrow.text = lastEditedArrow.text.split(",").sort().join(",");
         oldText = lastEditedArrow.text;
       }
       // If the transitionDeterminismCheck returns false, that means the transition is not valid.
