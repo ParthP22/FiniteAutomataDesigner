@@ -587,20 +587,19 @@
         // If the final state that we arrived at is the end state,
         // that means the string was accepted.
         if (curr.isAccept) {
-            alert("The string was accepted!");
+            alert("The string, \"" + input + "\", was accepted!");
             //console.log("Accepted!");
             return true;
         }
         // Else, the final state we arrived at is not the end state,
         // which means the string was rejected.
         else {
-            alert("The string was rejected!");
+            alert("The string, \"" + input + "\", was rejected!");
             //console.log("Rejected!");
             return false;
         }
     }
 
-    // import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
     // Command to compile this file into JS
     // npm run build:canvas
     // The previously edited object, which is determined by the object that was last
