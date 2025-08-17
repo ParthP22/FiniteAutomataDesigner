@@ -99,7 +99,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       if(transitionDeterminismCheck(lastEditedArrow)){
         // This will sort the string in ascending order and assign it to the arrow's text,
         // which makes it more visually appealing for the user
-        lastEditedArrow.text = lastEditedArrow.text.split(",").sort().join(",");
+        lastEditedArrow.text = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",").sort().join(",");
         oldText = lastEditedArrow.text;
       }
       // If the transitionDeterminismCheck returns false, that means the transition is not valid.
@@ -453,6 +453,8 @@ function attachWhenReady() {
     const alphabetInput = document.getElementById("alphabet") as HTMLInputElement | null;
     // Get the canvas tag for the canvas of the DFA
     const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
+    // Get label tag for alphabet label of DFA
+    const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
 
     if (canvas)  {
       setupDfaCanvas(canvas)
@@ -503,13 +505,19 @@ function attachWhenReady() {
           event.preventDefault();
           console.log("Submitting alphabet:", alphabetInput.value);
 
-          // Obtain the input and update the alphabet variable
-          const newAlphabet = new Set(alphabetInput.value.trim().split(","));
+          // Obtain the input and update the alphabet variable.
+          // The regex also removes any trailing/leading commas and whitespace
+          const newAlphabet = new Set(alphabetInput.value.replace(/^[,\s]+|[,\s]+$/g, "").split(","));
           setAlphabet(newAlphabet);
 
           console.log(alphabet);
 
           alphabetInput.value = ""; 
+
+          if(alphabetLabel){
+            alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+          }
+
         }
       });
     }
