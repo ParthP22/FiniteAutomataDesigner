@@ -1,9 +1,5 @@
-// (8/8/2025 @10:35 PM): For the "Unexpected token: 'exports' " error, I found this
-// https://stackoverflow.com/questions/65936222/next-js-syntaxerror-unexpected-token-export
-// Other resources mayhaps
-// https://stackoverflow.com/questions/43472778/typescript-exports-is-not-defined
-// https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-// https://www.tutorialsteacher.com/typescript/typescript-compiling-project-and-tsconfig
+// 8/17/2025 Update: the file is no longer needed, since Rollup handles
+// all compilation. We'll leave it here anyways just in case.
 
 // To compile, do
 // tsc -p tsconfig.scripts.json
