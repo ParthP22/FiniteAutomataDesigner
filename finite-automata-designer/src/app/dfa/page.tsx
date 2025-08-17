@@ -1,6 +1,6 @@
 'use client';
 import Link from "next/link";
-import { useState, useRef, useEffect, use } from "react";
+import { useRef} from "react";
 import Script from 'next/script';
 
 export default function DFAPage() {
