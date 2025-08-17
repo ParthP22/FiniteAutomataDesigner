@@ -1,5 +1,3 @@
-// import { transitionDeterminismCheck } from "../../src/lib/dfa/dfa"
-
 // Command to compile this file into JS
 // npm run build:canvas
 
