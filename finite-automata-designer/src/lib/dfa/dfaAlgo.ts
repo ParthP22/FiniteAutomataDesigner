@@ -12,8 +12,8 @@ import { startState } from "../../../public/scripts/EntryArrow";
 // with other transitions going out from that state? If it does,
 // then it fails determinism.
 export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | null){
-    if(lastEditedArrow == null){
-      console.log("null");
+    if(lastEditedArrow === null || lastEditedArrow.text === ""){
+      console.log((lastEditedArrow === null) ? "null" : "empty");
       return false;
     }
 
@@ -41,15 +41,13 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
     // it should not work, since "00" and "01" are not in the alphabet.
     for(let newTransition of newTransitions){
+      
       if(!alphabet.has(newTransition)){
         lastEditedArrow.text = "";
         alert("\'" + newTransition + "\' has not been defined in the alphabet!");
         return false;
       }
     }
-
-    // console.log(newTransitions);
-    
 
     // Check the outArrows of the initial node
     const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
