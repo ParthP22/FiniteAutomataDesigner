@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# DynamoDB
+/dynamodb_local_latest
+
+# Rollup Cache
+.rollup.cache

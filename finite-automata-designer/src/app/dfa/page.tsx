@@ -1,14 +1,11 @@
 'use client';
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef} from "react";
 import Script from 'next/script';
 
 export default function DFAPage() {
     const canvasRef = useRef<{ clear: () => void }>(null);
-
-    const handleClear = () => {
-        canvasRef.current?.clear(); // safe call if the ref is defined
-    };
+    
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
@@ -44,11 +41,17 @@ export default function DFAPage() {
                 <p className="underline font-bold">Instructions</p>
                 <ul className="list-disc text-left">
                     <li><p className="font-semibold inline">Add a state: </p>Double-click on the canvas</li>
-                    <li><p className="font-semibold inline">Add an arrow: </p>Shift + Drag the mouse on the canvas</li>
-                    <li><p className="font-semibold inline">Move anything: </p>Drag it around</li>
+                    <li><p className="font-semibold inline">Define start state: </p>Shift + Click empty space on canvas + Drag your desired start state</li>
+                    <li><p className="font-semibold inline">Add an arrow between states: </p>Shift + Click initial state + Drag the mouse to your desired terminal state</li>
+                    <li><p className="font-semibold inline">Add a looped arrow on a state: </p>Shift + Click existing state</li>
+                    <li><p className="font-semibold inline">Curve arrows: </p>Click your desired arrow and drag in the direction you wish to curve it</li>
+                    <li><p className="font-semibold inline">Move anything: </p>Click + Drag it around</li>
                     <li><p className="font-semibold inline">Delete anything: </p>Click it and press the delete key (not backspace)</li>
                     <li><p className="font-semibold inline">Make accept state: </p>Double-click an existing state</li>
+                    <li><p className="font-semibold inline">Type onto arrow or state: </p>Click on desired state, then begin typing. Click again anywhere else to submit</li>
                     <li><p className="font-semibold inline">Type numeric subscript: </p>Put an underscore before the number (ex: "q_0")</li>
+                    <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your DFA. Press Enter to submit</li>
+                    <li><p className="font-semibold inline">Run DFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
                 </ul>
             </div>
             <div id='inputDiv'className="flex flex-col self-center">
@@ -57,15 +60,17 @@ export default function DFAPage() {
                     Input:
                 </label>
                 <input
+                    id="inputString"
                     type="text"
                     placeholder="Enter a string..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 {/* Textbox for inputting the alphabet */}
-                <label htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
-                    Alphabet:
+                <label id="alphabetLabel" htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
+                    Alphabet: {"{0,1}"}
                 </label>
                 <input
+                    id="alphabet"
                     type="text"
                     placeholder="Enter an alphabet..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -80,7 +85,7 @@ export default function DFAPage() {
             </div>
         </div>
 
-        <Script src="/scripts/dfaCanvas.js" strategy="afterInteractive" />
+        <Script src="/scripts/dfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
       </main>
       
     );
