@@ -1,3 +1,15 @@
+/*
+ Portions of this file are adapted from:
+
+ Copyright (c) 2010 Evan Wallace
+ Finite State Machine Designer (https://madebyevan.com/fsm/)
+ Licensed under the MIT License
+
+ Modifications:
+ Copyright (c) 2025 Mohammed Mowla and Parth Patel
+ Licensed under the MIT Licenses
+*/
+
 import { drawArrow } from "./draw";
 
 export class TemporaryArrow {
