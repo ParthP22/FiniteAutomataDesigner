@@ -1,3 +1,15 @@
+/*
+ Portions of this file are adapted from:
+
+ Copyright (c) 2010 Evan Wallace
+ Finite State Machine Designer (https://madebyevan.com/fsm/)
+ Licensed under the MIT License
+
+ Modifications:
+ Copyright (c) 2025 Mohammed Mowla and Parth Patel
+ Licensed under the MIT Licenses
+*/
+
 export var nodeRadius = 30;
 export var snapToPadding = 10; // pixels
 export var hitTargetPadding = 6; // pixels
