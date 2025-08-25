@@ -1,9 +1,37 @@
 "use client";
-import { useSession, signIn, signOut } from "next-auth/react";
+// import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import { createClient } from '@/lib/supabase/client'
+import { useState,useEffect } from "react";
+import { redirect } from 'next/navigation'
+import { User } from "@supabase/supabase-js"
+import { signOut } from "../login/actions";
+
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
+
+  const [user, setUser] = useState<User | null>(null);
+
+  const supabase = createClient();
+
+  useEffect(() => { 
+    const fetchUser = async () => {
+      const { data: {user}, } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+
+    // const authChange = async () => {
+    //   const { data: {subscription},} = supabase.auth.onAuthStateChange((_event, session) => {
+        
+    //       setUser(session?.user);
+    //   });
+    //   return subscription.unsubscribe();
+    // };
+
+    // return () => authChange();
+  }, []);
 
   return (
     <nav className="w-full bg-gray-700 text-white px-8 py-4 flex items-center justify-between shadow">
@@ -13,16 +41,16 @@ export default function Navbar() {
       <div className="flex items-center space-x-4">
 
         {/* Note: you cannot use normal if-statements inside the return method lol, so use conditional operator */}
-        {status === "authenticated" ? (
+        {user ? (
           <>
-            {session.user?.image && (
+            {/* {session.user?.image && (
               <img
                 src={session.user.image}
                 alt="User avatar"
                 className="w-8 h-8 rounded-full border-2 border-white"
               />
-            )}
-            <span className="hidden sm:inline">{session.user?.name}</span>
+            )} */}
+            <span className="hidden sm:inline">{user.email}</span>
             <Link
               href="/profile"
               className="px-5 py-2 bg-blue-500 hover:bg-blue-700 rounded transition"
@@ -42,10 +70,10 @@ export default function Navbar() {
         // name and profile button would disappear. It gave the impression that you were logged out.
         // Fix: Now, we show a loading spinner in the top right corner of the navbar when performing
         // this action.This is a workaround to prevent the aforementioned issue from happening.
-        ) : status === "loading" ? (
-          <div className="w-24 h-8 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-          </div>
+        // ) : status === "loading" ? (
+        //   <div className="w-24 h-8 flex items-center justify-center">
+        //     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+        //   </div>
         // Here is the "else" part of the conditional operator
         ) : (
           <Link
