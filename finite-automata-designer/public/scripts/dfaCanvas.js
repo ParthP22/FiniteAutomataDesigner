@@ -1131,8 +1131,6 @@
                         event.preventDefault();
                         // Obtain the value entered
                         let newInput = inputString.value.trim();
-                        let temp = _arrow_string_formating(inputString.value);
-                        console.log('formatted: ', temp);
                         // Check to see if it contains anything not defined in the alphabet.
                         // If it contains undefined characters, alert the user
                         let notDefined = [];
@@ -1188,12 +1186,15 @@
     attachWhenReady();
     // Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
     function _arrow_string_formating(text) {
+        // let replace_commas = text.replace(/,+/g, ',');              // collapse multiple commas into one 
+        // let replace_empties = replace_commas.replace(/\s+/g, '');   // remove all spaces/tabs/newlines
+        // let split_arr = replace_empties.split(',');                 // split into array
         return text
-            .trim() // remove leading/trailing whitespace
-            .replace('/\s+/g', '') // remove all spaces/tabs/newlines
-            .replace('/,+/g', ',') // collapse multiple commas into one 
+            .replace(/,+/g, ',') // collapse multiple commas into one 
+            .replace(/\s+/g, '') // remove all spaces/tabs/newlines
             .split(',') // split into array
             .filter(Boolean); // remove empty string
     }
+    console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
 
 })();
