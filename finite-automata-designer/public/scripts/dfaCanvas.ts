@@ -519,8 +519,6 @@ function attachWhenReady() {
 
           // Obtain the value entered
           let newInput = inputString.value.trim();
-          let temp = _arrow_string_formating(inputString.value)
-          console.log(temp);
 
           // Check to see if it contains anything not defined in the alphabet.
           // If it contains undefined characters, alert the user
