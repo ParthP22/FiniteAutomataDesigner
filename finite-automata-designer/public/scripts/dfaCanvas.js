@@ -17,22 +17,20 @@
     let snapToPadding = 10; // pixels
     let hitTargetPadding = 6; // pixels
     // Takes LaTeX-like plain text and converts to Unicode symbols
-    // Handles Greek letters (\alpha, \Beta, etc.) and subscripts (_1, _2, ...)
+    // Handles Greek letters and subscripts
+    // --- Note --- greek letters cannot be subscripted current 'limitation'
     function convertText(text) {
         let result = text;
-        // --- Greek letter conversion ---
-        // greekLetterNames should be something like ["Alpha","Beta","Gamma",...]
+        // Greek letter conversion
         for (let i = 0; i < greekLetterNames.length; i++) {
             let name = greekLetterNames[i];
             // Regex: '\\\\' matches a literal backslash "\" in text.
-            // Example: new RegExp('\\\\Alpha','g') will match "\Alpha"
+            // 'g' flag -> replace all not just first instance
             result = result.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(913 + i + (i > 16 ? 1 : 0))); // uppercase
-            // Lowercase version, e.g. "\alpha"
             result = result.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'), String.fromCharCode(945 + i + (i > 16 ? 1 : 0))); // lowercase
         }
-        // --- Subscript conversion ---
-        // Regex: '_' + i matches literal "_0", "_1", etc.
-        // Example: "_2" -> "₂"
+        // Subscript conversion
+        // DECIDE: Subcript all characters or subscript only numbers as of right now?
         for (let i = 0; i < 10; i++) {
             result = result.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
         }

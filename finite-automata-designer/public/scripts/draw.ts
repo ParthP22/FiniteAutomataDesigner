@@ -10,7 +10,22 @@
  Licensed under the MIT Licenses
 */
 
-export const greekLetterNames = [ 'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega' ];
+export const greekLetterNames = [ 
+  'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 
+  'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 
+  'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 
+  'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega' 
+];
+export const greekLettersLower = [
+  'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ',
+  'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π',
+  'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω'
+];
+export const greekLettersUpper = [
+  'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ',
+  'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π',
+  'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'
+];
 export let nodeRadius = 30;
 export let snapToPadding = 10; // pixels
 export let hitTargetPadding = 6; // pixels
@@ -34,7 +49,6 @@ function convertText(text: string) {
   }
 
   // Subscript conversion
-
   for (let i = 0; i < 10; i++) {
     result = result.replace(new RegExp('_' + i, 'g'),
       String.fromCharCode(8320 + i));
