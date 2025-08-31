@@ -45,9 +45,28 @@ var shiftPressed = false; // True if shift is pressed, false otherwise
 var startClick: {x: number, y: number} | null = null;
 var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
 
+// Returns true if no input or focusable element is active meaning the document body has focus.
+function canvasHasFocus() {
+  return (document.activeElement || document.body) == document.body;
+}
+
+// Check if the mouse click is inside the canvas
+const isInsideCanvas = (event: MouseEvent, canvas: HTMLCanvasElement) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX;
+  const y = event.clientY;
+
+  return ( 
+    x >= rect.left &&
+    x <= rect.right &&
+    y >= rect.top &&
+    y <= rect.bottom
+  );
+}
+
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) return { draw: () => {} };
 
   function draw() {
     if (!ctx) return;
@@ -265,6 +284,11 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   // Whenever a key is pressed on the user's keyboard
   document.addEventListener('keydown', (event) => {
+    // If the document body is not focused, don't detect key inputs
+    if (!canvasHasFocus()) {
+      return true;
+    }
+    
     // If the "Shift" key is pressed, set
     // shiftPressed = true, since it'll be used for
     // other functions on the canvas.
@@ -451,6 +475,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
     return null;
   }
+
+  return { draw };
 }
 
 /* -----------------------------------------------------------
@@ -468,8 +494,27 @@ function attachWhenReady() {
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
 
     if (canvas)  {
-      setupDfaCanvas(canvas)
+      const { draw } = setupDfaCanvas(canvas);
+      // If you click outside of the canvas it will deselect the object and turn off dragging
+      document.addEventListener("mousedown", (event) => {
+        if (!isInsideCanvas(event, canvas)) {
+          selectedObj = null;
+          dragging = false;
+          draw();
+        } else {
+          console.log("inside")
+        }
+      });
+      // 
+      // document.addEventListener('mousemove', (event) =>{
+      //   if (isInsideCanvas(event, canvas)) {
+      //     selectedObj = null;
+      //     dragging = false;
+      //     draw();
+      //   }
+      // });
     };
+    
 
     if (inputString) {
       inputString.addEventListener("keydown", (event) => {
@@ -528,7 +573,6 @@ function attachWhenReady() {
           if(alphabetLabel){
             alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
           }
-
         }
       });
     }

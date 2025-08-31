@@ -1,28 +1,54 @@
 (function () {
     'use strict';
 
-    var nodeRadius = 30;
-    var snapToPadding = 10; // pixels
-    var hitTargetPadding = 6; // pixels
-    // Creates subscript text to the input string using underscores before 0-9 as the regex
-    function subscriptText(text) {
-        var subscriptText = text;
-        for (var i = 0; i < 10; i++) {
-            subscriptText = subscriptText.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
+    const greekLetterNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'];
+    let nodeRadius = 30;
+    let snapToPadding = 10; // pixels
+    let hitTargetPadding = 6; // pixels
+    // Takes LaTeX-like plain text and converts to Unicode symbols
+    // Handles Greek letters (\alpha, \Beta, etc.) and subscripts (_1, _2, ...)
+    function convertText(text) {
+        let result = text;
+        // --- Greek letter conversion ---
+        // greekLetterNames should be something like ["Alpha","Beta","Gamma",...]
+        for (let i = 0; i < greekLetterNames.length; i++) {
+            let name = greekLetterNames[i];
+            // Regex: '\\\\' matches a literal backslash "\" in text.
+            // Example: new RegExp('\\\\Alpha','g') will match "\Alpha"
+            result = result.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(913 + i + (i > 16 ? 1 : 0))); // uppercase
+            // Lowercase version, e.g. "\alpha"
+            result = result.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'), String.fromCharCode(945 + i + (i > 16 ? 1 : 0))); // lowercase
         }
-        return subscriptText;
+        // --- Subscript conversion ---
+        // Regex: '_' + i matches literal "_0", "_1", etc.
+        // Example: "_2" -> "₂"
+        for (let i = 0; i < 10; i++) {
+            result = result.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+        }
+        return result;
     }
     function drawText(ctx, originalText, x, y, angeOrNull) {
         ctx.font = '20px Times New Roman';
-        var text = subscriptText(originalText); // Add subscript to text if indicated
-        var width = ctx.measureText(text).width;
+        let text = convertText(originalText); // Convert all of the text in one go both subscript and greek
+        let width = ctx.measureText(text).width;
         x -= width / 2;
         if (angeOrNull != null) {
-            var cos = Math.cos(angeOrNull);
-            var sin = Math.sin(angeOrNull);
-            var cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
-            var cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
-            var slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
+            let cos = Math.cos(angeOrNull);
+            let sin = Math.sin(angeOrNull);
+            let cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
+            let cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
+            let slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
             x += cornerPointX - sin * slide;
             y += cornerPointY + cos * slide;
         }
@@ -31,8 +57,8 @@
         ctx.fillText(text, x, y + 6);
     }
     function drawArrow(ctx, x, y, angle) {
-        var dx = Math.cos(angle);
-        var dy = Math.sin(angle);
+        let dx = Math.cos(angle);
+        let dy = Math.sin(angle);
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
@@ -40,6 +66,17 @@
         ctx.fill();
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     var circles = [];
     class Circle {
         constructor(x, y) {
@@ -85,6 +122,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     var arrows = [];
     function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
@@ -249,6 +297,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     class SelfArrow {
         constructor(pointsToCircle, point) {
             this.circle = pointsToCircle;
@@ -322,6 +381,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     // The startState will be an EntryArrow. If you wish to
     // access the start state node itself, you can use the
     // pointsToCircle attribute of the EntryArrow to do so.
@@ -387,6 +457,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     class TemporaryArrow {
         constructor(startPoint, endPoint) {
             this.startPoint = startPoint;
@@ -600,6 +681,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     // Command to compile this file into JS
     // npm run build:canvas
     // The previously edited object, which is determined by the object that was last
@@ -621,10 +713,24 @@
     var shiftPressed = false; // True if shift is pressed, false otherwise
     var startClick = null;
     var tempArrow = null; // A new arrow being created
+    // Returns true if no input or focusable element is active meaning the document body has focus.
+    function canvasHasFocus() {
+        return (document.activeElement || document.body) == document.body;
+    }
+    // Check if the mouse click is inside the canvas
+    const isInsideCanvas = (event, canvas) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX;
+        const y = event.clientY;
+        return (x >= rect.left &&
+            x <= rect.right &&
+            y >= rect.top &&
+            y <= rect.bottom);
+    };
     function setupDfaCanvas(canvas) {
         const ctx = canvas.getContext('2d');
         if (!ctx)
-            return;
+            return { draw: () => { } };
         function draw() {
             if (!ctx)
                 return;
@@ -820,6 +926,10 @@
         canvas.addEventListener('contextmenu', event => event.preventDefault());
         // Whenever a key is pressed on the user's keyboard
         document.addEventListener('keydown', (event) => {
+            // If the document body is not focused, don't detect key inputs
+            if (!canvasHasFocus()) {
+                return true;
+            }
             // If the "Shift" key is pressed, set
             // shiftPressed = true, since it'll be used for
             // other functions on the canvas.
@@ -980,6 +1090,7 @@
             }
             return null;
         }
+        return { draw };
     }
     /* -----------------------------------------------------------
      * Attach automatically when DOM is ready.
@@ -995,7 +1106,26 @@
             // Get label tag for alphabet label of DFA
             const alphabetLabel = document.getElementById("alphabetLabel");
             if (canvas) {
-                setupDfaCanvas(canvas);
+                const { draw } = setupDfaCanvas(canvas);
+                // If you click outside of the canvas it will deselect the object and turn off dragging
+                document.addEventListener("mousedown", (event) => {
+                    if (!isInsideCanvas(event, canvas)) {
+                        selectedObj = null;
+                        dragging = false;
+                        draw();
+                    }
+                    else {
+                        console.log("inside");
+                    }
+                });
+                // 
+                // document.addEventListener('mousemove', (event) =>{
+                //   if (isInsideCanvas(event, canvas)) {
+                //     selectedObj = null;
+                //     dragging = false;
+                //     draw();
+                //   }
+                // });
             }
             if (inputString) {
                 inputString.addEventListener("keydown", (event) => {

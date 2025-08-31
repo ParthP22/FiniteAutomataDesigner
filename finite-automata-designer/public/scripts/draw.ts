@@ -10,18 +10,40 @@
  Licensed under the MIT Licenses
 */
 
-export var nodeRadius = 30;
-export var snapToPadding = 10; // pixels
-export var hitTargetPadding = 6; // pixels
+export const greekLetterNames = [ 'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega' ];
+export let nodeRadius = 30;
+export let snapToPadding = 10; // pixels
+export let hitTargetPadding = 6; // pixels
 
-// Creates subscript text to the input string using underscores before 0-9 as the regex
-function subscriptText(text: string) {
-  var subscriptText = text;
-  for(var i = 0; i < 10; i++) {
-    subscriptText = subscriptText.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+// Takes LaTeX-like plain text and converts to Unicode symbols
+// Handles Greek letters and subscripts
+// --- Note --- greek letters cannot be subscripted current 'limitation'
+function convertText(text: string) {
+  let result = text;
+
+  // Greek letter conversion
+  for (let i = 0; i < greekLetterNames.length; i++) {
+    let name = greekLetterNames[i];
+
+    // Regex: '\\\\' matches a literal backslash "\" in text.
+    // 'g' flag -> replace all not just first instance
+    result = result.replace(new RegExp('\\\\' + name, 'g'),
+      String.fromCharCode(913 + i + (i > 16 ? 1 : 0))); // uppercase
+    result = result.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'),
+      String.fromCharCode(945 + i + (i > 16 ? 1: 0))); // lowercase
   }
-  return subscriptText;
+
+  // Subscript conversion
+
+  for (let i = 0; i < 10; i++) {
+    result = result.replace(new RegExp('_' + i, 'g'),
+      String.fromCharCode(8320 + i));
+  }
+
+  return result;
 }
+
+
 
 export function drawText(
   ctx: CanvasRenderingContext2D,
@@ -33,16 +55,16 @@ export function drawText(
 
 
   ctx.font = '20px Times New Roman', 'serif';
-  var text = subscriptText(originalText); // Add subscript to text if indicated
-  var width = ctx.measureText(text).width;
+  let text = convertText(originalText); // Convert all of the text in one go both subscript and greek
+  let width = ctx.measureText(text).width;
   x -= width / 2;
 
   if (angeOrNull != null) {
-    var cos = Math.cos(angeOrNull);
-    var sin = Math.sin(angeOrNull);
-    var cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
-		var cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
-		var slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
+    let cos = Math.cos(angeOrNull);
+    let sin = Math.sin(angeOrNull);
+    let cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
+		let cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
+		let slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
 		x += cornerPointX - sin * slide;
 		y += cornerPointY + cos * slide;
   }
@@ -53,8 +75,8 @@ export function drawText(
 }
 
 export function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number) {
-  var dx = Math.cos(angle);
-  var dy = Math.sin(angle);
+  let dx = Math.cos(angle);
+  let dy = Math.sin(angle);
   ctx.beginPath();
   ctx.moveTo(x, y);
   ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
