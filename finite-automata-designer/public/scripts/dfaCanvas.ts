@@ -28,26 +28,45 @@ import { alphabet, setAlphabet } from "./alphabet";
 // This variable is crucial to determine when the transition determinism check
 // needs to be ran, since exiting typing mode on an Arrow or SelfArrow will
 // indicate that the user has submitted their transition.
-var lastEditedArrow: Arrow | SelfArrow | null = null; 
+let lastEditedArrow: Arrow | SelfArrow | null = null; 
 
 // This will store the previous text of an object before it is modified by the
 // keydown listener.
 // This variable is crucial for determining when to run the transitionDeterminismCheck,
 // because if the text changes on an arrow, the transitionDeterminismCheck must run.
 // If the text never changed, then no need to run the check.
-var oldText: string = "";
+let oldText: string = "";
 
-var selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null; // Currently selected object
-var hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
-var base = 'black'; // Black highlight for objects to indicate that they are not being selected
-var dragging = false; // True dragging objects is enabled, false otherwise
-var shiftPressed = false; // True if shift is pressed, false otherwise
-var startClick: {x: number, y: number} | null = null;
-var tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
+let selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null; // Currently selected object
+let hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
+let base = 'black'; // Black highlight for objects to indicate that they are not being selected
+let dragging = false; // True dragging objects is enabled, false otherwise
+let shiftPressed = false; // True if shift is pressed, false otherwise
+let startClick: {x: number, y: number} | null = null;
+let tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
+
+// Returns true if no input or focusable element is active meaning the document body has focus.
+function canvasHasFocus() {
+  return (document.activeElement || document.body) == document.body;
+}
+
+// Check if the mouse click is inside the canvas
+const isInsideCanvas = (event: MouseEvent, canvas: HTMLCanvasElement) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX;
+  const y = event.clientY;
+
+  return ( 
+    x >= rect.left &&
+    x <= rect.right &&
+    y >= rect.top &&
+    y <= rect.bottom
+  );
+}
 
 function setupDfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) return { draw: () => {} };
 
   function draw() {
     if (!ctx) return;
@@ -56,14 +75,14 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     // ctx?.translate(0.5, 0.5);
 
     // Iterate through ALL circles and draw each one
-    for (var circle = 0; circle < circles.length; circle++) {
+    for (let circle = 0; circle < circles.length; circle++) {
       ctx.lineWidth= 1;
       ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
       circles[circle].draw(ctx);
     }
 
     // Iterate through ALL Arrows and SelfArrows and draw each one
-    for (var arrow = 0; arrow < arrows.length; arrow++) {
+    for (let arrow = 0; arrow < arrows.length; arrow++) {
       ctx.lineWidth = 1;
       ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
       arrows[arrow].draw(ctx);
@@ -89,7 +108,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
     event.preventDefault();
     
-    var mouse = getMousePos(event);
+    let mouse = getMousePos(event);
     
     // Check if the mouse has clicked on an object.
     // If true, then selectedObj will be updated.
@@ -149,7 +168,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   // If mouse is double-clicked
   canvas.addEventListener('dblclick', (event) => {
-    var mouse = getMousePos(event);
+    let mouse = getMousePos(event);
     selectedObj = mouseCollision(mouse.x, mouse.y);
 
     // If the mouse double-clicks an empty space, then
@@ -169,12 +188,12 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   // If mouse moves
   canvas.addEventListener('mousemove', (event) => {
-    var mouse = getMousePos(event);
+    let mouse = getMousePos(event);
 
     // If a new TemporaryArrow has been created, the
     // canvas must draw where it is going
     if (tempArrow != null) {
-      var targetCircle = mouseCollision(mouse.x, mouse.y);
+      let targetCircle = mouseCollision(mouse.x, mouse.y);
       if (!(targetCircle instanceof Circle)) {
         targetCircle = null;
       }
@@ -265,6 +284,11 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   // Whenever a key is pressed on the user's keyboard
   document.addEventListener('keydown', (event) => {
+    // If the document body is not focused, don't detect key inputs
+    if (!canvasHasFocus()) {
+      return true;
+    }
+    
     // If the "Shift" key is pressed, set
     // shiftPressed = true, since it'll be used for
     // other functions on the canvas.
@@ -320,7 +344,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       if (event.key === 'Delete') {
 
         // Iterate through all circles that are present
-        for (var circ = 0; circ < circles.length; circ++) {
+        for (let circ = 0; circ < circles.length; circ++) {
           // If a circle is selected when "Delete" is pressed, 
           // then delete that specific circle
           if (circles[circ] == selectedObj) {
@@ -335,7 +359,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
         }
 
         // Iterate through all arrows that are present
-        for (var i = 0; i < arrows.length; i++) {
+        for (let i = 0; i < arrows.length; i++) {
           const arrow = arrows[i];
 
           // If an arrow is selected when "Delete" is pressed,
@@ -401,7 +425,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
   // Align the input circle to any circle in the array if x or y absolute is less than padding
   function snapAlignCircle(circle: Circle) {
-    for(var circ = 0; circ < circles.length; circ++) {
+    for(let circ = 0; circ < circles.length; circ++) {
       if(circles[circ] == circle) continue;
 
       if(Math.abs(circle.x - circles[circ].x) < snapToPadding) {
@@ -429,7 +453,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
     // Iterate through all circles. If a circle is selected by
     // the mouse, return that specific circle.
-    for(var circ = 0; circ < circles.length; circ++) {
+    for(let circ = 0; circ < circles.length; circ++) {
       if(circles[circ].containsPoint(x, y)) {
         return circles[circ];
       }
@@ -437,7 +461,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
     // Iterate through all Arrows and SelfArrows. If one of them is selected by
     // the mouse, return that specific Arrow or SelfArrow.
-    for(var arrow = 0; arrow < arrows.length; arrow++) {
+    for(let arrow = 0; arrow < arrows.length; arrow++) {
       if (arrows[arrow].containsPoint(x, y)) {
         return arrows[arrow];
       }
@@ -451,6 +475,9 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 
     return null;
   }
+
+  // Expose draw to force redraw when clicking outside of the canvas to remove highlighting and dragging
+  return { draw };
 }
 
 /* -----------------------------------------------------------
@@ -468,8 +495,21 @@ function attachWhenReady() {
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
 
     if (canvas)  {
-      setupDfaCanvas(canvas)
+      const { draw } = setupDfaCanvas(canvas);
+      // If you click outside of the canvas it will deselect the object and turn off dragging
+      document.addEventListener("mousedown", (event) => {
+        if (!isInsideCanvas(event, canvas)) {
+          selectedObj = null;
+          dragging = false;
+          draw();
+        } else {
+          // Force input fields to lose focus if you click inside the canvas
+          inputString?.blur()
+          alphabetInput?.blur()
+        }
+      });
     };
+    
 
     if (inputString) {
       inputString.addEventListener("keydown", (event) => {
@@ -478,11 +518,11 @@ function attachWhenReady() {
           event.preventDefault();
 
           // Obtain the value entered
-          var newInput = inputString.value.trim();
+          let newInput = inputString.value.trim();
 
           // Check to see if it contains anything not defined in the alphabet.
           // If it contains undefined characters, alert the user
-          var notDefined: Array<string> = [];
+          let notDefined: Array<string> = [];
           for(let char of newInput){
             if(!alphabet.has(char)){
               // Note to self: maybe make it so it goes through the entire string
@@ -528,7 +568,6 @@ function attachWhenReady() {
           if(alphabetLabel){
             alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
           }
-
         }
       });
     }
@@ -542,3 +581,15 @@ function attachWhenReady() {
 }
 
 attachWhenReady();
+
+// Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
+// NOTE: Removes white space from inside of text
+function _arrow_string_formating(text: string){
+  return text
+  .replace(/,+/g, ',')        // collapse multiple commas into one 
+  .replace(/\s+/g, '')         // remove all spaces/tabs/newlines
+  .split(',')                 // split into array
+  .filter(Boolean);           // remove empty string
+}
+
+console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));

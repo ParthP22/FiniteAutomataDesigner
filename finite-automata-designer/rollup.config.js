@@ -16,7 +16,8 @@ export default {
       compilerOptions: {
         module: 'esnext',
         target: 'es2020'
-      }
+      },
+      outputToFilesystem: false, // Prevents dupilicate file writes
     }),
     
   ],

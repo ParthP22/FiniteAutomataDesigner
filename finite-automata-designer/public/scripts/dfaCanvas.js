@@ -1,28 +1,56 @@
 (function () {
     'use strict';
 
-    var nodeRadius = 30;
-    var snapToPadding = 10; // pixels
-    var hitTargetPadding = 6; // pixels
-    // Creates subscript text to the input string using underscores before 0-9 as the regex
-    function subscriptText(text) {
-        var subscriptText = text;
-        for (var i = 0; i < 10; i++) {
-            subscriptText = subscriptText.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
+    const greekLetterNames = [
+        'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon',
+        'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda',
+        'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma',
+        'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'
+    ];
+    let nodeRadius = 30;
+    let snapToPadding = 10; // pixels
+    let hitTargetPadding = 6; // pixels
+    // Takes LaTeX-like plain text and converts to Unicode symbols
+    // Handles Greek letters and subscripts
+    // --- Note --- greek letters cannot be subscripted current 'limitation'
+    function convertText(text) {
+        let result = text;
+        // Greek letter conversion
+        for (let i = 0; i < greekLetterNames.length; i++) {
+            let name = greekLetterNames[i];
+            // Regex: '\\\\' matches a literal backslash "\" in text.
+            // 'g' flag -> replace all not just first instance
+            result = result.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(913 + i + (i > 16 ? 1 : 0))); // uppercase
+            result = result.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'), String.fromCharCode(945 + i + (i > 16 ? 1 : 0))); // lowercase
         }
-        return subscriptText;
+        // Subscript conversion
+        for (let i = 0; i < 10; i++) {
+            result = result.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+        }
+        return result;
     }
     function drawText(ctx, originalText, x, y, angeOrNull) {
         ctx.font = '20px Times New Roman';
-        var text = subscriptText(originalText); // Add subscript to text if indicated
-        var width = ctx.measureText(text).width;
+        let text = convertText(originalText); // Convert all of the text in one go both subscript and greek
+        let width = ctx.measureText(text).width;
         x -= width / 2;
         if (angeOrNull != null) {
-            var cos = Math.cos(angeOrNull);
-            var sin = Math.sin(angeOrNull);
-            var cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
-            var cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
-            var slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
+            let cos = Math.cos(angeOrNull);
+            let sin = Math.sin(angeOrNull);
+            let cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
+            let cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
+            let slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
             x += cornerPointX - sin * slide;
             y += cornerPointY + cos * slide;
         }
@@ -31,8 +59,8 @@
         ctx.fillText(text, x, y + 6);
     }
     function drawArrow(ctx, x, y, angle) {
-        var dx = Math.cos(angle);
-        var dy = Math.sin(angle);
+        let dx = Math.cos(angle);
+        let dy = Math.sin(angle);
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
@@ -40,6 +68,17 @@
         ctx.fill();
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     var circles = [];
     class Circle {
         constructor(x, y) {
@@ -85,6 +124,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     var arrows = [];
     function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
@@ -249,6 +299,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     class SelfArrow {
         constructor(pointsToCircle, point) {
             this.circle = pointsToCircle;
@@ -322,6 +383,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     // The startState will be an EntryArrow. If you wish to
     // access the start state node itself, you can use the
     // pointsToCircle attribute of the EntryArrow to do so.
@@ -387,6 +459,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     class TemporaryArrow {
         constructor(startPoint, endPoint) {
             this.startPoint = startPoint;
@@ -600,6 +683,17 @@
         }
     }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     // Command to compile this file into JS
     // npm run build:canvas
     // The previously edited object, which is determined by the object that was last
@@ -607,24 +701,38 @@
     // This variable is crucial to determine when the transition determinism check
     // needs to be ran, since exiting typing mode on an Arrow or SelfArrow will
     // indicate that the user has submitted their transition.
-    var lastEditedArrow = null;
+    let lastEditedArrow = null;
     // This will store the previous text of an object before it is modified by the
     // keydown listener.
     // This variable is crucial for determining when to run the transitionDeterminismCheck,
     // because if the text changes on an arrow, the transitionDeterminismCheck must run.
     // If the text never changed, then no need to run the check.
-    var oldText = "";
-    var selectedObj = null; // Currently selected object
-    var hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
-    var base = 'black'; // Black highlight for objects to indicate that they are not being selected
-    var dragging = false; // True dragging objects is enabled, false otherwise
-    var shiftPressed = false; // True if shift is pressed, false otherwise
-    var startClick = null;
-    var tempArrow = null; // A new arrow being created
+    let oldText = "";
+    let selectedObj = null; // Currently selected object
+    let hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
+    let base = 'black'; // Black highlight for objects to indicate that they are not being selected
+    let dragging = false; // True dragging objects is enabled, false otherwise
+    let shiftPressed = false; // True if shift is pressed, false otherwise
+    let startClick = null;
+    let tempArrow = null; // A new arrow being created
+    // Returns true if no input or focusable element is active meaning the document body has focus.
+    function canvasHasFocus() {
+        return (document.activeElement || document.body) == document.body;
+    }
+    // Check if the mouse click is inside the canvas
+    const isInsideCanvas = (event, canvas) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX;
+        const y = event.clientY;
+        return (x >= rect.left &&
+            x <= rect.right &&
+            y >= rect.top &&
+            y <= rect.bottom);
+    };
     function setupDfaCanvas(canvas) {
         const ctx = canvas.getContext('2d');
         if (!ctx)
-            return;
+            return { draw: () => { } };
         function draw() {
             if (!ctx)
                 return;
@@ -632,13 +740,13 @@
             ctx.save();
             // ctx?.translate(0.5, 0.5);
             // Iterate through ALL circles and draw each one
-            for (var circle = 0; circle < circles.length; circle++) {
+            for (let circle = 0; circle < circles.length; circle++) {
                 ctx.lineWidth = 1;
                 ctx.fillStyle = ctx.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
                 circles[circle].draw(ctx);
             }
             // Iterate through ALL Arrows and SelfArrows and draw each one
-            for (var arrow = 0; arrow < arrows.length; arrow++) {
+            for (let arrow = 0; arrow < arrows.length; arrow++) {
                 ctx.lineWidth = 1;
                 ctx.fillStyle = ctx.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
                 arrows[arrow].draw(ctx);
@@ -660,7 +768,7 @@
         // If a mouse button is pressed down
         canvas.addEventListener('mousedown', (event) => {
             event.preventDefault();
-            var mouse = getMousePos(event);
+            let mouse = getMousePos(event);
             // Check if the mouse has clicked on an object.
             // If true, then selectedObj will be updated.
             selectedObj = mouseCollision(mouse.x, mouse.y);
@@ -714,7 +822,7 @@
         });
         // If mouse is double-clicked
         canvas.addEventListener('dblclick', (event) => {
-            var mouse = getMousePos(event);
+            let mouse = getMousePos(event);
             selectedObj = mouseCollision(mouse.x, mouse.y);
             // If the mouse double-clicks an empty space, then
             // create a new Circle.
@@ -732,11 +840,11 @@
         });
         // If mouse moves
         canvas.addEventListener('mousemove', (event) => {
-            var mouse = getMousePos(event);
+            let mouse = getMousePos(event);
             // If a new TemporaryArrow has been created, the
             // canvas must draw where it is going
             if (tempArrow != null) {
-                var targetCircle = mouseCollision(mouse.x, mouse.y);
+                let targetCircle = mouseCollision(mouse.x, mouse.y);
                 if (!(targetCircle instanceof Circle)) {
                     targetCircle = null;
                 }
@@ -820,6 +928,10 @@
         canvas.addEventListener('contextmenu', event => event.preventDefault());
         // Whenever a key is pressed on the user's keyboard
         document.addEventListener('keydown', (event) => {
+            // If the document body is not focused, don't detect key inputs
+            if (!canvasHasFocus()) {
+                return true;
+            }
             // If the "Shift" key is pressed, set
             // shiftPressed = true, since it'll be used for
             // other functions on the canvas.
@@ -870,7 +982,7 @@
                 // If the "Delete" key is pressed on your keyboard
                 if (event.key === 'Delete') {
                     // Iterate through all circles that are present
-                    for (var circ = 0; circ < circles.length; circ++) {
+                    for (let circ = 0; circ < circles.length; circ++) {
                         // If a circle is selected when "Delete" is pressed, 
                         // then delete that specific circle
                         if (circles[circ] == selectedObj) {
@@ -883,7 +995,7 @@
                         setStartState(null);
                     }
                     // Iterate through all arrows that are present
-                    for (var i = 0; i < arrows.length; i++) {
+                    for (let i = 0; i < arrows.length; i++) {
                         const arrow = arrows[i];
                         // If an arrow is selected when "Delete" is pressed,
                         // then delete that specific arrow
@@ -937,7 +1049,7 @@
         /* Helper Functions*/
         // Align the input circle to any circle in the array if x or y absolute is less than padding
         function snapAlignCircle(circle) {
-            for (var circ = 0; circ < circles.length; circ++) {
+            for (let circ = 0; circ < circles.length; circ++) {
                 if (circles[circ] == circle)
                     continue;
                 if (Math.abs(circle.x - circles[circ].x) < snapToPadding) {
@@ -961,14 +1073,14 @@
         function mouseCollision(x, y) {
             // Iterate through all circles. If a circle is selected by
             // the mouse, return that specific circle.
-            for (var circ = 0; circ < circles.length; circ++) {
+            for (let circ = 0; circ < circles.length; circ++) {
                 if (circles[circ].containsPoint(x, y)) {
                     return circles[circ];
                 }
             }
             // Iterate through all Arrows and SelfArrows. If one of them is selected by
             // the mouse, return that specific Arrow or SelfArrow.
-            for (var arrow = 0; arrow < arrows.length; arrow++) {
+            for (let arrow = 0; arrow < arrows.length; arrow++) {
                 if (arrows[arrow].containsPoint(x, y)) {
                     return arrows[arrow];
                 }
@@ -980,6 +1092,8 @@
             }
             return null;
         }
+        // Expose draw to force redraw when clicking outside of the canvas to remove highlighting and dragging
+        return { draw };
     }
     /* -----------------------------------------------------------
      * Attach automatically when DOM is ready.
@@ -995,7 +1109,20 @@
             // Get label tag for alphabet label of DFA
             const alphabetLabel = document.getElementById("alphabetLabel");
             if (canvas) {
-                setupDfaCanvas(canvas);
+                const { draw } = setupDfaCanvas(canvas);
+                // If you click outside of the canvas it will deselect the object and turn off dragging
+                document.addEventListener("mousedown", (event) => {
+                    if (!isInsideCanvas(event, canvas)) {
+                        selectedObj = null;
+                        dragging = false;
+                        draw();
+                    }
+                    else {
+                        // Force input fields to lose focus if you click inside the canvas
+                        inputString?.blur();
+                        alphabetInput?.blur();
+                    }
+                });
             }
             if (inputString) {
                 inputString.addEventListener("keydown", (event) => {
@@ -1003,10 +1130,10 @@
                     if (event.key === "Enter") {
                         event.preventDefault();
                         // Obtain the value entered
-                        var newInput = inputString.value.trim();
+                        let newInput = inputString.value.trim();
                         // Check to see if it contains anything not defined in the alphabet.
                         // If it contains undefined characters, alert the user
-                        var notDefined = [];
+                        let notDefined = [];
                         for (let char of newInput) {
                             if (!alphabet.has(char)) {
                                 // Note to self: maybe make it so it goes through the entire string
@@ -1057,5 +1184,17 @@
         }
     }
     attachWhenReady();
+    // Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
+    function _arrow_string_formating(text) {
+        // let replace_commas = text.replace(/,+/g, ',');              // collapse multiple commas into one 
+        // let replace_empties = replace_commas.replace(/\s+/g, '');   // remove all spaces/tabs/newlines
+        // let split_arr = replace_empties.split(',');                 // split into array
+        return text
+            .replace(/,+/g, ',') // collapse multiple commas into one 
+            .replace(/\s+/g, '') // remove all spaces/tabs/newlines
+            .split(',') // split into array
+            .filter(Boolean); // remove empty string
+    }
+    console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
 
 })();
