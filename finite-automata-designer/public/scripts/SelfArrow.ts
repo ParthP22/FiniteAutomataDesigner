@@ -12,6 +12,7 @@
 
 import {Circle} from "./circle";
 import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
+import { ExportAsSVG } from "./ExportAsSVG";
 
 export class SelfArrow {
   circle: Circle; // The state which this SelfArrow loops back to
@@ -44,7 +45,7 @@ export class SelfArrow {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG) {
     var arcInfo = this.getEndPointsAndCircle();
     // draw arc
     ctx.beginPath();

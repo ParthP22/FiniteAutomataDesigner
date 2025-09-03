@@ -11,6 +11,7 @@
 */
 
 import { drawArrow } from "./draw";
+import { ExportAsSVG } from "./ExportAsSVG";
 
 export class TemporaryArrow {
   startPoint: {x: number, y: number};
@@ -22,7 +23,7 @@ export class TemporaryArrow {
     this.endPoint = endPoint;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG) {
     ctx.beginPath();
     ctx.moveTo(this.endPoint.x, this.endPoint.y);
     ctx.lineTo(this.startPoint.x, this.startPoint.y);

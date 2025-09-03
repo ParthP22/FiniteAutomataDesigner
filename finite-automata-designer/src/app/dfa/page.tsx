@@ -20,6 +20,23 @@ export default function DFAPage() {
         <div id="canvasDiv" className="">
             {/*Canvas for drawing FSM*/}
             <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none"></canvas>
+            <div className="text-center text-black mt-2">
+                Export as:{' '}
+                <button id='svgExportBtn' type="button" className="cursor-pointer text-center">SVG</button>
+                {' | '}
+                <button id='latexExportBtn' type="button" className="cursor-pointer">LaTeX</button>
+            </div>
+            <div id="text_area_container" hidden className="text-center text-black">
+                <textarea 
+                disabled
+                tabIndex={-1}
+                id="output"
+                className="w-full h-24 mt-2 border border-gray-400 rounded text-black bg-white select-none" 
+                placeholder="Export will appear here...">
+                </textarea>
+                <button id='hideOutput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Export Output</button>
+            </div>
+            
         </div>
         
         {/* <div className="mt-4 flex justify-center">

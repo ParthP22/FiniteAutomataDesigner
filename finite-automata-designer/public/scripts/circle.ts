@@ -12,6 +12,7 @@
 
 import {Arrow} from "./arrow";
 import { nodeRadius, drawText } from "./draw";
+import { ExportAsSVG } from "./ExportAsSVG";
 import {SelfArrow} from "./SelfArrow";
 
 export var circles: Circle[] = [];
@@ -47,7 +48,7 @@ export class Circle {
     this.y = y + this.mouseOffsetY;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG) {
     ctx.beginPath();
     ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
     ctx.stroke();

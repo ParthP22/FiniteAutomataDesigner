@@ -12,6 +12,7 @@
 
 import {Circle} from "./circle";
 import { drawArrow, drawText, snapToPadding, hitTargetPadding } from "./draw";
+import { ExportAsSVG } from "./ExportAsSVG";
 
 // The startState will be an EntryArrow. If you wish to
 // access the start state node itself, you can use the
@@ -43,7 +44,7 @@ export class EntryArrow {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG) {
     var points = this.getEndPoints();
 
     ctx.beginPath();

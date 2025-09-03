@@ -1,6 +1,139 @@
 (function () {
     'use strict';
 
+    class ExportAsSVG {
+        constructor(canvas) {
+            if (!canvas) {
+                throw new Error('A valid HTMLCanvasElement is required');
+            }
+            this.canvas = canvas;
+            this.fillStyle = 'black';
+            this.strokeStyle = 'black';
+            this.lineWidth = 1;
+            this.font = '12px Arial, sans-serif';
+            this._points = [];
+            this._svgData = '';
+            this._transX = 0;
+            this._transY = 0;
+        }
+        toSVG() {
+            return '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n<svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">\n' + this._svgData + '</svg>\n';
+        }
+        // Reset 
+        beginPath() {
+            this._points = [];
+        }
+        // SVG template code to create svg syntax
+        arc(x, y, radius, startAngle, endAngle, isReversed) {
+            x += this._transX;
+            y += this._transY;
+            let style = 'stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" fill="none"';
+            if (endAngle - startAngle == Math.PI * 2) {
+                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
+            }
+            else {
+                if (isReversed) {
+                    let temp = startAngle;
+                    startAngle = endAngle;
+                    endAngle = temp;
+                }
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                let startX = x + radius * Math.cos(startAngle);
+                let startY = y + radius * Math.sin(startAngle);
+                let endX = x + radius * Math.cos(endAngle);
+                let endY = y + radius * Math.sin(endAngle);
+                let useGreaterThan180 = (Math.abs(endAngle - startAngle) > Math.PI);
+                this._svgData += '\t<path ' + style + ' d="';
+                this._svgData += 'M ' + fixed(startX, 3) + ',' + fixed(startY, 3) + ' '; // startPoint(startX, startY)
+                this._svgData += 'A ' + fixed(radius, 3) + ',' + fixed(radius, 3) + ' '; // radii(radius, radius)
+                this._svgData += '0 '; // value of 0 means perfect circle, others mean ellipse
+                this._svgData += +useGreaterThan180 + ' ';
+                this._svgData += 1 + ' ';
+                this._svgData += fixed(endX, 3) + ',' + fixed(endY, 3); // endPoint(endX, endY)
+                this._svgData += '"/>\n';
+            }
+        }
+        ;
+        moveTo(x, y) {
+            x += this._transX;
+            y += this._transY;
+            this._points.push({ x, y });
+        }
+        lineTo(x, y) {
+            x += this._transX;
+            y += this._transY;
+            this._points.push({ x, y });
+        }
+        stroke() {
+            if (this._points.length == 0)
+                return;
+            this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
+            for (let i = 0; i < this._points.length; i++) {
+                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+            }
+            this._svgData += '"/>\n';
+        }
+        fill() {
+            if (this._points.length == 0)
+                return;
+            this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
+            for (let i = 0; i < this._points.length; i++) {
+                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+            }
+            this._svgData += '"/>\n';
+        }
+        ;
+        measureText(text) {
+            const c = this.canvas.getContext('2d');
+            if (c) {
+                c.font = '20px "Times New Roman", serif';
+                return c.measureText(text);
+            }
+            return { width: 0 };
+        }
+        fillText(text, x, y) {
+            x += this._transX;
+            y += this._transY;
+            if (text.replace(' ', '').length > 0) {
+                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
+            }
+        }
+        ;
+        translate(x, y) {
+            this._transX = x;
+            this._transY = y;
+        }
+        ;
+        save() {
+            // No-op for SVG export
+        }
+        restore() {
+            // No-op for SVG export
+        }
+        clearRect() {
+            // No-op for SVG export
+        }
+    }
+    function fixed(number, digits) {
+        return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
+    }
+    function textToXML(text) {
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            let c = text.charCodeAt(i);
+            if (c >= 0x20 && c <= 0x7E) {
+                result += text[i];
+            }
+            else {
+                result += '&#' + c + ';';
+            }
+        }
+        return result;
+    }
+
     /*
      Portions of this file are adapted from:
 
@@ -56,7 +189,12 @@
         }
         x = Math.round(x);
         y = Math.round(y);
-        ctx.fillText(text, x, y + 6);
+        if (ctx instanceof ExportAsSVG) {
+            ctx.fillText(text, x, y + 6);
+        }
+        else {
+            ctx.fillText(convertText(originalText), x, y + 6);
+        }
     }
     function drawArrow(ctx, x, y, angle) {
         let dx = Math.cos(angle);
@@ -1108,6 +1246,13 @@
             const canvas = document.getElementById('DFACanvas');
             // Get label tag for alphabet label of DFA
             const alphabetLabel = document.getElementById("alphabetLabel");
+            // Buttons for exporting, SVG and LaTeX
+            const exportSVGBtn = document.getElementById('svgExportBtn');
+            document.getElementById('latexExportBtn');
+            // Container surrounding the export textarea (the output container)
+            const outputContainer = document.getElementById('text_area_container');
+            // Button that will hide the output container effectively hiding the text area
+            const hideOutputBtn = document.getElementById('hideOutput');
             if (canvas) {
                 const { draw } = setupDfaCanvas(canvas);
                 // If you click outside of the canvas it will deselect the object and turn off dragging
@@ -1175,6 +1320,26 @@
                     }
                 });
             }
+            if (exportSVGBtn) {
+                exportSVGBtn.addEventListener('click', () => {
+                    if (canvas) {
+                        saveAsSVG(canvas);
+                        console.log("exporting!");
+                    }
+                    if (outputContainer) {
+                        if (outputContainer.hidden) {
+                            _toggle_visiblity(outputContainer);
+                        }
+                    }
+                });
+            }
+            if (hideOutputBtn) {
+                hideOutputBtn.addEventListener('click', () => {
+                    if (outputContainer) {
+                        _toggle_visiblity(outputContainer);
+                    }
+                });
+            }
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', run);
@@ -1184,17 +1349,45 @@
         }
     }
     attachWhenReady();
-    // Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
-    function _arrow_string_formating(text) {
-        // let replace_commas = text.replace(/,+/g, ',');              // collapse multiple commas into one 
-        // let replace_empties = replace_commas.replace(/\s+/g, '');   // remove all spaces/tabs/newlines
-        // let split_arr = replace_empties.split(',');                 // split into array
-        return text
-            .replace(/,+/g, ',') // collapse multiple commas into one 
-            .replace(/\s+/g, '') // remove all spaces/tabs/newlines
-            .split(',') // split into array
-            .filter(Boolean); // remove empty string
+    // saveAsSVG function to export the FSM as SVG
+    function saveAsSVG(canvas) {
+        if (!canvas)
+            return;
+        const exporter = new ExportAsSVG(canvas);
+        exporter.save();
+        for (let circle = 0; circle < circles.length; circle++) {
+            exporter.lineWidth = 1;
+            exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
+            circles[circle].draw(exporter);
+        }
+        for (let arrow = 0; arrow < arrows.length; arrow++) {
+            exporter.lineWidth = 1;
+            exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
+            arrows[arrow].draw(exporter);
+        }
+        // If there is an EntryArrow, then draw it
+        if (startState) {
+            exporter.lineWidth = 1;
+            exporter.fillStyle = exporter.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
+            startState.draw(exporter);
+        }
+        // If there is a TemporaryArrow being created, then draw it
+        if (tempArrow != null) {
+            exporter.lineWidth = 1;
+            exporter.fillStyle = exporter.strokeStyle = base;
+            tempArrow.draw(exporter);
+        }
+        output(exporter.toSVG());
     }
-    console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
+    function output(text) {
+        let element = document.getElementById('output');
+        if (element && element instanceof HTMLTextAreaElement) {
+            element.value = text;
+        }
+    }
+    function _toggle_visiblity(element) {
+        element.hidden = !element.hidden;
+    }
+    // console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
 
 })();

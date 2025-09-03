@@ -22,6 +22,7 @@ import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
+import { ExportAsSVG } from "./ExportAsSVG";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -493,6 +494,13 @@ function attachWhenReady() {
     const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
     // Get label tag for alphabet label of DFA
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
+    // Buttons for exporting, SVG and LaTeX
+    const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
+    const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
+    // Container surrounding the export textarea (the output container)
+    const outputContainer = document.getElementById('text_area_container') as HTMLDivElement | null;
+    // Button that will hide the output container effectively hiding the text area
+    const hideOutputBtn = document.getElementById('hideOutput') as HTMLButtonElement | null;
 
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
@@ -509,7 +517,6 @@ function attachWhenReady() {
         }
       });
     };
-    
 
     if (inputString) {
       inputString.addEventListener("keydown", (event) => {
@@ -571,7 +578,36 @@ function attachWhenReady() {
         }
       });
     }
+
+    if (exportSVGBtn) {
+      exportSVGBtn.addEventListener('click', () => {
+        if (canvas) {
+          saveAsSVG(canvas);
+          console.log("exporting!")
+        }
+        if (outputContainer) {
+          if (outputContainer.hidden) {
+            _toggle_visiblity(outputContainer);
+          }
+        }
+      });
+    }
+
+    if (exportLaTeXBtn) {
+      // To implement in the future for supporting exporting the FA's to LaTeX
+    }
+
+    if (hideOutputBtn) {
+      hideOutputBtn.addEventListener('click', () => {
+        if (outputContainer) {
+          _toggle_visiblity(outputContainer);
+        }
+      });
+    }
   };
+  
+
+  
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);
@@ -581,6 +617,52 @@ function attachWhenReady() {
 }
 
 attachWhenReady();
+
+// saveAsSVG function to export the FSM as SVG
+function saveAsSVG(canvas: HTMLCanvasElement) {
+    if (!canvas) return;
+
+    const exporter = new ExportAsSVG(canvas);
+    exporter.save();
+    for(let circle = 0; circle < circles.length; circle++) {
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
+      circles[circle].draw(exporter)
+    }
+    for (let arrow = 0; arrow < arrows.length; arrow++) {
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
+      arrows[arrow].draw(exporter);
+    }
+
+        // If there is an EntryArrow, then draw it
+    if(startState){
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
+      startState.draw(exporter);
+    }
+
+    // If there is a TemporaryArrow being created, then draw it
+    if (tempArrow != null) {
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = base;
+      tempArrow.draw(exporter);
+    }
+
+    output(exporter.toSVG());
+}
+
+function output(text: string) {
+  let element = document.getElementById('output');
+  if (element && element instanceof HTMLTextAreaElement) {
+    element.value = text;
+  }
+}
+
+function _toggle_visiblity(element: HTMLElement) {
+  element.hidden = !element.hidden;
+}
+
 
 // Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
 // NOTE: Removes white space from inside of text
@@ -592,4 +674,4 @@ function _arrow_string_formating(text: string){
   .filter(Boolean);           // remove empty string
 }
 
-console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
+// console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
