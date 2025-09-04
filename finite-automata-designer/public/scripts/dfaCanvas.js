@@ -1438,6 +1438,8 @@
             const copyOutputBtn = document.getElementById('copyOutput');
             // Button that will hide the input container effectively hiding the text area
             const hideInputBtn = document.getElementById('hideInput');
+            // Button that will clear the input textarea
+            const clearInputBtn = document.getElementById('clearInput');
             if (canvas) {
                 const { draw } = setupDfaCanvas(canvas);
                 // If you click outside of the canvas it will deselect the object and turn off dragging
@@ -1578,6 +1580,13 @@
                 hideInputBtn.addEventListener('click', () => {
                     if (inputContainer) {
                         _toggle_visiblity(inputContainer);
+                    }
+                });
+            }
+            if (clearInputBtn) {
+                clearInputBtn.addEventListener('click', () => {
+                    if (inputTextArea) {
+                        inputTextArea.value = '';
                     }
                 });
             }

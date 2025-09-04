@@ -516,6 +516,8 @@ function attachWhenReady() {
     const copyOutputBtn = document.getElementById('copyOutput') as HTMLButtonElement | null;
     // Button that will hide the input container effectively hiding the text area
     const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
+    // Button that will clear the input textarea
+    const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
 
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
@@ -677,6 +679,14 @@ function attachWhenReady() {
           _toggle_visiblity(inputContainer);
         }
       });
+    }
+
+    if (clearInputBtn) {
+      clearInputBtn.addEventListener('click', () => {
+        if (inputTextArea) {
+          inputTextArea.value = '';
+        }
+      })
     }
 
   };

@@ -19,7 +19,6 @@ export class ImportAsSVG {
     }
 
     convert(): void{
-        console.log("ran");
         let data_lines = this._svgData.split('\n');
         const cleaned: string[] = [];
         for (let i = 0; i < data_lines.length; i++) {

@@ -53,6 +53,7 @@ export default function DFAPage() {
                 </textarea>
                 <div className="flex gap-4 justify-center text-black">
                     <button id='hideInput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Input</button>
+                    <button id='clearInput' type="button" className="cursor-pointer text-center text-decoration underline">Clear Input</button>
                 </div>
             </div>
         </div>
