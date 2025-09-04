@@ -14,15 +14,15 @@
 // npm run build:canvas
 
 
-import {Circle, circles} from "./Circle";
-import {Arrow, arrows} from "./arrow";
-import {SelfArrow} from "./SelfArrow";
-import {EntryArrow,startState, setStartState} from "./EntryArrow";
-import {TemporaryArrow} from "./TemporaryArrow";
-import { snapToPadding} from "./draw";
+import {Circle, circles} from "./Shapes/Circle";
+import {Arrow, arrows} from "./Shapes/arrow";
+import {SelfArrow} from "./Shapes/SelfArrow";
+import {EntryArrow,startState, setStartState} from "./Shapes/EntryArrow";
+import {TemporaryArrow} from "./Shapes/TemporaryArrow";
+import { snapToPadding} from "./Shapes/draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
-import { ExportAsSVG, textToXML } from "./exporting/ExportAsSVG";
+import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 
 // The previously edited object, which is determined by the object that was last

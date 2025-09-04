@@ -12,8 +12,8 @@
 
 import {Arrow} from "./arrow";
 import { nodeRadius, drawText } from "./draw";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 import {SelfArrow} from "./SelfArrow";
 
 export var circles: Circle[] = [];

@@ -12,8 +12,8 @@
 
 import {Circle} from "./Circle";
 import { drawArrow, drawText, snapToPadding, hitTargetPadding } from "./draw";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 
 // The startState will be an EntryArrow. If you wish to
 // access the start state node itself, you can use the

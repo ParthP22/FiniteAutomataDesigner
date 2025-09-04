@@ -11,8 +11,8 @@
 */
 
 import { drawArrow } from "./draw";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 
 export class TemporaryArrow {
   startPoint: {x: number, y: number};

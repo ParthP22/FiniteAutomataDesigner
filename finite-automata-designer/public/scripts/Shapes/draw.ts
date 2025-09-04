@@ -10,8 +10,8 @@
  Licensed under the MIT Licenses
 */
 
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 
 export const greekLetterNames = [ 
   'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 

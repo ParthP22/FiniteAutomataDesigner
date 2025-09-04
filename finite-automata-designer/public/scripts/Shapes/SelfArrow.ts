@@ -12,8 +12,8 @@
 
 import {Circle} from "./Circle";
 import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 
 export class SelfArrow {
   circle: Circle; // The state which this SelfArrow loops back to
