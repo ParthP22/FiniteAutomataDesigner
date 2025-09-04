@@ -10,7 +10,8 @@
  Licensed under the MIT Licenses
 */
 
-import { ExportAsSVG } from "./ExportAsSVG";
+import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 
 export const greekLetterNames = [ 
   'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 
@@ -60,7 +61,7 @@ function convertText(text: string) {
 }
 
 export function drawText(
-  ctx: CanvasRenderingContext2D | ExportAsSVG,
+  ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX,
   originalText: string,
   x: number,
   y: number,
@@ -83,14 +84,16 @@ export function drawText(
 
   x = Math.round(x);
   y = Math.round(y);
-  if (ctx !instanceof ExportAsSVG) {
+  
+  if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsSVG) {
     ctx.fillText(text, x, y + 6);
-  } else {
-    ctx.fillText(convertText(originalText), x, y + 6);
+  } else if (ctx instanceof ExportAsLaTeX)
+  if (ctx !instanceof ExportAsSVG || ctx !instanceof ExportAsLaTeX) {
+    ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
   }
 }
 
-export function drawArrow(ctx: CanvasRenderingContext2D | ExportAsSVG, x: number, y: number, angle: number) {
+export function drawArrow(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX, x: number, y: number, angle: number) {
   let dx = Math.cos(angle);
   let dy = Math.sin(angle);
   ctx.beginPath();

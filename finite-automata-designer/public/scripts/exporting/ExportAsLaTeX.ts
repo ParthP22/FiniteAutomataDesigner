@@ -14,15 +14,11 @@ export interface Point {
     y: number
 }
 
-export class LaTeX {
-    fillStyle: string;
+export class ExportAsLaTeX {
     strokeStyle: string;
-    lineWidth: number;
     font: string; 
     _points: Point[];
     _texData: string;
-    _transX: number;
-    _transY: number;
     _scale: number;
     canvas: HTMLCanvasElement;
 
@@ -31,19 +27,15 @@ export class LaTeX {
             throw new Error('A valid HTMLCanvasElement is required');
         }
         this.canvas = canvas;
-        this.fillStyle = 'black';
         this.strokeStyle = 'black';
-        this.lineWidth = 1;
-        this.font = '12px Arial, sans-serif';
+        this.font = '20px "Times New Romain", serif';
         this._points =[];
         this._texData = '';
-        this._transX = 0;
-        this._transY = 0;
         this._scale = 0.1;
         
     }
 
-    toSVG(): string{
+    toLaTeX(): string{
         return '\\documentclass[12pt]{article}\n' +
 				'\\usepackage{tikz}\n' +
 				'\n' +
@@ -64,10 +56,9 @@ export class LaTeX {
         this._points = [];
     }
 
-    // SVG template code to create svg syntax
     arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, isReversed: boolean) {
-        x += this._scale;
-        y += this._scale;
+        x *= this._scale;
+        y *= this._scale;
         radius *= this._scale;
 
         if (endAngle - startAngle == Math.PI * 2) {
@@ -96,67 +87,82 @@ export class LaTeX {
     };
 
     moveTo(x: number, y: number) {
-        x += this._scale;
-        y += this._scale;
+        x *= this._scale;
+        y *= this._scale;
         this._points.push({ x, y });
     }
 
     lineTo(x: number, y: number) {
-        x += this._transX;
-        y += this._transY;
+        x *= this._scale;
+        y *= this._scale;
         this._points.push({ x, y });
     }
     
     stroke() {
         if (this._points.length == 0) return;
-        this._texData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
-        for (let i = 0; i < this._points.length; i++) {
-            this._texData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+        this._texData += '\\draw [' + this.strokeStyle + ']';
+        for (var i = 0; i < this._points.length; i++) {
+            var p = this._points[i];
+            this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
         }
-        this._texData += '"/>\n';
+        this._texData += ';\n';
     }
 
     fill() {
         if (this._points.length == 0) return;
-        this._texData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
-        for (let i = 0; i < this._points.length; i++) {
-            this._texData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+        this._texData += '\\fill [' + this.strokeStyle + ']';
+        for (var i = 0; i < this._points.length; i++) {
+            var p = this._points[i];
+            this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
         }
-        this._texData += '"/>\n';
+        this._texData += ';\n';
     };
 
     measureText(text: string): TextMetrics {
         const c = this.canvas.getContext('2d');
         if (c) {
-            c.font = '20px "Times New Roman", serif';
-            return c.measureText(text);
+            c.font = '20px "Times New Romain", serif';
+			return c.measureText(text);
         }
         return { width: 0 } as TextMetrics;
     }
 
-    fillText(text: string, x: number, y: number) {
-        x += this._transX;
-        y += this._transY;
+    fillText(text: string, originalText: string, x: number, y: number, angleOrNull: number | null) {
         if (text.replace(' ', '').length > 0) {
-            this._texData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
+            var nodeParams = '';
+            // x and y start off as the center of the text, but will be moved to one side of the box when angleOrNull != null
+            if (angleOrNull != null) {
+                var width = this.measureText(text).width;
+                var dx = Math.cos(angleOrNull);
+                var dy = Math.sin(angleOrNull);
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0) nodeParams = '[right] ', x -= width / 2;
+                    else nodeParams = '[left] ', x += width / 2;
+                } else {
+                    if (dy > 0) nodeParams = '[below] ', y -= 10;
+                    else nodeParams = '[above] ', y += 10;
+                }
+            }
+            x *= this._scale;
+            y *= this._scale;
+            this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
         }
     };
 
-    translate(x: number, y: number) {
-        this._transX = x;
-        this._transY = y;
-    };
+    translate() {
+        // No-op for LaTeX export
+    }
 
     save() {
-        // No-op for SVG export
+        // No-op for LaTeX export
     }
 
     restore() {
-        // No-op for SVG export
+        // No-op for LaTeX export
     }
 
     clearRect() {
-        // No-op for SVG export
+        // No-op for LaTeX export
     }
 
 }

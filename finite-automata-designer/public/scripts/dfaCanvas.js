@@ -23,13 +23,12 @@
         beginPath() {
             this._points = [];
         }
-        // SVG template code to create svg syntax
         arc(x, y, radius, startAngle, endAngle, isReversed) {
             x += this._transX;
             y += this._transY;
             let style = 'stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" fill="none"';
             if (endAngle - startAngle == Math.PI * 2) {
-                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
+                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed$1(x, 3) + '" cy="' + fixed$1(y, 3) + '" rx="' + fixed$1(radius, 3) + '" ry="' + fixed$1(radius, 3) + '"/>\n';
             }
             else {
                 if (isReversed) {
@@ -46,12 +45,12 @@
                 let endY = y + radius * Math.sin(endAngle);
                 let useGreaterThan180 = (Math.abs(endAngle - startAngle) > Math.PI);
                 this._svgData += '\t<path ' + style + ' d="';
-                this._svgData += 'M ' + fixed(startX, 3) + ',' + fixed(startY, 3) + ' '; // startPoint(startX, startY)
-                this._svgData += 'A ' + fixed(radius, 3) + ',' + fixed(radius, 3) + ' '; // radii(radius, radius)
+                this._svgData += 'M ' + fixed$1(startX, 3) + ',' + fixed$1(startY, 3) + ' '; // startPoint(startX, startY)
+                this._svgData += 'A ' + fixed$1(radius, 3) + ',' + fixed$1(radius, 3) + ' '; // radii(radius, radius)
                 this._svgData += '0 '; // value of 0 means perfect circle, others mean ellipse
                 this._svgData += +useGreaterThan180 + ' ';
                 this._svgData += 1 + ' ';
-                this._svgData += fixed(endX, 3) + ',' + fixed(endY, 3); // endPoint(endX, endY)
+                this._svgData += fixed$1(endX, 3) + ',' + fixed$1(endY, 3); // endPoint(endX, endY)
                 this._svgData += '"/>\n';
             }
         }
@@ -71,7 +70,7 @@
                 return;
             this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (let i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+                this._svgData += (i > 0 ? ' ' : '') + fixed$1(this._points[i].x, 3) + ',' + fixed$1(this._points[i].y, 3);
             }
             this._svgData += '"/>\n';
         }
@@ -80,7 +79,7 @@
                 return;
             this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (let i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+                this._svgData += (i > 0 ? ' ' : '') + fixed$1(this._points[i].x, 3) + ',' + fixed$1(this._points[i].y, 3);
             }
             this._svgData += '"/>\n';
         }
@@ -97,7 +96,7 @@
             x += this._transX;
             y += this._transY;
             if (text.replace(' ', '').length > 0) {
-                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
+                this._svgData += '\t<text x="' + fixed$1(x, 3) + '" y="' + fixed$1(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
             }
         }
         ;
@@ -116,7 +115,7 @@
             // No-op for SVG export
         }
     }
-    function fixed(number, digits) {
+    function fixed$1(number, digits) {
         return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
     }
     function textToXML(text) {
@@ -132,6 +131,151 @@
             }
         }
         return result;
+    }
+
+    class ExportAsLaTeX {
+        constructor(canvas) {
+            if (!canvas) {
+                throw new Error('A valid HTMLCanvasElement is required');
+            }
+            this.canvas = canvas;
+            this.strokeStyle = 'black';
+            this.font = '20px "Times New Romain", serif';
+            this._points = [];
+            this._texData = '';
+            this._scale = 0.1;
+        }
+        toLaTeX() {
+            return '\\documentclass[12pt]{article}\n' +
+                '\\usepackage{tikz}\n' +
+                '\n' +
+                '\\begin{document}\n' +
+                '\n' +
+                '\\begin{center}\n' +
+                '\\begin{tikzpicture}[scale=0.2]\n' +
+                '\\tikzstyle{every node}+=[inner sep=0pt]\n' +
+                this._texData +
+                '\\end{tikzpicture}\n' +
+                '\\end{center}\n' +
+                '\n' +
+                '\\end{document}\n';
+        }
+        // Reset 
+        beginPath() {
+            this._points = [];
+        }
+        arc(x, y, radius, startAngle, endAngle, isReversed) {
+            x *= this._scale;
+            y *= this._scale;
+            radius *= this._scale;
+            if (endAngle - startAngle == Math.PI * 2) {
+                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
+            }
+            else {
+                if (isReversed) {
+                    var temp = startAngle;
+                    startAngle = endAngle;
+                    endAngle = temp;
+                }
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                // TikZ needs the angles to be in between -2pi and 2pi or it breaks
+                if (Math.min(startAngle, endAngle) < -2 * Math.PI) {
+                    startAngle += 2 * Math.PI;
+                    endAngle += 2 * Math.PI;
+                }
+                else if (Math.max(startAngle, endAngle) > 2 * Math.PI) {
+                    startAngle -= 2 * Math.PI;
+                    endAngle -= 2 * Math.PI;
+                }
+                startAngle = -startAngle;
+                endAngle = -endAngle;
+                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x + radius * Math.cos(startAngle), 3) + ',' + fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' + fixed(startAngle * 180 / Math.PI, 5) + ':' + fixed(endAngle * 180 / Math.PI, 5) + ':' + fixed(radius, 3) + ');\n';
+            }
+        }
+        ;
+        moveTo(x, y) {
+            x *= this._scale;
+            y *= this._scale;
+            this._points.push({ x, y });
+        }
+        lineTo(x, y) {
+            x *= this._scale;
+            y *= this._scale;
+            this._points.push({ x, y });
+        }
+        stroke() {
+            if (this._points.length == 0)
+                return;
+            this._texData += '\\draw [' + this.strokeStyle + ']';
+            for (var i = 0; i < this._points.length; i++) {
+                var p = this._points[i];
+                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
+            }
+            this._texData += ';\n';
+        }
+        fill() {
+            if (this._points.length == 0)
+                return;
+            this._texData += '\\fill [' + this.strokeStyle + ']';
+            for (var i = 0; i < this._points.length; i++) {
+                var p = this._points[i];
+                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
+            }
+            this._texData += ';\n';
+        }
+        ;
+        measureText(text) {
+            const c = this.canvas.getContext('2d');
+            if (c) {
+                c.font = '20px "Times New Romain", serif';
+                return c.measureText(text);
+            }
+            return { width: 0 };
+        }
+        fillText(text, originalText, x, y, angleOrNull) {
+            if (text.replace(' ', '').length > 0) {
+                var nodeParams = '';
+                // x and y start off as the center of the text, but will be moved to one side of the box when angleOrNull != null
+                if (angleOrNull != null) {
+                    var width = this.measureText(text).width;
+                    var dx = Math.cos(angleOrNull);
+                    var dy = Math.sin(angleOrNull);
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        if (dx > 0)
+                            nodeParams = '[right] ', x -= width / 2;
+                        else
+                            nodeParams = '[left] ', x += width / 2;
+                    }
+                    else {
+                        if (dy > 0)
+                            nodeParams = '[below] ', y -= 10;
+                        else
+                            nodeParams = '[above] ', y += 10;
+                    }
+                }
+                x *= this._scale;
+                y *= this._scale;
+                this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
+            }
+        }
+        ;
+        translate() {
+            // No-op for LaTeX export
+        }
+        save() {
+            // No-op for LaTeX export
+        }
+        restore() {
+            // No-op for LaTeX export
+        }
+        clearRect() {
+            // No-op for LaTeX export
+        }
+    }
+    function fixed(number, digits) {
+        return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
     }
 
     /*
@@ -189,12 +333,13 @@
         }
         x = Math.round(x);
         y = Math.round(y);
-        if (ctx instanceof ExportAsSVG) {
+        if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsSVG) {
             ctx.fillText(text, x, y + 6);
         }
-        else {
-            ctx.fillText(convertText(originalText), x, y + 6);
-        }
+        else if (ctx instanceof ExportAsLaTeX)
+            if (ctx instanceof ExportAsSVG || ctx instanceof ExportAsLaTeX) {
+                ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
+            }
     }
     function drawArrow(ctx, x, y, angle) {
         let dx = Math.cos(angle);
@@ -1248,7 +1393,7 @@
             const alphabetLabel = document.getElementById("alphabetLabel");
             // Buttons for exporting, SVG and LaTeX
             const exportSVGBtn = document.getElementById('svgExportBtn');
-            document.getElementById('latexExportBtn');
+            const exportLaTeXBtn = document.getElementById('latexExportBtn');
             // Container surrounding the export textarea (the output container)
             const outputContainer = document.getElementById('text_area_container');
             // Button that will hide the output container effectively hiding the text area
@@ -1333,6 +1478,19 @@
                     }
                 });
             }
+            if (exportLaTeXBtn) {
+                exportLaTeXBtn.addEventListener('click', () => {
+                    if (canvas) {
+                        saveAsLaTeX(canvas);
+                    }
+                    if (outputContainer) {
+                        if (outputContainer.hidden) {
+                            _toggle_visiblity(outputContainer);
+                        }
+                    }
+                });
+                // To implement in the future for supporting exporting the FA's to LaTeX
+            }
             if (hideOutputBtn) {
                 hideOutputBtn.addEventListener('click', () => {
                     if (outputContainer) {
@@ -1354,7 +1512,6 @@
         if (!canvas)
             return;
         const exporter = new ExportAsSVG(canvas);
-        exporter.save();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.lineWidth = 1;
             exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
@@ -1378,6 +1535,26 @@
             tempArrow.draw(exporter);
         }
         output(exporter.toSVG());
+    }
+    function saveAsLaTeX(canvas) {
+        if (!canvas)
+            return;
+        const exporter = new ExportAsLaTeX(canvas);
+        for (let circle = 0; circle < circles.length; circle++) {
+            circles[circle].draw(exporter);
+        }
+        for (let arrow = 0; arrow < arrows.length; arrow++) {
+            arrows[arrow].draw(exporter);
+        }
+        // If there is an EntryArrow, then draw it
+        if (startState) {
+            startState.draw(exporter);
+        }
+        // If there is a TemporaryArrow being created, then draw it
+        if (tempArrow != null) {
+            tempArrow.draw(exporter);
+        }
+        output(exporter.toLaTeX());
     }
     function output(text) {
         let element = document.getElementById('output');

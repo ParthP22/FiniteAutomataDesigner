@@ -22,7 +22,8 @@ import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
-import { ExportAsSVG } from "./ExportAsSVG";
+import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -594,6 +595,16 @@ function attachWhenReady() {
     }
 
     if (exportLaTeXBtn) {
+      exportLaTeXBtn.addEventListener('click', () => {
+        if (canvas) {
+          saveAsLaTeX(canvas);
+        }
+        if (outputContainer) {
+          if (outputContainer.hidden) {
+            _toggle_visiblity(outputContainer);
+          }
+        }
+      });
       // To implement in the future for supporting exporting the FA's to LaTeX
     }
 
@@ -623,7 +634,7 @@ function saveAsSVG(canvas: HTMLCanvasElement) {
     if (!canvas) return;
 
     const exporter = new ExportAsSVG(canvas);
-    exporter.save();
+
     for(let circle = 0; circle < circles.length; circle++) {
       exporter.lineWidth = 1;
       exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
@@ -651,6 +662,33 @@ function saveAsSVG(canvas: HTMLCanvasElement) {
 
     output(exporter.toSVG());
 }
+
+function saveAsLaTeX(canvas: HTMLCanvasElement) {
+  if (!canvas) return;
+  
+  const exporter = new ExportAsLaTeX(canvas);
+
+  for(let circle = 0; circle < circles.length; circle++) {
+    circles[circle].draw(exporter)
+  }
+  for (let arrow = 0; arrow < arrows.length; arrow++) {
+    arrows[arrow].draw(exporter);
+  }
+
+      // If there is an EntryArrow, then draw it
+  if(startState){
+    startState.draw(exporter);
+  }
+
+  // If there is a TemporaryArrow being created, then draw it
+  if (tempArrow != null) {
+    tempArrow.draw(exporter);
+  }
+
+  output(exporter.toLaTeX());
+
+}
+
 
 function output(text: string) {
   let element = document.getElementById('output');

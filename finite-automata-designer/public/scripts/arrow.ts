@@ -14,7 +14,8 @@ import {Circle} from "./circle";
 import { SelfArrow } from "./SelfArrow";
 import { EntryArrow } from "./EntryArrow";
 import { snapToPadding, nodeRadius, drawArrow, drawText, hitTargetPadding } from "./draw";
-import { ExportAsSVG } from "./ExportAsSVG";
+import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 
 export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 
@@ -135,7 +136,7 @@ export class Arrow {
         };
     }
 
-    draw(ctx: CanvasRenderingContext2D | ExportAsSVG) {
+    draw(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX) {
 
         var pointInfo = this.getEndPointsAndCircle();
         // draw arc

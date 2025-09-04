@@ -35,7 +35,7 @@ export class ExportAsSVG {
         this.lineWidth = 1;
         this.font = '12px Arial, sans-serif';
         this._points =[];
-        this._svgData = '';
+        this._svgData = ''; 
         this._transX = 0;
         this._transY = 0;
         
@@ -50,7 +50,6 @@ export class ExportAsSVG {
         this._points = [];
     }
 
-    // SVG template code to create svg syntax
     arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, isReversed: boolean) {
         x += this._transX;
         y += this._transY;
