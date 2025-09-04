@@ -15,7 +15,7 @@
 
 
 import {Circle, circles} from "./Shapes/Circle";
-import {Arrow, arrows} from "./Shapes/arrow";
+import {Arrow, arrows} from "./Shapes/Arrow";
 import {SelfArrow} from "./Shapes/SelfArrow";
 import {EntryArrow,startState, setStartState} from "./Shapes/EntryArrow";
 import {TemporaryArrow} from "./Shapes/TemporaryArrow";
@@ -499,7 +499,7 @@ function attachWhenReady() {
     const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
     const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
     // Container surrounding the export textarea (the output container)
-    const outputContainer = document.getElementById('text_area_container') as HTMLDivElement | null;
+    const outputContainer = document.getElementById('exportOutputContainer') as HTMLDivElement | null;
     // Actual textarea containing the output data
     const outputTextArea = document.getElementById('output') as HTMLTextAreaElement | null;
     // Button that will hide the output container effectively hiding the text area

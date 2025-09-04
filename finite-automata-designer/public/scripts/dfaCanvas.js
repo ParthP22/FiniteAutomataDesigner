@@ -1395,7 +1395,7 @@
             const exportSVGBtn = document.getElementById('svgExportBtn');
             const exportLaTeXBtn = document.getElementById('latexExportBtn');
             // Container surrounding the export textarea (the output container)
-            const outputContainer = document.getElementById('text_area_container');
+            const outputContainer = document.getElementById('exportOutputContainer');
             // Actual textarea containing the output data
             const outputTextArea = document.getElementById('output');
             // Button that will hide the output container effectively hiding the text area

@@ -10,7 +10,7 @@
  Licensed under the MIT Licenses
 */
 
-import {Arrow} from "./arrow";
+import {Arrow} from "./Arrow";
 import { nodeRadius, drawText } from "./draw";
 import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { ExportAsSVG } from "../exporting/ExportAsSVG";

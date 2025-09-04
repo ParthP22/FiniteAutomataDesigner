@@ -25,8 +25,13 @@ export default function DFAPage() {
                 <button id='svgExportBtn' type="button" className="cursor-pointer text-center">SVG</button>
                 {' | '}
                 <button id='latexExportBtn' type="button" className="cursor-pointer">LaTeX</button>
+                <br />
+                Import as:{' '}
+                <button id='svgImportBtn' type="button" className="cursor-pointer text-center">SVG</button>
+                {' | '}
+                <button id='latexImportBtn' type="button" className="cursor-pointer">LaTeX</button>
             </div>
-            <div id="text_area_container" hidden className="text-center">
+            <div id="exportOutputContainer" hidden className="text-center">
                 <textarea 
                 disabled
                 tabIndex={-1}
