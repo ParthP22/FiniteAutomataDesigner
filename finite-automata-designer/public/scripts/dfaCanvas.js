@@ -966,6 +966,33 @@
         }
     }
 
+    class ImportAsSVG {
+        constructor(circArr, arrowsArray, data) {
+            this.circles = circArr;
+            this.arrows = arrowsArray;
+            this._svgData = data;
+        }
+        clear() {
+            this._svgData = '';
+        }
+        convert() {
+            console.log("ran");
+            let data_lines = this._svgData.split('\n');
+            const cleaned = [];
+            for (let i = 0; i < data_lines.length; i++) {
+                const s = data_lines[i].replace(/\s+/g, " ").trim();
+                if (s)
+                    cleaned.push(s);
+            }
+            for (let line in cleaned) {
+                console.log(cleaned[line]);
+            }
+        }
+        normalizeText(text) {
+            return text.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
+        }
+    }
+
     /*
      Portions of this file are adapted from:
 
@@ -1404,7 +1431,7 @@
             // Actual textarea containing the output data
             const outputTextArea = document.getElementById('output');
             // Textarea containing the input data 
-            document.getElementById('input');
+            const inputTextArea = document.getElementById('input');
             // Button that will hide the output container effectively hiding the text area
             const hideOutputBtn = document.getElementById('hideOutput');
             // Button that will copy the output to clipboard
@@ -1429,11 +1456,8 @@
                         exportLaTeXBtn?.blur();
                         importSVGBtn?.blur();
                         importLaTeXBtn?.blur();
-                        // Output containers and text areas
                         hideOutputBtn?.blur();
                         copyOutputBtn?.blur();
-                        outputContainer?.blur();
-                        outputTextArea?.blur();
                     }
                 });
             }
@@ -1518,6 +1542,14 @@
                     if (inputContainer) {
                         if (inputContainer.hidden) {
                             _toggle_visiblity(inputContainer);
+                        }
+                        if (circles && arrows && inputTextArea) {
+                            let data = inputTextArea.value;
+                            data = data.trim();
+                            if (data) {
+                                let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value);
+                                SVGImporter.convert();
+                            }
                         }
                     }
                 });

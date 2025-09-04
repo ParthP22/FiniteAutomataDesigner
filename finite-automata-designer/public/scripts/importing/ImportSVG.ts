@@ -19,9 +19,20 @@ export class ImportAsSVG {
     }
 
     convert(): void{
-        let split_by_line = this._svgData.split('\n')
-        for (let ele in split_by_line) {
-            console.log(ele);
-        } 
+        console.log("ran");
+        let data_lines = this._svgData.split('\n');
+        const cleaned: string[] = [];
+        for (let i = 0; i < data_lines.length; i++) {
+            const s = data_lines[i].replace(/\s+/g, " ").trim();
+            if (s) cleaned.push(s);
+        }
+
+        for (let line in cleaned){
+            console.log(cleaned[line]);
+        }
+    }
+
+    normalizeText(text: string) {
+        return text.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
     }
 }

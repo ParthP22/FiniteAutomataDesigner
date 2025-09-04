@@ -635,7 +635,13 @@ function attachWhenReady() {
             _toggle_visiblity(inputContainer);
           }
           if (circles && arrows && inputTextArea) {
-            let SVGImporter = new ImportAsSVG(circles, arrows, '');
+            let data = inputTextArea.value;
+            data = data.trim();
+            if (data) {
+              let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value);
+              SVGImporter.convert();
+            }
+            
           }
             
         }
