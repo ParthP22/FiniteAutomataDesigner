@@ -518,9 +518,11 @@ function attachWhenReady() {
     const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
     // Button that will clear the input textarea
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
-
+    // Reference to draw fucntion;
+    let drawRef:  () => void;
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
+      drawRef = draw;
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
         if (!isInsideCanvas(event, canvas)) {
@@ -640,7 +642,7 @@ function attachWhenReady() {
             let data = inputTextArea.value;
             data = data.trim();
             if (data) {
-              let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value);
+              let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value, drawRef);
               SVGImporter.convert();
             }
             

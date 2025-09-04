@@ -967,16 +967,16 @@
     }
 
     class ImportAsSVG {
-        constructor(circArr, arrowsArray, data) {
+        constructor(circArr, arrowsArray, data, drawFunc) {
             this.circles = circArr;
             this.arrows = arrowsArray;
             this._svgData = data;
+            this.draw = drawFunc;
         }
         clear() {
             this._svgData = '';
         }
         convert() {
-            console.log("ran");
             let data_lines = this._svgData.split('\n');
             const cleaned = [];
             for (let i = 0; i < data_lines.length; i++) {
@@ -987,6 +987,8 @@
             for (let line in cleaned) {
                 console.log(cleaned[line]);
             }
+            circles.push(new Circle(100, 100));
+            this.draw();
         }
         normalizeText(text) {
             return text.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
@@ -1440,8 +1442,11 @@
             const hideInputBtn = document.getElementById('hideInput');
             // Button that will clear the input textarea
             const clearInputBtn = document.getElementById('clearInput');
+            // Reference to draw fucntion;
+            let drawRef;
             if (canvas) {
                 const { draw } = setupDfaCanvas(canvas);
+                drawRef = draw;
                 // If you click outside of the canvas it will deselect the object and turn off dragging
                 document.addEventListener("mousedown", (event) => {
                     if (!isInsideCanvas(event, canvas)) {
@@ -1549,7 +1554,7 @@
                             let data = inputTextArea.value;
                             data = data.trim();
                             if (data) {
-                                let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value);
+                                let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value, drawRef);
                                 SVGImporter.convert();
                             }
                         }

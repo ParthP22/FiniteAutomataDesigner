@@ -7,11 +7,13 @@ export class ImportAsSVG {
     circles: Circle[];
     arrows: (Arrow | SelfArrow | EntryArrow) [];
     _svgData: string;
+    draw: () => void;
 
-    constructor(circArr: Circle[], arrowsArray: (Arrow | SelfArrow | EntryArrow)[], data: string) {
+    constructor(circArr: Circle[], arrowsArray: (Arrow | SelfArrow | EntryArrow)[], data: string, drawFunc:() => void) {
         this.circles = circArr;
         this.arrows = arrowsArray;
         this._svgData = data;
+        this.draw = drawFunc;
     }
 
     clear(){
@@ -29,6 +31,8 @@ export class ImportAsSVG {
         for (let line in cleaned){
             console.log(cleaned[line]);
         }
+        circles.push(new Circle(100, 100))
+        this.draw();
     }
 
     normalizeText(text: string) {
