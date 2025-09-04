@@ -534,11 +534,8 @@ function attachWhenReady() {
           exportLaTeXBtn?.blur();
           importSVGBtn?.blur();
           importLaTeXBtn?.blur();
-          // Output containers and text areas
           hideOutputBtn?.blur();
           copyOutputBtn?.blur();
-          outputContainer?.blur();
-          outputTextArea?.blur();
         }
       });
     };
