@@ -1411,6 +1411,13 @@
                         // Force input fields to lose focus if you click inside the canvas
                         inputString?.blur();
                         alphabetInput?.blur();
+                        exportSVGBtn?.blur();
+                        exportLaTeXBtn?.blur();
+                        hideOutputBtn?.blur();
+                        const active = document.activeElement;
+                        if (active && typeof active.blur === "function") {
+                            active.blur();
+                        }
                     }
                 });
             }

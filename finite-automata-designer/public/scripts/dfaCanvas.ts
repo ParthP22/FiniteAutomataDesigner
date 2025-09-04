@@ -513,8 +513,16 @@ function attachWhenReady() {
           draw();
         } else {
           // Force input fields to lose focus if you click inside the canvas
-          inputString?.blur()
-          alphabetInput?.blur()
+          inputString?.blur();
+          alphabetInput?.blur();
+          exportSVGBtn?.blur();
+          exportLaTeXBtn?.blur();
+          hideOutputBtn?.blur();
+          const active = document.activeElement as HTMLElement | null;
+          if (active && typeof active.blur === "function") {
+            active.blur();
+          }
+
         }
       });
     };
