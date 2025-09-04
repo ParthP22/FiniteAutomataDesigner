@@ -1396,6 +1396,8 @@
             const exportLaTeXBtn = document.getElementById('latexExportBtn');
             // Container surrounding the export textarea (the output container)
             const outputContainer = document.getElementById('text_area_container');
+            // Actual textarea containing the output data
+            const outputTextArea = document.getElementById('output');
             // Button that will hide the output container effectively hiding the text area
             const hideOutputBtn = document.getElementById('hideOutput');
             if (canvas) {
@@ -1414,10 +1416,8 @@
                         exportSVGBtn?.blur();
                         exportLaTeXBtn?.blur();
                         hideOutputBtn?.blur();
-                        const active = document.activeElement;
-                        if (active && typeof active.blur === "function") {
-                            active.blur();
-                        }
+                        outputContainer?.blur();
+                        outputTextArea?.blur();
                     }
                 });
             }
@@ -1474,8 +1474,8 @@
             }
             if (exportSVGBtn) {
                 exportSVGBtn.addEventListener('click', () => {
-                    if (canvas) {
-                        saveAsSVG(canvas);
+                    if (canvas && outputTextArea) {
+                        saveAsSVG(canvas, outputTextArea);
                         console.log("exporting!");
                     }
                     if (outputContainer) {
@@ -1487,8 +1487,8 @@
             }
             if (exportLaTeXBtn) {
                 exportLaTeXBtn.addEventListener('click', () => {
-                    if (canvas) {
-                        saveAsLaTeX(canvas);
+                    if (canvas && outputTextArea) {
+                        saveAsLaTeX(canvas, outputTextArea);
                     }
                     if (outputContainer) {
                         if (outputContainer.hidden) {
@@ -1515,7 +1515,7 @@
     }
     attachWhenReady();
     // saveAsSVG function to export the FSM as SVG
-    function saveAsSVG(canvas) {
+    function saveAsSVG(canvas, textArea) {
         if (!canvas)
             return;
         const exporter = new ExportAsSVG(canvas);
@@ -1541,9 +1541,9 @@
             exporter.fillStyle = exporter.strokeStyle = base;
             tempArrow.draw(exporter);
         }
-        output(exporter.toSVG());
+        output(exporter.toSVG(), textArea);
     }
-    function saveAsLaTeX(canvas) {
+    function saveAsLaTeX(canvas, textArea) {
         if (!canvas)
             return;
         const exporter = new ExportAsLaTeX(canvas);
@@ -1561,10 +1561,9 @@
         if (tempArrow != null) {
             tempArrow.draw(exporter);
         }
-        output(exporter.toLaTeX());
+        output(exporter.toLaTeX(), textArea);
     }
-    function output(text) {
-        let element = document.getElementById('output');
+    function output(text, element) {
         if (element && element instanceof HTMLTextAreaElement) {
             element.value = text;
         }
