@@ -1394,14 +1394,23 @@
             // Buttons for exporting, SVG and LaTeX
             const exportSVGBtn = document.getElementById('svgExportBtn');
             const exportLaTeXBtn = document.getElementById('latexExportBtn');
-            // Container surrounding the export textarea (the output container)
+            // Buttons for importing, SVG and LaTeX
+            const importSVGBtn = document.getElementById('svgImportBtn');
+            const importLaTeXBtn = document.getElementById('latexImportBtn');
+            // Container surrounding the export textarea (the output container {the div})
             const outputContainer = document.getElementById('exportOutputContainer');
+            // Container surround the import textarea (the input container {the div})
+            const inputContainer = document.getElementById('importInputContainer');
             // Actual textarea containing the output data
             const outputTextArea = document.getElementById('output');
+            // Textarea containing the input data 
+            document.getElementById('input');
             // Button that will hide the output container effectively hiding the text area
             const hideOutputBtn = document.getElementById('hideOutput');
             // Button that will copy the output to clipboard
             const copyOutputBtn = document.getElementById('copyOutput');
+            // Button that will hide the input container effectively hiding the text area
+            const hideInputBtn = document.getElementById('hideInput');
             if (canvas) {
                 const { draw } = setupDfaCanvas(canvas);
                 // If you click outside of the canvas it will deselect the object and turn off dragging
@@ -1415,8 +1424,12 @@
                         // Prevent focusing other elements so accidently taps on tab can be resolved with one click back on the canvas
                         inputString?.blur();
                         alphabetInput?.blur();
+                        // Buttons
                         exportSVGBtn?.blur();
                         exportLaTeXBtn?.blur();
+                        importSVGBtn?.blur();
+                        importLaTeXBtn?.blur();
+                        // Output containers and text areas
                         hideOutputBtn?.blur();
                         copyOutputBtn?.blur();
                         outputContainer?.blur();
@@ -1499,7 +1512,15 @@
                         }
                     }
                 });
-                // To implement in the future for supporting exporting the FA's to LaTeX
+            }
+            if (importSVGBtn) {
+                importSVGBtn?.addEventListener('click', () => {
+                    if (inputContainer) {
+                        if (inputContainer.hidden) {
+                            _toggle_visiblity(inputContainer);
+                        }
+                    }
+                });
             }
             if (hideOutputBtn) {
                 hideOutputBtn.addEventListener('click', () => {
@@ -1518,6 +1539,13 @@
                         catch (err) {
                             console.log("Failed to copy: ", err);
                         }
+                    }
+                });
+            }
+            if (hideInputBtn) {
+                hideInputBtn.addEventListener('click', () => {
+                    if (inputContainer) {
+                        _toggle_visiblity(inputContainer);
                     }
                 });
             }

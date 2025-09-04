@@ -24,6 +24,7 @@ import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
+import { ImportAsSVG } from "./importing/ImportSVG";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -498,14 +499,23 @@ function attachWhenReady() {
     // Buttons for exporting, SVG and LaTeX
     const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
     const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
-    // Container surrounding the export textarea (the output container)
+    // Buttons for importing, SVG and LaTeX
+    const importSVGBtn = document.getElementById('svgImportBtn') as HTMLButtonElement | null;
+    const importLaTeXBtn = document.getElementById('latexImportBtn') as HTMLButtonElement | null;
+    // Container surrounding the export textarea (the output container {the div})
     const outputContainer = document.getElementById('exportOutputContainer') as HTMLDivElement | null;
+    // Container surround the import textarea (the input container {the div})
+    const inputContainer = document.getElementById('importInputContainer') as HTMLDivElement | null;
     // Actual textarea containing the output data
     const outputTextArea = document.getElementById('output') as HTMLTextAreaElement | null;
+    // Textarea containing the input data 
+    const inputTextArea = document.getElementById('input') as HTMLTextAreaElement | null;
     // Button that will hide the output container effectively hiding the text area
     const hideOutputBtn = document.getElementById('hideOutput') as HTMLButtonElement | null;
     // Button that will copy the output to clipboard
     const copyOutputBtn = document.getElementById('copyOutput') as HTMLButtonElement | null;
+    // Button that will hide the input container effectively hiding the text area
+    const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
 
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
@@ -519,8 +529,12 @@ function attachWhenReady() {
           // Prevent focusing other elements so accidently taps on tab can be resolved with one click back on the canvas
           inputString?.blur();
           alphabetInput?.blur();
+          // Buttons
           exportSVGBtn?.blur();
           exportLaTeXBtn?.blur();
+          importSVGBtn?.blur();
+          importLaTeXBtn?.blur();
+          // Output containers and text areas
           hideOutputBtn?.blur();
           copyOutputBtn?.blur();
           outputContainer?.blur();
@@ -615,7 +629,21 @@ function attachWhenReady() {
           }
         }
       });
-      // To implement in the future for supporting exporting the FA's to LaTeX
+    }
+
+    if (importSVGBtn) {
+      importSVGBtn?.addEventListener('click', () => {
+        if (inputContainer) {
+          if (inputContainer.hidden) {
+            _toggle_visiblity(inputContainer);
+          }
+          if (circles && arrows && inputTextArea) {
+            let SVGImporter = new ImportAsSVG(circles, arrows, '');
+          }
+            
+        }
+        
+      })
     }
 
     if (hideOutputBtn) {
@@ -636,6 +664,14 @@ function attachWhenReady() {
             console.log("Failed to copy: ", err)
           }
           
+        }
+      });
+    }
+
+    if (hideInputBtn) {
+      hideInputBtn.addEventListener('click', () => {
+        if (inputContainer) {
+          _toggle_visiblity(inputContainer);
         }
       });
     }
@@ -669,7 +705,7 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
       arrows[arrow].draw(exporter);
     }
 
-        // If there is an EntryArrow, then draw it
+    // If there is an EntryArrow, then draw it
     if(startState){
       exporter.lineWidth = 1;
       exporter.fillStyle = exporter.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;

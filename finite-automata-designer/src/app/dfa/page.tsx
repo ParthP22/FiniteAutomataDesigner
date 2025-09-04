@@ -22,12 +22,12 @@ export default function DFAPage() {
             <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400 flex-none"></canvas>
             <div className="text-center text-black mt-2">
                 Export as:{' '}
-                <button id='svgExportBtn' type="button" className="cursor-pointer text-center">SVG</button>
+                <button id='svgExportBtn' type="button" className="cursor-pointer">SVG</button>
                 {' | '}
                 <button id='latexExportBtn' type="button" className="cursor-pointer">LaTeX</button>
                 <br />
                 Import as:{' '}
-                <button id='svgImportBtn' type="button" className="cursor-pointer text-center">SVG</button>
+                <button id='svgImportBtn' type="button" className="cursor-pointer">SVG</button>
                 {' | '}
                 <button id='latexImportBtn' type="button" className="cursor-pointer">LaTeX</button>
             </div>
@@ -42,6 +42,17 @@ export default function DFAPage() {
                 <div className="flex gap-4 justify-center text-black">
                      <button id='hideOutput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Export Output</button>
                      <button id='copyOutput' type="button" className="cursor-pointer text-center text-decoration underline">Copy Output</button>
+                </div>
+            </div>
+            <div id="importInputContainer" hidden className="text-center">
+                <textarea 
+                tabIndex={-1}
+                id="input"
+                className="w-full h-24 mt-2 border border-gray-400 rounded text-black bg-white select-none" 
+                placeholder="Enter the input data that you exported EXCLUSIVELY from this FA designer goes here...">
+                </textarea>
+                <div className="flex gap-4 justify-center text-black">
+                    <button id='hideInput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Input</button>
                 </div>
             </div>
         </div>
