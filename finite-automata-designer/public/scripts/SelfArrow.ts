@@ -10,7 +10,7 @@
  Licensed under the MIT Licenses
 */
 
-import {Circle} from "./circle";
+import {Circle} from "./Circle";
 import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";

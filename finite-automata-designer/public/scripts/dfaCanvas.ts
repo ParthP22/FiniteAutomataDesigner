@@ -14,7 +14,7 @@
 // npm run build:canvas
 
 
-import {Circle, circles} from "./circle";
+import {Circle, circles} from "./Circle";
 import {Arrow, arrows} from "./arrow";
 import {SelfArrow} from "./SelfArrow";
 import {EntryArrow,startState, setStartState} from "./EntryArrow";
@@ -641,8 +641,6 @@ function attachWhenReady() {
     }
 
   };
-  
-
   
 
   if (document.readyState === 'loading') {

@@ -19,7 +19,7 @@ export default function DFAPage() {
         </h1>
         <div id="canvasDiv" className="">
             {/*Canvas for drawing FSM*/}
-            <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none"></canvas>
+            <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400 flex-none"></canvas>
             <div className="text-center text-black mt-2">
                 Export as:{' '}
                 <button id='svgExportBtn' type="button" className="cursor-pointer text-center">SVG</button>

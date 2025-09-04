@@ -10,7 +10,7 @@
  Licensed under the MIT Licenses
 */
 
-import {Circle} from "./circle";
+import {Circle} from "./Circle";
 import { SelfArrow } from "./SelfArrow";
 import { EntryArrow } from "./EntryArrow";
 import { snapToPadding, nodeRadius, drawArrow, drawText, hitTargetPadding } from "./draw";

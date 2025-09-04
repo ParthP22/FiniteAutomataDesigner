@@ -1,4 +1,4 @@
-import { Circle, circles } from "../../../public/scripts/circle";
+import { Circle, circles } from "../../../public/scripts/Circle";
 import { alphabet } from "../../../public/scripts/alphabet";
 import { Arrow } from "../../../public/scripts/arrow";
 import { SelfArrow } from "../../../public/scripts/SelfArrow";
