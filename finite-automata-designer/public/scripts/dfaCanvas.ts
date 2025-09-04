@@ -22,7 +22,7 @@ import {TemporaryArrow} from "./TemporaryArrow";
 import { snapToPadding} from "./draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsSVG, textToXML } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 
 // The previously edited object, which is determined by the object that was last
@@ -504,6 +504,8 @@ function attachWhenReady() {
     const outputTextArea = document.getElementById('output') as HTMLTextAreaElement | null;
     // Button that will hide the output container effectively hiding the text area
     const hideOutputBtn = document.getElementById('hideOutput') as HTMLButtonElement | null;
+    // Button that will copy the output to clipboard
+    const copyOutputBtn = document.getElementById('copyOutput') as HTMLButtonElement | null;
 
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
@@ -520,6 +522,7 @@ function attachWhenReady() {
           exportSVGBtn?.blur();
           exportLaTeXBtn?.blur();
           hideOutputBtn?.blur();
+          copyOutputBtn?.blur();
           outputContainer?.blur();
           outputTextArea?.blur();
         }
@@ -622,6 +625,21 @@ function attachWhenReady() {
         }
       });
     }
+
+    if (copyOutputBtn) {
+      copyOutputBtn.addEventListener('click', async () => {
+        if (outputTextArea) {
+          try {
+            let textToCopy = outputTextArea.value;
+            await navigator.clipboard.writeText(textToCopy); 
+          } catch (err) {
+            console.log("Failed to copy: ", err)
+          }
+          
+        }
+      });
+    }
+
   };
   
 

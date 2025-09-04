@@ -1400,6 +1400,8 @@
             const outputTextArea = document.getElementById('output');
             // Button that will hide the output container effectively hiding the text area
             const hideOutputBtn = document.getElementById('hideOutput');
+            // Button that will copy the output to clipboard
+            const copyOutputBtn = document.getElementById('copyOutput');
             if (canvas) {
                 const { draw } = setupDfaCanvas(canvas);
                 // If you click outside of the canvas it will deselect the object and turn off dragging
@@ -1410,12 +1412,13 @@
                         draw();
                     }
                     else {
-                        // Force input fields to lose focus if you click inside the canvas
+                        // Prevent focusing other elements so accidently taps on tab can be resolved with one click back on the canvas
                         inputString?.blur();
                         alphabetInput?.blur();
                         exportSVGBtn?.blur();
                         exportLaTeXBtn?.blur();
                         hideOutputBtn?.blur();
+                        copyOutputBtn?.blur();
                         outputContainer?.blur();
                         outputTextArea?.blur();
                     }
@@ -1502,6 +1505,19 @@
                 hideOutputBtn.addEventListener('click', () => {
                     if (outputContainer) {
                         _toggle_visiblity(outputContainer);
+                    }
+                });
+            }
+            if (copyOutputBtn) {
+                copyOutputBtn.addEventListener('click', async () => {
+                    if (outputTextArea) {
+                        try {
+                            let textToCopy = outputTextArea.value;
+                            await navigator.clipboard.writeText(textToCopy);
+                        }
+                        catch (err) {
+                            console.log("Failed to copy: ", err);
+                        }
                     }
                 });
             }
