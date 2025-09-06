@@ -2,7 +2,7 @@ import {Circle, circles} from "../Shapes/Circle";
 import {Arrow, arrows} from "../Shapes/Arrow";
 import {SelfArrow} from "../Shapes/SelfArrow";
 import {EntryArrow,startState, setStartState} from "../Shapes/EntryArrow";
-import { Point } from "../exporting/ExportAsSVG";
+// import { Point } from "../exporting/PointInterface";
 
 export class ImportAsSVG {
     circles: Circle[];

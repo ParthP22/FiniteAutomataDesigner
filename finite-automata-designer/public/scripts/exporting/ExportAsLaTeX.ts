@@ -9,10 +9,7 @@
  Copyright (c) 2025 Mohammed Mowla and Parth Patel
  Licensed under the MIT Licenses
 */
-export interface Point {
-    x: number;
-    y: number
-}
+import { Point } from "./PointInterface";
 
 export class ExportAsLaTeX {
     strokeStyle: string;
