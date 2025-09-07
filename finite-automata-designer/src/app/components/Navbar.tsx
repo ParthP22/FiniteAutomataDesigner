@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useState,useEffect } from "react";
 import { redirect } from 'next/navigation'
 import { User } from "@supabase/supabase-js"
-import { signOut } from "../login/actions";
+// import { signout } from "../login/actions";
 
 
 export default function Navbar() {
@@ -57,12 +57,14 @@ export default function Navbar() {
             >
               Profile
             </Link>
-            <button
-              onClick={() => signOut()}
-              className="px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
-            >
-              Log out
-            </button>
+            <form action="/auth/signout" method="post">
+              <button
+                className="px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
+                type="submit"
+              >
+                Log out
+              </button>
+            </form>
           </>
         // Here is the equivalent of the "else if" part of the conditional operator
         // Previous issue: whenever you go from the profile page back to the home page, 
