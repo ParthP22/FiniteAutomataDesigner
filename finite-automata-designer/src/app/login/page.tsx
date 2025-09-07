@@ -149,15 +149,22 @@
 // }
 
 import { login, signup } from './actions'
+import GoogleOAuthForm from '../components/forms/GoogleOAuth'
 export default function LoginPage() {
   return (
-    <form>
-      <label htmlFor="email">Email:</label>
-      <input id="email" name="email" type="email" required />
-      <label htmlFor="password">Password:</label>
-      <input id="password" name="password" type="password" required />
-      <button formAction={login}>Log in</button>
-      <button formAction={signup}>Sign up</button>
-    </form>
+    <>
+      <form>
+        <label htmlFor="email">Email:</label>
+        <input id="email" name="email" type="email" required />
+        <label htmlFor="password">Password:</label>
+        <input id="password" name="password" type="password" required />
+        <button formAction={login}>Log in</button>
+        <button formAction={signup}>Sign up</button>
+      </form>
+      <div className='flex flex-col items-center justify-center h-screen gap-4'>
+          <h1 className='text-4xl font-bold'>Not Authenticated</h1>
+          <GoogleOAuthForm />
+      </div>
+    </>
   )
 }
