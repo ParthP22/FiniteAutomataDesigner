@@ -14,7 +14,7 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  } from "./exportUtils";
+import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML} from "./exportUtils";
 export class ExportAsSVG {
     fillStyle: string;
     strokeStyle: string;
@@ -172,16 +172,3 @@ export class ExportAsSVG {
 
 
 
-export function textToXML(text: string): string{
-	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	let result = '';
-	for(let i = 0; i < text.length; i++) {
-		let c = text.charCodeAt(i);
-		if(c >= 0x20 && c <= 0x7E) {
-			result += text[i];
-		} else {
-			result += '&#' + c + ';';
-		}
-	}
-	return result;
-}

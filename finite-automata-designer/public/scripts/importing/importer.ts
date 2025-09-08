@@ -12,7 +12,7 @@ const startsWith = {
     ENTRY_ARROW: 'EntryArrow:'
 }
 
-export class ImportAsSVG {
+export class Importer {
     circles: Circle[];
     arrows: (Arrow | SelfArrow | EntryArrow) [];
     _svgData: string;

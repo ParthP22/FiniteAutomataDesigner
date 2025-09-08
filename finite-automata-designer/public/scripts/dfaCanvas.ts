@@ -24,7 +24,7 @@ import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { ImportAsSVG } from "./importing/ImportSVG";
+import { Importer } from "./importing/importer";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -642,7 +642,7 @@ function attachWhenReady() {
             let data = inputTextArea.value;
             data = data.trim();
             if (data) {
-              let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value, drawRef);
+              let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
               SVGImporter.convert();
             }
             

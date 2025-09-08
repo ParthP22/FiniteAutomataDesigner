@@ -26,3 +26,17 @@ export function addSelfArrowComment(_data: string, circleId: string, anchorX: nu
      _data += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
      return _data;
 }
+
+export function textToXML(text: string): string{
+	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	let result = '';
+	for(let i = 0; i < text.length; i++) {
+		let c = text.charCodeAt(i);
+		if(c >= 0x20 && c <= 0x7E) {
+			result += text[i];
+		} else {
+			result += '&#' + c + ';';
+		}
+	}
+	return result;
+}

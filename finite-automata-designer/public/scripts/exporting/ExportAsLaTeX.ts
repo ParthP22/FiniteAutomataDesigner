@@ -9,7 +9,13 @@
  Copyright (c) 2025 Mohammed Mowla and Parth Patel
  Licensed under the MIT Licenses
 */
+import { Arrow } from "../Shapes/Arrow";
+import { Circle } from "../Shapes/Circle";
+import { EntryArrow } from "../Shapes/EntryArrow";
+import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
+import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  } from "./exportUtils";
+
 
 export class ExportAsLaTeX {
     strokeStyle: string;
@@ -162,22 +168,4 @@ export class ExportAsLaTeX {
         // No-op for LaTeX export
     }
 
-}
-
-export function fixed(number: number, digits: number): string {
-	return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
-}
-
-export function textToXML(text: string): string{
-	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	let result = '';
-	for(let i = 0; i < text.length; i++) {
-		let c = text.charCodeAt(i);
-		if(c >= 0x20 && c <= 0x7E) {
-			result += text[i];
-		} else {
-			result += '&#' + c + ';';
-		}
-	}
-	return result;
 }
