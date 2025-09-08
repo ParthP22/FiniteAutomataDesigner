@@ -114,7 +114,8 @@ export class ExportAsSVG {
         if (this.faObject instanceof Arrow) {
             this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
         } else if (this.faObject instanceof EntryArrow) {
-            this.addEntryArrowComment(this.faObject.pointsToCircle.id, this.faObject.startPoint.x, this.faObject.startPoint.y);
+            const points = this.faObject.getEndPoints();
+            this.addEntryArrowComment(this.faObject.pointsToCircle.id, points.startX, points.startY);
         }
         this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
         for (let i = 0; i < this._points.length; i++) {
