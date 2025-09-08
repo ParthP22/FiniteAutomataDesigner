@@ -68,10 +68,11 @@ export class ImportAsSVG {
                     this.arrows.push(arrow);
                 }
             } else if (raw.startsWith(startsWith.SELF_ARROW)) {
-                const [, circleId, x, y] = raw.match(/circle=(\w+), anchor=\(([\d.]+),([\d.]+)\)/)!;
+                const [, circleId, x, y, text] = raw.match(/circle=(\w+), anchor=\(([\d.]+),([\d.]+)\), text=(.*)/)!;
                 const circle = this.circles.find(c => c.id === circleId);
                 if (circle) {
-                    const selfArrow = new SelfArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
+                    const selfArrow = new SelfArrow(circle, { x: parseFloat(x), y: parseFloat(y)});
+                    selfArrow.text = text;
                     this.arrows.push(selfArrow);
                 }
             } else if (raw.startsWith(startsWith.ENTRY_ARROW)) {

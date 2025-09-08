@@ -388,7 +388,7 @@
                 }
                 else if (this.faObject instanceof SelfArrow) {
                     const centerPoint = this.faObject.getEndPointsAndCircle();
-                    this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY);
+                    this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
                 }
                 if (isReversed) {
                     let temp = startAngle;
@@ -489,8 +489,8 @@
         addEntryArrowComment(toId, startX, startY) {
             this._svgData += `\t<!-- EntryArrow: to=${toId}, start=(${fixed$1(startX, 3)},${fixed$1(startY, 3)}) -->\n`;
         }
-        addSelfArrowComment(circleId, anchorX, anchorY) {
-            this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed$1(anchorX, 3)},${fixed$1(anchorY, 3)}) -->\n`;
+        addSelfArrowComment(circleId, anchorX, anchorY, text) {
+            this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed$1(anchorX, 3)},${fixed$1(anchorY, 3)}), text=${text} -->\n`;
         }
     }
     function fixed$1(number, digits) {
@@ -1072,10 +1072,11 @@
                     }
                 }
                 else if (raw.startsWith(startsWith.SELF_ARROW)) {
-                    const [, circleId, x, y] = raw.match(/circle=(\w+), anchor=\(([\d.]+),([\d.]+)\)/);
+                    const [, circleId, x, y, text] = raw.match(/circle=(\w+), anchor=\(([\d.]+),([\d.]+)\), text=(.*)/);
                     const circle = this.circles.find(c => c.id === circleId);
                     if (circle) {
                         const selfArrow = new SelfArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
+                        selfArrow.text = text;
                         this.arrows.push(selfArrow);
                     }
                 }

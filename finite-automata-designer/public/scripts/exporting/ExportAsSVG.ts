@@ -68,7 +68,7 @@ export class ExportAsSVG {
                 this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
             } else if (this.faObject instanceof SelfArrow) {
                 const centerPoint = this.faObject.getEndPointsAndCircle();
-                this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY);
+                this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
             }
             if (isReversed) {
                 let temp = startAngle;
@@ -180,8 +180,8 @@ export class ExportAsSVG {
         this._svgData += `\t<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
     }
 
-    addSelfArrowComment(circleId: string, anchorX: number, anchorY: number) {
-        this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}) -->\n`;
+    addSelfArrowComment(circleId: string, anchorX: number, anchorY: number, text: string) {
+        this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
     }
 
 }
