@@ -67,7 +67,8 @@ export class ExportAsSVG {
             if (this.faObject instanceof Arrow) {
                 this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
             } else if (this.faObject instanceof SelfArrow) {
-                this.addSelfArrowComment(this.faObject.circle.id, this.faObject.point.x, this.faObject.point.y);
+                const centerPoint = this.faObject.getEndPointsAndCircle();
+                this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY);
             }
             if (isReversed) {
                 let temp = startAngle;

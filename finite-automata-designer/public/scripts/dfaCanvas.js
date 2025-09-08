@@ -387,7 +387,8 @@
                     this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
                 }
                 else if (this.faObject instanceof SelfArrow) {
-                    this.addSelfArrowComment(this.faObject.circle.id, this.faObject.point.x, this.faObject.point.y);
+                    const centerPoint = this.faObject.getEndPointsAndCircle();
+                    this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY);
                 }
                 if (isReversed) {
                     let temp = startAngle;
@@ -430,7 +431,8 @@
                 this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
             }
             else if (this.faObject instanceof EntryArrow) {
-                this.addEntryArrowComment(this.faObject.pointsToCircle.id, this.faObject.startPoint.x, this.faObject.startPoint.y);
+                const points = this.faObject.getEndPoints();
+                this.addEntryArrowComment(this.faObject.pointsToCircle.id, points.startX, points.startY);
             }
             this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (let i = 0; i < this._points.length; i++) {
