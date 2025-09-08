@@ -1019,7 +1019,8 @@
     // import { Point } from "../exporting/PointInterface";
     const startsWith = {
         CIRCLE: 'Circle:',
-        ARROW: 'Arrow:',
+        STRAIGHT_ARROW: 'StraightArrow:',
+        CURVED_ARROW: 'CurvedArrow:',
         SELF_ARROW: 'SelfArrow:',
         ENTRY_ARROW: 'EntryArrow:'
     };
@@ -1065,13 +1066,25 @@
             // Run through the array again and add the arrows with the associated circles
             for (let rawData = 0; rawData < parsedData.length; rawData++) {
                 const raw = parsedData[rawData];
-                if (raw.startsWith(startsWith.ARROW)) {
+                if (raw.startsWith(startsWith.STRAIGHT_ARROW)) {
                     const [, from, to, label] = raw.match(/from=(\w+), to=(\w+), label=(.*)/);
                     const startCircle = this.circles.find(c => c.id === from);
                     const endCircle = this.circles.find(c => c.id === to);
                     if (startCircle && endCircle) {
                         const arrow = new Arrow(startCircle, endCircle);
                         arrow.text = label.trim();
+                        this.arrows.push(arrow);
+                    }
+                }
+                else if (raw.startsWith(startsWith.CURVED_ARROW)) {
+                    const [, from, to, parallel, perpendicular, label] = raw.match(/from=(\w+), to=(\w+), parallel=([\d.]+), perpendicular=([-]?\d+(?:\.\d+)?), label=(.*)/);
+                    const startCircle = this.circles.find(c => c.id === from);
+                    const endCircle = this.circles.find(c => c.id === to);
+                    if (startCircle && endCircle) {
+                        const arrow = new Arrow(startCircle, endCircle);
+                        arrow.text = label.trim();
+                        arrow.parallelPart = parseFloat(parallel);
+                        arrow.perpendicularPart = parseFloat(perpendicular);
                         this.arrows.push(arrow);
                     }
                 }
