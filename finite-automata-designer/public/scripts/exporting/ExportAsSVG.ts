@@ -25,7 +25,7 @@ export class ExportAsSVG {
     _transX: number;
     _transY: number;
     canvas: HTMLCanvasElement;
-    faObject: Circle | Arrow | EntryArrow | SelfArrow | TemporaryArrow | null;
+    faObject: any;
 
     constructor(canvas: HTMLCanvasElement) {
         if (!canvas) {
@@ -58,8 +58,17 @@ export class ExportAsSVG {
         let style = 'stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" fill="none"';
 
         if (endAngle - startAngle == Math.PI * 2) {
+            // Comment  for a circle for easy importing
+           if (this.faObject instanceof Circle) {
+                this.addCircleComment(this.faObject.id, x, y, this.faObject.isAccept);
+            }
             this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
         } else {
+            if (this.faObject instanceof Arrow) {
+                this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            } else if (this.faObject instanceof SelfArrow) {
+                this.addSelfArrowComment(this.faObject.circle.id, this.faObject.point.x, this.faObject.point.y);
+            }
             if (isReversed) {
                 let temp = startAngle;
                 startAngle = endAngle;
@@ -102,6 +111,11 @@ export class ExportAsSVG {
     
     stroke() {
         if (this._points.length == 0) return;
+        if (this.faObject instanceof Arrow) {
+            this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+        } else if (this.faObject instanceof EntryArrow) {
+            this.addEntryArrowComment(this.faObject.pointsToCircle.id, this.faObject.startPoint.x, this.faObject.startPoint.y);
+        }
         this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
         for (let i = 0; i < this._points.length; i++) {
             this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
