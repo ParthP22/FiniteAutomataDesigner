@@ -65,43 +65,43 @@ export class SelfArrow {
     this.mouseOffsetAngle = this.anchorAngle - Math.atan2(y - this.circle.y, x - this.circle.x);
   }
 
-    setAnchorPoint(x: number, y: number) {
-        this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
-        // snap to 90 degrees
-        var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
-        if (Math.abs(this.anchorAngle - snap) < 0.1) this.anchorAngle = snap;
-        // keep in the range -pi to pi so our containsPoint() function always works
-        if (this.anchorAngle < -Math.PI) this.anchorAngle += 2 * Math.PI;
-        if (this.anchorAngle > Math.PI) this.anchorAngle -= 2 * Math.PI;
-    }
-    getEndPointsAndCircle() {
-        var circleX = this.circle.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
-        var circleY = this.circle.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
-        var circleRadius = 0.75 * nodeRadius;
-        var startAngle = this.anchorAngle - Math.PI * 0.8;
-        var endAngle = this.anchorAngle + Math.PI * 0.8;
-        var startX = circleX + circleRadius * Math.cos(startAngle);
-        var startY = circleY + circleRadius * Math.sin(startAngle);
-        var endX = circleX + circleRadius * Math.cos(endAngle);
-        var endY = circleY + circleRadius * Math.sin(endAngle);
-        return {
-            'hasCircle': true,
-            'startX': startX,
-            'startY': startY,
-            'endX': endX,
-            'endY': endY,
-            'startAngle': startAngle,
-            'endAngle': endAngle,
-            'circleX': circleX,
-            'circleY': circleY,
-            'circleRadius': circleRadius
-        };
-    }
+  setAnchorPoint(x: number, y: number) {
+    this.anchorAngle = Math.atan2(y - this.circle.y, x - this.circle.x) + this.mouseOffsetAngle;
+    // snap to 90 degrees
+    var snap = Math.round(this.anchorAngle / (Math.PI / 2)) * (Math.PI / 2);
+    if (Math.abs(this.anchorAngle - snap) < 0.1) this.anchorAngle = snap;
+    // keep in the range -pi to pi so our containsPoint() function always works
+    if (this.anchorAngle < -Math.PI) this.anchorAngle += 2 * Math.PI;
+    if (this.anchorAngle > Math.PI) this.anchorAngle -= 2 * Math.PI;
+  }
+  getEndPointsAndCircle() {
+    var circleX = this.circle.x + 1.5 * nodeRadius * Math.cos(this.anchorAngle);
+    var circleY = this.circle.y + 1.5 * nodeRadius * Math.sin(this.anchorAngle);
+    var circleRadius = 0.75 * nodeRadius;
+    var startAngle = this.anchorAngle - Math.PI * 0.8;
+    var endAngle = this.anchorAngle + Math.PI * 0.8;
+    var startX = circleX + circleRadius * Math.cos(startAngle);
+    var startY = circleY + circleRadius * Math.sin(startAngle);
+    var endX = circleX + circleRadius * Math.cos(endAngle);
+    var endY = circleY + circleRadius * Math.sin(endAngle);
+    return {
+        'hasCircle': true,
+        'startX': startX,
+        'startY': startY,
+        'endX': endX,
+        'endY': endY,
+        'startAngle': startAngle,
+        'endAngle': endAngle,
+        'circleX': circleX,
+        'circleY': circleY,
+        'circleRadius': circleRadius
+    };
+  }
   containsPoint(x: number, y:number) {
-        var stuff = this.getEndPointsAndCircle();
-        var dx = x - stuff.circleX;
-        var dy = y - stuff.circleY;
-        var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
-        return (Math.abs(distance) < hitTargetPadding);
-    }
+    var stuff = this.getEndPointsAndCircle();
+    var dx = x - stuff.circleX;
+    var dy = y - stuff.circleY;
+    var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
+    return (Math.abs(distance) < hitTargetPadding);
+  }
 }
