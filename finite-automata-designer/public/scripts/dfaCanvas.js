@@ -15,6 +15,7 @@
             this._svgData = '';
             this._transX = 0;
             this._transY = 0;
+            this.faObject = null;
         }
         toSVG() {
             return '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n<svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">\n' + this._svgData + '</svg>\n';
@@ -113,6 +114,18 @@
         }
         clearRect() {
             // No-op for SVG export
+        }
+        addCircleComment(id, x, y, accept) {
+            this._svgData += `\t<!-- Circle: id=${id}, x=${fixed$1(x, 3)}, y=${fixed$1(y, 3)}, accept=${accept} -->\n`;
+        }
+        addArrowComment(fromId, toId, label) {
+            this._svgData += `\t<!-- Arrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+        }
+        addEntryArrowComment(toId, startX, startY) {
+            this._svgData += `\t<!-- EntryArrow: to=${toId}, start=(${fixed$1(startX, 3)},${fixed$1(startY, 3)}) -->\n`;
+        }
+        addSelfArrowComment(circleId, anchorX, anchorY) {
+            this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed$1(anchorX, 3)},${fixed$1(anchorY, 3)}) -->\n`;
         }
     }
     function fixed$1(number, digits) {
@@ -362,9 +375,11 @@
      Copyright (c) 2025 Mohammed Mowla and Parth Patel
      Licensed under the MIT Licenses
     */
-    var circles = [];
+    let circles = [];
+    let circleIdCounter = 0;
     class Circle {
         constructor(x, y) {
+            this.id = 'c' + circleIdCounter;
             this.x = x,
                 this.y = y;
             this.mouseOffsetX = 0;
@@ -373,6 +388,8 @@
             this.text = '';
             this.outArrows = new Set();
             this.loop = null;
+            // Increment ID
+            circleIdCounter++;
         }
         setMouseStart(x, y) {
             this.mouseOffsetX = this.x - x;
@@ -966,6 +983,7 @@
         }
     }
 
+    // import { Point } from "../exporting/PointInterface";
     class ImportAsSVG {
         constructor(circArr, arrowsArray, data, drawFunc) {
             this.circles = circArr;
@@ -1656,12 +1674,12 @@
             exporter.fillStyle = exporter.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
             startState.draw(exporter);
         }
-        // If there is a TemporaryArrow being created, then draw it
-        if (tempArrow != null) {
-            exporter.lineWidth = 1;
-            exporter.fillStyle = exporter.strokeStyle = base;
-            tempArrow.draw(exporter);
-        }
+        // // If there is a TemporaryArrow being created, then draw it
+        // if (tempArrow != null) {
+        //   exporter.lineWidth = 1;
+        //   exporter.fillStyle = exporter.strokeStyle = base;
+        //   tempArrow.draw(exporter);
+        // }
         output(exporter.toSVG(), textArea);
     }
     function saveAsLaTeX(canvas, textArea) {
@@ -1678,10 +1696,10 @@
         if (startState) {
             startState.draw(exporter);
         }
-        // If there is a TemporaryArrow being created, then draw it
-        if (tempArrow != null) {
-            tempArrow.draw(exporter);
-        }
+        // // If there is a TemporaryArrow being created, then draw it
+        // if (tempArrow != null) {
+        //   tempArrow.draw(exporter);
+        // }
         output(exporter.toLaTeX(), textArea);
     }
     function output(text, element) {

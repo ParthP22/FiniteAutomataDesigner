@@ -56,24 +56,15 @@ export class Circle {
 
   draw(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX) {
     ctx.beginPath();
-    if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsLaTeX) {
-      ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
-      ctx.stroke();
-    } else if (ctx instanceof ExportAsSVG) {
-      ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false, [this.id]);
-    }
+    ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
+    ctx.stroke();
 
     drawText(ctx, this.text, this.x, this.y, null);
 
     if (this.isAccept) {
       ctx.beginPath();
-      if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsLaTeX) {
-        ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
-        ctx.stroke();
-      } else if (ctx instanceof ExportAsSVG) {
-        ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false, [this.id, '' + this.isAccept]);
-      }
-      
+      ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
+      ctx.stroke();
     }
   }
 

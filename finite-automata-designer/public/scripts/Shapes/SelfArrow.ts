@@ -50,13 +50,8 @@ export class SelfArrow {
     var arcInfo = this.getEndPointsAndCircle();
     // draw arc
     ctx.beginPath();
-    if (ctx instanceof CanvasRenderingContext2D) {
-      ctx.arc(arcInfo.circleX, arcInfo.circleY, arcInfo.circleRadius, arcInfo.startAngle, arcInfo.endAngle, false);
-      ctx.stroke();
-    } else if (ctx instanceof ExportAsSVG) {
-      ctx.arc(arcInfo.circleX, arcInfo.circleY, arcInfo.circleRadius, arcInfo.startAngle, arcInfo.endAngle, false, [this.circle.id]);
-    }
-    
+    ctx.arc(arcInfo.circleX, arcInfo.circleY, arcInfo.circleRadius, arcInfo.startAngle, arcInfo.endAngle, false);
+    ctx.stroke();
     
     // Draw the text on the loop farthest from the circle
     var textX = arcInfo.circleX + arcInfo.circleRadius * Math.cos(this.anchorAngle);

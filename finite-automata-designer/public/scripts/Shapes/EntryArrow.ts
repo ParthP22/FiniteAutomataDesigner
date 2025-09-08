@@ -51,11 +51,7 @@ export class EntryArrow {
     ctx.beginPath();
     ctx.moveTo(points.startX, points.startY);
     ctx.lineTo(points.endX, points.endY);
-    if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsLaTeX) {
-      ctx.stroke();
-    } else if (ctx instanceof ExportAsSVG) {
-      ctx.stroke(this.pointsToCircle.id);
-    }
+    ctx.stroke();
     
     // Draw the text at the end without the arrow
     var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);

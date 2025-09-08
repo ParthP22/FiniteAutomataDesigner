@@ -9,6 +9,10 @@
  Copyright (c) 2025 Mohammed Mowla and Parth Patel
  Licensed under the MIT Licenses
 */
+import { Arrow } from "../Shapes/Arrow";
+import { Circle } from "../Shapes/Circle";
+import { EntryArrow } from "../Shapes/EntryArrow";
+import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
 export class ExportAsSVG {
     fillStyle: string;
@@ -20,6 +24,7 @@ export class ExportAsSVG {
     _transX: number;
     _transY: number;
     canvas: HTMLCanvasElement;
+    faObject: Circle | Arrow | EntryArrow | SelfArrow | null;
 
     constructor(canvas: HTMLCanvasElement) {
         if (!canvas) {
@@ -34,7 +39,7 @@ export class ExportAsSVG {
         this._svgData = ''; 
         this._transX = 0;
         this._transY = 0;
-        
+        this.faObject = null;
     }
 
     toSVG(): string{
@@ -144,6 +149,22 @@ export class ExportAsSVG {
 
     clearRect() {
         // No-op for SVG export
+    }
+
+    addCircleComment(id: string, x: number, y: number, accept: boolean) {
+        this._svgData += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept} -->\n`;
+    }
+
+    addArrowComment(fromId: string, toId: string, label: string) {
+        this._svgData += `\t<!-- Arrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+    }
+
+    addEntryArrowComment(toId: string, startX: number, startY: number) {
+        this._svgData += `\t<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
+    }
+
+    addSelfArrowComment(circleId: string, anchorX: number, anchorY: number) {
+        this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}) -->\n`;
     }
 
 }

@@ -142,19 +142,12 @@ export class Arrow {
         // draw arc
         ctx.beginPath();
         if (pointInfo.hasCircle && pointInfo.circleX) {
-            if (ctx instanceof CanvasRenderingContext2D) {
-                ctx.arc(pointInfo.circleX, pointInfo.circleY, pointInfo.circleRadius, pointInfo.startAngle, pointInfo.endAngle, pointInfo.isReversed);
-            } else if (ctx instanceof CanvasRenderingContext2D) {
-                // Passes the start and end circles to become comments for reconstruction
-                ctx.arc(pointInfo.circleX, pointInfo.circleY, pointInfo.circleRadius, pointInfo.startAngle, pointInfo.endAngle, pointInfo.isReversed, [this.startCircle.id, this.endCircle.id]);
-            }
+            ctx.arc(pointInfo.circleX, pointInfo.circleY, pointInfo.circleRadius, pointInfo.startAngle, pointInfo.endAngle, pointInfo.isReversed);
         } else {
             ctx.moveTo(pointInfo.startX, pointInfo.startY);
             ctx.lineTo(pointInfo.endX, pointInfo.endY);
         }
-        if (ctx instanceof CanvasRenderingContext2D) {
-            ctx.stroke();
-        }
+        ctx.stroke();
         
         // draw the head of the arrow
         if (pointInfo.hasCircle && pointInfo.endAngle) {

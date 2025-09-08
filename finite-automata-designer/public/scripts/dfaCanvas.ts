@@ -727,12 +727,12 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
       startState.draw(exporter);
     }
 
-    // If there is a TemporaryArrow being created, then draw it
-    if (tempArrow != null) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = base;
-      tempArrow.draw(exporter);
-    }
+    // // If there is a TemporaryArrow being created, then draw it
+    // if (tempArrow != null) {
+    //   exporter.lineWidth = 1;
+    //   exporter.fillStyle = exporter.strokeStyle = base;
+    //   tempArrow.draw(exporter);
+    // }
     output(exporter.toSVG(), textArea);
 }
 
@@ -748,15 +748,15 @@ function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     arrows[arrow].draw(exporter);
   }
 
-      // If there is an EntryArrow, then draw it
+  // If there is an EntryArrow, then draw it
   if(startState){
     startState.draw(exporter);
   }
 
-  // If there is a TemporaryArrow being created, then draw it
-  if (tempArrow != null) {
-    tempArrow.draw(exporter);
-  }
+  // // If there is a TemporaryArrow being created, then draw it
+  // if (tempArrow != null) {
+  //   tempArrow.draw(exporter);
+  // }
 
   output(exporter.toLaTeX(), textArea);
 
