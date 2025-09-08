@@ -13,8 +13,8 @@ import { Arrow } from "../Shapes/Arrow";
 import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
-import { TemporaryArrow } from "../Shapes/TemporaryArrow";
 import { Point } from "./PointInterface";
+import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  } from "./exportUtils";
 export class ExportAsSVG {
     fillStyle: string;
     strokeStyle: string;
@@ -60,15 +60,15 @@ export class ExportAsSVG {
         if (endAngle - startAngle == Math.PI * 2) {
             // Comment  for a circle for easy importing
            if (this.faObject instanceof Circle) {
-                this.addCircleComment(this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                this._svgData = addCircleComment(this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
             }
             this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
         } else {
             if (this.faObject instanceof Arrow) {
-                this.addCurvedArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+                this._svgData = addCurvedArrowComment(this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
             } else if (this.faObject instanceof SelfArrow) {
                 const centerPoint = this.faObject.getEndPointsAndCircle();
-                this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+                this._svgData = addSelfArrowComment(this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
             }
             if (isReversed) {
                 let temp = startAngle;
@@ -113,10 +113,10 @@ export class ExportAsSVG {
     stroke() {
         if (this._points.length == 0) return;
         if (this.faObject instanceof Arrow) {
-            this.addStraightArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            this._svgData = addStraightArrowComment(this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
         } else if (this.faObject instanceof EntryArrow) {
             const points = this.faObject.getEndPoints();
-            this.addEntryArrowComment(this.faObject.pointsToCircle.id, points.startX, points.startY);
+            this._svgData = addEntryArrowComment(this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
         }
         this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
         for (let i = 0; i < this._points.length; i++) {
@@ -167,34 +167,10 @@ export class ExportAsSVG {
     clearRect() {
         // No-op for SVG export
     }
-    
-    
-    
-    addCircleComment(id: string, x: number, y: number, accept: boolean, text: string) {
-        this._svgData += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
-    }
-
-    addCurvedArrowComment(fromId: string, toId: string, parallel: number, perpendicular: number, label: string) {
-        this._svgData += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
-    }
-
-    addStraightArrowComment(fromId: string, toId: string, label: string) {
-        this._svgData += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
-    }
-
-    addEntryArrowComment(toId: string, startX: number, startY: number) {
-        this._svgData += `\t<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
-    }
-
-    addSelfArrowComment(circleId: string, anchorX: number, anchorY: number, text: string) {
-        this._svgData += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
-    }
 
 }
 
-export function fixed(number: number, digits: number): string {
-	return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
-}
+
 
 export function textToXML(text: string): string{
 	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
