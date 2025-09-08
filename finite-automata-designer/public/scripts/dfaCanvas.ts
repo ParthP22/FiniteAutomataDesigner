@@ -712,11 +712,13 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     for(let circle = 0; circle < circles.length; circle++) {
       exporter.lineWidth = 1;
       exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
-      circles[circle].draw(exporter)
+      exporter.faObject = circles[circle];
+      circles[circle].draw(exporter);
     }
     for (let arrow = 0; arrow < arrows.length; arrow++) {
       exporter.lineWidth = 1;
       exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
+      exporter.faObject = arrows[arrow];
       arrows[arrow].draw(exporter);
     }
 
@@ -724,15 +726,17 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     if(startState){
       exporter.lineWidth = 1;
       exporter.fillStyle = exporter.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
+      exporter.faObject = startState;
       startState.draw(exporter);
     }
 
-    // // If there is a TemporaryArrow being created, then draw it
-    // if (tempArrow != null) {
-    //   exporter.lineWidth = 1;
-    //   exporter.fillStyle = exporter.strokeStyle = base;
-    //   tempArrow.draw(exporter);
-    // }
+    // If there is a TemporaryArrow being created, then draw it
+    if (tempArrow != null) {
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = base;
+      exporter.faObject = tempArrow;
+      tempArrow.draw(exporter);
+    }
     output(exporter.toSVG(), textArea);
 }
 

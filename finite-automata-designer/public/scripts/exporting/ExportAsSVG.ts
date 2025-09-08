@@ -13,6 +13,7 @@ import { Arrow } from "../Shapes/Arrow";
 import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
+import { TemporaryArrow } from "../Shapes/TemporaryArrow";
 import { Point } from "./PointInterface";
 export class ExportAsSVG {
     fillStyle: string;
@@ -24,7 +25,7 @@ export class ExportAsSVG {
     _transX: number;
     _transY: number;
     canvas: HTMLCanvasElement;
-    faObject: Circle | Arrow | EntryArrow | SelfArrow | null;
+    faObject: Circle | Arrow | EntryArrow | SelfArrow | TemporaryArrow | null;
 
     constructor(canvas: HTMLCanvasElement) {
         if (!canvas) {

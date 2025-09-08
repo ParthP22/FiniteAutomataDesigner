@@ -10,19 +10,19 @@
  Licensed under the MIT Licenses
 */
 
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 import { drawArrow } from "./draw";
 
 export class TemporaryArrow {
   startPoint: {x: number, y: number};
   endPoint: {x: number, y: number};
 
-
   constructor(startPoint: {x: number, y: number}, endPoint: {x: number, y: number}) {
     this.startPoint = startPoint;
     this.endPoint = endPoint;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG) {
     ctx.beginPath();
     ctx.moveTo(this.endPoint.x, this.endPoint.y);
     ctx.lineTo(this.startPoint.x, this.startPoint.y);
