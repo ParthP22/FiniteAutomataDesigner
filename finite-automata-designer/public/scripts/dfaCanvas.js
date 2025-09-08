@@ -1601,6 +1601,12 @@
             const canvas = document.getElementById('DFACanvas');
             // Get label tag for alphabet label of DFA
             const alphabetLabel = document.getElementById("alphabetLabel");
+            // Export menu button and div
+            const exportMenuBtn = document.getElementById("exportMenuBtn");
+            const exportMenu = document.getElementById("exportMenu");
+            // Import menu button and div
+            const importMenuBtn = document.getElementById('importMenuBtn');
+            const importMenu = document.getElementById('importMenu');
             // Buttons for exporting, SVG and LaTeX
             const exportSVGBtn = document.getElementById('svgExportBtn');
             const exportLaTeXBtn = document.getElementById('latexExportBtn');
@@ -1704,7 +1710,6 @@
                 exportSVGBtn.addEventListener('click', () => {
                     if (canvas && outputTextArea) {
                         saveAsSVG(canvas, outputTextArea);
-                        console.log("exporting!");
                     }
                     if (outputContainer) {
                         if (outputContainer.hidden) {
@@ -1712,6 +1717,9 @@
                         }
                     }
                 });
+            }
+            else {
+                console.log("unable to find the export svg btn");
             }
             if (exportLaTeXBtn) {
                 exportLaTeXBtn.addEventListener('click', () => {
@@ -1793,6 +1801,26 @@
                     }
                 });
             }
+            // Toggle dropdown visibility
+            exportMenuBtn.addEventListener("click", () => {
+                exportMenu.classList.toggle("hidden");
+            });
+            // Hide when clicking outside
+            document.addEventListener("click", (event) => {
+                if (!exportMenu.contains(event.target) && event.target !== exportMenuBtn) {
+                    exportMenu.classList.add("hidden");
+                }
+            });
+            // Toggle dropdown visibility
+            importMenuBtn.addEventListener("click", () => {
+                importMenu.classList.toggle("hidden");
+            });
+            // Hide when clicking outside
+            document.addEventListener("click", (event) => {
+                if (!importMenu.contains(event.target) && event.target !== importMenuBtn) {
+                    importMenu.classList.add("hidden");
+                }
+            });
         };
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', run);
