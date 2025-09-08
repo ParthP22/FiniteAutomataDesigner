@@ -65,7 +65,7 @@ export class ExportAsSVG {
             this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
         } else {
             if (this.faObject instanceof Arrow) {
-                this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+                this.addCurvedArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
             } else if (this.faObject instanceof SelfArrow) {
                 const centerPoint = this.faObject.getEndPointsAndCircle();
                 this.addSelfArrowComment(this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
@@ -113,7 +113,7 @@ export class ExportAsSVG {
     stroke() {
         if (this._points.length == 0) return;
         if (this.faObject instanceof Arrow) {
-            this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            this.addStraightArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
         } else if (this.faObject instanceof EntryArrow) {
             const points = this.faObject.getEndPoints();
             this.addEntryArrowComment(this.faObject.pointsToCircle.id, points.startX, points.startY);
@@ -167,13 +167,19 @@ export class ExportAsSVG {
     clearRect() {
         // No-op for SVG export
     }
-
+    
+    
+    
     addCircleComment(id: string, x: number, y: number, accept: boolean, text: string) {
         this._svgData += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
     }
 
-    addArrowComment(fromId: string, toId: string, label: string) {
-        this._svgData += `\t<!-- Arrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+    addCurvedArrowComment(fromId: string, toId: string, parallel: number, perpendicular: number, label: string) {
+        this._svgData += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+    }
+
+    addStraightArrowComment(fromId: string, toId: string, label: string) {
+        this._svgData += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
     }
 
     addEntryArrowComment(toId: string, startX: number, startY: number) {

@@ -384,7 +384,7 @@
             }
             else {
                 if (this.faObject instanceof Arrow) {
-                    this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+                    this.addCurvedArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
                 }
                 else if (this.faObject instanceof SelfArrow) {
                     const centerPoint = this.faObject.getEndPointsAndCircle();
@@ -428,7 +428,7 @@
             if (this._points.length == 0)
                 return;
             if (this.faObject instanceof Arrow) {
-                this.addArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+                this.addStraightArrowComment(this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
             }
             else if (this.faObject instanceof EntryArrow) {
                 const points = this.faObject.getEndPoints();
@@ -483,8 +483,11 @@
         addCircleComment(id, x, y, accept, text) {
             this._svgData += `\t<!-- Circle: id=${id}, x=${fixed$1(x, 3)}, y=${fixed$1(y, 3)}, accept=${accept}, text=${text} -->\n`;
         }
-        addArrowComment(fromId, toId, label) {
-            this._svgData += `\t<!-- Arrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+        addCurvedArrowComment(fromId, toId, parallel, perpendicular, label) {
+            this._svgData += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+        }
+        addStraightArrowComment(fromId, toId, label) {
+            this._svgData += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
         }
         addEntryArrowComment(toId, startX, startY) {
             this._svgData += `\t<!-- EntryArrow: to=${toId}, start=(${fixed$1(startX, 3)},${fixed$1(startY, 3)}) -->\n`;
