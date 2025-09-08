@@ -60,14 +60,16 @@ export class ExportAsLaTeX {
         this._points = [];
     }
 
-    arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, isReversed: boolean) {
+arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, isReversed: boolean) {
+        let trueX = x;
+        let trueY = y;
         x *= this._scale;
         y *= this._scale;
         radius *= this._scale;
 
         if (endAngle - startAngle == Math.PI * 2) {
             if (this.faObject instanceof Circle) {
-                this._texData = addCircleComment(CALLERS.LATEX, this._texData,  this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                this._texData = addCircleComment(CALLERS.LATEX, this._texData,  this.faObject.id, trueX, trueY, this.faObject.isAccept, this.faObject.text);
             }
             this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
         } else {

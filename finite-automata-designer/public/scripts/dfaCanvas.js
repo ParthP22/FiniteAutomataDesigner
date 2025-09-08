@@ -593,12 +593,14 @@
             this._points = [];
         }
         arc(x, y, radius, startAngle, endAngle, isReversed) {
+            let trueX = x;
+            let trueY = y;
             x *= this._scale;
             y *= this._scale;
             radius *= this._scale;
             if (endAngle - startAngle == Math.PI * 2) {
                 if (this.faObject instanceof Circle) {
-                    this._texData = addCircleComment(CALLERS.LATEX, this._texData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                    this._texData = addCircleComment(CALLERS.LATEX, this._texData, this.faObject.id, trueX, trueY, this.faObject.isAccept, this.faObject.text);
                 }
                 this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
             }
@@ -1724,7 +1726,7 @@
                 });
             }
             if (importSVGBtn) {
-                importSVGBtn?.addEventListener('click', () => {
+                importSVGBtn.addEventListener('click', () => {
                     if (inputContainer) {
                         if (inputContainer.hidden) {
                             _toggle_visiblity(inputContainer);
@@ -1735,6 +1737,23 @@
                             if (data) {
                                 let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
                                 SVGImporter.convert();
+                            }
+                        }
+                    }
+                });
+            }
+            if (importLaTeXBtn) {
+                importLaTeXBtn.addEventListener('click', () => {
+                    if (inputContainer) {
+                        if (inputContainer.hidden) {
+                            _toggle_visiblity(inputContainer);
+                        }
+                        if (circles && arrows && inputTextArea) {
+                            let data = inputTextArea.value;
+                            data = data.trim();
+                            if (data) {
+                                let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
+                                LaTeXImporter.convert();
                             }
                         }
                     }

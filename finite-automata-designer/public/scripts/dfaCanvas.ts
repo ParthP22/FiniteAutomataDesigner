@@ -633,7 +633,7 @@ function attachWhenReady() {
     }
 
     if (importSVGBtn) {
-      importSVGBtn?.addEventListener('click', () => {
+      importSVGBtn.addEventListener('click', () => {
         if (inputContainer) {
           if (inputContainer.hidden) {
             _toggle_visiblity(inputContainer);
@@ -651,6 +651,24 @@ function attachWhenReady() {
         }
         
       })
+    }
+
+    if (importLaTeXBtn) {
+      importLaTeXBtn.addEventListener('click', () => {
+        if (inputContainer) {
+          if (inputContainer.hidden) {
+            _toggle_visiblity(inputContainer);
+          }
+          if (circles && arrows && inputTextArea) {
+            let data = inputTextArea.value;
+            data = data.trim();
+            if (data) {
+              let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
+              LaTeXImporter.convert();
+            }
+          }
+        }
+      });
     }
 
     if (hideOutputBtn) {

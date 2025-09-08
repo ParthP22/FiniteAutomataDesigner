@@ -2,32 +2,36 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
 <svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">
-	<!-- Circle: id=c0, x=152.5, y=219, accept=false -->
-	<ellipse stroke="black" stroke-width="1" fill="none" cx="152.5" cy="219" rx="30" ry="30"/>
-	<text x="145" y="225" font-family="Times New Roman" font-size="20">q&#8321;</text>
-	<!-- Circle: id=c1, x=588.5, y=255, accept=true -->
-	<ellipse stroke="black" stroke-width="1" fill="none" cx="588.5" cy="255" rx="30" ry="30"/>
-	<text x="581" y="261" font-family="Times New Roman" font-size="20">q&#8322;</text>
-	<!-- Circle: id=c1, x=588.5, y=255, accept=true -->
-	<ellipse stroke="black" stroke-width="1" fill="none" cx="588.5" cy="255" rx="25" ry="25"/>
-	<!-- SelfArrow: circle=c0, anchor=(171.5,198) -->
-	<path stroke="black" stroke-width="1" fill="none" d="M 123.499,211.795 A 22.5,22.5 0 1 1 140.578,191.598"/>
-	<polygon fill="black" stroke-width="1" points="140.578,191.598 143.053,182.637 133.341,185.019"/>
-	<!-- Arrow: from=c0, to=c1, label=0,1 -->
-	<path stroke="black" stroke-width="1" fill="none" d="M 565.972,274.791 A 289.911,289.911 0 0 1 171.477,242.218"/>
-	<polygon fill="black" stroke-width="1" points="565.972,274.791 555.026,275.83 561.229,283.675"/>
-	<text x="347" y="359" font-family="Times New Roman" font-size="20">0,1</text>
-	<!-- Arrow: from=c1, to=c0, label= -->
-	<path stroke="black" stroke-width="1" fill="none" d="M 175.931,200.285 A 303.214,303.214 0 0 1 568.456,232.695"/>
-	<polygon fill="black" stroke-width="1" points="175.931,200.285 186.967,199.663 181.12,191.551"/>
-	<!-- Arrow: from=c1, to=c0, label=0,1 -->
-	<polygon stroke="black" stroke-width="1" points="558.602,252.531 182.398,221.469"/>
-	<polygon fill="black" stroke-width="1" points="182.398,221.469 191.953,227.11 192.776,217.144"/>
-	<text x="360" y="227" font-family="Times New Roman" font-size="20">0,1</text>
-	<!-- SelfArrow: circle=c1, anchor=(600.5,238) -->
-	<path stroke="black" stroke-width="1" fill="none" d="M 593.149,225.481 A 22.5,22.5 0 1 1 614.758,240.734"/>
-	<polygon fill="black" stroke-width="1" points="614.758,240.734 625.835,242.892 622.616,233.425"/>
-	<!-- EntryArrow: to=c0, start=(585.5,233) -->
-	<polygon stroke="black" stroke-width="1" points="99.5,393 143.759,247.698"/>
-	<polygon fill="black" stroke-width="1" points="143.759,247.698 136.062,253.894 145.628,256.808"/>
+	<!-- Circle: id=c0, x=138, y=158, accept=false, text=Q_1 -->
+	<ellipse stroke="black" stroke-width="1" fill="none" cx="138" cy="158" rx="30" ry="30"/>
+	<text x="128" y="164" font-family="Times New Roman" font-size="20">Q&#8321;</text>
+	<!-- Circle: id=c1, x=558, y=180, accept=false, text=qasdf -->
+	<ellipse stroke="black" stroke-width="1" fill="none" cx="558" cy="180" rx="30" ry="30"/>
+	<text x="536" y="186" font-family="Times New Roman" font-size="20">qasdf</text>
+	<!-- Circle: id=c2, x=284, y=331, accept=true, text=q_1 -->
+	<ellipse stroke="black" stroke-width="1" fill="none" cx="284" cy="331" rx="30" ry="30"/>
+	<text x="276" y="337" font-family="Times New Roman" font-size="20">q&#8321;</text>
+	<!-- Circle: id=c2, x=284, y=331, accept=true, text=q_1 -->
+	<ellipse stroke="black" stroke-width="1" fill="none" cx="284" cy="331" rx="25" ry="25"/>
+	<!-- CurvedArrow: from=c1, to=c0, parallel=0.47645914836842224, perpendicular=78.62554224808952, label= -->
+	<path stroke="black" stroke-width="1" fill="none" d="M 162.448,140.632 A 320.055,320.055 0 0 1 535.501,160.173"/>
+	<polygon fill="black" stroke-width="1" points="162.448,140.632 173.564,140.517 168.161,132.102"/>
+	<!-- CurvedArrow: from=c2, to=c1, parallel=0.36649059533904804, perpendicular=98.583040400431, label= -->
+	<path stroke="black" stroke-width="1" fill="none" d="M 558.487,209.957 A 169.766,169.766 0 0 1 309.066,347.411"/>
+	<polygon fill="black" stroke-width="1" points="558.487,209.957 552.78,217.576 562.754,218.296"/>
+	<!-- CurvedArrow: from=c2, to=c0, parallel=0.45719582398282754, perpendicular=-68.36928433080408, label= -->
+	<path stroke="black" stroke-width="1" fill="none" d="M 254.231,334.11 A 127.558,127.558 0 0 1 129.931,186.823"/>
+	<polygon fill="black" stroke-width="1" points="129.931,186.823 123.443,193.952 133.323,195.5"/>
+	<!-- StraightArrow: from=c1, to=c2, label= -->
+	<polygon stroke="black" stroke-width="1" points="531.726,194.48 310.274,316.52"/>
+	<polygon fill="black" stroke-width="1" points="310.274,316.52 321.446,317.038 316.619,308.28"/>
+	<!-- SelfArrow: circle=c1, anchor=(558,135), text= -->
+	<path stroke="black" stroke-width="1" fill="none" d="M 544.775,153.203 A 22.5,22.5 0 1 1 571.225,153.203"/>
+	<polygon fill="black" stroke-width="1" points="571.225,153.203 581.148,149.67 573.058,143.792"/>
+	<!-- SelfArrow: circle=c2, anchor=(329,331), text= -->
+	<path stroke="black" stroke-width="1" fill="none" d="M 310.797,317.775 A 22.5,22.5 0 1 1 310.797,344.225"/>
+	<polygon fill="black" stroke-width="1" points="310.797,344.225 315.948,352.973 321.826,344.882"/>
+	<!-- EntryArrow: to=c2, start=(448,524) -->
+	<polygon stroke="black" stroke-width="1" points="448,524 303.426,353.861"/>
+	<polygon fill="black" stroke-width="1" points="303.426,353.861 306.091,363.195 313.712,356.72"/>
 </svg>
