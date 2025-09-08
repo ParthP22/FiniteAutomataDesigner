@@ -30,6 +30,7 @@ export class SelfArrow {
   mouseOffsetAngle: number;
   text: string; // The text (transition) of the Arrow that will be displayed
   transition: Set<string>; // Set containing the transition of this arrow
+  point: {x: number, y: number}
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
     this.circle = pointsToCircle;
@@ -39,6 +40,7 @@ export class SelfArrow {
     this.mouseOffsetAngle = 0;
     this.text = ''; 
     this.transition = new Set();
+    this.point = point;
     
 
     if (point) {
