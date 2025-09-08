@@ -337,28 +337,71 @@
         }
     }
 
-    function fixed$1(number, digits) {
+    const CALLERS = {
+        SVG: 'svg',
+        LATEX: 'latex'
+    };
+    function fixed(number, digits) {
         return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
     }
-    function addCircleComment(_data, id, x, y, accept, text) {
-        _data += `\t<!-- Circle: id=${id}, x=${fixed$1(x, 3)}, y=${fixed$1(y, 3)}, accept=${accept}, text=${text} -->\n`;
+    function addCircleComment(caller, _data, id, x, y, accept, text) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
+        }
         return _data;
     }
-    function addCurvedArrowComment(_data, fromId, toId, parallel, perpendicular, label) {
-        _data += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+    function addCurvedArrowComment(caller, _data, fromId, toId, parallel, perpendicular, label) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+        }
         return _data;
     }
-    function addStraightArrowComment(_data, fromId, toId, label) {
-        _data += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+    function addStraightArrowComment(caller, _data, fromId, toId, label) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+        }
         return _data;
     }
-    function addEntryArrowComment(_data, toId, startX, startY) {
-        _data += `\t<!-- EntryArrow: to=${toId}, start=(${fixed$1(startX, 3)},${fixed$1(startY, 3)}) -->\n`;
+    function addEntryArrowComment(caller, _data, toId, startX, startY) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
+        }
         return _data;
     }
-    function addSelfArrowComment(_data, circleId, anchorX, anchorY, text) {
-        _data += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed$1(anchorX, 3)},${fixed$1(anchorY, 3)}), text=${text} -->\n`;
+    function addSelfArrowComment(caller, _data, circleId, anchorX, anchorY, text) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
+        }
         return _data;
+    }
+    function textToXML(text) {
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            let c = text.charCodeAt(i);
+            if (c >= 0x20 && c <= 0x7E) {
+                result += text[i];
+            }
+            else {
+                result += '&#' + c + ';';
+            }
+        }
+        return result;
     }
 
     /*
@@ -402,17 +445,17 @@
             if (endAngle - startAngle == Math.PI * 2) {
                 // Comment  for a circle for easy importing
                 if (this.faObject instanceof Circle) {
-                    this._svgData = addCircleComment(this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                    this._svgData = addCircleComment(CALLERS.SVG, this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
                 }
-                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed$1(x, 3) + '" cy="' + fixed$1(y, 3) + '" rx="' + fixed$1(radius, 3) + '" ry="' + fixed$1(radius, 3) + '"/>\n';
+                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
             }
             else {
                 if (this.faObject instanceof Arrow) {
-                    this._svgData = addCurvedArrowComment(this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+                    this._svgData = addCurvedArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
                 }
                 else if (this.faObject instanceof SelfArrow) {
                     const centerPoint = this.faObject.getEndPointsAndCircle();
-                    this._svgData = addSelfArrowComment(this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+                    this._svgData = addSelfArrowComment(CALLERS.SVG, this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
                 }
                 if (isReversed) {
                     let temp = startAngle;
@@ -428,12 +471,12 @@
                 let endY = y + radius * Math.sin(endAngle);
                 let useGreaterThan180 = (Math.abs(endAngle - startAngle) > Math.PI);
                 this._svgData += '\t<path ' + style + ' d="';
-                this._svgData += 'M ' + fixed$1(startX, 3) + ',' + fixed$1(startY, 3) + ' '; // startPoint(startX, startY)
-                this._svgData += 'A ' + fixed$1(radius, 3) + ',' + fixed$1(radius, 3) + ' '; // radii(radius, radius)
+                this._svgData += 'M ' + fixed(startX, 3) + ',' + fixed(startY, 3) + ' '; // startPoint(startX, startY)
+                this._svgData += 'A ' + fixed(radius, 3) + ',' + fixed(radius, 3) + ' '; // radii(radius, radius)
                 this._svgData += '0 '; // value of 0 means perfect circle, others mean ellipse
                 this._svgData += +useGreaterThan180 + ' ';
                 this._svgData += 1 + ' ';
-                this._svgData += fixed$1(endX, 3) + ',' + fixed$1(endY, 3); // endPoint(endX, endY)
+                this._svgData += fixed(endX, 3) + ',' + fixed(endY, 3); // endPoint(endX, endY)
                 this._svgData += '"/>\n';
             }
         }
@@ -452,15 +495,15 @@
             if (this._points.length == 0)
                 return;
             if (this.faObject instanceof Arrow) {
-                this._svgData = addStraightArrowComment(this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+                this._svgData = addStraightArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
             }
             else if (this.faObject instanceof EntryArrow) {
                 const points = this.faObject.getEndPoints();
-                this._svgData = addEntryArrowComment(this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
+                this._svgData = addEntryArrowComment(CALLERS.SVG, this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
             }
             this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (let i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed$1(this._points[i].x, 3) + ',' + fixed$1(this._points[i].y, 3);
+                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
             }
             this._svgData += '"/>\n';
         }
@@ -469,7 +512,7 @@
                 return;
             this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
             for (let i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed$1(this._points[i].x, 3) + ',' + fixed$1(this._points[i].y, 3);
+                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
             }
             this._svgData += '"/>\n';
         }
@@ -486,7 +529,7 @@
             x += this._transX;
             y += this._transY;
             if (text.replace(' ', '').length > 0) {
-                this._svgData += '\t<text x="' + fixed$1(x, 3) + '" y="' + fixed$1(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
+                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
             }
         }
         ;
@@ -505,21 +548,18 @@
             // No-op for SVG export
         }
     }
-    function textToXML(text) {
-        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            let c = text.charCodeAt(i);
-            if (c >= 0x20 && c <= 0x7E) {
-                result += text[i];
-            }
-            else {
-                result += '&#' + c + ';';
-            }
-        }
-        return result;
-    }
 
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
     class ExportAsLaTeX {
         constructor(canvas) {
             if (!canvas) {
@@ -531,6 +571,7 @@
             this._points = [];
             this._texData = '';
             this._scale = 0.1;
+            this.faObject = null;
         }
         toLaTeX() {
             return '\\documentclass[12pt]{article}\n' +
@@ -556,9 +597,19 @@
             y *= this._scale;
             radius *= this._scale;
             if (endAngle - startAngle == Math.PI * 2) {
+                if (this.faObject instanceof Circle) {
+                    this._texData = addCircleComment(CALLERS.LATEX, this._texData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                }
                 this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
             }
             else {
+                if (this.faObject instanceof Arrow) {
+                    this._texData = addCurvedArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+                }
+                else if (this.faObject instanceof SelfArrow) {
+                    const centerPoint = this.faObject.getEndPointsAndCircle();
+                    this._texData = addSelfArrowComment(CALLERS.LATEX, this._texData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+                }
                 if (isReversed) {
                     var temp = startAngle;
                     startAngle = endAngle;
@@ -595,6 +646,13 @@
         stroke() {
             if (this._points.length == 0)
                 return;
+            if (this.faObject instanceof Arrow) {
+                this._texData = addStraightArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            }
+            else if (this.faObject instanceof EntryArrow) {
+                const points = this.faObject.getEndPoints();
+                this._texData = addEntryArrowComment(CALLERS.LATEX, this._texData, this.faObject.pointsToCircle.id, points.startX, points.startY);
+            }
             this._texData += '\\draw [' + this.strokeStyle + ']';
             for (var i = 0; i < this._points.length; i++) {
                 var p = this._points[i];
@@ -660,9 +718,6 @@
         clearRect() {
             // No-op for LaTeX export
         }
-    }
-    function fixed(number, digits) {
-        return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
     }
 
     /*
@@ -1030,7 +1085,7 @@
         SELF_ARROW: 'SelfArrow:',
         ENTRY_ARROW: 'EntryArrow:'
     };
-    class ImportAsSVG {
+    class Importer {
         constructor(circArr, arrowsArray, data, drawFunc) {
             this.circles = circArr;
             this.arrows = arrowsArray;
@@ -1678,7 +1733,7 @@
                             let data = inputTextArea.value;
                             data = data.trim();
                             if (data) {
-                                let SVGImporter = new ImportAsSVG(circles, arrows, inputTextArea.value, drawRef);
+                                let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
                                 SVGImporter.convert();
                             }
                         }
@@ -1766,13 +1821,16 @@
             return;
         const exporter = new ExportAsLaTeX(canvas);
         for (let circle = 0; circle < circles.length; circle++) {
+            exporter.faObject = circles[circle];
             circles[circle].draw(exporter);
         }
         for (let arrow = 0; arrow < arrows.length; arrow++) {
+            exporter.faObject = arrows[arrow];
             arrows[arrow].draw(exporter);
         }
         // If there is an EntryArrow, then draw it
         if (startState) {
+            exporter.faObject = startState;
             startState.draw(exporter);
         }
         // // If there is a TemporaryArrow being created, then draw it

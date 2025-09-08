@@ -14,7 +14,7 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML} from "./exportUtils";
+import { CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML} from "./exportUtils";
 export class ExportAsSVG {
     fillStyle: string;
     strokeStyle: string;
@@ -60,15 +60,15 @@ export class ExportAsSVG {
         if (endAngle - startAngle == Math.PI * 2) {
             // Comment  for a circle for easy importing
            if (this.faObject instanceof Circle) {
-                this._svgData = addCircleComment(this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                this._svgData = addCircleComment(CALLERS.SVG, this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
             }
             this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
         } else {
             if (this.faObject instanceof Arrow) {
-                this._svgData = addCurvedArrowComment(this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+                this._svgData = addCurvedArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
             } else if (this.faObject instanceof SelfArrow) {
                 const centerPoint = this.faObject.getEndPointsAndCircle();
-                this._svgData = addSelfArrowComment(this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+                this._svgData = addSelfArrowComment(CALLERS.SVG, this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
             }
             if (isReversed) {
                 let temp = startAngle;
@@ -113,10 +113,10 @@ export class ExportAsSVG {
     stroke() {
         if (this._points.length == 0) return;
         if (this.faObject instanceof Arrow) {
-            this._svgData = addStraightArrowComment(this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            this._svgData = addStraightArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
         } else if (this.faObject instanceof EntryArrow) {
             const points = this.faObject.getEndPoints();
-            this._svgData = addEntryArrowComment(this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
+            this._svgData = addEntryArrowComment(CALLERS.SVG, this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
         }
         this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
         for (let i = 0; i < this._points.length; i++) {

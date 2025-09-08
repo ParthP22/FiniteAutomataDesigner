@@ -14,7 +14,7 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  } from "./exportUtils";
+import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS,  } from "./exportUtils";
 
 
 export class ExportAsLaTeX {
@@ -24,6 +24,7 @@ export class ExportAsLaTeX {
     _texData: string;
     _scale: number;
     canvas: HTMLCanvasElement;
+    faObject: any;
 
     constructor(canvas: HTMLCanvasElement) {
         if (!canvas) {
@@ -35,7 +36,7 @@ export class ExportAsLaTeX {
         this._points =[];
         this._texData = '';
         this._scale = 0.1;
-        
+        this.faObject = null;
     }
 
     toLaTeX(): string{
@@ -65,8 +66,17 @@ export class ExportAsLaTeX {
         radius *= this._scale;
 
         if (endAngle - startAngle == Math.PI * 2) {
+            if (this.faObject instanceof Circle) {
+                this._texData = addCircleComment(CALLERS.LATEX, this._texData,  this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+            }
             this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
         } else {
+            if (this.faObject instanceof Arrow) {
+                this._texData = addCurvedArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+            } else if (this.faObject instanceof SelfArrow) {
+                const centerPoint = this.faObject.getEndPointsAndCircle();
+                this._texData = addSelfArrowComment(CALLERS.LATEX, this._texData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+            }
             if (isReversed) {
                 var temp = startAngle;
                 startAngle = endAngle;
@@ -103,6 +113,12 @@ export class ExportAsLaTeX {
     
     stroke() {
         if (this._points.length == 0) return;
+        if (this.faObject instanceof Arrow) {
+            this._texData = addStraightArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+        } else if (this.faObject instanceof EntryArrow) {
+            const points = this.faObject.getEndPoints();
+            this._texData = addEntryArrowComment(CALLERS.LATEX, this._texData, this.faObject.pointsToCircle.id, points.startX, points.startY);
+        }
         this._texData += '\\draw [' + this.strokeStyle + ']';
         for (var i = 0; i < this._points.length; i++) {
             var p = this._points[i];

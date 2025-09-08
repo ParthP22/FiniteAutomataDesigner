@@ -746,14 +746,17 @@ function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
   const exporter = new ExportAsLaTeX(canvas);
 
   for(let circle = 0; circle < circles.length; circle++) {
+    exporter.faObject = circles[circle];
     circles[circle].draw(exporter)
   }
   for (let arrow = 0; arrow < arrows.length; arrow++) {
+    exporter.faObject = arrows[arrow];
     arrows[arrow].draw(exporter);
   }
 
   // If there is an EntryArrow, then draw it
   if(startState){
+    exporter.faObject = startState;
     startState.draw(exporter);
   }
 
