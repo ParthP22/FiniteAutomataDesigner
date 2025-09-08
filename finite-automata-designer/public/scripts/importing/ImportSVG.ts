@@ -47,11 +47,12 @@ export class ImportAsSVG {
         for (let rawData = 0; rawData < parsedData.length; rawData++) {
             const raw = parsedData[rawData];
             if (raw.startsWith(startsWith.CIRCLE)) {
-                const [, id, x, y, accept] = raw.match(/id=(\w+), x=([\d.]+), y=([\d.]+), accept=(\w+)/)!;
+                const [, id, x, y, accept, text] = raw.match(/id=(\w+), x=([\d.]+), y=([\d.]+), accept=(\w+), text=(.*)/)!;
                 // Create circle instance
                 const circle = new Circle(parseFloat(x), parseFloat(y));
                 circle.id = id;
                 circle.isAccept = accept == 'true';
+                circle.text = text;
                 this.circles.push(circle);
             } 
         }

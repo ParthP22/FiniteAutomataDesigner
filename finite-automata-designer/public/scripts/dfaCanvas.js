@@ -378,7 +378,7 @@
             if (endAngle - startAngle == Math.PI * 2) {
                 // Comment  for a circle for easy importing
                 if (this.faObject instanceof Circle) {
-                    this.addCircleComment(this.faObject.id, x, y, this.faObject.isAccept);
+                    this.addCircleComment(this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
                 }
                 this._svgData += '\t<ellipse ' + style + ' cx="' + fixed$1(x, 3) + '" cy="' + fixed$1(y, 3) + '" rx="' + fixed$1(radius, 3) + '" ry="' + fixed$1(radius, 3) + '"/>\n';
             }
@@ -480,8 +480,8 @@
         clearRect() {
             // No-op for SVG export
         }
-        addCircleComment(id, x, y, accept) {
-            this._svgData += `\t<!-- Circle: id=${id}, x=${fixed$1(x, 3)}, y=${fixed$1(y, 3)}, accept=${accept} -->\n`;
+        addCircleComment(id, x, y, accept, text) {
+            this._svgData += `\t<!-- Circle: id=${id}, x=${fixed$1(x, 3)}, y=${fixed$1(y, 3)}, accept=${accept}, text=${text} -->\n`;
         }
         addArrowComment(fromId, toId, label) {
             this._svgData += `\t<!-- Arrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
@@ -1050,11 +1050,12 @@
             for (let rawData = 0; rawData < parsedData.length; rawData++) {
                 const raw = parsedData[rawData];
                 if (raw.startsWith(startsWith.CIRCLE)) {
-                    const [, id, x, y, accept] = raw.match(/id=(\w+), x=([\d.]+), y=([\d.]+), accept=(\w+)/);
+                    const [, id, x, y, accept, text] = raw.match(/id=(\w+), x=([\d.]+), y=([\d.]+), accept=(\w+), text=(.*)/);
                     // Create circle instance
                     const circle = new Circle(parseFloat(x), parseFloat(y));
                     circle.id = id;
                     circle.isAccept = accept == 'true';
+                    circle.text = text;
                     this.circles.push(circle);
                 }
             }

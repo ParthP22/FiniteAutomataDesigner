@@ -60,7 +60,7 @@ export class ExportAsSVG {
         if (endAngle - startAngle == Math.PI * 2) {
             // Comment  for a circle for easy importing
            if (this.faObject instanceof Circle) {
-                this.addCircleComment(this.faObject.id, x, y, this.faObject.isAccept);
+                this.addCircleComment(this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
             }
             this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
         } else {
@@ -168,8 +168,8 @@ export class ExportAsSVG {
         // No-op for SVG export
     }
 
-    addCircleComment(id: string, x: number, y: number, accept: boolean) {
-        this._svgData += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept} -->\n`;
+    addCircleComment(id: string, x: number, y: number, accept: boolean, text: string) {
+        this._svgData += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
     }
 
     addArrowComment(fromId: string, toId: string, label: string) {
