@@ -1,10 +1,55 @@
+/**
+ * Utility functions for exporting finite automata diagrams to different formats.
+ *
+ * Provides helpers to:
+ * - Format numbers (`fixed`)
+ * - Escape text for XML (`textToXML`)
+ * - Insert descriptive comments into serialized outputs (`addCircleComment`, `addCurvedArrowComment`,
+ *   `addStraightArrowComment`, `addEntryArrowComment`, `addSelfArrowComment`)
+ *
+ * Supports both SVG (`<!-- ... -->`) and LaTeX (`%<!-- ... -->`) callers through the `CALLERS` enum.
+ */
+
+/**
+ * Exists so that there aren't separate methods for both SVG and LaTeX
+ */
 export const CALLERS = {
     SVG: 'svg',
     LATEX: 'latex'
 }
 
+/**
+ * Formats a number to a fixed number of decimal places,
+ * trimming unnecessary trailing zeros and decimal points
+ * 
+ * @param number 
+ * @param digits 
+ * @returns 
+ */
 export function fixed(number: number, digits: number): string {
 	return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+/**
+ * Escapes special characters in a string for safe inclusion in XML.
+ * Converts `&`, `<`, and `>` into their XML entities, and encodes
+ * non-printable or non-ASCII characters as numeric character references.
+ * 
+ * @param text - The input string to escape
+ * @returns A safe XML-encoded string
+ */
+export function textToXML(text: string): string{
+	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	let result = '';
+	for(let i = 0; i < text.length; i++) {
+		let c = text.charCodeAt(i);
+		if(c >= 0x20 && c <= 0x7E) {
+			result += text[i];
+		} else {
+			result += '&#' + c + ';';
+		}
+	}
+	return result;
 }
 
 export function addCircleComment(caller: string, _data: string, id: string, x: number, y: number, accept: boolean, text: string) {
@@ -55,16 +100,3 @@ export function addSelfArrowComment(caller: string, _data: string, circleId: str
      return _data;
 }
 
-export function textToXML(text: string): string{
-	text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	let result = '';
-	for(let i = 0; i < text.length; i++) {
-		let c = text.charCodeAt(i);
-		if(c >= 0x20 && c <= 0x7E) {
-			result += text[i];
-		} else {
-			result += '&#' + c + ';';
-		}
-	}
-	return result;
-}

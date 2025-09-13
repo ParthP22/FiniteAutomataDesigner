@@ -15,6 +15,7 @@ import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
 import { CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML} from "./exportUtils";
+
 export class ExportAsSVG {
     fillStyle: string;
     strokeStyle: string;

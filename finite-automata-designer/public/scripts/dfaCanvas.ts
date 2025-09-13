@@ -611,6 +611,7 @@ function attachWhenReady() {
       });
     }
 
+    // Export SVG button event handler and export textarea visiblity enable
     if (exportSVGBtn) {
       exportSVGBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
@@ -626,6 +627,7 @@ function attachWhenReady() {
       console.log("unable to find the export svg btn");
     }
 
+    // Export LaTeX button event handler and export textarea visiblity enable
     if (exportLaTeXBtn) {
       exportLaTeXBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
@@ -639,6 +641,7 @@ function attachWhenReady() {
       });
     }
 
+    // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
         if (inputContainer) {
@@ -660,6 +663,7 @@ function attachWhenReady() {
       })
     }
 
+    // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
         if (inputContainer) {
@@ -678,6 +682,7 @@ function attachWhenReady() {
       });
     }
 
+    // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
     if (hideOutputBtn) {
       hideOutputBtn.addEventListener('click', () => {
         if (outputContainer) {
@@ -686,6 +691,7 @@ function attachWhenReady() {
       });
     }
 
+    // Copies the output created from the export to your clipboard NOTE FOR FUTURE: Some indicator that it has been copied to your clipboard 
     if (copyOutputBtn) {
       copyOutputBtn.addEventListener('click', async () => {
         if (outputTextArea) {
@@ -700,6 +706,7 @@ function attachWhenReady() {
       });
     }
 
+    // Event handler to hide the import textarea (refered to as the input container, since hiding the div hides the textarea)
     if (hideInputBtn) {
       hideInputBtn.addEventListener('click', () => {
         if (inputContainer) {
@@ -708,6 +715,7 @@ function attachWhenReady() {
       });
     }
 
+    // Event handler to clear the text in the inputTextArea
     if (clearInputBtn) {
       clearInputBtn.addEventListener('click', () => {
         if (inputTextArea) {

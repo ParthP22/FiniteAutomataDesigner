@@ -2,7 +2,6 @@ import {Circle} from "../Shapes/Circle";
 import {Arrow} from "../Shapes/Arrow";
 import {SelfArrow} from "../Shapes/SelfArrow";
 import {EntryArrow} from "../Shapes/EntryArrow";
-// import { Point } from "../exporting/PointInterface";
 
 const startsWith = {
     CIRCLE: 'Circle:',
