@@ -655,11 +655,11 @@ function attachWhenReady() {
               let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
               SVGImporter.convert();
             }
-            
           }
-            
+          if(alphabetLabel){
+            alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+          }
         }
-        
       })
     }
 
@@ -677,6 +677,9 @@ function attachWhenReady() {
               let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
               LaTeXImporter.convert();
             }
+          }
+          if(alphabetLabel){
+            alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
           }
         }
       });
@@ -764,7 +767,8 @@ attachWhenReady();
 function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     if (!canvas) return;
 
-    const exporter = new ExportAsSVG(canvas);
+    const exporter = new ExportAsSVG(canvas, alphabet);
+    exporter.addAlphabet();
 
     for(let circle = 0; circle < circles.length; circle++) {
       exporter.lineWidth = 1;
@@ -785,7 +789,8 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
 function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
   if (!canvas) return;
   
-  const exporter = new ExportAsLaTeX(canvas);
+  const exporter = new ExportAsLaTeX(canvas, alphabet);
+  exporter.addAlphabet();
 
   for(let circle = 0; circle < circles.length; circle++) {
     exporter.faObject = circles[circle];

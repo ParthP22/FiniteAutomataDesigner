@@ -1,10 +1,12 @@
-import {Circle} from "../Shapes/Circle";
-import {Arrow} from "../Shapes/Arrow";
-import {SelfArrow} from "../Shapes/SelfArrow";
-import {EntryArrow, setStartState} from "../Shapes/EntryArrow";
+import { Circle } from "../Shapes/Circle";
+import { Arrow } from "../Shapes/Arrow";
+import { SelfArrow } from "../Shapes/SelfArrow";
+import { EntryArrow, setStartState } from "../Shapes/EntryArrow";
 import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
+import { setAlphabet } from "../alphabet";
 
 const startsWith = {
+    ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
     CURVED_ARROW: 'CurvedArrow:',
@@ -107,12 +109,12 @@ export class Importer {
                     setStartState(entryArrow);
                     this.arrows.push(entryArrow);
                 }
+            } else if (raw.startsWith(startsWith.ALPHABET)) {
+                const [, values] = raw.match(/Alphabet:\s*(.*)/)!;
+                const newAlphabet = new Set(values.split(",").map(s => s.trim()));
+                setAlphabet(newAlphabet);
             }
         }
-        for (let circle in this.circles) {
-            console.log(this.circles[circle].outArrows);
-        }
-        console.log(this.arrows);
 
         this.draw();
     }

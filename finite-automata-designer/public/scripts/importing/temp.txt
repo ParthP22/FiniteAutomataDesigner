@@ -2,6 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
 <svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<!-- Alphabet: 0,1 -->
 	<!-- Circle: id=c2, x=215.2, y=143, accept=true, text= -->
 	<ellipse stroke="black" stroke-width="1" fill="none" cx="215.2" cy="143" rx="30" ry="30"/>
 	<!-- Circle: id=c2, x=215.2, y=143, accept=true, text= -->
@@ -47,4 +48,11 @@
 	<!-- EntryArrow: to=c2, start=(91.5,161) -->
 	<polygon stroke="black" stroke-width="1" points="91.5,161 185.513,147.32"/>
 	<polygon fill="black" stroke-width="1" points="185.513,147.32 174.897,143.524 176.337,153.42"/>
+</svg>
+
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<!-- Alphabet: 0,1,2,3,4,5,6 -->
 </svg>

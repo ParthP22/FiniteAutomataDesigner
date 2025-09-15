@@ -100,3 +100,14 @@ export function addSelfArrowComment(caller: string, _data: string, circleId: str
      return _data;
 }
 
+export function addAlphabetComment(caller: string, _data: string, alphabet: Set<string>){
+    const stringifiedAlphabet = Array.from(alphabet).join(',');
+    console.log(stringifiedAlphabet);
+    if (caller == CALLERS.SVG) {
+        _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
+    } else if (caller == CALLERS.LATEX) {
+        _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
+    }
+
+    return _data;
+}

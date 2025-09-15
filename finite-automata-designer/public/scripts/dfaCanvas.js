@@ -433,6 +433,17 @@
         }
         return _data;
     }
+    function addAlphabetComment(caller, _data, alphabet) {
+        const stringifiedAlphabet = Array.from(alphabet).join(',');
+        console.log(stringifiedAlphabet);
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
+        }
+        return _data;
+    }
 
     /*
      Portions of this file are adapted from:
@@ -446,11 +457,12 @@
      Licensed under the MIT Licenses
     */
     class ExportAsSVG {
-        constructor(canvas) {
+        constructor(canvas, alphabet) {
             if (!canvas) {
                 throw new Error('A valid HTMLCanvasElement is required');
             }
             this.canvas = canvas;
+            this.alphabet = alphabet;
             this.fillStyle = 'black';
             this.strokeStyle = 'black';
             this.lineWidth = 1;
@@ -546,7 +558,6 @@
             }
             this._svgData += '"/>\n';
         }
-        ;
         measureText(text) {
             const c = this.canvas.getContext('2d');
             if (c) {
@@ -562,12 +573,14 @@
                 this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
             }
         }
-        ;
         translate(x, y) {
             this._transX = x;
             this._transY = y;
         }
         ;
+        addAlphabet() {
+            this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
+        }
         save() {
             // No-op for SVG export
         }
@@ -591,11 +604,12 @@
      Licensed under the MIT Licenses
     */
     class ExportAsLaTeX {
-        constructor(canvas) {
+        constructor(canvas, alphabet) {
             if (!canvas) {
                 throw new Error('A valid HTMLCanvasElement is required');
             }
             this.canvas = canvas;
+            this.alphabet = alphabet;
             this.strokeStyle = 'black';
             this.font = '20px "Times New Romain", serif';
             this._points = [];
@@ -702,7 +716,6 @@
             }
             this._texData += ';\n';
         }
-        ;
         measureText(text) {
             const c = this.canvas.getContext('2d');
             if (c) {
@@ -737,7 +750,9 @@
                 this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
             }
         }
-        ;
+        addAlphabet() {
+            this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
+        }
         translate() {
             // No-op for LaTeX export
         }
@@ -1110,6 +1125,7 @@
     }
 
     const startsWith = {
+        ALPHABET: 'Alphabet:',
         CIRCLE: 'Circle:',
         STRAIGHT_ARROW: 'StraightArrow:',
         CURVED_ARROW: 'CurvedArrow:',
@@ -1209,11 +1225,12 @@
                         this.arrows.push(entryArrow);
                     }
                 }
+                else if (raw.startsWith(startsWith.ALPHABET)) {
+                    const [, values] = raw.match(/Alphabet:\s*(.*)/);
+                    const newAlphabet = new Set(values.split(",").map(s => s.trim()));
+                    setAlphabet(newAlphabet);
+                }
             }
-            for (let circle in this.circles) {
-                console.log(this.circles[circle].outArrows);
-            }
-            console.log(this.arrows);
             this.draw();
         }
         normalizeText(text) {
@@ -1795,6 +1812,9 @@
                                 SVGImporter.convert();
                             }
                         }
+                        if (alphabetLabel) {
+                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
+                        }
                     }
                 });
             }
@@ -1812,6 +1832,9 @@
                                 let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
                                 LaTeXImporter.convert();
                             }
+                        }
+                        if (alphabetLabel) {
+                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
                         }
                     }
                 });
@@ -1887,7 +1910,8 @@
     function saveAsSVG(canvas, textArea) {
         if (!canvas)
             return;
-        const exporter = new ExportAsSVG(canvas);
+        const exporter = new ExportAsSVG(canvas, alphabet);
+        exporter.addAlphabet();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.lineWidth = 1;
             exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
@@ -1905,7 +1929,8 @@
     function saveAsLaTeX(canvas, textArea) {
         if (!canvas)
             return;
-        const exporter = new ExportAsLaTeX(canvas);
+        const exporter = new ExportAsLaTeX(canvas, alphabet);
+        exporter.addAlphabet();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.faObject = circles[circle];
             circles[circle].draw(exporter);

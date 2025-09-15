@@ -14,7 +14,7 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS,  } from "./exportUtils";
+import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS, addAlphabetComment,  } from "./exportUtils";
 
 
 export class ExportAsLaTeX {
@@ -24,13 +24,15 @@ export class ExportAsLaTeX {
     _texData: string;
     _scale: number;
     canvas: HTMLCanvasElement;
+    alphabet: Set<string>;
     faObject: any;
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, alphabet: Set<string>) {
         if (!canvas) {
             throw new Error('A valid HTMLCanvasElement is required');
         }
         this.canvas = canvas;
+        this.alphabet = alphabet;
         this.strokeStyle = 'black';
         this.font = '20px "Times New Romain", serif';
         this._points =[];
@@ -60,7 +62,7 @@ export class ExportAsLaTeX {
         this._points = [];
     }
 
-arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, isReversed: boolean) {
+    arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, isReversed: boolean) {
         let trueX = x;
         let trueY = y;
         x *= this._scale;
@@ -137,7 +139,7 @@ arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, i
             this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
         }
         this._texData += ';\n';
-    };
+    }
 
     measureText(text: string): TextMetrics {
         const c = this.canvas.getContext('2d');
@@ -168,7 +170,11 @@ arc(x: number, y: number, radius: number, startAngle:number, endAngle: number, i
             y *= this._scale;
             this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
         }
-    };
+    }
+
+    addAlphabet(){
+        this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
+    }
 
     translate() {
         // No-op for LaTeX export

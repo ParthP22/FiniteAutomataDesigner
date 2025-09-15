@@ -14,7 +14,7 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML} from "./exportUtils";
+import { CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML, addAlphabetComment} from "./exportUtils";
 
 export class ExportAsSVG {
     fillStyle: string;
@@ -26,13 +26,16 @@ export class ExportAsSVG {
     _transX: number;
     _transY: number;
     canvas: HTMLCanvasElement;
+    alphabet: Set<string>;
     faObject: any;
+    
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, alphabet: Set<string>) {
         if (!canvas) {
             throw new Error('A valid HTMLCanvasElement is required');
         }
         this.canvas = canvas;
+        this.alphabet = alphabet;
         this.fillStyle = 'black';
         this.strokeStyle = 'black';
         this.lineWidth = 1;
@@ -42,6 +45,7 @@ export class ExportAsSVG {
         this._transX = 0;
         this._transY = 0;
         this.faObject = null;
+        
     }
 
     toSVG(): string{
@@ -133,7 +137,7 @@ export class ExportAsSVG {
             this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
         }
         this._svgData += '"/>\n';
-    };
+    }
 
     measureText(text: string): TextMetrics {
         const c = this.canvas.getContext('2d');
@@ -150,12 +154,16 @@ export class ExportAsSVG {
         if (text.replace(' ', '').length > 0) {
             this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
         }
-    };
+    }
 
     translate(x: number, y: number) {
         this._transX = x;
         this._transY = y;
     };
+
+    addAlphabet(){
+        this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
+    }
 
     save() {
         // No-op for SVG export
