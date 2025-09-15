@@ -1808,8 +1808,15 @@
                             let data = inputTextArea.value;
                             data = data.trim();
                             if (data) {
-                                let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
-                                SVGImporter.convert();
+                                if (confirm("Everything on canvas will be erased and lost! Proceed?")) {
+                                    if (emptyDFA(canvas, arrows, circles)) {
+                                        let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
+                                        SVGImporter.convert();
+                                    }
+                                    else {
+                                        alert("Failure to import DFA");
+                                    }
+                                }
                             }
                         }
                         if (alphabetLabel) {
@@ -1829,8 +1836,15 @@
                             let data = inputTextArea.value;
                             data = data.trim();
                             if (data) {
-                                let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
-                                LaTeXImporter.convert();
+                                if (confirm("Everything on canvas will be erased and lost! Proceed?")) {
+                                    if (emptyDFA(canvas, arrows, circles)) {
+                                        let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
+                                        LaTeXImporter.convert();
+                                    }
+                                    else {
+                                        alert("Failure to import DFA");
+                                    }
+                                }
                             }
                         }
                         if (alphabetLabel) {
@@ -1940,6 +1954,20 @@
             arrows[arrow].draw(exporter);
         }
         output(exporter.toLaTeX(), textArea);
+    }
+    function emptyDFA(canvas, arrows, circles) {
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                arrows.length = 0;
+                circles.length = 0;
+                setStartState(null);
+                setStartState(null);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return true;
+            }
+        }
+        return false;
     }
     function output(text, element) {
         if (element && element instanceof HTMLTextAreaElement) {

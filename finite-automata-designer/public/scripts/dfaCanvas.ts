@@ -17,7 +17,7 @@
 import {Circle, circles} from "./Shapes/Circle";
 import {Arrow, arrows} from "./Shapes/Arrow";
 import {SelfArrow} from "./Shapes/SelfArrow";
-import {EntryArrow,startState, setStartState} from "./Shapes/EntryArrow";
+import {EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
 import {TemporaryArrow} from "./Shapes/TemporaryArrow";
 import { snapToPadding} from "./Shapes/draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
@@ -652,8 +652,14 @@ function attachWhenReady() {
             let data = inputTextArea.value;
             data = data.trim();
             if (data) {
-              let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
-              SVGImporter.convert();
+              if (confirm("Everything on canvas will be erased and lost! Proceed?")){
+                if (emptyDFA(canvas, arrows, circles)){
+                  let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
+                  SVGImporter.convert();
+                } else {
+                  alert("Failure to import DFA");
+                }
+              }
             }
           }
           if(alphabetLabel){
@@ -674,8 +680,15 @@ function attachWhenReady() {
             let data = inputTextArea.value;
             data = data.trim();
             if (data) {
-              let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
-              LaTeXImporter.convert();
+              if (confirm("Everything on canvas will be erased and lost! Proceed?")){
+                if (emptyDFA(canvas, arrows, circles)) {
+                  let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
+                  LaTeXImporter.convert();
+                } else {
+                  alert("Failure to import DFA");
+                }
+                
+              }
             }
           }
           if(alphabetLabel){
@@ -703,8 +716,7 @@ function attachWhenReady() {
             await navigator.clipboard.writeText(textToCopy); 
           } catch (err) {
             console.log("Failed to copy: ", err)
-          }
-          
+          } 
         }
       });
     }
@@ -803,6 +815,21 @@ function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
 
   output(exporter.toLaTeX(), textArea);
 
+}
+
+function emptyDFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow | SelfArrow)[], circles: Circle[]): boolean {
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      arrows.length = 0;
+      circles.length = 0;
+      setStartState(null);
+      setStartState(null);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return true;
+    } 
+  }
+  return false;
 }
 
 

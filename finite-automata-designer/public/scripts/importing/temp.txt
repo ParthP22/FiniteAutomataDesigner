@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 
 <svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">
-	<!-- Alphabet: 0,1 -->
+	<!-- Alphabet: 0,1,2 -->
 	<!-- Circle: id=c2, x=215.2, y=143, accept=true, text= -->
 	<ellipse stroke="black" stroke-width="1" fill="none" cx="215.2" cy="143" rx="30" ry="30"/>
 	<!-- Circle: id=c2, x=215.2, y=143, accept=true, text= -->
@@ -13,18 +13,18 @@
 	<ellipse stroke="black" stroke-width="1" fill="none" cx="253.2" cy="353" rx="30" ry="30"/>
 	<!-- Circle: id=c5, x=511.2, y=345, accept=false, text= -->
 	<ellipse stroke="black" stroke-width="1" fill="none" cx="511.2" cy="345" rx="30" ry="30"/>
-	<!-- CurvedArrow: from=c2, to=c3, parallel=0.4655251141552512, perpendicular=-76.46609061341263, label=0 -->
-	<path stroke="black" stroke-width="1" fill="none" d="M 234.984,120.482 A 209.555,209.555 0 0 1 517.804,110.007"/>
-	<polygon fill="black" stroke-width="1" points="517.804,110.007 513.421,101.017 506.946,108.637"/>
-	<text x="369" y="51" font-family="Times New Roman" font-size="20">0</text>
+	<!-- CurvedArrow: from=c2, to=c3, parallel=0.5210730593607306, perpendicular=-81.80317205893736, label=0,2 -->
+	<path stroke="black" stroke-width="1" fill="none" d="M 233.87,119.553 A 201.362,201.362 0 0 1 518.846,108.998"/>
+	<polygon fill="black" stroke-width="1" points="518.846,108.998 514.936,99.887 508.121,107.206"/>
+	<text x="361" y="46" font-family="Times New Roman" font-size="20">0,2</text>
 	<!-- CurvedArrow: from=c3, to=c5, parallel=0.656934306569343, perpendicular=-41.74697856106598, label=1 -->
 	<path stroke="black" stroke-width="1" fill="none" d="M 555.361,156.216 A 150.467,150.467 0 0 1 533.305,324.791"/>
 	<polygon fill="black" stroke-width="1" points="533.305,324.791 543.701,322.168 536.253,315.496"/>
 	<text x="577" y="251" font-family="Times New Roman" font-size="20">1</text>
-	<!-- CurvedArrow: from=c5, to=c4, parallel=0.5167497148346041, perpendicular=-74.90198474169148, label=0 -->
+	<!-- CurvedArrow: from=c5, to=c4, parallel=0.5167497148346041, perpendicular=-74.90198474169148, label=0,2 -->
 	<path stroke="black" stroke-width="1" fill="none" d="M 494.579,369.914 A 148.581,148.581 0 0 1 271.332,376.836"/>
 	<polygon fill="black" stroke-width="1" points="271.332,376.836 274.504,386.096 281.812,379.27"/>
-	<text x="380" y="445" font-family="Times New Roman" font-size="20">0</text>
+	<text x="372" y="445" font-family="Times New Roman" font-size="20">0,2</text>
 	<!-- CurvedArrow: from=c4, to=c2, parallel=0.5312664675917793, perpendicular=-42.490899615674245, label=1 -->
 	<path stroke="black" stroke-width="1" fill="none" d="M 230.848,333.061 A 154.847,154.847 0 0 1 201.253,169.508"/>
 	<polygon fill="black" stroke-width="1" points="201.253,169.508 192.845,175.025 202.103,178.804"/>
@@ -33,14 +33,14 @@
 	<path stroke="black" stroke-width="1" fill="none" d="M 231.598,168.098 A 239.182,239.182 0 0 1 259.763,323.747"/>
 	<polygon fill="black" stroke-width="1" points="259.763,323.747 266.274,316.633 256.399,315.06"/>
 	<text x="266" y="247" font-family="Times New Roman" font-size="20">1</text>
-	<!-- CurvedArrow: from=c3, to=c2, parallel=0.477054794520548, perpendicular=-42.304327962793145, label=0 -->
+	<!-- CurvedArrow: from=c3, to=c2, parallel=0.477054794520548, perpendicular=-42.304327962793145, label=0,2 -->
 	<path stroke="black" stroke-width="1" fill="none" d="M 512.928,145.463 A 331.188,331.188 0 0 1 242.47,155.48"/>
 	<polygon fill="black" stroke-width="1" points="242.47,155.48 249.869,163.112 253.615,153.84"/>
-	<text x="374" y="201" font-family="Times New Roman" font-size="20">0</text>
-	<!-- CurvedArrow: from=c4, to=c5, parallel=0.46364891637149547, perpendicular=-52.31594093057834, label=0 -->
+	<text x="367" y="201" font-family="Times New Roman" font-size="20">0,2</text>
+	<!-- CurvedArrow: from=c4, to=c5, parallel=0.46364891637149547, perpendicular=-52.31594093057834, label=0,2 -->
 	<path stroke="black" stroke-width="1" fill="none" d="M 275.666,333.168 A 184.751,184.751 0 0 1 487.549,326.598"/>
 	<polygon fill="black" stroke-width="1" points="487.549,326.598 481.924,318.031 476.444,326.396"/>
-	<text x="375" y="287" font-family="Times New Roman" font-size="20">0</text>
+	<text x="368" y="287" font-family="Times New Roman" font-size="20">0,2</text>
 	<!-- CurvedArrow: from=c5, to=c3, parallel=0.5456848432803778, perpendicular=-32.55430314872914, label=1 -->
 	<path stroke="black" stroke-width="1" fill="none" d="M 500.006,317.199 A 193.89,193.89 0 0 1 521.23,154.985"/>
 	<polygon fill="black" stroke-width="1" points="521.23,154.985 511.65,159.06 520.092,164.419"/>
@@ -48,11 +48,4 @@
 	<!-- EntryArrow: to=c2, start=(91.5,161) -->
 	<polygon stroke="black" stroke-width="1" points="91.5,161 185.513,147.32"/>
 	<polygon fill="black" stroke-width="1" points="185.513,147.32 174.897,143.524 176.337,153.42"/>
-</svg>
-
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-
-<svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">
-	<!-- Alphabet: 0,1,2,3,4,5,6 -->
 </svg>
