@@ -1,7 +1,8 @@
 import {Circle} from "../Shapes/Circle";
 import {Arrow} from "../Shapes/Arrow";
 import {SelfArrow} from "../Shapes/SelfArrow";
-import {EntryArrow} from "../Shapes/EntryArrow";
+import {EntryArrow, setStartState} from "../Shapes/EntryArrow";
+import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
 
 const startsWith = {
     CIRCLE: 'Circle:',
@@ -65,8 +66,11 @@ export class Importer {
                 const endCircle = this.circles.find(c => c.id === to);
                 if (startCircle && endCircle) {
                     const arrow = new Arrow(startCircle, endCircle);
+                    arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                     arrow.text = label.trim();
-                    this.arrows.push(arrow);
+                    if (transitionDeterminismCheck(arrow)) {
+                        this.arrows.push(arrow);
+                    }
                 }
             } else if (raw.startsWith(startsWith.CURVED_ARROW)) {
                 const [, from, to, parallel, perpendicular, label] = raw.match(/from=(\w+), to=(\w+), parallel=([\d.]+), perpendicular=([-]?\d+(?:\.\d+)?), label=(.*)/)!;
@@ -74,28 +78,41 @@ export class Importer {
                 const endCircle = this.circles.find(c => c.id === to);
                 if (startCircle && endCircle) {
                     const arrow = new Arrow(startCircle, endCircle);
+                    arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                     arrow.text = label.trim();
                     arrow.parallelPart = parseFloat(parallel);
                     arrow.perpendicularPart = parseFloat(perpendicular);
-                    this.arrows.push(arrow);
+                    if (transitionDeterminismCheck(arrow)) {
+                        this.arrows.push(arrow);
+                    }
                 }
             } else if (raw.startsWith(startsWith.SELF_ARROW)) {
                 const [, circleId, x, y, text] = raw.match(/circle=(\w+), anchor=\(([\d.]+),([\d.]+)\), text=(.*)/)!;
                 const circle = this.circles.find(c => c.id === circleId);
                 if (circle) {
                     const selfArrow = new SelfArrow(circle, { x: parseFloat(x), y: parseFloat(y)});
+                    // Add the 
+                    circle.loop = selfArrow;
+                    circle.outArrows.add(selfArrow); // Adds out arrow for the circle
                     selfArrow.text = text;
-                    this.arrows.push(selfArrow);
+                    if (transitionDeterminismCheck(selfArrow)) {
+                        this.arrows.push(selfArrow);
+                    }
                 }
             } else if (raw.startsWith(startsWith.ENTRY_ARROW)) {
                 const [, toId, x, y] = raw.match(/to=(\w+), start=\(([\d.]+),([\d.]+)\)/)!;
                 const circle = this.circles.find(c => c.id === toId);
                 if (circle) {
                     const entryArrow = new EntryArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
+                    setStartState(entryArrow);
                     this.arrows.push(entryArrow);
                 }
             }
         }
+        for (let circle in this.circles) {
+            console.log(this.circles[circle].outArrows);
+        }
+        console.log(this.arrows);
 
         this.draw();
     }

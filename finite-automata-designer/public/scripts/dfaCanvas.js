@@ -337,12 +337,56 @@
         }
     }
 
+    /**
+     * Utility functions for exporting finite automata diagrams to different formats.
+     *
+     * Provides helpers to:
+     * - Format numbers (`fixed`)
+     * - Escape text for XML (`textToXML`)
+     * - Insert descriptive comments into serialized outputs (`addCircleComment`, `addCurvedArrowComment`,
+     *   `addStraightArrowComment`, `addEntryArrowComment`, `addSelfArrowComment`)
+     *
+     * Supports both SVG (`<!-- ... -->`) and LaTeX (`%<!-- ... -->`) callers through the `CALLERS` enum.
+     */
+    /**
+     * Exists so that there aren't separate methods for both SVG and LaTeX
+     */
     const CALLERS = {
         SVG: 'svg',
         LATEX: 'latex'
     };
+    /**
+     * Formats a number to a fixed number of decimal places,
+     * trimming unnecessary trailing zeros and decimal points
+     *
+     * @param number
+     * @param digits
+     * @returns
+     */
     function fixed(number, digits) {
         return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
+    }
+    /**
+     * Escapes special characters in a string for safe inclusion in XML.
+     * Converts `&`, `<`, and `>` into their XML entities, and encodes
+     * non-printable or non-ASCII characters as numeric character references.
+     *
+     * @param text - The input string to escape
+     * @returns A safe XML-encoded string
+     */
+    function textToXML(text) {
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            let c = text.charCodeAt(i);
+            if (c >= 0x20 && c <= 0x7E) {
+                result += text[i];
+            }
+            else {
+                result += '&#' + c + ';';
+            }
+        }
+        return result;
     }
     function addCircleComment(caller, _data, id, x, y, accept, text) {
         if (caller == CALLERS.SVG) {
@@ -388,20 +432,6 @@
             _data += `\t%<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
         }
         return _data;
-    }
-    function textToXML(text) {
-        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            let c = text.charCodeAt(i);
-            if (c >= 0x20 && c <= 0x7E) {
-                result += text[i];
-            }
-            else {
-                result += '&#' + c + ';';
-            }
-        }
-        return result;
     }
 
     /*
@@ -1079,7 +1109,6 @@
         }
     }
 
-    // import { Point } from "../exporting/PointInterface";
     const startsWith = {
         CIRCLE: 'Circle:',
         STRAIGHT_ARROW: 'StraightArrow:',
@@ -1135,8 +1164,11 @@
                     const endCircle = this.circles.find(c => c.id === to);
                     if (startCircle && endCircle) {
                         const arrow = new Arrow(startCircle, endCircle);
+                        arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                         arrow.text = label.trim();
-                        this.arrows.push(arrow);
+                        if (transitionDeterminismCheck(arrow)) {
+                            this.arrows.push(arrow);
+                        }
                     }
                 }
                 else if (raw.startsWith(startsWith.CURVED_ARROW)) {
@@ -1145,10 +1177,13 @@
                     const endCircle = this.circles.find(c => c.id === to);
                     if (startCircle && endCircle) {
                         const arrow = new Arrow(startCircle, endCircle);
+                        arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                         arrow.text = label.trim();
                         arrow.parallelPart = parseFloat(parallel);
                         arrow.perpendicularPart = parseFloat(perpendicular);
-                        this.arrows.push(arrow);
+                        if (transitionDeterminismCheck(arrow)) {
+                            this.arrows.push(arrow);
+                        }
                     }
                 }
                 else if (raw.startsWith(startsWith.SELF_ARROW)) {
@@ -1156,8 +1191,13 @@
                     const circle = this.circles.find(c => c.id === circleId);
                     if (circle) {
                         const selfArrow = new SelfArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
+                        // Add the 
+                        circle.loop = selfArrow;
+                        circle.outArrows.add(selfArrow); // Adds out arrow for the circle
                         selfArrow.text = text;
-                        this.arrows.push(selfArrow);
+                        if (transitionDeterminismCheck(selfArrow)) {
+                            this.arrows.push(selfArrow);
+                        }
                     }
                 }
                 else if (raw.startsWith(startsWith.ENTRY_ARROW)) {
@@ -1165,10 +1205,15 @@
                     const circle = this.circles.find(c => c.id === toId);
                     if (circle) {
                         const entryArrow = new EntryArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
+                        setStartState(entryArrow);
                         this.arrows.push(entryArrow);
                     }
                 }
             }
+            for (let circle in this.circles) {
+                console.log(this.circles[circle].outArrows);
+            }
+            console.log(this.arrows);
             this.draw();
         }
         normalizeText(text) {
@@ -1706,6 +1751,7 @@
                     }
                 });
             }
+            // Export SVG button event handler and export textarea visiblity enable
             if (exportSVGBtn) {
                 exportSVGBtn.addEventListener('click', () => {
                     if (canvas && outputTextArea) {
@@ -1721,6 +1767,7 @@
             else {
                 console.log("unable to find the export svg btn");
             }
+            // Export LaTeX button event handler and export textarea visiblity enable
             if (exportLaTeXBtn) {
                 exportLaTeXBtn.addEventListener('click', () => {
                     if (canvas && outputTextArea) {
@@ -1733,6 +1780,7 @@
                     }
                 });
             }
+            // Import SVG button event handler and import textarea visiblity enable
             if (importSVGBtn) {
                 importSVGBtn.addEventListener('click', () => {
                     if (inputContainer) {
@@ -1750,6 +1798,7 @@
                     }
                 });
             }
+            // Import LaTeX button event handler and Import textarea visiblity enable
             if (importLaTeXBtn) {
                 importLaTeXBtn.addEventListener('click', () => {
                     if (inputContainer) {
@@ -1767,6 +1816,7 @@
                     }
                 });
             }
+            // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
             if (hideOutputBtn) {
                 hideOutputBtn.addEventListener('click', () => {
                     if (outputContainer) {
@@ -1774,6 +1824,7 @@
                     }
                 });
             }
+            // Copies the output created from the export to your clipboard NOTE FOR FUTURE: Some indicator that it has been copied to your clipboard 
             if (copyOutputBtn) {
                 copyOutputBtn.addEventListener('click', async () => {
                     if (outputTextArea) {
@@ -1787,6 +1838,7 @@
                     }
                 });
             }
+            // Event handler to hide the import textarea (refered to as the input container, since hiding the div hides the textarea)
             if (hideInputBtn) {
                 hideInputBtn.addEventListener('click', () => {
                     if (inputContainer) {
@@ -1794,6 +1846,7 @@
                     }
                 });
             }
+            // Event handler to clear the text in the inputTextArea
             if (clearInputBtn) {
                 clearInputBtn.addEventListener('click', () => {
                     if (inputTextArea) {
@@ -1847,20 +1900,6 @@
             exporter.faObject = arrows[arrow];
             arrows[arrow].draw(exporter);
         }
-        // If there is an EntryArrow, then draw it
-        if (startState) {
-            exporter.lineWidth = 1;
-            exporter.fillStyle = exporter.strokeStyle = (startState == selectedObj) ? hightlightSelected : base;
-            exporter.faObject = startState;
-            startState.draw(exporter);
-        }
-        // If there is a TemporaryArrow being created, then draw it
-        if (tempArrow != null) {
-            exporter.lineWidth = 1;
-            exporter.fillStyle = exporter.strokeStyle = base;
-            exporter.faObject = tempArrow;
-            tempArrow.draw(exporter);
-        }
         output(exporter.toSVG(), textArea);
     }
     function saveAsLaTeX(canvas, textArea) {
@@ -1875,15 +1914,6 @@
             exporter.faObject = arrows[arrow];
             arrows[arrow].draw(exporter);
         }
-        // If there is an EntryArrow, then draw it
-        if (startState) {
-            exporter.faObject = startState;
-            startState.draw(exporter);
-        }
-        // // If there is a TemporaryArrow being created, then draw it
-        // if (tempArrow != null) {
-        //   tempArrow.draw(exporter);
-        // }
         output(exporter.toLaTeX(), textArea);
     }
     function output(text, element) {
