@@ -110,7 +110,13 @@ export default function DFAPage() {
                             </button>
                         </div>
                     </div>
-                    <button className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md" hidden>Draw Import</button>
+                    <button 
+                    id="confirmImport"
+                    className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md" 
+                    hidden
+                    >
+                        Draw Import
+                    </button>
                 </div>
             </div>
             

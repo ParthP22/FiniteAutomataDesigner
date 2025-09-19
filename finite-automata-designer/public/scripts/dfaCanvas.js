@@ -1675,6 +1675,7 @@
             // Buttons for importing, SVG and LaTeX
             const importSVGBtn = document.getElementById('svgImportBtn');
             const importLaTeXBtn = document.getElementById('latexImportBtn');
+            document.getElementById('confirmImport');
             // Container surrounding the export textarea (the output container {the div})
             const outputContainer = document.getElementById('exportOutputContainer');
             // Container surround the import textarea (the input container {the div})
@@ -1800,59 +1801,13 @@
             // Import SVG button event handler and import textarea visiblity enable
             if (importSVGBtn) {
                 importSVGBtn.addEventListener('click', () => {
-                    if (inputContainer) {
-                        if (inputContainer.hidden) {
-                            _toggle_visiblity(inputContainer);
-                            return;
-                        }
-                        if (circles && arrows && inputTextArea) {
-                            let data = inputTextArea.value;
-                            data = data.trim();
-                            if (data) {
-                                if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")) {
-                                    if (emptyDFA(canvas, arrows, circles)) {
-                                        let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
-                                        SVGImporter.convert();
-                                    }
-                                    else {
-                                        alert("Failure to import DFA");
-                                    }
-                                }
-                            }
-                        }
-                        if (alphabetLabel) {
-                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
-                        }
-                    }
+                    importHelper(canvas, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
                 });
             }
             // Import LaTeX button event handler and Import textarea visiblity enable
             if (importLaTeXBtn) {
                 importLaTeXBtn.addEventListener('click', () => {
-                    if (inputContainer) {
-                        if (inputContainer.hidden) {
-                            _toggle_visiblity(inputContainer);
-                            return;
-                        }
-                        if (circles && arrows && inputTextArea) {
-                            let data = inputTextArea.value;
-                            data = data.trim();
-                            if (data) {
-                                if (confirm("Everything on canvas will be erased and lost! Proceed?")) {
-                                    if (emptyDFA(canvas, arrows, circles)) {
-                                        let LaTeXImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
-                                        LaTeXImporter.convert();
-                                    }
-                                    else {
-                                        alert("Failure to import DFA");
-                                    }
-                                }
-                            }
-                        }
-                        if (alphabetLabel) {
-                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
-                        }
-                    }
+                    importHelper(canvas, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
                 });
             }
             // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
@@ -1956,6 +1911,35 @@
             arrows[arrow].draw(exporter);
         }
         output(exporter.toLaTeX(), textArea);
+    }
+    function importHelper(canvas, alphabetLabel, inputContainer, textArea, circles, arrows, drawFunc) {
+        if (inputContainer) {
+            if (inputContainer.hidden) {
+                console.log("called the helper function inside the toggle textArea");
+                _toggle_visiblity(inputContainer);
+                return;
+            }
+            if (circles && arrows && textArea) {
+                let data = textArea.value;
+                data = data.trim();
+                if (data) {
+                    if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")) {
+                        if (canvas) {
+                            if (emptyDFA(canvas, arrows, circles)) {
+                                let importer = new Importer(circles, arrows, textArea.value, drawFunc);
+                                importer.convert();
+                            }
+                            else {
+                                alert("Failure to import DFA");
+                            }
+                        }
+                    }
+                }
+            }
+            if (alphabetLabel) {
+                alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
+            }
+        }
     }
     function emptyDFA(canvas, arrows, circles) {
         if (canvas) {
