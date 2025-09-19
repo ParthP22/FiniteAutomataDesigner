@@ -647,6 +647,7 @@ function attachWhenReady() {
         if (inputContainer) {
           if (inputContainer.hidden) {
             _toggle_visiblity(inputContainer);
+            return;
           }
           if (circles && arrows && inputTextArea) {
             let data = inputTextArea.value;
@@ -675,6 +676,7 @@ function attachWhenReady() {
         if (inputContainer) {
           if (inputContainer.hidden) {
             _toggle_visiblity(inputContainer);
+            return;
           }
           if (circles && arrows && inputTextArea) {
             let data = inputTextArea.value;
