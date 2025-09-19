@@ -652,7 +652,7 @@ function attachWhenReady() {
             let data = inputTextArea.value;
             data = data.trim();
             if (data) {
-              if (confirm("Everything on canvas will be erased and lost! Proceed?")){
+              if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")){
                 if (emptyDFA(canvas, arrows, circles)){
                   let SVGImporter = new Importer(circles, arrows, inputTextArea.value, drawRef);
                   SVGImporter.convert();
