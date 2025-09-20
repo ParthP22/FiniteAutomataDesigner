@@ -1675,7 +1675,7 @@
             // Buttons for importing, SVG and LaTeX
             const importSVGBtn = document.getElementById('svgImportBtn');
             const importLaTeXBtn = document.getElementById('latexImportBtn');
-            document.getElementById('confirmImport');
+            const drawImportBtn = document.getElementById('confirmImport');
             // Container surrounding the export textarea (the output container {the div})
             const outputContainer = document.getElementById('exportOutputContainer');
             // Container surround the import textarea (the input container {the div})
@@ -1801,13 +1801,19 @@
             // Import SVG button event handler and import textarea visiblity enable
             if (importSVGBtn) {
                 importSVGBtn.addEventListener('click', () => {
-                    importHelper(canvas, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
                 });
             }
             // Import LaTeX button event handler and Import textarea visiblity enable
             if (importLaTeXBtn) {
                 importLaTeXBtn.addEventListener('click', () => {
-                    importHelper(canvas, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+                });
+            }
+            // Additional button so the user doesn't have to click the drop down to import
+            if (drawImportBtn) {
+                drawImportBtn.addEventListener('click', () => {
+                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
                 });
             }
             // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
@@ -1835,8 +1841,9 @@
             // Event handler to hide the import textarea (refered to as the input container, since hiding the div hides the textarea)
             if (hideInputBtn) {
                 hideInputBtn.addEventListener('click', () => {
-                    if (inputContainer) {
+                    if (inputContainer && drawImportBtn) {
                         _toggle_visiblity(inputContainer);
+                        _toggle_visiblity(drawImportBtn);
                     }
                 });
             }
@@ -1912,11 +1919,12 @@
         }
         output(exporter.toLaTeX(), textArea);
     }
-    function importHelper(canvas, alphabetLabel, inputContainer, textArea, circles, arrows, drawFunc) {
-        if (inputContainer) {
-            if (inputContainer.hidden) {
+    function importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, textArea, circles, arrows, drawFunc) {
+        if (inputContainer && drawImportBtn) {
+            if (inputContainer.hidden && drawImportBtn.hidden) {
                 console.log("called the helper function inside the toggle textArea");
                 _toggle_visiblity(inputContainer);
+                _toggle_visiblity(drawImportBtn);
                 return;
             }
             if (circles && arrows && textArea) {

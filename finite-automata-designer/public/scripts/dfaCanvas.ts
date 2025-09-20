@@ -645,15 +645,22 @@ function attachWhenReady() {
     // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
-        importHelper(canvas, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
       });
     }
 
     // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
-        importHelper(canvas, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
       });
+    }
+
+    // Additional button so the user doesn't have to click the drop down to import
+    if (drawImportBtn) {
+      drawImportBtn.addEventListener('click', () => {
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+      })
     }
 
     // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
@@ -682,8 +689,9 @@ function attachWhenReady() {
     // Event handler to hide the import textarea (refered to as the input container, since hiding the div hides the textarea)
     if (hideInputBtn) {
       hideInputBtn.addEventListener('click', () => {
-        if (inputContainer) {
+        if (inputContainer && drawImportBtn) {
           _toggle_visiblity(inputContainer);
+          _toggle_visiblity(drawImportBtn);
         }
       });
     }
@@ -774,16 +782,18 @@ function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
 }
 
 function importHelper(canvas: HTMLCanvasElement | null, 
+                      drawImportBtn: HTMLButtonElement | null,
                       alphabetLabel: HTMLLabelElement | null, 
                       inputContainer: HTMLDivElement | null, 
                       textArea: HTMLTextAreaElement | null, 
                       circles: Circle[], 
                       arrows: (Arrow | SelfArrow | EntryArrow)[], 
                       drawFunc:() => void) {
-  if (inputContainer) {
-    if (inputContainer.hidden) {
+  if (inputContainer && drawImportBtn) {
+    if (inputContainer.hidden && drawImportBtn.hidden) {
       console.log("called the helper function inside the toggle textArea")
       _toggle_visiblity(inputContainer);
+      _toggle_visiblity(drawImportBtn);
       return;
     }
     if (circles && arrows && textArea) {
