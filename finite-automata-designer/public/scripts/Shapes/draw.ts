@@ -10,6 +10,9 @@
  Licensed under the MIT Licenses
 */
 
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+
 export const greekLetterNames = [ 
   'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 
   'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 
@@ -57,17 +60,13 @@ function convertText(text: string) {
   return result;
 }
 
-
-
 export function drawText(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX,
   originalText: string,
   x: number,
   y: number,
   angeOrNull: number | null,
 ) {
-
-
   ctx.font = '20px Times New Roman', 'serif';
   let text = convertText(originalText); // Convert all of the text in one go both subscript and greek
   let width = ctx.measureText(text).width;
@@ -85,10 +84,16 @@ export function drawText(
 
   x = Math.round(x);
   y = Math.round(y);
-  ctx.fillText(text, x, y + 6);
+  
+  if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsSVG) {
+    ctx.fillText(text, x, y + 6);
+  } else if (ctx instanceof ExportAsLaTeX)
+  if (ctx !instanceof ExportAsSVG || ctx !instanceof ExportAsLaTeX) {
+    ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
+  }
 }
 
-export function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number) {
+export function drawArrow(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX, x: number, y: number, angle: number) {
   let dx = Math.cos(angle);
   let dy = Math.sin(angle);
   ctx.beginPath();

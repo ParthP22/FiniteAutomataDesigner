@@ -10,10 +10,12 @@
  Licensed under the MIT Licenses
 */
 
-import {Circle} from "./circle";
+import {Circle} from "./Circle";
 import { SelfArrow } from "./SelfArrow";
 import { EntryArrow } from "./EntryArrow";
 import { snapToPadding, nodeRadius, drawArrow, drawText, hitTargetPadding } from "./draw";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 
 export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 
@@ -134,7 +136,7 @@ export class Arrow {
         };
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX) {
 
         var pointInfo = this.getEndPointsAndCircle();
         // draw arc
@@ -146,6 +148,7 @@ export class Arrow {
             ctx.lineTo(pointInfo.endX, pointInfo.endY);
         }
         ctx.stroke();
+        
         // draw the head of the arrow
         if (pointInfo.hasCircle && pointInfo.endAngle) {
             drawArrow(ctx, pointInfo.endX, pointInfo.endY, pointInfo.endAngle - pointInfo.reverseScale * (Math.PI / 2));

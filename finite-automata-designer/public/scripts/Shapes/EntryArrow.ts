@@ -10,8 +10,10 @@
  Licensed under the MIT Licenses
 */
 
-import {Circle} from "./circle";
+import {Circle} from "./Circle";
 import { drawArrow, drawText, snapToPadding, hitTargetPadding } from "./draw";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 
 // The startState will be an EntryArrow. If you wish to
 // access the start state node itself, you can use the
@@ -32,18 +34,20 @@ export class EntryArrow {
   deltaX: number;
   deltaY: number;
   // text: string;
+  startPoint: {x: number, y: number}
 
   constructor(pointsToCircle: Circle, startPoint: {x: number, y: number}) {
     this.pointsToCircle = pointsToCircle;
-    this.deltaX = 0
+    this.deltaX = 0;
     this.deltaY = 0;
+    this.startPoint = startPoint;
     // this.text = ''
     if (startPoint) {
       this.setAnchorPoint(startPoint.x, startPoint.y);
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX) {
     var points = this.getEndPoints();
 
     ctx.beginPath();
@@ -51,7 +55,7 @@ export class EntryArrow {
     ctx.lineTo(points.endX, points.endY);
     ctx.stroke();
     
-    // Draw the text at the end without the arrow
+    // Draw the text at the end without the fillrow
     var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
     drawText(ctx, "", points.startX, points.startY, textAngle);
 

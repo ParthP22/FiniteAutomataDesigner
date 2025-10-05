@@ -10,13 +10,17 @@
  Licensed under the MIT Licenses
 */
 
-import {Arrow} from "./arrow";
+import {Arrow} from "./Arrow";
 import { nodeRadius, drawText } from "./draw";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
 import {SelfArrow} from "./SelfArrow";
 
-export var circles: Circle[] = [];
+export let circles: Circle[] = [];
+export let circleIdCounter = 0;
 
 export class Circle {
+  id: string;
   x: number;
   y: number;
   mouseOffsetX: number;
@@ -27,6 +31,7 @@ export class Circle {
   loop: SelfArrow | null; // The SelfArrow which loops back to this state, if it exists
 
   constructor(x: number, y: number) {
+    this.id = 'c' + circleIdCounter;
     this.x = x,
     this.y = y;
     this.mouseOffsetX = 0;
@@ -35,6 +40,8 @@ export class Circle {
     this.text = ''; 
     this.outArrows = new Set(); 
     this.loop = null; 
+    // Increment ID
+    circleIdCounter++;
   }
 
   setMouseStart(x: number, y: number): void {
@@ -47,10 +54,11 @@ export class Circle {
     this.y = y + this.mouseOffsetY;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D | ExportAsSVG | ExportAsLaTeX) {
     ctx.beginPath();
     ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
     ctx.stroke();
+
     drawText(ctx, this.text, this.x, this.y, null);
 
     if (this.isAccept) {

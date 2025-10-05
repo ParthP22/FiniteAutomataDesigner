@@ -1,15 +1,11 @@
 'use client';
 import Link from "next/link";
-import { useRef} from "react";
 import Script from 'next/script';
 
-export default function DFAPage() {
-    const canvasRef = useRef<{ clear: () => void }>(null);
-    
 
+export default function DFAPage() {
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
-
         {/* DFA title at the top */}
         <h1 className="text-5xl font-bold text-center my-2 text-black ">
             <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
@@ -17,9 +13,147 @@ export default function DFAPage() {
             </span>
             <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
-        <div id="canvasDiv" className="">
-            {/*Canvas for drawing FSM*/}
-            <canvas id="DFACanvas" width={800} height={600} className="border border-gray-400 flex-none"></canvas>
+        <div id="canvasDiv" className="flex flex-col text-black">
+            {/* Canvas for drawing FSM */}
+            <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400 flex-none"></canvas>
+            {/* Exporting dropdowns container*/}
+            <div className="flex gap-2">
+                <p className="text-lg mt-5">Export as: </p> 
+                <div className="relative inline-block text-left mt-5">
+                    {/* Exporting options parent selector*/}
+                    <button
+                        id="exportMenuBtn"
+                        type="button"
+                        className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md"
+                    >
+                        Export Options
+                        <svg
+                        className="-mr-1 h-5 w-5 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                        >
+                        <path
+                            fillRule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                            clipRule="evenodd"
+                        />
+                        </svg>
+                    </button>
+                        {/* Export Menu options (SVG and LaTeX)*/}
+                        <div
+                            id="exportMenu"
+                            className="absolute hidden mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
+                        >
+                            <button
+                            id="svgExportBtn"
+                            type="button"
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
+                            >
+                            SVG
+                            </button>
+                            <button
+                            id="latexExportBtn"
+                            type="button"
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
+                            >
+                            LaTeX
+                            </button>
+                        </div>
+                </div>
+
+            </div>
+            <div className="flex gap-2 mt-2">
+                <p className="text-lg">Import as: </p> 
+                <div className="flex gap-2">
+                    {/* Importing options parent selector*/}
+                    <div className="relative inline-block text-left">
+                        <button
+                            id="importMenuBtn"
+                            type="button"
+                            className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md"
+                        >
+                            Import Options
+                            <svg
+                            className="-mr-1 h-5 w-5 text-gray-400"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            aria-hidden="true"
+                            >
+                            <path
+                                fillRule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                                clipRule="evenodd"
+                            />
+                            </svg>
+                        </button>
+                        {/* Import Menu options (SVG and LaTeX)*/}
+                        <div
+                            id="importMenu"
+                            className="absolute hidden mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
+                        >
+                            <button
+                            id="svgImportBtn"
+                            type="button"
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
+                            >
+                            Import as SVG
+                            </button>
+                            <button
+                            id="latexImportBtn"
+                            type="button"
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
+                            >
+                            Import as LaTeX
+                            </button>
+                        </div>
+                    </div>
+                    <button 
+                    id="confirmImport"
+                    className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md" 
+                    hidden
+                    >
+                        Draw Import
+                    </button>
+                </div>
+            </div>
+            
+            {/*Leave for now in case we turn back the UI for importing and exporting*/}
+
+            {/* <div className="text-center text-black mt-2">
+                Export as: <button id='svgExportBtn' type="button" className="cursor-pointer">SVG</button>
+                {' | '} <button id='latexExportBtn' type="button" className="cursor-pointer">LaTeX</button>
+                <br />
+                Import as: <button id='svgImportBtn' type="button" className="cursor-pointer">SVG</button>
+                {' | '} <button id='latexImportBtn' type="button" className="cursor-pointer">LaTeX</button>
+            </div> */}
+            <div id="exportOutputContainer" hidden className="text-center">
+                <textarea 
+                disabled
+                tabIndex={-1}
+                id="output"
+                className="w-full h-24 mt-2 border border-gray-400 rounded text-black bg-white select-none" 
+                placeholder="Export will appear here...">
+                </textarea>
+                <div className="flex gap-4 justify-center text-black">
+                     <button id='hideOutput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Export Output</button>
+                     <button id='copyOutput' type="button" className="cursor-pointer text-center text-decoration underline">Copy Output</button>
+                </div>
+            </div>
+            <div id="importInputContainer" hidden className="text-center">
+                <textarea 
+                tabIndex={-1}
+                id="input"
+                className="w-full h-24 mt-2 border border-gray-400 rounded text-black bg-white select-none" 
+                placeholder="Enter the input data that you exported EXCLUSIVELY from this FA designer goes here...">
+                </textarea>
+                <div className="flex gap-4 justify-center text-black">
+                    <button id='hideInput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Input</button>
+                    <button id='clearInput' type="button" className="cursor-pointer text-center text-decoration underline">Clear Input</button>
+                </div>
+            </div>
         </div>
         
         {/* <div className="mt-4 flex justify-center">

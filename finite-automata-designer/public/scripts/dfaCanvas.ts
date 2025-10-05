@@ -14,14 +14,17 @@
 // npm run build:canvas
 
 
-import {Circle, circles} from "./circle";
-import {Arrow, arrows} from "./arrow";
-import {SelfArrow} from "./SelfArrow";
-import {EntryArrow,startState, setStartState} from "./EntryArrow";
-import {TemporaryArrow} from "./TemporaryArrow";
-import { snapToPadding} from "./draw";
+import {Circle, circles} from "./Shapes/Circle";
+import {Arrow, arrows} from "./Shapes/Arrow";
+import {SelfArrow} from "./Shapes/SelfArrow";
+import {EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
+import {TemporaryArrow} from "./Shapes/TemporaryArrow";
+import { snapToPadding} from "./Shapes/draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
+import { ExportAsSVG } from "./exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
+import { Importer } from "./importing/importer";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -493,9 +496,40 @@ function attachWhenReady() {
     const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
     // Get label tag for alphabet label of DFA
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
-
+    // Export menu button and div
+    const exportMenuBtn = document.getElementById("exportMenuBtn")!;
+    const exportMenu = document.getElementById("exportMenu")!;
+    // Import menu button and div
+    const importMenuBtn = document.getElementById('importMenuBtn')!;
+    const importMenu = document.getElementById('importMenu')!;
+    // Buttons for exporting, SVG and LaTeX
+    const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
+    const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
+    // Buttons for importing, SVG and LaTeX
+    const importSVGBtn = document.getElementById('svgImportBtn') as HTMLButtonElement | null;
+    const importLaTeXBtn = document.getElementById('latexImportBtn') as HTMLButtonElement | null;
+    const drawImportBtn = document.getElementById('confirmImport') as HTMLButtonElement | null;
+    // Container surrounding the export textarea (the output container {the div})
+    const outputContainer = document.getElementById('exportOutputContainer') as HTMLDivElement | null;
+    // Container surround the import textarea (the input container {the div})
+    const inputContainer = document.getElementById('importInputContainer') as HTMLDivElement | null;
+    // Actual textarea containing the output data
+    const outputTextArea = document.getElementById('output') as HTMLTextAreaElement | null;
+    // Textarea containing the input data 
+    const inputTextArea = document.getElementById('input') as HTMLTextAreaElement | null;
+    // Button that will hide the output container effectively hiding the text area
+    const hideOutputBtn = document.getElementById('hideOutput') as HTMLButtonElement | null;
+    // Button that will copy the output to clipboard
+    const copyOutputBtn = document.getElementById('copyOutput') as HTMLButtonElement | null;
+    // Button that will hide the input container effectively hiding the text area
+    const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
+    // Button that will clear the input textarea
+    const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
+    // Reference to draw fucntion;
+    let drawRef:  () => void;
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
+      drawRef = draw;
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
         if (!isInsideCanvas(event, canvas)) {
@@ -503,13 +537,19 @@ function attachWhenReady() {
           dragging = false;
           draw();
         } else {
-          // Force input fields to lose focus if you click inside the canvas
-          inputString?.blur()
-          alphabetInput?.blur()
+          // Prevent focusing other elements so accidently taps on tab can be resolved with one click back on the canvas
+          inputString?.blur();
+          alphabetInput?.blur();
+          // Buttons
+          exportSVGBtn?.blur();
+          exportLaTeXBtn?.blur();
+          importSVGBtn?.blur();
+          importLaTeXBtn?.blur();
+          hideOutputBtn?.blur();
+          copyOutputBtn?.blur();
         }
       });
     };
-    
 
     if (inputString) {
       inputString.addEventListener("keydown", (event) => {
@@ -571,6 +611,124 @@ function attachWhenReady() {
         }
       });
     }
+
+    // Export SVG button event handler and export textarea visiblity enable
+    if (exportSVGBtn) {
+      exportSVGBtn.addEventListener('click', () => {
+        if (canvas && outputTextArea) {
+          saveAsSVG(canvas, outputTextArea);
+        }
+        if (outputContainer) {
+          if (outputContainer.hidden) {
+            _toggle_visiblity(outputContainer);
+          }
+        }
+      });
+    } else {
+      console.log("unable to find the export svg btn");
+    }
+
+    // Export LaTeX button event handler and export textarea visiblity enable
+    if (exportLaTeXBtn) {
+      exportLaTeXBtn.addEventListener('click', () => {
+        if (canvas && outputTextArea) {
+          saveAsLaTeX(canvas, outputTextArea);
+        }
+        if (outputContainer) {
+          if (outputContainer.hidden) {
+            _toggle_visiblity(outputContainer);
+          }
+        }
+      });
+    }
+
+    // Import SVG button event handler and import textarea visiblity enable
+    if (importSVGBtn) {
+      importSVGBtn.addEventListener('click', () => {
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+      });
+    }
+
+    // Import LaTeX button event handler and Import textarea visiblity enable
+    if (importLaTeXBtn) {
+      importLaTeXBtn.addEventListener('click', () => {
+        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+      });
+    }
+
+    // Additional button so the user doesn't have to click the drop down to import
+    if (drawImportBtn) {
+      drawImportBtn.addEventListener('click', () => {
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+      })
+    }
+
+    // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
+    if (hideOutputBtn) {
+      hideOutputBtn.addEventListener('click', () => {
+        if (outputContainer) {
+          _toggle_visiblity(outputContainer);
+        }
+      });
+    }
+
+    // Copies the output created from the export to your clipboard NOTE FOR FUTURE: Some indicator that it has been copied to your clipboard 
+    if (copyOutputBtn) {
+      copyOutputBtn.addEventListener('click', async () => {
+        if (outputTextArea) {
+          try {
+            let textToCopy = outputTextArea.value;
+            await navigator.clipboard.writeText(textToCopy); 
+          } catch (err) {
+            console.log("Failed to copy: ", err)
+          } 
+        }
+      });
+    }
+
+    // Event handler to hide the import textarea (refered to as the input container, since hiding the div hides the textarea)
+    if (hideInputBtn) {
+      hideInputBtn.addEventListener('click', () => {
+        if (inputContainer && drawImportBtn) {
+          _toggle_visiblity(inputContainer);
+          _toggle_visiblity(drawImportBtn);
+        }
+      });
+    }
+
+    // Event handler to clear the text in the inputTextArea
+    if (clearInputBtn) {
+      clearInputBtn.addEventListener('click', () => {
+        if (inputTextArea) {
+          inputTextArea.value = '';
+        }
+      })
+    }
+
+    // Toggle dropdown visibility
+    exportMenuBtn.addEventListener("click", () => {
+      exportMenu.classList.toggle("hidden");
+    });
+
+    // Hide when clicking outside
+    document.addEventListener("click", (event) => {
+      if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
+        exportMenu.classList.add("hidden");
+      }
+    });
+
+    // Toggle dropdown visibility
+    importMenuBtn.addEventListener("click", () => {
+      importMenu.classList.toggle("hidden");
+    });
+
+    // Hide when clicking outside
+    document.addEventListener("click", (event) => {
+      if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
+        importMenu.classList.add("hidden");
+      }
+    });
+
   };
 
   if (document.readyState === 'loading') {
@@ -582,6 +740,112 @@ function attachWhenReady() {
 
 attachWhenReady();
 
+// saveAsSVG function to export the FSM as SVG
+function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
+    if (!canvas) return;
+
+    const exporter = new ExportAsSVG(canvas, alphabet);
+    exporter.addAlphabet();
+
+    for(let circle = 0; circle < circles.length; circle++) {
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
+      exporter.faObject = circles[circle];
+      circles[circle].draw(exporter);
+    }
+    for (let arrow = 0; arrow < arrows.length; arrow++) {
+      exporter.lineWidth = 1;
+      exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
+      exporter.faObject = arrows[arrow];
+      arrows[arrow].draw(exporter);
+    }
+
+    output(exporter.toSVG(), textArea);
+}
+
+function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
+  if (!canvas) return;
+  
+  const exporter = new ExportAsLaTeX(canvas, alphabet);
+  exporter.addAlphabet();
+
+  for(let circle = 0; circle < circles.length; circle++) {
+    exporter.faObject = circles[circle];
+    circles[circle].draw(exporter)
+  }
+  for (let arrow = 0; arrow < arrows.length; arrow++) {
+    exporter.faObject = arrows[arrow];
+    arrows[arrow].draw(exporter);
+  }
+
+  output(exporter.toLaTeX(), textArea);
+}
+
+function importHelper(canvas: HTMLCanvasElement | null, 
+                      drawImportBtn: HTMLButtonElement | null,
+                      alphabetLabel: HTMLLabelElement | null, 
+                      inputContainer: HTMLDivElement | null, 
+                      textArea: HTMLTextAreaElement | null, 
+                      circles: Circle[], 
+                      arrows: (Arrow | SelfArrow | EntryArrow)[], 
+                      drawFunc:() => void) {
+  if (inputContainer && drawImportBtn) {
+    if (inputContainer.hidden && drawImportBtn.hidden) {
+      console.log("called the helper function inside the toggle textArea")
+      _toggle_visiblity(inputContainer);
+      _toggle_visiblity(drawImportBtn);
+      return;
+    }
+    if (circles && arrows && textArea) {
+      let data = textArea.value;
+      data = data.trim();
+      if (data) {
+        if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")){
+          if (canvas) {
+            if (emptyDFA(canvas, arrows, circles)){
+              let importer = new Importer(circles, arrows, textArea.value, drawFunc);
+              importer.convert();
+            } else {
+              alert("Failure to import DFA");
+            }
+          }
+          
+        }
+      }
+    }
+    if(alphabetLabel){
+      alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+    }
+  }
+}
+
+function emptyDFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow | SelfArrow)[], circles: Circle[]): boolean {
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      arrows.length = 0;
+      circles.length = 0;
+      setStartState(null);
+      setStartState(null);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return true;
+    } 
+  }
+  return false;
+}
+
+
+function output(text: string, element: HTMLTextAreaElement | null) {
+  if (element && element instanceof HTMLTextAreaElement) {
+    element.value = text;
+  }
+}
+
+function _toggle_visiblity(element: HTMLElement) {
+  element.hidden = !element.hidden;
+}
+
+
 // Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
 // NOTE: Removes white space from inside of text
 function _arrow_string_formating(text: string){
@@ -592,4 +856,4 @@ function _arrow_string_formating(text: string){
   .filter(Boolean);           // remove empty string
 }
 
-console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
+// console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
