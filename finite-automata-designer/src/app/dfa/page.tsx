@@ -183,7 +183,7 @@ export default function DFAPage() {
                     <li><p className="font-semibold inline">Delete anything: </p>Click it and press the delete key (not backspace)</li>
                     <li><p className="font-semibold inline">Make accept state: </p>Double-click an existing state</li>
                     <li><p className="font-semibold inline">Type onto arrow or state: </p>Click on desired state, then begin typing. Click again anywhere else to submit</li>
-                    <li><p className="font-semibold inline">Type numeric subscript: </p>Put an underscore before the number (ex: "q_0")</li>
+                    <li><p className="font-semibold inline">Type numeric subscript: </p>Put an underscore before the number (ex: &quot;q_0&quot;)</li>
                     <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your DFA. Press Enter to submit</li>
                     <li><p className="font-semibold inline">Run DFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
                 </ul>
