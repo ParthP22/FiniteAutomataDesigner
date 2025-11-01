@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -46,7 +47,9 @@ export default function ProfilePage() {
           
           <div className="flex items-center space-x-4 mb-6">
             {session?.user?.image && (
-              <img
+              <Image
+                height={100}
+                width={100}
                 src={session.user.image}
                 alt="Profile picture"
                 className="w-20 h-20 rounded-full border-4 border-gray-200"
