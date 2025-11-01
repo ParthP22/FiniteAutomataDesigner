@@ -1,6 +1,248 @@
 (function () {
     'use strict';
 
+    /**
+     * Utility functions for exporting finite automata diagrams to different formats.
+     *
+     * Provides helpers to:
+     * - Format numbers (`fixed`)
+     * - Escape text for XML (`textToXML`)
+     * - Insert descriptive comments into serialized outputs (`addCircleComment`, `addCurvedArrowComment`,
+     *   `addStraightArrowComment`, `addEntryArrowComment`, `addSelfArrowComment`)
+     *
+     * Supports both SVG (`<!-- ... -->`) and LaTeX (`%<!-- ... -->`) callers through the `CALLERS` enum.
+     */
+    const typeSVG = "svg";
+    const typeLaTeX = "latex";
+    /**
+     * Exists so that there aren't separate methods for both SVG and LaTeX
+     */
+    const CALLERS = {
+        SVG: 'svg',
+        LATEX: 'latex'
+    };
+    /**
+     * Formats a number to a fixed number of decimal places,
+     * trimming unnecessary trailing zeros and decimal points
+     *
+     * @param number
+     * @param digits
+     * @returns
+     */
+    function fixed(number, digits) {
+        return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
+    }
+    /**
+     * Escapes special characters in a string for safe inclusion in XML.
+     * Converts `&`, `<`, and `>` into their XML entities, and encodes
+     * non-printable or non-ASCII characters as numeric character references.
+     *
+     * @param text - The input string to escape
+     * @returns A safe XML-encoded string
+     */
+    function textToXML(text) {
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            let c = text.charCodeAt(i);
+            if (c >= 0x20 && c <= 0x7E) {
+                result += text[i];
+            }
+            else {
+                result += '&#' + c + ';';
+            }
+        }
+        return result;
+    }
+    function addCircleComment(caller, _data, id, x, y, accept, text) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
+        }
+        return _data;
+    }
+    function addCurvedArrowComment(caller, _data, fromId, toId, parallel, perpendicular, label) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
+        }
+        return _data;
+    }
+    function addStraightArrowComment(caller, _data, fromId, toId, label) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
+        }
+        return _data;
+    }
+    function addEntryArrowComment(caller, _data, toId, startX, startY) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
+        }
+        return _data;
+    }
+    function addSelfArrowComment(caller, _data, circleId, anchorX, anchorY, text) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
+        }
+        return _data;
+    }
+    function addAlphabetComment(caller, _data, alphabet) {
+        const stringifiedAlphabet = Array.from(alphabet).join(',');
+        console.log(stringifiedAlphabet);
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
+        }
+        return _data;
+    }
+
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
+    const greekLetterNames = [
+        'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon',
+        'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda',
+        'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma',
+        'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'
+    ];
+    let nodeRadius = 30;
+    let snapToPadding = 10; // pixels
+    let hitTargetPadding = 6; // pixels
+    // Takes LaTeX-like plain text and converts to Unicode symbols
+    // Handles Greek letters and subscripts
+    // --- Note --- greek letters cannot be subscripted current 'limitation'
+    function convertText(text) {
+        let result = text;
+        // Greek letter conversion
+        for (let i = 0; i < greekLetterNames.length; i++) {
+            let name = greekLetterNames[i];
+            // Regex: '\\\\' matches a literal backslash "\" in text.
+            // 'g' flag -> replace all not just first instance
+            result = result.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(913 + i + (i > 16 ? 1 : 0))); // uppercase
+            result = result.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'), String.fromCharCode(945 + i + (i > 16 ? 1 : 0))); // lowercase
+        }
+        // Subscript conversion
+        for (let i = 0; i < 10; i++) {
+            result = result.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
+        }
+        return result;
+    }
+    function drawText(ctx, originalText, x, y, angeOrNull) {
+        ctx.font = '20px Times New Roman';
+        let text = convertText(originalText); // Convert all of the text in one go both subscript and greek
+        let width = ctx.measureText(text).width;
+        x -= width / 2;
+        if (angeOrNull != null) {
+            let cos = Math.cos(angeOrNull);
+            let sin = Math.sin(angeOrNull);
+            let cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
+            let cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
+            let slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
+            x += cornerPointX - sin * slide;
+            y += cornerPointY + cos * slide;
+        }
+        x = Math.round(x);
+        y = Math.round(y);
+        if (ctx instanceof CanvasRenderingContext2D || ctx.type == typeSVG) {
+            ctx.fillText(text, x, y + 6);
+        }
+        else if (ctx.type == typeLaTeX) {
+            ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
+        }
+    }
+    function drawArrow(ctx, x, y, angle) {
+        let dx = Math.cos(angle);
+        let dy = Math.sin(angle);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
+        ctx.lineTo(x - 10 * dx - 5 * dy, y - 8 * dy + 5 * dx);
+        ctx.fill();
+    }
+
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
+    let circles = [];
+    let circleIdCounter = 0;
+    class Circle {
+        constructor(x, y) {
+            this.id = 'c' + circleIdCounter;
+            this.x = x,
+                this.y = y;
+            this.mouseOffsetX = 0;
+            this.mouseOffsetY = 0;
+            this.isAccept = false;
+            this.text = '';
+            this.outArrows = new Set();
+            this.loop = null;
+            // Increment ID
+            circleIdCounter++;
+        }
+        setMouseStart(x, y) {
+            this.mouseOffsetX = this.x - x;
+            this.mouseOffsetY = this.y - y;
+        }
+        setAnchorPoint(x, y) {
+            this.x = x + this.mouseOffsetX;
+            this.y = y + this.mouseOffsetY;
+        }
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
+            ctx.stroke();
+            drawText(ctx, this.text, this.x, this.y, null);
+            if (this.isAccept) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
+                ctx.stroke();
+            }
+        }
+        closestPointOnCircle(x, y) {
+            var dx = x - this.x;
+            var dy = y - this.y;
+            var scale = Math.sqrt(dx * dx + dy * dy);
+            return {
+                'x': this.x + dx * nodeRadius / scale,
+                'y': this.y + dy * nodeRadius / scale
+            };
+        }
+        containsPoint(x, y) {
+            return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
+        }
+    }
+
     /*
      Portions of this file are adapted from:
 
@@ -187,82 +429,6 @@
      Copyright (c) 2025 Mohammed Mowla and Parth Patel
      Licensed under the MIT Licenses
     */
-    // The startState will be an EntryArrow. If you wish to
-    // access the start state node itself, you can use the
-    // pointsToCircle attribute of the EntryArrow to do so.
-    // Since we are not storing the EntryArrow itself as an
-    // attribute for Circles, it was best that the startState
-    // was set to the EntryArrow instead of its Circle
-    var startState = null;
-    // Since the startState will be imported, it cannot be reassigned
-    // as usual, so this setter method will enable you to do so
-    function setStartState(newEntryArrow) {
-        startState = newEntryArrow;
-    }
-    class EntryArrow {
-        constructor(pointsToCircle, startPoint) {
-            this.pointsToCircle = pointsToCircle;
-            this.deltaX = 0;
-            this.deltaY = 0;
-            this.startPoint = startPoint;
-            // this.text = ''
-            if (startPoint) {
-                this.setAnchorPoint(startPoint.x, startPoint.y);
-            }
-        }
-        draw(ctx) {
-            var points = this.getEndPoints();
-            ctx.beginPath();
-            ctx.moveTo(points.startX, points.startY);
-            ctx.lineTo(points.endX, points.endY);
-            ctx.stroke();
-            // Draw the text at the end without the fillrow
-            var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
-            drawText(ctx, "", points.startX, points.startY, textAngle);
-            // Draw the head of the arrow
-            drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
-        }
-        setAnchorPoint(x, y) {
-            this.deltaX = x - this.pointsToCircle.x;
-            this.deltaY = y - this.pointsToCircle.y;
-            if (Math.abs(this.deltaX) < snapToPadding)
-                this.deltaX = 0;
-            if (Math.abs(this.deltaY) < snapToPadding)
-                this.deltaY = 0;
-        }
-        getEndPoints() {
-            var startX = this.pointsToCircle.x + this.deltaX;
-            var startY = this.pointsToCircle.y + this.deltaY;
-            var end = this.pointsToCircle.closestPointOnCircle(startX, startY);
-            return {
-                'startX': startX,
-                'startY': startY,
-                'endX': end.x,
-                'endY': end.y,
-            };
-        }
-        containsPoint(x, y) {
-            var lineInfo = this.getEndPoints();
-            var dx = lineInfo.endX - lineInfo.startX;
-            var dy = lineInfo.endY - lineInfo.startY;
-            var length = Math.sqrt(dx * dx + dy * dy);
-            var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
-            var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
-            return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
-        }
-    }
-
-    /*
-     Portions of this file are adapted from:
-
-     Copyright (c) 2010 Evan Wallace
-     Finite State Machine Designer (https://madebyevan.com/fsm/)
-     Licensed under the MIT License
-
-     Modifications:
-     Copyright (c) 2025 Mohammed Mowla and Parth Patel
-     Licensed under the MIT Licenses
-    */
     class SelfArrow {
         constructor(pointsToCircle, point) {
             this.circle = pointsToCircle;
@@ -337,114 +503,6 @@
         }
     }
 
-    /**
-     * Utility functions for exporting finite automata diagrams to different formats.
-     *
-     * Provides helpers to:
-     * - Format numbers (`fixed`)
-     * - Escape text for XML (`textToXML`)
-     * - Insert descriptive comments into serialized outputs (`addCircleComment`, `addCurvedArrowComment`,
-     *   `addStraightArrowComment`, `addEntryArrowComment`, `addSelfArrowComment`)
-     *
-     * Supports both SVG (`<!-- ... -->`) and LaTeX (`%<!-- ... -->`) callers through the `CALLERS` enum.
-     */
-    /**
-     * Exists so that there aren't separate methods for both SVG and LaTeX
-     */
-    const CALLERS = {
-        SVG: 'svg',
-        LATEX: 'latex'
-    };
-    /**
-     * Formats a number to a fixed number of decimal places,
-     * trimming unnecessary trailing zeros and decimal points
-     *
-     * @param number
-     * @param digits
-     * @returns
-     */
-    function fixed(number, digits) {
-        return number.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '');
-    }
-    /**
-     * Escapes special characters in a string for safe inclusion in XML.
-     * Converts `&`, `<`, and `>` into their XML entities, and encodes
-     * non-printable or non-ASCII characters as numeric character references.
-     *
-     * @param text - The input string to escape
-     * @returns A safe XML-encoded string
-     */
-    function textToXML(text) {
-        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            let c = text.charCodeAt(i);
-            if (c >= 0x20 && c <= 0x7E) {
-                result += text[i];
-            }
-            else {
-                result += '&#' + c + ';';
-            }
-        }
-        return result;
-    }
-    function addCircleComment(caller, _data, id, x, y, accept, text) {
-        if (caller == CALLERS.SVG) {
-            _data += `\t<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
-        }
-        else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- Circle: id=${id}, x=${fixed(x, 3)}, y=${fixed(y, 3)}, accept=${accept}, text=${text} -->\n`;
-        }
-        return _data;
-    }
-    function addCurvedArrowComment(caller, _data, fromId, toId, parallel, perpendicular, label) {
-        if (caller == CALLERS.SVG) {
-            _data += `\t<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
-        }
-        else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- CurvedArrow: from=${fromId}, to=${toId}, parallel=${parallel}, perpendicular=${perpendicular}, label=${label} -->\n`;
-        }
-        return _data;
-    }
-    function addStraightArrowComment(caller, _data, fromId, toId, label) {
-        if (caller == CALLERS.SVG) {
-            _data += `\t<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
-        }
-        else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- StraightArrow: from=${fromId}, to=${toId}, label=${label} -->\n`;
-        }
-        return _data;
-    }
-    function addEntryArrowComment(caller, _data, toId, startX, startY) {
-        if (caller == CALLERS.SVG) {
-            _data += `\t<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
-        }
-        else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
-        }
-        return _data;
-    }
-    function addSelfArrowComment(caller, _data, circleId, anchorX, anchorY, text) {
-        if (caller == CALLERS.SVG) {
-            _data += `\t<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
-        }
-        else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- SelfArrow: circle=${circleId}, anchor=(${fixed(anchorX, 3)},${fixed(anchorY, 3)}), text=${text} -->\n`;
-        }
-        return _data;
-    }
-    function addAlphabetComment(caller, _data, alphabet) {
-        const stringifiedAlphabet = Array.from(alphabet).join(',');
-        console.log(stringifiedAlphabet);
-        if (caller == CALLERS.SVG) {
-            _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
-        }
-        else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
-        }
-        return _data;
-    }
-
     /*
      Portions of this file are adapted from:
 
@@ -456,447 +514,68 @@
      Copyright (c) 2025 Mohammed Mowla and Parth Patel
      Licensed under the MIT Licenses
     */
-    class ExportAsSVG {
-        constructor(canvas, alphabet) {
-            if (!canvas) {
-                throw new Error('A valid HTMLCanvasElement is required');
-            }
-            this.canvas = canvas;
-            this.alphabet = alphabet;
-            this.fillStyle = 'black';
-            this.strokeStyle = 'black';
-            this.lineWidth = 1;
-            this.font = '12px Arial, sans-serif';
-            this._points = [];
-            this._svgData = '';
-            this._transX = 0;
-            this._transY = 0;
-            this.faObject = null;
-        }
-        toSVG() {
-            return '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n<svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">\n' + this._svgData + '</svg>\n';
-        }
-        // Reset 
-        beginPath() {
-            this._points = [];
-        }
-        arc(x, y, radius, startAngle, endAngle, isReversed) {
-            x += this._transX;
-            y += this._transY;
-            let style = 'stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" fill="none"';
-            if (endAngle - startAngle == Math.PI * 2) {
-                // Comment  for a circle for easy importing
-                if (this.faObject instanceof Circle) {
-                    this._svgData = addCircleComment(CALLERS.SVG, this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
-                }
-                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
-            }
-            else {
-                if (this.faObject instanceof Arrow) {
-                    this._svgData = addCurvedArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
-                }
-                else if (this.faObject instanceof SelfArrow) {
-                    const centerPoint = this.faObject.getEndPointsAndCircle();
-                    this._svgData = addSelfArrowComment(CALLERS.SVG, this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
-                }
-                if (isReversed) {
-                    let temp = startAngle;
-                    startAngle = endAngle;
-                    endAngle = temp;
-                }
-                if (endAngle < startAngle) {
-                    endAngle += Math.PI * 2;
-                }
-                let startX = x + radius * Math.cos(startAngle);
-                let startY = y + radius * Math.sin(startAngle);
-                let endX = x + radius * Math.cos(endAngle);
-                let endY = y + radius * Math.sin(endAngle);
-                let useGreaterThan180 = (Math.abs(endAngle - startAngle) > Math.PI);
-                this._svgData += '\t<path ' + style + ' d="';
-                this._svgData += 'M ' + fixed(startX, 3) + ',' + fixed(startY, 3) + ' '; // startPoint(startX, startY)
-                this._svgData += 'A ' + fixed(radius, 3) + ',' + fixed(radius, 3) + ' '; // radii(radius, radius)
-                this._svgData += '0 '; // value of 0 means perfect circle, others mean ellipse
-                this._svgData += +useGreaterThan180 + ' ';
-                this._svgData += 1 + ' ';
-                this._svgData += fixed(endX, 3) + ',' + fixed(endY, 3); // endPoint(endX, endY)
-                this._svgData += '"/>\n';
-            }
-        }
-        ;
-        moveTo(x, y) {
-            x += this._transX;
-            y += this._transY;
-            this._points.push({ x, y });
-        }
-        lineTo(x, y) {
-            x += this._transX;
-            y += this._transY;
-            this._points.push({ x, y });
-        }
-        stroke() {
-            if (this._points.length == 0)
-                return;
-            if (this.faObject instanceof Arrow) {
-                this._svgData = addStraightArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
-            }
-            else if (this.faObject instanceof EntryArrow) {
-                const points = this.faObject.getEndPoints();
-                this._svgData = addEntryArrowComment(CALLERS.SVG, this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
-            }
-            this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
-            for (let i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
-            }
-            this._svgData += '"/>\n';
-        }
-        fill() {
-            if (this._points.length == 0)
-                return;
-            this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
-            for (let i = 0; i < this._points.length; i++) {
-                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
-            }
-            this._svgData += '"/>\n';
-        }
-        measureText(text) {
-            const c = this.canvas.getContext('2d');
-            if (c) {
-                c.font = '20px "Times New Roman", serif';
-                return c.measureText(text);
-            }
-            return { width: 0 };
-        }
-        fillText(text, x, y) {
-            x += this._transX;
-            y += this._transY;
-            if (text.replace(' ', '').length > 0) {
-                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
-            }
-        }
-        translate(x, y) {
-            this._transX = x;
-            this._transY = y;
-        }
-        ;
-        addAlphabet() {
-            this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
-        }
-        save() {
-            // No-op for SVG export
-        }
-        restore() {
-            // No-op for SVG export
-        }
-        clearRect() {
-            // No-op for SVG export
-        }
+    // The startState will be an EntryArrow. If you wish to
+    // access the start state node itself, you can use the
+    // pointsToCircle attribute of the EntryArrow to do so.
+    // Since we are not storing the EntryArrow itself as an
+    // attribute for Circles, it was best that the startState
+    // was set to the EntryArrow instead of its Circle
+    var startState = null;
+    // Since the startState will be imported, it cannot be reassigned
+    // as usual, so this setter method will enable you to do so
+    function setStartState(newEntryArrow) {
+        startState = newEntryArrow;
     }
-
-    /*
-     Portions of this file are adapted from:
-
-     Copyright (c) 2010 Evan Wallace
-     Finite State Machine Designer (https://madebyevan.com/fsm/)
-     Licensed under the MIT License
-
-     Modifications:
-     Copyright (c) 2025 Mohammed Mowla and Parth Patel
-     Licensed under the MIT Licenses
-    */
-    class ExportAsLaTeX {
-        constructor(canvas, alphabet) {
-            if (!canvas) {
-                throw new Error('A valid HTMLCanvasElement is required');
+    class EntryArrow {
+        constructor(pointsToCircle, startPoint) {
+            this.pointsToCircle = pointsToCircle;
+            this.deltaX = 0;
+            this.deltaY = 0;
+            this.startPoint = startPoint;
+            // this.text = ''
+            if (startPoint) {
+                this.setAnchorPoint(startPoint.x, startPoint.y);
             }
-            this.canvas = canvas;
-            this.alphabet = alphabet;
-            this.strokeStyle = 'black';
-            this.font = '20px "Times New Romain", serif';
-            this._points = [];
-            this._texData = '';
-            this._scale = 0.1;
-            this.faObject = null;
-        }
-        toLaTeX() {
-            return '\\documentclass[12pt]{article}\n' +
-                '\\usepackage{tikz}\n' +
-                '\n' +
-                '\\begin{document}\n' +
-                '\n' +
-                '\\begin{center}\n' +
-                '\\begin{tikzpicture}[scale=0.2]\n' +
-                '\\tikzstyle{every node}+=[inner sep=0pt]\n' +
-                this._texData +
-                '\\end{tikzpicture}\n' +
-                '\\end{center}\n' +
-                '\n' +
-                '\\end{document}\n';
-        }
-        // Reset 
-        beginPath() {
-            this._points = [];
-        }
-        arc(x, y, radius, startAngle, endAngle, isReversed) {
-            let trueX = x;
-            let trueY = y;
-            x *= this._scale;
-            y *= this._scale;
-            radius *= this._scale;
-            if (endAngle - startAngle == Math.PI * 2) {
-                if (this.faObject instanceof Circle) {
-                    this._texData = addCircleComment(CALLERS.LATEX, this._texData, this.faObject.id, trueX, trueY, this.faObject.isAccept, this.faObject.text);
-                }
-                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
-            }
-            else {
-                if (this.faObject instanceof Arrow) {
-                    this._texData = addCurvedArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
-                }
-                else if (this.faObject instanceof SelfArrow) {
-                    const centerPoint = this.faObject.getEndPointsAndCircle();
-                    this._texData = addSelfArrowComment(CALLERS.LATEX, this._texData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
-                }
-                if (isReversed) {
-                    var temp = startAngle;
-                    startAngle = endAngle;
-                    endAngle = temp;
-                }
-                if (endAngle < startAngle) {
-                    endAngle += Math.PI * 2;
-                }
-                // TikZ needs the angles to be in between -2pi and 2pi or it breaks
-                if (Math.min(startAngle, endAngle) < -2 * Math.PI) {
-                    startAngle += 2 * Math.PI;
-                    endAngle += 2 * Math.PI;
-                }
-                else if (Math.max(startAngle, endAngle) > 2 * Math.PI) {
-                    startAngle -= 2 * Math.PI;
-                    endAngle -= 2 * Math.PI;
-                }
-                startAngle = -startAngle;
-                endAngle = -endAngle;
-                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x + radius * Math.cos(startAngle), 3) + ',' + fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' + fixed(startAngle * 180 / Math.PI, 5) + ':' + fixed(endAngle * 180 / Math.PI, 5) + ':' + fixed(radius, 3) + ');\n';
-            }
-        }
-        ;
-        moveTo(x, y) {
-            x *= this._scale;
-            y *= this._scale;
-            this._points.push({ x, y });
-        }
-        lineTo(x, y) {
-            x *= this._scale;
-            y *= this._scale;
-            this._points.push({ x, y });
-        }
-        stroke() {
-            if (this._points.length == 0)
-                return;
-            if (this.faObject instanceof Arrow) {
-                this._texData = addStraightArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
-            }
-            else if (this.faObject instanceof EntryArrow) {
-                const points = this.faObject.getEndPoints();
-                this._texData = addEntryArrowComment(CALLERS.LATEX, this._texData, this.faObject.pointsToCircle.id, points.startX, points.startY);
-            }
-            this._texData += '\\draw [' + this.strokeStyle + ']';
-            for (var i = 0; i < this._points.length; i++) {
-                var p = this._points[i];
-                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
-            }
-            this._texData += ';\n';
-        }
-        fill() {
-            if (this._points.length == 0)
-                return;
-            this._texData += '\\fill [' + this.strokeStyle + ']';
-            for (var i = 0; i < this._points.length; i++) {
-                var p = this._points[i];
-                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
-            }
-            this._texData += ';\n';
-        }
-        measureText(text) {
-            const c = this.canvas.getContext('2d');
-            if (c) {
-                c.font = '20px "Times New Romain", serif';
-                return c.measureText(text);
-            }
-            return { width: 0 };
-        }
-        fillText(text, originalText, x, y, angleOrNull) {
-            if (text.replace(' ', '').length > 0) {
-                var nodeParams = '';
-                // x and y start off as the center of the text, but will be moved to one side of the box when angleOrNull != null
-                if (angleOrNull != null) {
-                    var width = this.measureText(text).width;
-                    var dx = Math.cos(angleOrNull);
-                    var dy = Math.sin(angleOrNull);
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        if (dx > 0)
-                            nodeParams = '[right] ', x -= width / 2;
-                        else
-                            nodeParams = '[left] ', x += width / 2;
-                    }
-                    else {
-                        if (dy > 0)
-                            nodeParams = '[below] ', y -= 10;
-                        else
-                            nodeParams = '[above] ', y += 10;
-                    }
-                }
-                x *= this._scale;
-                y *= this._scale;
-                this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
-            }
-        }
-        addAlphabet() {
-            this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
-        }
-        translate() {
-            // No-op for LaTeX export
-        }
-        save() {
-            // No-op for LaTeX export
-        }
-        restore() {
-            // No-op for LaTeX export
-        }
-        clearRect() {
-            // No-op for LaTeX export
-        }
-    }
-
-    /*
-     Portions of this file are adapted from:
-
-     Copyright (c) 2010 Evan Wallace
-     Finite State Machine Designer (https://madebyevan.com/fsm/)
-     Licensed under the MIT License
-
-     Modifications:
-     Copyright (c) 2025 Mohammed Mowla and Parth Patel
-     Licensed under the MIT Licenses
-    */
-    const greekLetterNames = [
-        'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon',
-        'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda',
-        'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma',
-        'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'
-    ];
-    let nodeRadius = 30;
-    let snapToPadding = 10; // pixels
-    let hitTargetPadding = 6; // pixels
-    // Takes LaTeX-like plain text and converts to Unicode symbols
-    // Handles Greek letters and subscripts
-    // --- Note --- greek letters cannot be subscripted current 'limitation'
-    function convertText(text) {
-        let result = text;
-        // Greek letter conversion
-        for (let i = 0; i < greekLetterNames.length; i++) {
-            let name = greekLetterNames[i];
-            // Regex: '\\\\' matches a literal backslash "\" in text.
-            // 'g' flag -> replace all not just first instance
-            result = result.replace(new RegExp('\\\\' + name, 'g'), String.fromCharCode(913 + i + (i > 16 ? 1 : 0))); // uppercase
-            result = result.replace(new RegExp('\\\\' + name.toLowerCase(), 'g'), String.fromCharCode(945 + i + (i > 16 ? 1 : 0))); // lowercase
-        }
-        // Subscript conversion
-        for (let i = 0; i < 10; i++) {
-            result = result.replace(new RegExp('_' + i, 'g'), String.fromCharCode(8320 + i));
-        }
-        return result;
-    }
-    function drawText(ctx, originalText, x, y, angeOrNull) {
-        ctx.font = '20px Times New Roman';
-        let text = convertText(originalText); // Convert all of the text in one go both subscript and greek
-        let width = ctx.measureText(text).width;
-        x -= width / 2;
-        if (angeOrNull != null) {
-            let cos = Math.cos(angeOrNull);
-            let sin = Math.sin(angeOrNull);
-            let cornerPointX = (width / 2 + 5) * (cos > 0 ? 1 : -1);
-            let cornerPointY = (10 + 5) * (sin > 0 ? 1 : -1);
-            let slide = sin * Math.pow(Math.abs(sin), 40) * cornerPointX - cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
-            x += cornerPointX - sin * slide;
-            y += cornerPointY + cos * slide;
-        }
-        x = Math.round(x);
-        y = Math.round(y);
-        if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsSVG) {
-            ctx.fillText(text, x, y + 6);
-        }
-        else if (ctx instanceof ExportAsLaTeX)
-            if (ctx instanceof ExportAsSVG || ctx instanceof ExportAsLaTeX) {
-                ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
-            }
-    }
-    function drawArrow(ctx, x, y, angle) {
-        let dx = Math.cos(angle);
-        let dy = Math.sin(angle);
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - 10 * dx + 5 * dy, y - 8 * dy - 5 * dx);
-        ctx.lineTo(x - 10 * dx - 5 * dy, y - 8 * dy + 5 * dx);
-        ctx.fill();
-    }
-
-    /*
-     Portions of this file are adapted from:
-
-     Copyright (c) 2010 Evan Wallace
-     Finite State Machine Designer (https://madebyevan.com/fsm/)
-     Licensed under the MIT License
-
-     Modifications:
-     Copyright (c) 2025 Mohammed Mowla and Parth Patel
-     Licensed under the MIT Licenses
-    */
-    let circles = [];
-    let circleIdCounter = 0;
-    class Circle {
-        constructor(x, y) {
-            this.id = 'c' + circleIdCounter;
-            this.x = x,
-                this.y = y;
-            this.mouseOffsetX = 0;
-            this.mouseOffsetY = 0;
-            this.isAccept = false;
-            this.text = '';
-            this.outArrows = new Set();
-            this.loop = null;
-            // Increment ID
-            circleIdCounter++;
-        }
-        setMouseStart(x, y) {
-            this.mouseOffsetX = this.x - x;
-            this.mouseOffsetY = this.y - y;
-        }
-        setAnchorPoint(x, y) {
-            this.x = x + this.mouseOffsetX;
-            this.y = y + this.mouseOffsetY;
         }
         draw(ctx) {
+            var points = this.getEndPoints();
             ctx.beginPath();
-            ctx.arc(this.x, this.y, nodeRadius, 0, 2 * Math.PI, false);
+            ctx.moveTo(points.startX, points.startY);
+            ctx.lineTo(points.endX, points.endY);
             ctx.stroke();
-            drawText(ctx, this.text, this.x, this.y, null);
-            if (this.isAccept) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, nodeRadius - 5, 0, 2 * Math.PI, false);
-                ctx.stroke();
-            }
+            // Draw the text at the end without the fillrow
+            var textAngle = Math.atan2(points.startY - points.endY, points.startX - points.endX);
+            drawText(ctx, "", points.startX, points.startY, textAngle);
+            // Draw the head of the arrow
+            drawArrow(ctx, points.endX, points.endY, Math.atan2(-this.deltaY, -this.deltaX));
         }
-        closestPointOnCircle(x, y) {
-            var dx = x - this.x;
-            var dy = y - this.y;
-            var scale = Math.sqrt(dx * dx + dy * dy);
+        setAnchorPoint(x, y) {
+            this.deltaX = x - this.pointsToCircle.x;
+            this.deltaY = y - this.pointsToCircle.y;
+            if (Math.abs(this.deltaX) < snapToPadding)
+                this.deltaX = 0;
+            if (Math.abs(this.deltaY) < snapToPadding)
+                this.deltaY = 0;
+        }
+        getEndPoints() {
+            var startX = this.pointsToCircle.x + this.deltaX;
+            var startY = this.pointsToCircle.y + this.deltaY;
+            var end = this.pointsToCircle.closestPointOnCircle(startX, startY);
             return {
-                'x': this.x + dx * nodeRadius / scale,
-                'y': this.y + dy * nodeRadius / scale
+                'startX': startX,
+                'startY': startY,
+                'endX': end.x,
+                'endY': end.y,
             };
         }
         containsPoint(x, y) {
-            return (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) < nodeRadius * nodeRadius;
+            var lineInfo = this.getEndPoints();
+            var dx = lineInfo.endX - lineInfo.startX;
+            var dy = lineInfo.endY - lineInfo.startY;
+            var length = Math.sqrt(dx * dx + dy * dy);
+            var percent = (dx * (x - lineInfo.startX) + dy * (y - lineInfo.startY)) / (length * length);
+            var distance = (dx * (y - lineInfo.startY) - dy * (x - lineInfo.startX)) / length;
+            return (percent > 0 && percent < 1 && Math.abs(distance) < hitTargetPadding);
         }
     }
 
@@ -1133,6 +812,330 @@
             alert("The string, \"" + input + "\", was rejected!");
             //console.log("Rejected!");
             return false;
+        }
+    }
+
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
+    class ExportAsSVG {
+        constructor(canvas, alphabet) {
+            this.type = "svg";
+            if (!canvas) {
+                throw new Error('A valid HTMLCanvasElement is required');
+            }
+            this.canvas = canvas;
+            this.alphabet = alphabet;
+            this.fillStyle = 'black';
+            this.strokeStyle = 'black';
+            this.lineWidth = 1;
+            this.font = '12px Arial, sans-serif';
+            this._points = [];
+            this._svgData = '';
+            this._transX = 0;
+            this._transY = 0;
+            this.faObject = null;
+        }
+        toSVG() {
+            return '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n\n<svg width="800" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">\n' + this._svgData + '</svg>\n';
+        }
+        // Reset 
+        beginPath() {
+            this._points = [];
+        }
+        arc(x, y, radius, startAngle, endAngle, isReversed) {
+            x += this._transX;
+            y += this._transY;
+            let style = 'stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" fill="none"';
+            if (endAngle - startAngle == Math.PI * 2) {
+                // Comment  for a circle for easy importing
+                if (this.faObject instanceof Circle) {
+                    this._svgData = addCircleComment(CALLERS.SVG, this._svgData, this.faObject.id, x, y, this.faObject.isAccept, this.faObject.text);
+                }
+                this._svgData += '\t<ellipse ' + style + ' cx="' + fixed(x, 3) + '" cy="' + fixed(y, 3) + '" rx="' + fixed(radius, 3) + '" ry="' + fixed(radius, 3) + '"/>\n';
+            }
+            else {
+                if (this.faObject instanceof Arrow) {
+                    this._svgData = addCurvedArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+                }
+                else if (this.faObject instanceof SelfArrow) {
+                    const centerPoint = this.faObject.getEndPointsAndCircle();
+                    this._svgData = addSelfArrowComment(CALLERS.SVG, this._svgData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+                }
+                if (isReversed) {
+                    let temp = startAngle;
+                    startAngle = endAngle;
+                    endAngle = temp;
+                }
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                let startX = x + radius * Math.cos(startAngle);
+                let startY = y + radius * Math.sin(startAngle);
+                let endX = x + radius * Math.cos(endAngle);
+                let endY = y + radius * Math.sin(endAngle);
+                let useGreaterThan180 = (Math.abs(endAngle - startAngle) > Math.PI);
+                this._svgData += '\t<path ' + style + ' d="';
+                this._svgData += 'M ' + fixed(startX, 3) + ',' + fixed(startY, 3) + ' '; // startPoint(startX, startY)
+                this._svgData += 'A ' + fixed(radius, 3) + ',' + fixed(radius, 3) + ' '; // radii(radius, radius)
+                this._svgData += '0 '; // value of 0 means perfect circle, others mean ellipse
+                this._svgData += +useGreaterThan180 + ' ';
+                this._svgData += 1 + ' ';
+                this._svgData += fixed(endX, 3) + ',' + fixed(endY, 3); // endPoint(endX, endY)
+                this._svgData += '"/>\n';
+            }
+        }
+        ;
+        moveTo(x, y) {
+            x += this._transX;
+            y += this._transY;
+            this._points.push({ x, y });
+        }
+        lineTo(x, y) {
+            x += this._transX;
+            y += this._transY;
+            this._points.push({ x, y });
+        }
+        stroke() {
+            if (this._points.length == 0)
+                return;
+            if (this.faObject instanceof Arrow) {
+                this._svgData = addStraightArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            }
+            else if (this.faObject instanceof EntryArrow) {
+                const points = this.faObject.getEndPoints();
+                this._svgData = addEntryArrowComment(CALLERS.SVG, this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
+            }
+            this._svgData += '\t<polygon stroke="' + this.strokeStyle + '" stroke-width="' + this.lineWidth + '" points="';
+            for (let i = 0; i < this._points.length; i++) {
+                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+            }
+            this._svgData += '"/>\n';
+        }
+        fill() {
+            if (this._points.length == 0)
+                return;
+            this._svgData += '\t<polygon fill="' + this.fillStyle + '" stroke-width="' + this.lineWidth + '" points="';
+            for (let i = 0; i < this._points.length; i++) {
+                this._svgData += (i > 0 ? ' ' : '') + fixed(this._points[i].x, 3) + ',' + fixed(this._points[i].y, 3);
+            }
+            this._svgData += '"/>\n';
+        }
+        measureText(text) {
+            const c = this.canvas.getContext('2d');
+            if (c) {
+                c.font = '20px "Times New Roman", serif';
+                return c.measureText(text);
+            }
+            return { width: 0 };
+        }
+        fillText(text, x, y) {
+            x += this._transX;
+            y += this._transY;
+            if (text.replace(' ', '').length > 0) {
+                this._svgData += '\t<text x="' + fixed(x, 3) + '" y="' + fixed(y, 3) + '" font-family="Times New Roman" font-size="20">' + textToXML(text) + '</text>\n';
+            }
+        }
+        translate(x, y) {
+            this._transX = x;
+            this._transY = y;
+        }
+        ;
+        addAlphabet() {
+            this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
+        }
+        save() {
+            // No-op for SVG export
+        }
+        restore() {
+            // No-op for SVG export
+        }
+        clearRect() {
+            // No-op for SVG export
+        }
+    }
+
+    /*
+     Portions of this file are adapted from:
+
+     Copyright (c) 2010 Evan Wallace
+     Finite State Machine Designer (https://madebyevan.com/fsm/)
+     Licensed under the MIT License
+
+     Modifications:
+     Copyright (c) 2025 Mohammed Mowla and Parth Patel
+     Licensed under the MIT Licenses
+    */
+    class ExportAsLaTeX {
+        constructor(canvas, alphabet) {
+            this.type = "latex";
+            if (!canvas) {
+                throw new Error('A valid HTMLCanvasElement is required');
+            }
+            this.canvas = canvas;
+            this.alphabet = alphabet;
+            this.strokeStyle = 'black';
+            this.font = '20px "Times New Romain", serif';
+            this._points = [];
+            this._texData = '';
+            this._scale = 0.1;
+            this.faObject = null;
+        }
+        toLaTeX() {
+            return '\\documentclass[12pt]{article}\n' +
+                '\\usepackage{tikz}\n' +
+                '\n' +
+                '\\begin{document}\n' +
+                '\n' +
+                '\\begin{center}\n' +
+                '\\begin{tikzpicture}[scale=0.2]\n' +
+                '\\tikzstyle{every node}+=[inner sep=0pt]\n' +
+                this._texData +
+                '\\end{tikzpicture}\n' +
+                '\\end{center}\n' +
+                '\n' +
+                '\\end{document}\n';
+        }
+        // Reset 
+        beginPath() {
+            this._points = [];
+        }
+        arc(x, y, radius, startAngle, endAngle, isReversed) {
+            let trueX = x;
+            let trueY = y;
+            x *= this._scale;
+            y *= this._scale;
+            radius *= this._scale;
+            if (endAngle - startAngle == Math.PI * 2) {
+                if (this.faObject instanceof Circle) {
+                    this._texData = addCircleComment(CALLERS.LATEX, this._texData, this.faObject.id, trueX, trueY, this.faObject.isAccept, this.faObject.text);
+                }
+                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x, 3) + ',' + fixed(-y, 3) + ') circle (' + fixed(radius, 3) + ');\n';
+            }
+            else {
+                if (this.faObject instanceof Arrow) {
+                    this._texData = addCurvedArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.parallelPart, this.faObject.perpendicularPart, this.faObject.text);
+                }
+                else if (this.faObject instanceof SelfArrow) {
+                    const centerPoint = this.faObject.getEndPointsAndCircle();
+                    this._texData = addSelfArrowComment(CALLERS.LATEX, this._texData, this.faObject.circle.id, centerPoint.circleX, centerPoint.circleY, this.faObject.text);
+                }
+                if (isReversed) {
+                    var temp = startAngle;
+                    startAngle = endAngle;
+                    endAngle = temp;
+                }
+                if (endAngle < startAngle) {
+                    endAngle += Math.PI * 2;
+                }
+                // TikZ needs the angles to be in between -2pi and 2pi or it breaks
+                if (Math.min(startAngle, endAngle) < -2 * Math.PI) {
+                    startAngle += 2 * Math.PI;
+                    endAngle += 2 * Math.PI;
+                }
+                else if (Math.max(startAngle, endAngle) > 2 * Math.PI) {
+                    startAngle -= 2 * Math.PI;
+                    endAngle -= 2 * Math.PI;
+                }
+                startAngle = -startAngle;
+                endAngle = -endAngle;
+                this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x + radius * Math.cos(startAngle), 3) + ',' + fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' + fixed(startAngle * 180 / Math.PI, 5) + ':' + fixed(endAngle * 180 / Math.PI, 5) + ':' + fixed(radius, 3) + ');\n';
+            }
+        }
+        ;
+        moveTo(x, y) {
+            x *= this._scale;
+            y *= this._scale;
+            this._points.push({ x, y });
+        }
+        lineTo(x, y) {
+            x *= this._scale;
+            y *= this._scale;
+            this._points.push({ x, y });
+        }
+        stroke() {
+            if (this._points.length == 0)
+                return;
+            if (this.faObject instanceof Arrow) {
+                this._texData = addStraightArrowComment(CALLERS.LATEX, this._texData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
+            }
+            else if (this.faObject instanceof EntryArrow) {
+                const points = this.faObject.getEndPoints();
+                this._texData = addEntryArrowComment(CALLERS.LATEX, this._texData, this.faObject.pointsToCircle.id, points.startX, points.startY);
+            }
+            this._texData += '\\draw [' + this.strokeStyle + ']';
+            for (var i = 0; i < this._points.length; i++) {
+                var p = this._points[i];
+                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
+            }
+            this._texData += ';\n';
+        }
+        fill() {
+            if (this._points.length == 0)
+                return;
+            this._texData += '\\fill [' + this.strokeStyle + ']';
+            for (var i = 0; i < this._points.length; i++) {
+                var p = this._points[i];
+                this._texData += (i > 0 ? ' --' : '') + ' (' + fixed(p.x, 2) + ',' + fixed(-p.y, 2) + ')';
+            }
+            this._texData += ';\n';
+        }
+        measureText(text) {
+            const c = this.canvas.getContext('2d');
+            if (c) {
+                c.font = '20px "Times New Romain", serif';
+                return c.measureText(text);
+            }
+            return { width: 0 };
+        }
+        fillText(text, originalText, x, y, angleOrNull) {
+            if (text.replace(' ', '').length > 0) {
+                var nodeParams = '';
+                // x and y start off as the center of the text, but will be moved to one side of the box when angleOrNull != null
+                if (angleOrNull != null) {
+                    var width = this.measureText(text).width;
+                    var dx = Math.cos(angleOrNull);
+                    var dy = Math.sin(angleOrNull);
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        if (dx > 0)
+                            nodeParams = '[right] ', x -= width / 2;
+                        else
+                            nodeParams = '[left] ', x += width / 2;
+                    }
+                    else {
+                        if (dy > 0)
+                            nodeParams = '[below] ', y -= 10;
+                        else
+                            nodeParams = '[above] ', y += 10;
+                    }
+                }
+                x *= this._scale;
+                y *= this._scale;
+                this._texData += '\\draw (' + fixed(x, 2) + ',' + fixed(-y, 2) + ') node ' + nodeParams + '{$' + originalText.replace(/ /g, '\\mbox{ }') + '$};\n';
+            }
+        }
+        addAlphabet() {
+            this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
+        }
+        translate() {
+            // No-op for LaTeX export
+        }
+        save() {
+            // No-op for LaTeX export
+        }
+        restore() {
+            // No-op for LaTeX export
+        }
+        clearRect() {
+            // No-op for LaTeX export
         }
     }
 

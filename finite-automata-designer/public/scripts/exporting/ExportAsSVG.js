@@ -13,9 +13,10 @@ import { Arrow } from "../Shapes/Arrow";
 import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
-import { CALLERS, fixed, addCircleComment, addCurvedArrowComment, addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, textToXML, addAlphabetComment } from "./exportUtils";
+import { CALLERS, fixed, addCircleComment, addCurvedArrowComment, addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, textToXML, addAlphabetComment } from "../exportUtils";
 export class ExportAsSVG {
     constructor(canvas, alphabet) {
+        this.type = "svg";
         if (!canvas) {
             throw new Error('A valid HTMLCanvasElement is required');
         }

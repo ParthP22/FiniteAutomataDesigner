@@ -13,9 +13,10 @@ import { Arrow } from "../Shapes/Arrow";
 import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
-import { fixed, addCircleComment, addCurvedArrowComment, addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS, addAlphabetComment, } from "./exportUtils";
+import { fixed, addCircleComment, addCurvedArrowComment, addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS, addAlphabetComment, } from "../exportUtils";
 export class ExportAsLaTeX {
     constructor(canvas, alphabet) {
+        this.type = "latex";
         if (!canvas) {
             throw new Error('A valid HTMLCanvasElement is required');
         }

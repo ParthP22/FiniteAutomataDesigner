@@ -14,10 +14,11 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS, addAlphabetComment,  } from "./exportUtils";
+import { BaseDrawContext, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS, addAlphabetComment,  } from "../exportUtils";
 
 
-export class ExportAsLaTeX {
+export class ExportAsLaTeX implements BaseDrawContext{
+    readonly type = "latex";
     strokeStyle: string;
     font: string; 
     _points: Point[];

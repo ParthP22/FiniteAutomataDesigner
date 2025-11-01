@@ -14,9 +14,10 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML, addAlphabetComment} from "./exportUtils";
+import { BaseDrawContext, CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML, addAlphabetComment} from "../exportUtils";
 
-export class ExportAsSVG {
+export class ExportAsSVG implements BaseDrawContext{
+    readonly type = "svg";
     fillStyle: string;
     strokeStyle: string;
     lineWidth: number;

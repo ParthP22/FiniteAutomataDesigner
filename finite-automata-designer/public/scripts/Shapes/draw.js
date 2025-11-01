@@ -9,8 +9,8 @@
  Copyright (c) 2025 Mohammed Mowla and Parth Patel
  Licensed under the MIT Licenses
 */
-import { ExportAsSVG } from "../exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { typeSVG } from "../exportUtils";
+import { typeLaTeX } from "../exportUtils";
 export const greekLetterNames = [
     'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon',
     'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda',
@@ -65,13 +65,12 @@ export function drawText(ctx, originalText, x, y, angeOrNull) {
     }
     x = Math.round(x);
     y = Math.round(y);
-    if (ctx instanceof CanvasRenderingContext2D || ctx instanceof ExportAsSVG) {
+    if (ctx instanceof CanvasRenderingContext2D || ctx.type == typeSVG) {
         ctx.fillText(text, x, y + 6);
     }
-    else if (ctx instanceof ExportAsLaTeX)
-        if (ctx instanceof ExportAsSVG || ctx instanceof ExportAsLaTeX) {
-            ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
-        }
+    else if (ctx.type == typeLaTeX) {
+        ctx.fillText(text, originalText, x + 6, y + 3, angeOrNull);
+    }
 }
 export function drawArrow(ctx, x, y, angle) {
     let dx = Math.cos(angle);
