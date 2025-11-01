@@ -1,6 +1,7 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -8,7 +9,7 @@ export default function Navbar() {
   return (
     <nav className="w-full bg-gray-700 text-white px-8 py-4 flex items-center justify-between shadow">
       <div className="text-2xl font-bold tracking-wide">
-        <a href="/">Finite Automata Designer</a>
+        <Link href="/">Finite Automata Designer</Link>
       </div>
       <div className="flex items-center space-x-4">
 
@@ -16,7 +17,9 @@ export default function Navbar() {
         {status === "authenticated" ? (
           <>
             {session.user?.image && (
-              <img
+              <Image
+                width={100}
+                height={100}
                 src={session.user.image}
                 alt="User avatar"
                 className="w-8 h-8 rounded-full border-2 border-white"

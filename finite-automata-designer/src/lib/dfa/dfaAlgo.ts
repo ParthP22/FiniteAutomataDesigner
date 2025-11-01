@@ -41,7 +41,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     // in the alphabet.
     // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
     // it should not work, since "00" and "01" are not in the alphabet.
-    for(let newTransition of newTransitions){
+    for(const newTransition of newTransitions){
       
       if(!alphabet.has(newTransition)){
         lastEditedArrow.text = "";
@@ -57,16 +57,16 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     const duplicateTransitions: Array<string> = [];
 
     // You iterate through every arrow that goes outwards from this current node
-    for(let arrow of startCircOutArrows){
+    for(const arrow of startCircOutArrows){
       const oldTransitions = arrow.transition;
 
       // Then, you iterate through each of the old transitions for each arrow
-      for(let oldTransition of oldTransitions){
+      for(const oldTransition of oldTransitions){
         
         // Next, you iterate through each transition in the new
         // transition, and compare it against each transition
         // in the original transition for that arrow
-        for(let newTransition of newTransitions){
+        for(const newTransition of newTransitions){
 
           // If a transition already exists, then it fails determinism
           if(newTransition === oldTransition){
@@ -92,19 +92,19 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     }
 }
 
-function printTransitions(){
-  console.log("Printing transitions");
+// function printTransitions(){
+//   console.log("Printing transitions");
   
-  for(let circle of circles){
-    console.log("Num of trans for circle " + circle.text + " is: " + circle.outArrows.size);
-    console.log("Trans for circle: " + circle.text + "{ ");
-    const outArrows = circle.outArrows;
-    for(let arrow of outArrows){
-      console.log(arrow.transition);
-    }
-    console.log("}");
-  }
-}
+//   for(let circle of circles){
+//     console.log("Num of trans for circle " + circle.text + " is: " + circle.outArrows.size);
+//     console.log("Trans for circle: " + circle.text + "{ ");
+//     const outArrows = circle.outArrows;
+//     for(let arrow of outArrows){
+//       console.log(arrow.transition);
+//     }
+//     console.log("}");
+//   }
+// }
 
 // This is a "completeness" check: were all characters of the
 // alphabet used when building the DFA? This is processed
@@ -112,22 +112,22 @@ function printTransitions(){
 export function inputDeterminismCheck(){
   
   // We iterate over every single state
-  for(let node of circles){
+  for(const node of circles){
     // We retrieve the outgoing arrows from the current state
     const outArrows = node.outArrows;
-    for(let char of alphabet){
+    for(const char of alphabet){
       // The "exists" variable will be used to track if
 			// this specific character in the alphabet has been
 			// used as a transition or not for this specific state
-      var exists: boolean = false;
+      let exists: boolean = false;
 
       // We iterate over all the outgoing arrows from the
 			// current state
-      for(let arrow of outArrows){
+      for(const arrow of outArrows){
 
         // Then, for each arrow, we iterate over every
 				// transition for it.
-        for(let transition of arrow.transition){
+        for(const transition of arrow.transition){
 
           // If the current character in the alphabet
 					// does exist as a transition for this current
@@ -162,8 +162,8 @@ export function inputDeterminismCheck(){
 }
 
 export function dfaAlgo(input: string){
-  var acceptStateExists: boolean = false;
-  for(let circle of circles){
+  let acceptStateExists: boolean = false;
+  for(const circle of circles){
     if(circle.isAccept){
       acceptStateExists = true;
       break;
@@ -185,7 +185,7 @@ export function dfaAlgo(input: string){
 
   // First, we make sure the input string is legal. If it contains
 	// characters not defined in the alphabet, then we return false immediately.
-  for(let char of input){
+  for(const char of input){
     if(!alphabet.has(char)){
       alert("Input contains \'" + char + "\', which is not in the alphabet");
       return false;
@@ -193,7 +193,7 @@ export function dfaAlgo(input: string){
   }
 
   // This "curr" variable will be used to traverse over the whole DFA
-  var curr: Circle = startState.pointsToCircle;
+  let curr: Circle = startState.pointsToCircle;
 
   // We check if the DFA has been defined correctly. If not, then return false.
   if(!inputDeterminismCheck()){
@@ -201,13 +201,13 @@ export function dfaAlgo(input: string){
   }
 
   // We begin traversing the input string.
-  for(let char of input){
+  for(const char of input){
 
     // We go through every outgoing arrow for the 
 		// current state.
     const currOutArrows = curr.outArrows;
     //console.log("Char: " + char);
-    for(let arrow of currOutArrows){
+    for(const arrow of currOutArrows){
       //console.log("At: " + curr.text);
       //console.log("Checking transition: " + arrow.transition);
 
