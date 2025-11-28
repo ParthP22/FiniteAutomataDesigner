@@ -3,12 +3,16 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
-import { User } from "@supabase/supabase-js"
-
+import { User } from "@supabase/supabase-js";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [passwordSectionOpen, setPasswordSectionOpen] = useState(false); // <-- NEW
 
   const router = useRouter();
   const supabase = createClient();
@@ -32,7 +36,33 @@ export default function ProfilePage() {
     loadUser();
   }, [router, supabase]);
 
-  // Show loading while checking authentication
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordMessage("");
+    setErrorMessage("");
+
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long.");
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (error) {
+      setErrorMessage("Error updating password: " + error.message);
+    } else {
+      setPasswordMessage("Password updated successfully.");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordSectionOpen(false); // Optionally close dropdown after update
+    }
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -44,7 +74,6 @@ export default function ProfilePage() {
     );
   }
 
-  // If no user, don't render (redirect will run)
   if (!user) return null;
 
   return (
@@ -59,9 +88,7 @@ export default function ProfilePage() {
         {/* Profile Information */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Account Information</h2>
-
           <div className="flex items-center space-x-4 mb-6">
-            {/* Optional if you’ve added metadata like photo_url */}
             {user?.user_metadata?.avatar_url && (
               <img
                 src={user.user_metadata.avatar_url}
@@ -69,7 +96,6 @@ export default function ProfilePage() {
                 className="w-20 h-20 rounded-full border-4 border-gray-200"
               />
             )}
-
             <div>
               <h3 className="text-lg font-medium text-gray-800">
                 {user?.user_metadata?.name || "User"}
@@ -77,22 +103,70 @@ export default function ProfilePage() {
               <p className="text-gray-600">{user?.email}</p>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <p className="text-gray-900 px-3 py-2">
-                {user?.user_metadata?.name || "Not provided"}
-              </p>
-            </div>
+        {/* Change Password (Dropdown) */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2
+            className="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center cursor-pointer"
+            onClick={() => setPasswordSectionOpen(!passwordSectionOpen)}
+          >
+            Change Password
+            <span
+              className={`transition-transform ${
+                passwordSectionOpen ? "rotate-180" : ""
+              }`}
+            >
+              ▼
+            </span>
+          </h2>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="text-gray-900 px-3 py-2">
-                {user?.email}
-              </p>
-            </div>
-          </div>
+          {/* Dropdown content */}
+          {passwordSectionOpen && (
+            <form onSubmit={handlePasswordChange} className="space-y-4 mt-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="mt-1 w-full border rounded-lg px-3 py-2"
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1 w-full border rounded-lg px-3 py-2"
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+
+              {errorMessage && (
+                <p className="text-red-600 text-sm">{errorMessage}</p>
+              )}
+              {passwordMessage && (
+                <p className="text-green-600 text-sm">{passwordMessage}</p>
+              )}
+
+              <button
+                type="submit"
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Update Password
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </main>
