@@ -1,35 +1,61 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { login, signup } from "../../login/actions"; // server actions
-import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
 
 export default function LoginForm() {
-  const router = useRouter();
-  const supabase = createClient();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <form
       className="flex flex-col gap-4"
-
       // Prevent default and run server action manually to ensure session cookies are synced
       onSubmit={async (e) => {
         e.preventDefault();
+        setError(null); // Clear previous errors
+        setIsLoading(true);
+        
         const form = e.currentTarget;
         const formData = new FormData(form);
         const action = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("data-action");
 
-        if (action === "login") {
-          await login(formData);
+        try {
+          if (action === "login") {
+            const result = await login(formData);
+            
+            if (result?.error) {
+              // Display error and clear form
+              setError(result.error);
+              form.reset();
+              setIsLoading(false);
+              return;
+            }
+            
+            // Success - redirect to home
+            window.location.href = "/";
+          }
+          else {
+            const result = await signup(formData);
+            
+            if (result?.error) {
+              // Display error and clear form
+              setError(result.error);
+              form.reset();
+              setIsLoading(false);
+              return;
+            }
+            
+            // Success - redirect to home
+            // If there's a message (like email confirmation), we could show it, but for now just redirect
+            window.location.href = "/";
+          }
+        } catch (err) {
+          // Handle unexpected errors
+          setError(err instanceof Error ? err.message : "An unexpected error occurred");
+          form.reset();
+          setIsLoading(false);
         }
-        else {
-          await signup(formData);
-        }
-
-        // Use window.location for a full page reload to ensure session cookies are synced
-        // This is more reliable than router navigation for auth state updates
-        // The Navbar will properly detect the logged-in state after the reload
-        window.location.href = "/";
       }}
     >
       <div>
@@ -54,20 +80,29 @@ export default function LoginForm() {
         />
       </div>
 
+      {/* Error message display */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
       <div className="flex space-x-4 mt-4">
         <button
           type="submit"
           data-action="login"
-          className="flex-1 px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
+          disabled={isLoading}
+          className="flex-1 px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Log in
+          {isLoading ? "Logging in..." : "Log in"}
         </button>
         <button
           type="submit"
           data-action="signup"
-          className="flex-1 px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
+          disabled={isLoading}
+          className="flex-1 px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Sign up
+          {isLoading ? "Signing up..." : "Sign up"}
         </button>
       </div>
     </form>
