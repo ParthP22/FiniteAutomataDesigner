@@ -1,55 +1,44 @@
 "use client";
-// import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
-import { createClient } from '@/lib/supabase/client'
-import { useState,useEffect } from "react";
-import { redirect } from 'next/navigation'
-import { User } from "@supabase/supabase-js"
-// import { signout } from "../login/actions";
-
+import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { User } from "@supabase/supabase-js";
 
 export default function Navbar() {
-  // const { data: session, status } = useSession();
 
   const [user, setUser] = useState<User | null>(null);
-
+  const router = useRouter();
   const supabase = createClient();
 
-  useEffect(() => { 
+  useEffect(() => {
     const fetchUser = async () => {
-      const { data: {user}, } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
     fetchUser();
 
-    // const authChange = async () => {
-    //   const { data: {subscription},} = supabase.auth.onAuthStateChange((_event, session) => {
-        
-    //       setUser(session?.user);
-    //   });
-    //   return subscription.unsubscribe();
-    // };
+    // Supabase auth listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
 
-    // return () => authChange();
-  }, []);
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <nav className="w-full bg-gray-700 text-white px-8 py-4 flex items-center justify-between shadow">
       <div className="text-2xl font-bold tracking-wide">
-        <a href="/">Finite Automata Designer</a>
+        <Link href="/">Finite Automata Designer</Link>
       </div>
       <div className="flex items-center space-x-4">
-
         {/* Note: you cannot use normal if-statements inside the return method lol, so use conditional operator */}
         {user ? (
           <>
-            {/* {session.user?.image && (
-              <img
-                src={session.user.image}
-                alt="User avatar"
-                className="w-8 h-8 rounded-full border-2 border-white"
-              />
-            )} */}
             <span className="hidden sm:inline">{user.email}</span>
             <Link
               href="/profile"
@@ -57,26 +46,19 @@ export default function Navbar() {
             >
               Profile
             </Link>
-            <form action="/auth/signout" method="post">
-              <button
-                className="px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
-                type="submit"
-              >
-                Log out
-              </button>
-            </form>
+
+            {/* Proper logout with UI refresh and redirect */}
+            <button
+              className="px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.refresh(); // Forces UI update
+                router.push('/login'); // Redirect to login page
+              }}
+            >
+              Log out
+            </button>
           </>
-        // Here is the equivalent of the "else if" part of the conditional operator
-        // Previous issue: whenever you go from the profile page back to the home page, 
-        // it would temporarily return the "log out" button to a "log in" button and your
-        // name and profile button would disappear. It gave the impression that you were logged out.
-        // Fix: Now, we show a loading spinner in the top right corner of the navbar when performing
-        // this action.This is a workaround to prevent the aforementioned issue from happening.
-        // ) : status === "loading" ? (
-        //   <div className="w-24 h-8 flex items-center justify-center">
-        //     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-        //   </div>
-        // Here is the "else" part of the conditional operator
         ) : (
           <Link
             href="/login"
@@ -85,9 +67,7 @@ export default function Navbar() {
             Log In
           </Link>
         )}
-
       </div>
     </nav>
   );
 }
-
