@@ -74,6 +74,26 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
+
+    // NOTE: gonna be honest, I have no idea what the code below is for. It's from
+    // the summer when I was still implementing Supabase for the first time.
+    // I'm writing this on 11/29/2025 and I have no idea what this code was for.
+    // I'm not sure if it's needed or not, but I'm not going to remove it for now,
+    // so I'm just gonna comment it out for now.
+
+    // const { data: {user}} = await supabase.auth.getUser()
+
+    // if(user){
+    //   const { data: existingUser } = await supabase
+    //   .from('auth.users')
+    //   .select('id')
+    //   .eq('email', user.email)
+    //   .single()
+    //   if(existingUser){
+        
+    //   }
+    // }
+
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
