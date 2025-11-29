@@ -13,7 +13,8 @@ export async function login(formData: FormData) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    redirect('/error?msg=' + encodeURIComponent(error.message))
+    // Return error instead of redirecting
+    return { error: error.message }
   }
 
   // Important: persist auth session
@@ -21,6 +22,8 @@ export async function login(formData: FormData) {
 
   // Note: Do NOT router.refresh() here - this is server-side
   revalidatePath('/')
+  
+  return { success: true }
 }
 
 
@@ -33,14 +36,17 @@ export async function signup(formData: FormData) {
   const { data, error } = await supabase.auth.signUp({ email, password })
 
   if (error) {
-    redirect('/error')
+    // Return error instead of redirecting
+    return { error: error.message }
   }
 
   if (data.session) {
     await supabase.auth.setSession(data.session)
-    redirect('/')
+    revalidatePath('/', 'layout')
+    return { success: true }
   }
 
+  // If no session, email confirmation might be required
   revalidatePath('/', 'layout')
-  redirect('/')
+  return { success: true, message: 'Please check your email to confirm your account' }
 }
