@@ -1,5 +1,5 @@
-import { login, signup } from './actions'
-import GoogleOAuthForm from '../components/forms/GoogleOAuth'
+import GoogleOAuthForm from "../components/forms/GoogleOAuth";
+import LoginForm from "../components/forms/LoginForm"; // 👈 Import client form
 
 export default function LoginPage() {
   return (
@@ -15,54 +15,7 @@ export default function LoginPage() {
       {/* Centered form */}
       <div className="flex-grow flex items-center justify-center">
         <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-8 w-full max-w-md">
-          <form className="flex flex-col gap-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="flex space-x-4 mt-4">
-              <button
-                formAction={login}
-                className="flex-1 px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
-              >
-                Log in
-              </button>
-              <button
-                formAction={signup}
-                className="flex-1 px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
-              >
-                Sign up
-              </button>
-            </div>
-          </form>
+          <LoginForm /> {/* 👈 This now runs client-side refresh logic */}
 
           {/* Divider + Google button */}
           <div className="mt-6 flex flex-col items-center">
@@ -72,6 +25,5 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
-
