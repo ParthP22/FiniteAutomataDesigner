@@ -2,6 +2,7 @@
 
 import {createClient} from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { Provider } from '@supabase/supabase-js';
 
 const signInWith = (provider : Provider) => async () => {
@@ -72,6 +73,9 @@ const updatePassword = async (
     }
 
     await supabase.auth.signOut();
+    
+    // Revalidate the layout to ensure Navbar updates
+    revalidatePath('/', 'layout');
 
     return {
         success: 'Password updated successfully',
