@@ -25,28 +25,3 @@ export async function login(formData: FormData) {
   
   return { success: true }
 }
-
-
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-
-  const { data, error } = await supabase.auth.signUp({ email, password })
-
-  if (error) {
-    // Return error instead of redirecting
-    return { error: error.message }
-  }
-
-  if (data.session) {
-    await supabase.auth.setSession(data.session)
-    revalidatePath('/', 'layout')
-    return { success: true }
-  }
-
-  // If no session, email confirmation might be required
-  revalidatePath('/', 'layout')
-  return { success: true, message: 'Please check your email to confirm your account' }
-}
