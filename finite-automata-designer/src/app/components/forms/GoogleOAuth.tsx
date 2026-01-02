@@ -1,6 +1,6 @@
-'use client'
-import { signinWithGoogle } from '@/lib/actions'
-import React from 'react'
+"use client";
+import { signinWithGoogle } from "@/lib/actions";
+import React from "react";
 
 const GoogleOAuthForm = () => {
   return (
@@ -8,12 +8,30 @@ const GoogleOAuthForm = () => {
       <button
         type="submit"
         formAction={signinWithGoogle}
-        className="px-8 py-3 bg-gray-600 text-white text-lg rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
+        className="
+          flex items-center gap-3
+          px-6 py-3
+          bg-white text-gray-700
+          border border-gray-300
+          rounded-lg
+          shadow-sm
+          hover:shadow-md hover:bg-gray-50
+          transition
+        "
       >
-        Sign in with Google
+        {/* Google Logo */}
+        <img
+          src="/google.svg"
+          alt="Google logo"
+          className="w-5 h-5"
+        />
+
+        <span className="text-sm font-medium">
+          Sign in with Google
+        </span>
       </button>
     </form>
-  )
-}
+  );
+};
 
-export default GoogleOAuthForm
+export default GoogleOAuthForm;
