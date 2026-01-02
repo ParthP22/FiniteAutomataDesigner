@@ -12,17 +12,14 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [passwordSectionOpen, setPasswordSectionOpen] = useState(false); // <-- NEW
+  const [passwordSectionOpen, setPasswordSectionOpen] = useState(false);
 
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     async function loadUser() {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabase.auth.getUser();
 
       if (error || !user) {
         router.replace("/login");
@@ -59,13 +56,13 @@ export default function ProfilePage() {
       setPasswordMessage("Password updated successfully.");
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordSectionOpen(false); // Optionally close dropdown after update
+      setPasswordSectionOpen(false);
     }
   }
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <main className="min-h-screen bg-blue-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -77,16 +74,17 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <main className="min-h-screen bg-blue-100 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <main className="min-h-screen bg-blue-100 py-8 flex justify-center">
+      <div className="w-full max-w-3xl px-4 space-y-6">
+
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-6 text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Profile</h1>
           <p className="text-gray-600">Manage your account settings and preferences</p>
         </div>
 
-        {/* Profile Information */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        {/* Account Info */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Account Information</h2>
           <div className="flex items-center space-x-4 mb-6">
             {user?.user_metadata?.avatar_url && (
@@ -105,63 +103,65 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Change Password (Dropdown) */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        {/* Change Password */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-6">
           <h2
-            className="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center cursor-pointer"
+            className="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center cursor-pointer select-none"
             onClick={() => setPasswordSectionOpen(!passwordSectionOpen)}
           >
             Change Password
-            <span
-              className={`transition-transform ${
-                passwordSectionOpen ? "rotate-180" : ""
-              }`}
-            >
-              ▼
-            </span>
+            <span className={`transition-transform ${passwordSectionOpen ? "rotate-180" : ""}`}>▼</span>
           </h2>
 
-          {/* Dropdown content */}
           {passwordSectionOpen && (
-            <form onSubmit={handlePasswordChange} className="space-y-4 mt-2">
+            <form onSubmit={handlePasswordChange} className="flex flex-col gap-4 mt-2">
+
+              {/* New Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   New Password
                 </label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="mt-1 w-full border rounded-lg px-3 py-2"
                   placeholder="Enter new password"
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
+              {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm Password
                 </label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 w-full border rounded-lg px-3 py-2"
                   placeholder="Confirm new password"
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
+              {/* Messages */}
               {errorMessage && (
-                <p className="text-red-600 text-sm">{errorMessage}</p>
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center">
+                  {errorMessage}
+                </div>
               )}
               {passwordMessage && (
-                <p className="text-green-600 text-sm">{passwordMessage}</p>
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-center">
+                  {passwordMessage}
+                </div>
               )}
 
+              {/* Submit */}
               <button
                 type="submit"
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
               >
                 Update Password
               </button>
