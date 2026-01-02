@@ -17,20 +17,16 @@ const UpdatePasswordPage = () => {
 
   const { error, success } = state;
 
-  // 🔑 Redirect after success
+  // Redirect and sign out after success
   useEffect(() => {
     if (success) {
-      // Sign out on client side to ensure Navbar's auth listener picks up the change
       const signOutAndRedirect = async () => {
         await supabase.auth.signOut();
-        router.refresh(); // Refresh to ensure UI updates
+        router.refresh(); // Ensure Navbar updates
         router.push('/login');
       };
-      
-      const timer = setTimeout(() => {
-        signOutAndRedirect();
-      }, 1500); // 1.5 seconds so user sees the success message
 
+      const timer = setTimeout(signOutAndRedirect, 1500); // Show success message briefly
       return () => clearTimeout(timer);
     }
   }, [success, router, supabase]);
@@ -38,22 +34,24 @@ const UpdatePasswordPage = () => {
   return (
     <main className="min-h-screen bg-blue-100 flex items-center justify-center">
       <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">
-          Set New Password
-        </h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Set New Password</h1>
 
-        <form action={formAction} className="flex flex-col gap-4">
-          {/* Password input */}
+        <form
+          action={formAction}
+          className="flex flex-col gap-4"
+        >
+          {/* New password input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               New Password
             </label>
             <input
+              id="password"
               type="password"
               name="password"
               required
-              className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter new password"
+              className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -61,19 +59,23 @@ const UpdatePasswordPage = () => {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="w-full px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? 'Updating…' : 'Update Password'}
           </button>
 
-          {/* Error */}
+          {/* Error message */}
           {error && (
-            <p className="text-sm text-red-600 text-center">{error}</p>
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center">
+              {error}
+            </div>
           )}
 
-          {/* Success */}
+          {/* Success message */}
           {success && (
-            <p className="text-sm text-green-600 text-center">{success}</p>
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-center">
+              {success}
+            </div>
           )}
         </form>
       </div>
