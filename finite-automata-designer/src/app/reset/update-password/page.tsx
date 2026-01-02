@@ -4,9 +4,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
 import { updatePassword } from '@/lib/actions';
+import { createClient } from '@/lib/supabase/client';
 
 const UpdatePasswordPage = () => {
   const router = useRouter();
+  const supabase = createClient();
 
   const [state, formAction, isPending] = useActionState(updatePassword, {
     error: '',
@@ -18,13 +20,20 @@ const UpdatePasswordPage = () => {
   // 🔑 Redirect after success
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => {
+      // Sign out on client side to ensure Navbar's auth listener picks up the change
+      const signOutAndRedirect = async () => {
+        await supabase.auth.signOut();
+        router.refresh(); // Refresh to ensure UI updates
         router.push('/login');
+      };
+      
+      const timer = setTimeout(() => {
+        signOutAndRedirect();
       }, 1500); // 1.5 seconds so user sees the success message
 
       return () => clearTimeout(timer);
     }
-  }, [success, router]);
+  }, [success, router, supabase]);
 
   return (
     <main className="min-h-screen bg-blue-100 flex items-center justify-center">
