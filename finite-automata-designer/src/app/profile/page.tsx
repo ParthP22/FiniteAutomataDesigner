@@ -9,8 +9,6 @@ import Link from "next/link";
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSectionOpen, setPasswordSectionOpen] = useState(false);
 
   const router = useRouter();
