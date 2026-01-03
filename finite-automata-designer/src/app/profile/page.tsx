@@ -11,8 +11,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [passwordSectionOpen, setPasswordSectionOpen] = useState(false);
 
   const router = useRouter();
@@ -33,33 +31,6 @@ export default function ProfilePage() {
 
     loadUser();
   }, [router, supabase]);
-
-  async function handlePasswordChange(e: React.FormEvent) {
-    e.preventDefault();
-    setPasswordMessage("");
-    setErrorMessage("");
-
-    if (newPassword !== confirmPassword) {
-      setErrorMessage("Passwords do not match.");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long.");
-      return;
-    }
-
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-    if (error) {
-      setErrorMessage("Error updating password: " + error.message);
-    } else {
-      setPasswordMessage("Password updated successfully.");
-      setNewPassword("");
-      setConfirmPassword("");
-      setPasswordSectionOpen(false);
-    }
-  }
 
   if (loading) {
     return (
