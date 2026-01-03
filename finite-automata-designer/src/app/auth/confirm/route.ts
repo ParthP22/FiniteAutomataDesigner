@@ -27,6 +27,9 @@
 //   redirect('/error')
 // }
 
+// Note from 1/2/2025: I am not sure if the comments above are safe to remove yet.
+// They may come in handy for debugging later. So for now, I'm just leaving them here.
+
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
