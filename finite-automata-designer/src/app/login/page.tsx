@@ -16,7 +16,7 @@ export default function LoginPage() {
         <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-8 w-full max-w-md">
           <LoginForm />
 
-          {/* 🔑 Forgot password */}
+          {/* Forgot password */}
           <p className="mt-3 text-center text-sm">
             <Link
               href="/reset"
