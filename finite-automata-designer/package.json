@@ -7,7 +7,7 @@
     "dev": "next dev --turbopack",
     "dev:all": "npm run build:canvas && npm run dev",
     "build": "next build",
-    "build:canvas": "rollup -c rollup.config.js",
+    "build:canvas": "rollup -c rollup.dfa.config.js && rollup -c rollup.nfa.config.js",
     "build:dfa": "cd src/lib/dfa && tsc -p tsconfig.dfa.json",
     "build:prod": "npm run build:canvas && npm run build:dfa && npm run build",
     "start": "next start",
