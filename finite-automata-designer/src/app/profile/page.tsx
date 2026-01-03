@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -114,59 +115,22 @@ export default function ProfilePage() {
           </h2>
 
           {passwordSectionOpen && (
-            <form onSubmit={handlePasswordChange} className="flex flex-col gap-4 mt-2">
+            <div className="mt-2">
+              <p className="text-gray-600 mb-4">
+                You’ll be redirected to a secure page to update your password.
+              </p>
 
-              {/* New Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              {/* Messages */}
-              {errorMessage && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center">
-                  {errorMessage}
-                </div>
-              )}
-              {passwordMessage && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-center">
-                  {passwordMessage}
-                </div>
-              )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                className="px-6 py-3 bg-gray-600 text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-300"
+              <Link
+                href="/reset/update-password"
+                className="inline-block px-6 py-3 bg-gray-600 text-white rounded
+                          hover:bg-black hover:shadow-lg hover:scale-105
+                          transition-transform duration-300"
               >
-                Update Password
-              </button>
-            </form>
+                Go to Update Password
+              </Link>
+            </div>
           )}
+
         </div>
       </div>
     </main>
