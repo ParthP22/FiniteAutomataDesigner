@@ -58,7 +58,7 @@
 //   return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 // }
 
-// Note from 1/2/2025: I am not sure if the comments above are safe to remove yet.
+// Note from 1/2/2026: I am not sure if the comments above are safe to remove yet.
 // They may come in handy for debugging later. So for now, I'm just leaving them here.
 
 import { NextResponse } from 'next/server'
