@@ -20,7 +20,7 @@ import { SelfArrow} from "./Shapes/SelfArrow";
 import { EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
 import { TemporaryArrow} from "./Shapes/TemporaryArrow";
 import { snapToPadding} from "./Shapes/draw";
-import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
+import { nfaAlgo } from "../../src/lib/nfa/nfaAlgo";
 import { alphabet, setAlphabet } from "./alphabet";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
@@ -123,27 +123,27 @@ function setupNFACanvas(canvas: HTMLCanvasElement) {
     // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
     // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
     // then we will run the transitionDeterminismCheck
-    if(lastEditedArrow && oldText !== lastEditedArrow.text && selectedObj !== lastEditedArrow){
+    // if(lastEditedArrow && oldText !== lastEditedArrow.text && selectedObj !== lastEditedArrow){
       
-      // If the transitionDeterminismCheck returns true, that means the transition is valid.
-      // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
-      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-      // the text of the lastEditedArrow will be equal
-      if(transitionDeterminismCheck(lastEditedArrow)){
-        // This will sort the string in ascending order and assign it to the arrow's text,
-        // which makes it more visually appealing for the user
-        lastEditedArrow.text = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",").sort().join(",");
-        oldText = lastEditedArrow.text;
-      }
-      // If the transitionDeterminismCheck returns false, that means the transition is not valid.
-      // So, we set oldText equal to the empty string, since the arrow's text will also have been
-      // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
-      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-      // the text of the lastEditedArrow will be equal
-      else{
-        oldText = "";
-      }
-    }
+    //   // If the transitionDeterminismCheck returns true, that means the transition is valid.
+    //   // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
+    //   // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+    //   // the text of the lastEditedArrow will be equal
+    //   if(transitionDeterminismCheck(lastEditedArrow)){
+    //     // This will sort the string in ascending order and assign it to the arrow's text,
+    //     // which makes it more visually appealing for the user
+    //     lastEditedArrow.text = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",").sort().join(",");
+    //     oldText = lastEditedArrow.text;
+    //   }
+    //   // If the transitionDeterminismCheck returns false, that means the transition is not valid.
+    //   // So, we set oldText equal to the empty string, since the arrow's text will also have been
+    //   // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
+    //   // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+    //   // the text of the lastEditedArrow will be equal
+    //   else{
+    //     oldText = "";
+    //   }
+    // }
 
     // Update the previously edited object here
     if(selectedObj instanceof Arrow ||
@@ -580,7 +580,7 @@ function attachWhenReady() {
           }
           else{
             // Run the NFA algorithm
-            dfaAlgo(newInput);
+            nfaAlgo(newInput);
           }
           
           // Reset the input tag
