@@ -3,6 +3,32 @@ import { alphabet } from "../../../public/scripts/alphabet";
 import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
+import Queue from "../queue/queue";
+
+var pointers: Map<Circle | undefined,boolean> = new Map();
+
+function epsilonTransitions(pointer: Circle){
+  let queue: Queue<Circle> = new Queue();
+  let visited: Map<Circle, boolean> = new Map();
+  queue.offer(pointer);
+  visited.set(pointer, true);
+
+
+  while(!queue.isEmpty()){
+    let current: Circle | undefined = queue.poll();
+    let currentOutArrows: Set<Arrow | SelfArrow> = new Set();
+    if(current !== undefined){
+      currentOutArrows = current.outArrows;
+    }
+    for(const arrow of currentOutArrows){
+      if(arrow.transition.has("ε") && !visited.has(arrow.endCircle)){
+        visited.set(arrow.endCircle, true);
+        queue.offer(arrow.endCircle);
+        pointers.set(arrow.endCircle, true);}
+    }
+  }
+
+} 
 
 export function nfaAlgo(input: string){
   let acceptStateExists: boolean = false;
@@ -35,8 +61,13 @@ export function nfaAlgo(input: string){
     }
   }
 
+  pointers.clear();
+  pointers.set(startState.pointsToCircle, false);
+
+  epsilonTransitions(startState.pointsToCircle);
+
   // This "curr" variable will be used to traverse over the whole DFA
-  let curr: Circle = startState.pointsToCircle;
+  //let curr: Circle = startState.pointsToCircle;
 
   // We check if the DFA has been defined correctly. If not, then return false.
 //   if(!inputDeterminismCheck()){
@@ -45,45 +76,61 @@ export function nfaAlgo(input: string){
 
   // We begin traversing the input string.
   for(const char of input){
+    for(const pointer of pointers.keys()){
+      if(pointer !== undefined){
+        if(pointer.outArrows.size > 0){
+          pointers.delete(pointer);
+          continue;
+        }
+        // We go through every outgoing arrow for the 
+            // current state.
+        const currOutArrows = pointer.outArrows;
+        //console.log("Char: " + char);
+        for(const arrow of currOutArrows){
+          //console.log("At: " + curr.text);
+          //console.log("Checking transition: " + arrow.transition);
 
-    // We go through every outgoing arrow for the 
-        // current state.
-    const currOutArrows = curr.outArrows;
-    //console.log("Char: " + char);
-    for(const arrow of currOutArrows){
-      //console.log("At: " + curr.text);
-      //console.log("Checking transition: " + arrow.transition);
-
-      // If the current character from the input string
-            // is found in one of the transitions, then we 
-            // use that transition to move to the next state.
-      if(arrow.transition.has(char)){
-        //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
-        curr = arrow.endCircle;
-        break;
-      }
-      else{
-        //console.log("Not taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
+          // If the current character from the input string
+          // is found in one of the transitions, then we 
+          // use that transition to move to the next state.
+    
+          if(arrow.transition.has("ε")){//epsilon transition
+            epsilonTransitions(pointer);
+            continue;
+          }
+          if(arrow.transition.has(char)){
+            //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
+            pointers.set(arrow.endCircle, false);
+            break;
+          }
+          pointers.delete(pointer);
+        }
       }
     }
   }
 
-  //console.log("Finally at: " + curr.text);
-
-  // If the final state that we arrived at is the end state,
-    // that means the string was accepted.
-  if(curr.isAccept){
-    alert("The string, \"" + input + "\", was accepted!");
-    //console.log("Accepted!");
-    return true;
-  }
-  // Else, the final state we arrived at is not the end state,
-    // which means the string was rejected.
-  else{
-    alert("The string, \"" + input + "\", was rejected!");
-    //console.log("Rejected!");
-    return false;
+  for(const pointer of pointers.keys()){
+    if(pointer !== undefined){
+      for(const arrow of pointer.outArrows){
+        if (arrow.transition.has("ε")){
+          epsilonTransitions(pointer);
+          continue;
+        }
+      }
+    } 
   }
 
-
+  for(const pointer of pointers.keys()){
+    if(pointer !== undefined && pointer.isAccept){
+      alert("The string, \"" + input + "\", was accepted!");
+      //console.log("Accepted!");
+      pointers.clear();
+      return true;
+    }
+  }
+  alert("The string, \"" + input + "\", was rejected!");
+  //console.log("Rejected!");
+  pointers.clear();
+  return false;
 }
+
