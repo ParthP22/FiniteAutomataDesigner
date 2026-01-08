@@ -25,6 +25,7 @@ import { alphabet, setAlphabet } from "./alphabet";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
+import { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -47,6 +48,7 @@ let dragging = false; // True dragging objects is enabled, false otherwise
 let shiftPressed = false; // True if shift is pressed, false otherwise
 let startClick: {x: number, y: number} | null = null;
 let tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
+let transitionLabelInputValidator: TransitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
 
 // Returns true if no input or focusable element is active meaning the document body has focus.
 function canvasHasFocus() {
@@ -310,28 +312,41 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
           // If the currently selected object is an Arrow or SelfArrow,
           // then save the old text of the object so you can determine later
           // if a determinism check needs to be ran
-          if((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow)){
-            oldText = selectedObj.text;
+          if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
+            if (transitionLabelInputValidator.handleBackspace(selectedObj.text)) {
+              selectedObj.text = selectedObj.text.slice(0, -1);
+            }
+          } 
+          else {
+            selectedObj.text = selectedObj.text.slice(0, -1);
           }
-          selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
           draw();
         }
+
+        
         // We will only allow characters of length 1 to be typed on the arrows
-        if(event.key.length === 1){
+        else if(event.key.length === 1){
           if((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow)){
 
             // If the current object that is being typed on is an Arrow or SelfArrow,
             // then we will check if the character being typed is defined in the alphabet.
             // If not, we will alert the user.
-            if(alphabet.has(event.key) || event.key === ','){
+            // if(alphabet.has(event.key) || event.key === ','){
               // Store the text of the object before it changes, since
               // the 'text' attribute of the object will be directly modified
               // by this keydown listener
-              oldText = selectedObj.text;
+              // oldText = selectedObj.text;
+              // selectedObj.text += event.key;
+            // }
+            // else{
+            //   alert("\'" + event.key + "\' is not defined in the alphabet!");
+            // }
+
+
+            if (transitionLabelInputValidator.handleChar(event.key)) {
               selectedObj.text += event.key;
-            }
-            else{
-              alert("\'" + event.key + "\' is not defined in the alphabet!");
+            } else {
+              alert(`'${event.key}' is not defined in the alphabet!`);
             }
           }
           // Else, the selectedObj must be Circle, which we can type anything for
@@ -600,6 +615,7 @@ function attachWhenReady() {
           // The regex also removes any trailing/leading commas and whitespace
           const newAlphabet = new Set(alphabetInput.value.replace(/^[,\s]+|[,\s]+$/g, "").split(","));
           setAlphabet(newAlphabet);
+          transitionLabelInputValidator = new TransitionLabelInputValidator(alphabet);
 
           console.log(alphabet);
 
