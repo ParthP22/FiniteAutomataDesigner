@@ -1,7 +1,21 @@
 import { Trie } from "../data-structures/Trie";
-
 /**
- * TransitionLabelLexer
+ * TransitionLabelInputValidator
+ *
+ * This component performs incremental, prefix-based validation of transition
+ * labels as the user types. It intentionally does NOT tokenize input or emit
+ * symbols. Instead, it enforces that every keystroke keeps the current input
+ * as a valid prefix of some symbol in the user-defined alphabet.
+ *
+ * Design rationale:
+ * - Input is committed by UI interaction (arrow deselection), not by syntax.
+ * - Invalid symbols are prevented at the point of entry, eliminating the need
+ *   for post-hoc validation or token streams.
+ * - Multi-character symbols, overlapping prefixes, and escape sequences are
+ *   naturally supported via a Trie.
+ *
+ * This design mirrors editor-style validation rather than compiler-style
+ * lexing, which better fits an interactive automata editor.
  *
  * Responsibilities:
  * - Maintain a buffer for the *current symbol* being typed
