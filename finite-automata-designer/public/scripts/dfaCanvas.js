@@ -88,7 +88,6 @@
         else if (caller == CALLERS.LATEX) {
             _data += `\t%<!-- EntryArrow: to=${toId}, start=(${fixed(startX, 3)},${fixed(startY, 3)}) -->\n`;
         }
-        console.log('hit the entry arrow comment function');
         return _data;
     }
     function addSelfArrowComment(caller, _data, circleId, anchorX, anchorY, text) {
@@ -908,12 +907,10 @@
         stroke() {
             if (this._points.length == 0)
                 return;
-            console.log(this.faObject);
             if (this.faObject instanceof Arrow) {
                 this._svgData = addStraightArrowComment(CALLERS.SVG, this._svgData, this.faObject.startCircle.id, this.faObject.endCircle.id, this.faObject.text);
             }
             else if (this.faObject instanceof EntryArrow) {
-                console.log('entry arrow exists');
                 const points = this.faObject.getEndPoints();
                 this._svgData = addEntryArrowComment(CALLERS.SVG, this._svgData, this.faObject.pointsToCircle.id, points.startX, points.startY);
             }
@@ -1256,6 +1253,136 @@
         }
     }
 
+    class TrieNode {
+        constructor() {
+            this.children = new Map;
+            this.isTerminal = false;
+        }
+    }
+    class Trie {
+        constructor() {
+            this.root = new TrieNode();
+        }
+        insert(word) {
+            let node = this.root;
+            for (const char of word) {
+                if (!node.children.has(char)) {
+                    node.children.set(char, new TrieNode());
+                }
+                node = node.children.get(char);
+            }
+            node.isTerminal = true;
+        }
+        isPrefix(prefix) {
+            let node = this.root;
+            for (const char of prefix) {
+                const next = node.children.get(char);
+                if (!next) {
+                    return false;
+                }
+                node = next;
+            }
+            return true;
+        }
+        contains(word) {
+            let node = this.root;
+            for (const char of word) {
+                const next = node.children.get(char);
+                if (!next) {
+                    return false;
+                }
+                node = next;
+            }
+            return node.isTerminal;
+        }
+    }
+
+    /**
+     * TransitionLabelLexer
+     *
+     * Responsibilities:
+     * - Maintain a buffer for the *current symbol* being typed
+     * - Validate keystrokes using a Trie (prefix-based)
+     * - Allow commas as separators
+     * - Support backspace
+     *
+     * Non-responsibilities:
+     * - Token emission
+     * - Commit logic
+     * - Escape replacement (handled elsewhere)
+     */
+    class TransitionLabelInputValidator {
+        constructor(alphabet) {
+            this.buffer = "";
+            this.trie = new Trie();
+            for (const symbol of alphabet) {
+                this.trie.insert(symbol);
+            }
+        }
+        /**
+         * Returns true if the character is allowed to be typed.
+         * If allowed, internal state is updated.
+         */
+        handleChar(char) {
+            console.log("Handling char:", char);
+            // Always allow commas — they separate symbols
+            if (char === ",") {
+                this.buffer = "";
+                console.log("Comma typed, buffer reset");
+                return true;
+            }
+            const nextBuffer = this.buffer + char;
+            console.log("New buffer to check:", nextBuffer);
+            // Check prefix validity
+            if (this.trie.isPrefix(nextBuffer)) {
+                this.buffer = nextBuffer;
+                console.log("Valid prefix, buffer updated:", this.buffer);
+                return true;
+            }
+            // Invalid prefix → reject keystroke
+            console.log("Invalid prefix, keystroke rejected");
+            return false;
+        }
+        /**
+         * Handles backspace.
+         * Returns true if backspace should be allowed.
+         */
+        handleBackspace(currentText) {
+            if (currentText.length === 0) {
+                this.buffer = "";
+                return true;
+            }
+            const lastChar = currentText[currentText.length - 1];
+            // If we backspaced over a comma, rebuild buffer
+            if (lastChar === ",") {
+                this.rebuildBufferFromText(currentText.slice(0, -1));
+                return true;
+            }
+            // Normal character backspace
+            this.buffer = this.buffer.slice(0, -1);
+            return true;
+        }
+        /**
+         * Clears the internal buffer.
+         * Call this when:
+         * - Arrow is deselected
+         * - Arrow selection changes
+         */
+        reset() {
+            this.buffer = "";
+        }
+        /**
+         * Rebuilds buffer based on the text after backspacing a comma.
+         * We only care about the *current symbol* (after last comma).
+         */
+        rebuildBufferFromText(text) {
+            const parts = text.split(",");
+            this.buffer = parts.length > 0
+                ? parts[parts.length - 1]
+                : "";
+        }
+    }
+
     /*
      Portions of this file are adapted from:
 
@@ -1288,6 +1415,7 @@
     let shiftPressed = false; // True if shift is pressed, false otherwise
     let startClick = null;
     let tempArrow = null; // A new arrow being created
+    let transitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
     // Returns true if no input or focusable element is active meaning the document body has focus.
     function canvasHasFocus() {
         return (document.activeElement || document.body) == document.body;
@@ -1521,27 +1649,37 @@
                         // If the currently selected object is an Arrow or SelfArrow,
                         // then save the old text of the object so you can determine later
                         // if a determinism check needs to be ran
-                        if ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow)) {
-                            oldText = selectedObj.text;
+                        if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
+                            if (transitionLabelInputValidator.handleBackspace(selectedObj.text)) {
+                                selectedObj.text = selectedObj.text.slice(0, -1);
+                            }
                         }
-                        selectedObj.text = selectedObj.text.substring(0, selectedObj.text.length - 1);
+                        else {
+                            selectedObj.text = selectedObj.text.slice(0, -1);
+                        }
                         draw();
                     }
                     // We will only allow characters of length 1 to be typed on the arrows
-                    if (event.key.length === 1) {
+                    else if (event.key.length === 1) {
                         if ((selectedObj instanceof Arrow || selectedObj instanceof SelfArrow)) {
                             // If the current object that is being typed on is an Arrow or SelfArrow,
                             // then we will check if the character being typed is defined in the alphabet.
                             // If not, we will alert the user.
-                            if (alphabet.has(event.key) || event.key === ',') {
-                                // Store the text of the object before it changes, since
-                                // the 'text' attribute of the object will be directly modified
-                                // by this keydown listener
-                                oldText = selectedObj.text;
+                            // if(alphabet.has(event.key) || event.key === ','){
+                            // Store the text of the object before it changes, since
+                            // the 'text' attribute of the object will be directly modified
+                            // by this keydown listener
+                            // oldText = selectedObj.text;
+                            // selectedObj.text += event.key;
+                            // }
+                            // else{
+                            //   alert("\'" + event.key + "\' is not defined in the alphabet!");
+                            // }
+                            if (transitionLabelInputValidator.handleChar(event.key)) {
                                 selectedObj.text += event.key;
                             }
                             else {
-                                alert("\'" + event.key + "\' is not defined in the alphabet!");
+                                alert(`'${event.key}' is not defined in the alphabet!`);
                             }
                         }
                         // Else, the selectedObj must be Circle, which we can type anything for
@@ -1779,6 +1917,7 @@
                         // The regex also removes any trailing/leading commas and whitespace
                         const newAlphabet = new Set(alphabetInput.value.replace(/^[,\s]+|[,\s]+$/g, "").split(","));
                         setAlphabet(newAlphabet);
+                        transitionLabelInputValidator = new TransitionLabelInputValidator(alphabet);
                         console.log(alphabet);
                         alphabetInput.value = "";
                         if (alphabetLabel) {
