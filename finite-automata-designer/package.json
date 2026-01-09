@@ -2,7 +2,9 @@
   "name": "finite-automata-designer",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
+<<<<<<< HEAD
     "dynamodb": "cd dynamodb_local_latest && java -Djava.library.path=./DynamoDBLocal_lib/ -jar ./DynamoDBLocal.jar -sharedDb",
     "dev": "next dev",
     "dev:all": "concurrently \"npm run dynamodb\" \"npm run dev\"",
@@ -17,6 +19,21 @@
     "google-auth-library": "^10.2.1",
     "google-one-tap": "^1.0.6",
     "next": "15.3.3",
+=======
+    "dev": "next dev --turbopack",
+    "dev:all": "npm run build:canvas && npm run dev",
+    "build": "next build",
+    "build:canvas": "rollup -c rollup.config.js",
+    "build:dfa": "cd src/lib/dfa && tsc -p tsconfig.dfa.json",
+    "build:prod": "npm run build:canvas && npm run build:dfa && npm run build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.7",
+    "@heroicons/react": "^2.2.0",
+    "next": "^15.5.9",
+>>>>>>> b2257456505019e96ea1ba2e84e8e8b0f5028ea8
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -24,6 +41,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@tailwindcss/postcss": "^4",
     "@types/google-one-tap": "^1.2.6",
     "@types/node": "^20",
@@ -32,8 +51,13 @@
     "concurrently": "^9.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "rollup": "^4.55.1",
     "tailwindcss": "^4",
+<<<<<<< HEAD
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+=======
+    "typescript": "^5.9.2"
+>>>>>>> b2257456505019e96ea1ba2e84e8e8b0f5028ea8
   }
 }

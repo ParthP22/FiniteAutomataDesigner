@@ -1,3 +1,9 @@
+// 8/17/2025 Update: the file is no longer needed, since Rollup handles
+// all compilation. We'll leave it here anyways just in case.
+
+// To compile, do
+// tsc -p tsconfig.scripts.json
+
 {
   "compilerOptions": {
     "target": "ES2017",
@@ -5,7 +11,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -19,9 +24,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./public/scripts/*"]
     }
+    
   },
-  "include": ["src/**/*","public/scripts/**/*","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
