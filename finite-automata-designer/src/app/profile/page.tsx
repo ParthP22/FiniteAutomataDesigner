@@ -1,14 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
-=======
-import Image from "next/image";
->>>>>>> b2257456505019e96ea1ba2e84e8e8b0f5028ea8
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -61,17 +57,9 @@ export default function ProfilePage() {
         <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Account Information</h2>
           <div className="flex items-center space-x-4 mb-6">
-<<<<<<< HEAD
             {user?.user_metadata?.avatar_url && (
               <img
                 src={user.user_metadata.avatar_url}
-=======
-            {session?.user?.image && (
-              <Image
-                height={100}
-                width={100}
-                src={session.user.image}
->>>>>>> b2257456505019e96ea1ba2e84e8e8b0f5028ea8
                 alt="Profile picture"
                 className="w-20 h-20 rounded-full border-4 border-gray-200"
               />
