@@ -4,22 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-<<<<<<< HEAD
-    "dynamodb": "cd dynamodb_local_latest && java -Djava.library.path=./DynamoDBLocal_lib/ -jar ./DynamoDBLocal.jar -sharedDb",
-    "dev": "next dev",
-    "dev:all": "concurrently \"npm run dynamodb\" \"npm run dev\"",
-    "db:setup": "ts-node ./scripts/createUserTable.ts"
-  },
-  "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.840.0",
-    "@aws-sdk/lib-dynamodb": "^3.840.0",
-    "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.55.0",
-    "client-only": "^0.0.1",
-    "google-auth-library": "^10.2.1",
-    "google-one-tap": "^1.0.6",
-    "next": "15.3.3",
-=======
     "dev": "next dev --turbopack",
     "dev:all": "npm run build:canvas && npm run dev",
     "build": "next build",
@@ -30,10 +14,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.840.0",
+    "@aws-sdk/lib-dynamodb": "^3.840.0",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.55.0",
+    "client-only": "^0.0.1",
+    "google-auth-library": "^10.2.1",
+    "google-one-tap": "^1.0.6",
     "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
     "next": "^15.5.9",
->>>>>>> b2257456505019e96ea1ba2e84e8e8b0f5028ea8
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -53,11 +43,7 @@
     "eslint-config-next": "15.3.3",
     "rollup": "^4.55.1",
     "tailwindcss": "^4",
-<<<<<<< HEAD
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
-=======
     "typescript": "^5.9.2"
->>>>>>> b2257456505019e96ea1ba2e84e8e8b0f5028ea8
   }
 }
