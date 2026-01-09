@@ -151,6 +151,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     if(selectedObj instanceof Arrow ||
       selectedObj instanceof SelfArrow){
       lastEditedArrow = selectedObj;
+      transitionLabelInputValidator.reset();
     }
 
 
@@ -346,7 +347,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
             if (transitionLabelInputValidator.handleChar(event.key)) {
               selectedObj.text += event.key;
             } else {
-              alert(`'${event.key}' is not defined in the alphabet!`);
+              alert(`'${transitionLabelInputValidator.getBuffer() + event.key}' is not defined in the alphabet!`);
             }
           }
           // Else, the selectedObj must be Circle, which we can type anything for
