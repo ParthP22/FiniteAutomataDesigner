@@ -34,7 +34,7 @@ const UpdatePasswordPage = () => {
   return (
     <main className="min-h-screen bg-blue-100 flex items-center justify-center">
       <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Set New Password</h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-black">Set New Password</h1>
 
         <form
           action={formAction}
@@ -42,7 +42,7 @@ const UpdatePasswordPage = () => {
         >
           {/* New password input */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-black mb-1">
               New Password
             </label>
             <input
@@ -51,7 +51,7 @@ const UpdatePasswordPage = () => {
               name="password"
               required
               placeholder="Enter new password"
-              className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
             />
           </div>
 
