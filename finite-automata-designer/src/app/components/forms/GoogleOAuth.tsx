@@ -1,6 +1,7 @@
 "use client";
 import { signinWithGoogle } from "@/lib/actions";
 import React from "react";
+import Image from "next/image"; 
 
 const GoogleOAuthForm = () => {
   return (
@@ -20,12 +21,14 @@ const GoogleOAuthForm = () => {
         "
       >
         {/* Google Logo */}
-        <img
-          src="/google.svg"
+        <Image 
+          width={100}
+          height={100}
+          src={"/google.svg"}
           alt="Google logo"
           className="w-5 h-5"
         />
-
+        
         <span className="text-sm font-medium">
           Sign in with Google
         </span>
