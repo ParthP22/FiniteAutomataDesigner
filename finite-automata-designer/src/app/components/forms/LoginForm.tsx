@@ -46,24 +46,26 @@ export default function LoginForm() {
       }}
     >
       <div>
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email" className="text-black">Email</label>
         <input
           id="email"
           name="email"
           type="email"
           required
-          className="w-full rounded border px-3 py-2"
+          placeholder="your@email.com"
+          className="w-full rounded border px-3 py-2 text-gray-700"
         />
       </div>
 
       <div>
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password" className="text-black">Password</label>
         <input
           id="password"
           name="password"
           type="password"
           required
-          className="w-full rounded border px-3 py-2"
+          placeholder="Password"
+          className="w-full rounded border px-3 py-2 text-gray-700"
         />
       </div>
 
