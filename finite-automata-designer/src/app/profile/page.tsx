@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -58,7 +59,9 @@ export default function ProfilePage() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Account Information</h2>
           <div className="flex items-center space-x-4 mb-6">
             {user?.user_metadata?.avatar_url && (
-              <img
+              <Image 
+                width={100}
+                height={100}
                 src={user.user_metadata.avatar_url}
                 alt="Profile picture"
                 className="w-20 h-20 rounded-full border-4 border-gray-200"
