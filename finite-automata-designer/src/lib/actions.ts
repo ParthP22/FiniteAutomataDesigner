@@ -34,7 +34,7 @@ const sendResetPasswordEmail = async (
     formData: FormData) => {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.auth.resetPasswordForEmail(
+    const { error } = await supabase.auth.resetPasswordForEmail(
         formData.get('email') as string,
     );
 
@@ -57,7 +57,7 @@ const updatePassword = async (
     prev: {error: string; success: string},
     formData: FormData) => {
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
         password: formData.get('password') as string,
     });
 

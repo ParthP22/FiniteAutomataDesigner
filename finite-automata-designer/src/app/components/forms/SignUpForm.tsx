@@ -20,7 +20,6 @@ export default function SignUpForm() {
         
         const form = e.currentTarget;
         const formData = new FormData(form);
-        const action = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("data-action");
 
         try {
           
