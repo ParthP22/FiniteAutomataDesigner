@@ -95,7 +95,7 @@ export function parseInputString(
         
     }
 
-    let notDefined: Array<string> = [];
+    const notDefined: Array<string> = [];
 
     // Validate that each token is in the alphabet
     for (const token of tokens) {
