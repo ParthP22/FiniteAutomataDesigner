@@ -115,41 +115,15 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     
     // Check if the mouse has clicked on an object.
     // If true, then selectedObj will be updated.
-    selectedObj = mouseCollision(mouse.x, mouse.y);
-
+    const nextSelected = mouseCollision(mouse.x, mouse.y);
+    selectedObj = nextSelected;
     dragging = false;
     startClick = mouse;
 
     // console.log("Last edited arrow:", lastEditedArrow?.startCircle.text, " to ", lastEditedArrow?.endCircle.text);
     // console.log("Last edited arrow text:", lastEditedArrow?.text);
     // console.log("Selected object: " , selectedObj instanceof Arrow || selectedObj instanceof SelfArrow ? "Arrow or SelfArrow" : "Not an Arrow or SelfArrow");
-
-    // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
-    // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
-    // then we will run the transitionDeterminismCheck
-    if(lastEditedArrow && selectedObj !== lastEditedArrow){
-      
-      // If the transitionDeterminismCheck returns true, that means the transition is valid.
-      // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
-      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-      // the text of the lastEditedArrow will be equal
-      if(transitionDeterminismCheck(lastEditedArrow)){
-        // This will sort the string in ascending order and assign it to the arrow's text,
-        // which makes it more visually appealing for the user
-        // console.log("Transition determinism check passed for state ", lastEditedArrow.startCircle.id);
-        lastEditedArrow.text = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",").sort().join(",");
-
-      }
-      // If the transitionDeterminismCheck returns false, that means the transition is not valid.
-      // So, we set oldText equal to the empty string, since the arrow's text will also have been
-      // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
-      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-      // the text of the lastEditedArrow will be equal
-      else{
-        console.log("Transition determinism check failed for state ", lastEditedArrow.startCircle.id);
-
-      }
-    }
+    finalizeEditedArrow(nextSelected);
 
     // Update the previously edited object here
     if(selectedObj instanceof Arrow ||
@@ -542,6 +516,8 @@ function attachWhenReady() {
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
         if (!isInsideCanvas(event, canvas)) {
+          finalizeEditedArrow(null);
+
           selectedObj = null;
           dragging = false;
           draw();
@@ -862,6 +838,41 @@ function output(text: string, element: HTMLTextAreaElement | null) {
 
 function _toggle_visiblity(element: HTMLElement) {
   element.hidden = !element.hidden;
+}
+
+// Simplifies the finalization for the transition of an edited arrow
+function finalizeEditedArrow(nextSelected: any | null) {
+  if (!lastEditedArrow) return;
+
+  // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
+  // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
+  // then we will run the transitionDeterminismCheckt
+  if (nextSelected !== lastEditedArrow) {
+    // If the transitionDeterminismCheck returns true, that means the transition is valid.
+    // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
+    // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+    // the text of the lastEditedArrow will be equal
+    if (transitionDeterminismCheck(lastEditedArrow)) {
+      // This will sort the string in ascending order and assign it to the arrow's text,
+      // which makes it more visually appealing for the user
+      // console.log("Transition determinism check passed for state ", lastEditedArrow.startCircle.id);
+      lastEditedArrow.text = lastEditedArrow.text
+        .replace(/^[,\s]+|[,\s]+$/g, "")
+        .split(",")
+        .sort()
+        .join(",");
+    } else {
+      // If the transitionDeterminismCheck returns false, that means the transition is not valid.
+      // So, we set oldText equal to the empty string, since the arrow's text will also have been
+      // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
+      // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+      // the text of the lastEditedArrow will be equal
+      console.log(
+        "Transition determinism check failed for state",
+        lastEditedArrow.startCircle.id
+      );
+    }
+  }
 }
 
 
