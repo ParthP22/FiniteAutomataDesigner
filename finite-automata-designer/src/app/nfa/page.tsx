@@ -1,15 +1,42 @@
 'use client';
 import Link from "next/link";
 import Script from 'next/script';
+import { useEffect, useState } from "react";
 
 
 export default function NFAPage() {
+
+    const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
+    const [alphabetInput, setAlphabetInput] = useState("");
+
+    useEffect(() => {
+
+        // This will listen for alphabet updates from the canvas script
+        const handler = (event: Event) => {
+            const customEvent = event as CustomEvent<{alphabet: string[]}>;
+            const symbols = customEvent.detail.alphabet;
+
+            const alphabetString = symbols.join(',');
+            setAlphabetInput(alphabetString);
+
+            const hasMulti = symbols.some(symbol => symbol.length > 1);
+            setHasMultiCharAlphabet(hasMulti);
+        }
+
+        window.addEventListener("nfaAlphabetUpdated", handler);
+
+        return () => {
+            window.removeEventListener("nfaAlphabetUpdated", handler);
+        }
+
+    }, [alphabetInput]);
+
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* NFA title at the top */}
         <h1 className="text-5xl font-bold text-center my-2 text-black ">
             <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
-                Nondeterministic Finite Automata
+                Non-deterministic Finite Automata
             </span>
             <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
@@ -184,11 +211,11 @@ export default function NFAPage() {
                     <li><p className="font-semibold inline">Make accept state: </p>Double-click an existing state</li>
                     <li><p className="font-semibold inline">Type onto arrow or state: </p>Click on desired state, then begin typing. Click again anywhere else to submit</li>
                     <li><p className="font-semibold inline">Type numeric subscript: </p>Put an underscore before the number (ex: &quot;q_0&quot;)</li>
-                    <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your DFA. Press Enter to submit</li>
-                    <li><p className="font-semibold inline">Run DFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
+                    <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your NFA. Press Enter to submit</li>
+                    <li><p className="font-semibold inline">Run NFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
                 </ul>
             </div>
-            <div id='inputDiv'className="flex flex-col self-center">
+            <div id='inputDiv' className="flex flex-col self-center w-full max-w-md">
                 {/* Textbox for inputting strings */}
                 <label htmlFor="inputString" className="block mb-1 text-gray-700 text-xl font-bold">
                     Input:
@@ -201,10 +228,23 @@ export default function NFAPage() {
                     // Loose focus after you press enter
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                        e.currentTarget.blur();
+                            e.currentTarget.blur();
                         }
                     }}
                 />
+                <div className="min-h-[3rem]">
+                    {hasMultiCharAlphabet && (
+                        <div className="w-full rounded border border-red-300 bg-red-100 px-3 py-2">
+                            <p className="text-sm text-red-700 font-semibold">
+                                Multi-character element detected in alphabet. Please separate elements
+                                in your input string with commas or spaces.
+                            </p>
+                        </div>
+                    )}
+                </div>
+                    
+
+
                 {/* Textbox for inputting the alphabet */}
                 <label id="alphabetLabel" htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
                     Alphabet: {"{0,1}"}
@@ -214,17 +254,19 @@ export default function NFAPage() {
                     type="text"
                     placeholder="Enter an alphabet..."
                     className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    //onChange={(e) => setAlphabetDraft(e.target.value)}
                     // Loose focus after you press enter
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                        e.currentTarget.blur();
+                            e.currentTarget.blur();
+                            //setAlphabetInput(alphabetDraft.trim());
                         }
                     }}
                 />
             </div>
             </div>
             <div className="flex">
-                {/* Run button to run the DFA with the given input string */}
+                {/* Run button to run the NFA with the given input string */}
                 <Link href="/" className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
                     Run
                 </Link>
