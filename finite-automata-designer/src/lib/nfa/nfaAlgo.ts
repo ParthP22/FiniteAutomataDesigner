@@ -1,6 +1,6 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
 import { alphabet } from "../../../public/scripts/alphabet";
-import { Arrow } from "../../../public/scripts/Shapes/Arrow";
+import { Arrow, arrows } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { Queue } from "../data-structures/";
@@ -10,9 +10,7 @@ var pointers: Map<Circle | undefined,boolean> = new Map();
 
 
 
-// This is a "correctness" check: does the new transition coincide
-// with other transitions going out from that state? If it does,
-// then it fails determinism.
+// Commits the transition to a given Arrow or SelfArrow after validating it.
 export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
     if(lastEditedArrow === null){
       return false;
@@ -63,6 +61,22 @@ export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
     lastEditedArrow.text = lastEditedArrow.transition.values().toArray().join(",");
     return true;
     
+}
+
+// This is a "completeness" check: do all the arrows have a valid transition?
+export function completenessCheck(){
+  
+  // We iterate over every single state
+  for(const arrow of arrows){
+    if(arrow instanceof Arrow || arrow instanceof SelfArrow){
+      if(arrow.transition.size === 0){
+        alert("Arrow from " + arrow.startCircle.text + " to " + arrow.endCircle.text + " has no transition!");
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 function epsilonTransitions(pointer: Circle){
@@ -139,6 +153,10 @@ export function nfaAlgo(input: string){
     return false;
   }
   const tokens = parseResult.tokens;
+
+  if(!completenessCheck()){
+    return false;
+  }
 
   // We begin traversing the input string.
   for(const char of tokens){
