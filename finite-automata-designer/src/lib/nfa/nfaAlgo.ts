@@ -4,8 +4,66 @@ import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import Queue from "../queue/queue";
+import { parseInputString } from "../input/InputStringLexer";
 
 var pointers: Map<Circle | undefined,boolean> = new Map();
+
+
+
+// This is a "correctness" check: does the new transition coincide
+// with other transitions going out from that state? If it does,
+// then it fails determinism.
+export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
+    if(lastEditedArrow === null){
+      return false;
+    }
+    if(lastEditedArrow.text === ""){
+      lastEditedArrow.transition = new Set();
+      console.log("Empty transition, accepted");
+      return true;
+    }
+
+    // Leaving this here commented-out, for debugging purposes if the
+    // need for it arises.
+    // printTransitions();
+
+    // Note: the code below will cover both the Arrow and the SelfArrow.
+    // We won't need to split them into two separate cases.
+    // This is because Arrow and SelfArrow both contain the startCircle
+    // and endCircle attributes.
+    
+    // You don't want to check the transition for this current arrow
+    // when iterating through all the arrows, so just empty it here.
+    // If the transition is incorrect, then it'll remain empty.
+    // If the transition is correct, then we'll reassign it to a new
+    // value after all the checks.
+    lastEditedArrow.transition = new Set();
+
+    // The regex will remove any trailing/leading commas and whitespace
+    const newTransitions = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",");
+
+    // When you're typing the transition, the keydown listener checks if the
+    // key pressed is in the alphabet. However, this is not enough.
+    // This for-loop here will check if the entire transition itself is defined
+    // in the alphabet.
+    // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
+    // it should not work, since "00" and "01" are not in the alphabet.
+    for(const newTransition of newTransitions){
+      
+      if(!alphabet.has(newTransition)){
+        lastEditedArrow.text = "";
+        alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+        return false;
+      }
+    }
+
+    
+    // Update the transition with the new one
+    lastEditedArrow.transition = new Set(newTransitions);
+    lastEditedArrow.text = lastEditedArrow.transition.values().toArray().join(",");
+    return true;
+    
+}
 
 function epsilonTransitions(pointer: Circle){
   let queue: Queue<Circle> = new Queue();
@@ -21,7 +79,7 @@ function epsilonTransitions(pointer: Circle){
       currentOutArrows = current.outArrows;
     }
     for(const arrow of currentOutArrows){
-      if(arrow.transition.has("ε") && !visited.has(arrow.endCircle)){
+      if(arrow.transition.has("\\epsilon") && !visited.has(arrow.endCircle)){
         visited.set(arrow.endCircle, true);
         queue.offer(arrow.endCircle);
         pointers.set(arrow.endCircle, true);}
@@ -74,8 +132,16 @@ export function nfaAlgo(input: string){
 //     return false;
 //   }
 
+  const parseResult = parseInputString(input, alphabet);
+
+  if (!parseResult.success) {
+    alert(parseResult.error);
+    return false;
+  }
+  const tokens = parseResult.tokens;
+
   // We begin traversing the input string.
-  for(const char of input){
+  for(const char of tokens){
     for(const pointer of pointers.keys()){
       if(pointer !== undefined){
         if(pointer.outArrows.size > 0){
@@ -112,7 +178,7 @@ export function nfaAlgo(input: string){
   for(const pointer of pointers.keys()){
     if(pointer !== undefined){
       for(const arrow of pointer.outArrows){
-        if (arrow.transition.has("ε")){
+        if (arrow.transition.has("\\epsilon")) {
           epsilonTransitions(pointer);
           continue;
         }
@@ -122,13 +188,13 @@ export function nfaAlgo(input: string){
 
   for(const pointer of pointers.keys()){
     if(pointer !== undefined && pointer.isAccept){
-      alert("The string, \"" + input + "\", was accepted!");
+      alert("The string, \"" + tokens.toString() + "\", was accepted!");
       //console.log("Accepted!");
       pointers.clear();
       return true;
     }
   }
-  alert("The string, \"" + input + "\", was rejected!");
+  alert("The string, \"" + tokens.toString() + "\", was rejected!");
   //console.log("Rejected!");
   pointers.clear();
   return false;
