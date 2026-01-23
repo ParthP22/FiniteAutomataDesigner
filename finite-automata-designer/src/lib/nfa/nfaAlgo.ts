@@ -3,7 +3,7 @@ import { alphabet } from "../../../public/scripts/alphabet";
 import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
-import Queue from "../queue/queue";
+import { Queue } from "../data-structures/";
 import { parseInputString } from "../input/InputStringLexer";
 
 var pointers: Map<Circle | undefined,boolean> = new Map();
