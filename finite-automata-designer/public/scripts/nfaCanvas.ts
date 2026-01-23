@@ -20,7 +20,7 @@ import { SelfArrow} from "./Shapes/SelfArrow";
 import { EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
 import { TemporaryArrow} from "./Shapes/TemporaryArrow";
 import { snapToPadding} from "./Shapes/draw";
-import { nfaAlgo } from "../../src/lib/nfa/nfaAlgo";
+import { commitTransition, nfaAlgo } from "../../src/lib/nfa/nfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "./alphabet";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
@@ -846,13 +846,13 @@ function finalizeEditedArrow(nextSelected: any | null) {
 
   // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
   // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
-  // then we will run the transitionDeterminismCheckt
+  // then we will run the commitTransition function
   if (nextSelected !== lastEditedArrow) {
-    // If the transitionDeterminismCheck returns true, that means the transition is valid.
+    // If the commitTransition returns true, that means the transition is valid.
     // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
     // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
     // the text of the lastEditedArrow will be equal
-    if (transitionDeterminismCheck(lastEditedArrow)) {
+    if (commitTransition(lastEditedArrow)) {
       // This will sort the string in ascending order and assign it to the arrow's text,
       // which makes it more visually appealing for the user
       // console.log("Transition determinism check passed for state ", lastEditedArrow.startCircle.id);
