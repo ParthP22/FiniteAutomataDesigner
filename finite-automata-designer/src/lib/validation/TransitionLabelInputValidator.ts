@@ -109,6 +109,10 @@ export class TransitionLabelInputValidator {
     this.rebuildBufferFromText(newBuffer);
   }
 
+  public getTrie(): Trie {
+    return this.trie;
+  }
+
   /**
    * Rebuilds buffer based on the text after backspacing a comma.
    * We only care about the *current symbol* (after last comma).
