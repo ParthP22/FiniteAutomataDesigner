@@ -6,7 +6,7 @@ import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { Queue } from "../data-structures/";
 import { parseInputString } from "../input/InputStringLexer";
 
-var pointers: Map<Circle | undefined,boolean> = new Map();
+var pointers: Set<Circle> = new Set();
 
 
 
@@ -94,9 +94,11 @@ function epsilonTransitions(pointer: Circle){
     }
     for(const arrow of currentOutArrows){
       if(arrow.transition.has("\\epsilon") && !visited.has(arrow.endCircle)){
+        console.log("Splitting epsilon transition to " + arrow.endCircle.text);
         visited.set(arrow.endCircle, true);
         queue.offer(arrow.endCircle);
-        pointers.set(arrow.endCircle, true);}
+        pointers.add(arrow.endCircle);
+      }
     }
   }
 
@@ -134,7 +136,7 @@ export function nfaAlgo(input: string){
   }
 
   pointers.clear();
-  pointers.set(startState.pointsToCircle, false);
+  pointers.add(startState.pointsToCircle);
 
   epsilonTransitions(startState.pointsToCircle);
 
@@ -160,51 +162,55 @@ export function nfaAlgo(input: string){
 
   // We begin traversing the input string.
   for(const char of tokens){
-    for(const pointer of pointers.keys()){
+    console.log("Processing character: " + char);
+    let size = pointers.size;
+    let currPointers : Set<Circle> = new Set(pointers);
+
+    for(const pointer of currPointers){
       if(pointer !== undefined){
-        if(pointer.outArrows.size > 0){
-          pointers.delete(pointer);
-          continue;
-        }
+        console.log("At state: " + pointer.text);
+        pointers.delete(pointer);
+        
         // We go through every outgoing arrow for the 
             // current state.
         const currOutArrows = pointer.outArrows;
         //console.log("Char: " + char);
         for(const arrow of currOutArrows){
           //console.log("At: " + curr.text);
-          //console.log("Checking transition: " + arrow.transition);
 
           // If the current character from the input string
           // is found in one of the transitions, then we 
           // use that transition to move to the next state.
     
-          if(arrow.transition.has("ε")){//epsilon transition
+          if(arrow.transition.has("\\epsilon")){//epsilon transition
             epsilonTransitions(pointer);
             continue;
           }
           if(arrow.transition.has(char)){
             //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
-            pointers.set(arrow.endCircle, false);
-            break;
+            console.log("Taking transition: " + Array.from(arrow.transition).toString() + " to node " + arrow.endCircle.text);
+            pointers.add(arrow.endCircle);
+          
           }
-          pointers.delete(pointer);
         }
+        console.log("Leaving state: " + pointer.text);
+        
       }
     }
   }
 
-  for(const pointer of pointers.keys()){
-    if(pointer !== undefined){
-      for(const arrow of pointer.outArrows){
-        if (arrow.transition.has("\\epsilon")) {
-          epsilonTransitions(pointer);
-          continue;
-        }
-      }
-    } 
-  }
+  // for(const pointer of pointers){
+  //   if(pointer !== undefined){
+  //     for(const arrow of pointer.outArrows){
+  //       if (arrow.transition.has("\\epsilon")) {
+  //         epsilonTransitions(pointer);
+  //         continue;
+  //       }
+  //     }
+  //   } 
+  // }
 
-  for(const pointer of pointers.keys()){
+  for(const pointer of pointers){
     if(pointer !== undefined && pointer.isAccept){
       alert("The string, \"" + tokens.toString() + "\", was accepted!");
       //console.log("Accepted!");
