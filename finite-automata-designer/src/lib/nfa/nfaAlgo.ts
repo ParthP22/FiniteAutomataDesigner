@@ -169,7 +169,6 @@ export function nfaAlgo(input: string){
     for(const pointer of currPointers){
       if(pointer !== undefined){
         console.log("At state: " + pointer.text);
-        pointers.delete(pointer);
         
         // We go through every outgoing arrow for the 
             // current state.
@@ -182,14 +181,12 @@ export function nfaAlgo(input: string){
           // is found in one of the transitions, then we 
           // use that transition to move to the next state.
     
-          if(arrow.transition.has("\\epsilon")){//epsilon transition
-            epsilonTransitions(pointer);
-            continue;
-          }
+          
           if(arrow.transition.has(char)){
             //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
             console.log("Taking transition: " + Array.from(arrow.transition).toString() + " to node " + arrow.endCircle.text);
             pointers.add(arrow.endCircle);
+            epsilonTransitions(arrow.endCircle);
           
           }
         }
