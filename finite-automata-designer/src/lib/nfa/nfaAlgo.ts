@@ -1,5 +1,5 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { nfaTransitionSymbols } from "./nfaTransitionSymbols";
+import { alphabet, nfaTransitionSymbols } from "./nfaTransitionSymbols";
 import { Arrow, arrows } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
@@ -146,7 +146,7 @@ export function nfaAlgo(input: string){
 //     return false;
 //   }
 
-  const parseResult = parseInputString(input, nfaTransitionSymbols);
+  const parseResult = parseInputString(input, alphabet);
 
   if (!parseResult.success) {
     alert(parseResult.error);
