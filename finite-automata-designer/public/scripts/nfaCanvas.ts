@@ -21,7 +21,7 @@ import { EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
 import { TemporaryArrow} from "./Shapes/TemporaryArrow";
 import { snapToPadding} from "./Shapes/draw";
 import { commitTransition, nfaAlgo } from "../../src/lib/nfa/nfaAlgo";
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "./alphabet";
+import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../src/lib/nfa/nfaTransitionSymbols";
 import { ExportAsSVG } from "./exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
