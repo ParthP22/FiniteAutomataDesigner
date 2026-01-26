@@ -165,6 +165,7 @@ export function nfaAlgo(input: string){
     console.log("Processing character: " + char);
     let size = pointers.size;
     let currPointers : Set<Circle> = new Set(pointers);
+    pointers.clear();
 
     for(const pointer of currPointers){
       if(pointer !== undefined){
