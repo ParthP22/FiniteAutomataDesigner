@@ -1,5 +1,5 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet } from "../../../public/scripts/alphabet";
+import { nfaTransitionSymbols } from "./nfaTransitionSymbols";
 import { Arrow, arrows } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
@@ -48,7 +48,7 @@ export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
     // it should not work, since "00" and "01" are not in the alphabet.
     for(const newTransition of newTransitions){
       
-      if(!alphabet.has(newTransition)){
+      if(!nfaTransitionSymbols.has(newTransition)){
         lastEditedArrow.text = "";
         alert("\'" + newTransition + "\' has not been defined in the alphabet!");
         return false;
@@ -127,7 +127,7 @@ export function nfaAlgo(input: string){
   // First, we make sure the input string is legal. If it contains
     // characters not defined in the alphabet, then we return false immediately.
   for(const char of input){
-    if(!alphabet.has(char)){
+    if(!nfaTransitionSymbols.has(char)){
       alert("Input contains \'" + char + "\', which is not in the alphabet");
       return false;
     }
@@ -146,7 +146,7 @@ export function nfaAlgo(input: string){
 //     return false;
 //   }
 
-  const parseResult = parseInputString(input, alphabet);
+  const parseResult = parseInputString(input, nfaTransitionSymbols);
 
   if (!parseResult.success) {
     alert(parseResult.error);
