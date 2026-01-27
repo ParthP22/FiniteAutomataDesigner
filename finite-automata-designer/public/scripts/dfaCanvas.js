@@ -760,8 +760,8 @@
 
     // The alphabet defines every character that can be used in the DFA.
     // For easier usage, it has been defined as a Set.
-    var alphabet$1 = new Set(["0", "1"]);
-    var transitionLabelInputValidator$1 = new TransitionLabelInputValidator(alphabet$1); // Input validator for transition labels
+    let alphabet$1 = new Set(["0", "1"]);
+    let transitionLabelInputValidator$1 = new TransitionLabelInputValidator(alphabet$1); // Input validator for transition labels
     // Since the alphabet is being imported, it cannot be reassigned
     // directly. So, this is a setter method for it.
     function setAlphabet$1(newAlphabet) {
