@@ -9,6 +9,7 @@
     "build": "next build",
     "build:canvas": "rollup -c rollup.dfa.config.js && rollup -c rollup.nfa.config.js",
     "build:dfa": "rollup -c rollup.dfa.config.js",
+    "build:nfa": "rollup -c rollup.nfa.config.js",
     "build:prod": "npm run build:canvas && npm run build:dfa && npm run build",
     "start": "next start",
     "lint": "next lint"
