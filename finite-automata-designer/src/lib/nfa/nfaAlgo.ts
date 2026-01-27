@@ -6,9 +6,6 @@ import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { Queue } from "../data-structures/";
 import { parseInputString } from "../input/InputStringLexer";
 
-var pointers: Set<Circle> = new Set();
-
-
 
 // Commits the transition to a given Arrow or SelfArrow after validating it.
 export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
@@ -80,7 +77,7 @@ export function completenessCheck(){
 }
 
 // This function performs BFS to do epsilon closure from a given state
-function epsilonTransitions(pointer: Circle){
+function epsilonTransitions(pointer: Circle, nextPointers: Set<Circle>){
   let queue: Queue<Circle> = new Queue();
   let visited: Map<Circle, boolean> = new Map();
   queue.offer(pointer);
@@ -94,11 +91,14 @@ function epsilonTransitions(pointer: Circle){
       currentOutArrows = current.outArrows;
     }
     for(const arrow of currentOutArrows){
+      // If the transition contains epsilon, and the endCircle
+      // has not been visited yet, then we add it to the queue.
+      // We don't want to revisit nodes, since that could lead to infinite loops.
       if(arrow.transition.has("\\epsilon") && !visited.has(arrow.endCircle)){
         console.log("Splitting epsilon transition to " + arrow.endCircle.text);
         visited.set(arrow.endCircle, true);
         queue.offer(arrow.endCircle);
-        pointers.add(arrow.endCircle);
+        nextPointers.add(arrow.endCircle);
       }
     }
   }
@@ -107,6 +107,8 @@ function epsilonTransitions(pointer: Circle){
 
 // This function runs the NFA algorithm on the given input string
 export function nfaAlgo(input: string){
+
+  // Check if there is a start state and at least one accept state
   let acceptStateExists: boolean = false;
   for(const circle of circles){
     if(circle.isAccept){
@@ -129,7 +131,7 @@ export function nfaAlgo(input: string){
   }
 
   // First, we make sure the input string is legal. If it contains
-    // characters not defined in the alphabet, then we return false immediately.
+  // characters not defined in the alphabet, then we return false immediately.
   for(const char of input){
     if(!nfaTransitionSymbols.has(char)){
       alert("Input contains \'" + char + "\', which is not in the alphabet");
@@ -137,82 +139,86 @@ export function nfaAlgo(input: string){
     }
   }
 
-  pointers.clear();
-  pointers.add(startState.pointsToCircle);
+  // This will contain the pointers that will be used in the next iteration
+  // of the NFA algorithm.
+  const nextPointers: Set<Circle> = new Set();  
 
-  epsilonTransitions(startState.pointsToCircle);
+  nextPointers.add(startState.pointsToCircle);
 
+  // Run an initial epsilon closure from the start state
+  epsilonTransitions(startState.pointsToCircle, nextPointers);
+
+  // We parse the input string into tokens
   const parseResult = parseInputString(input, alphabet);
 
+  // If parsing failed, alert the user and return false
   if (!parseResult.success) {
     alert(parseResult.error);
     return false;
   }
   const tokens = parseResult.tokens;
 
+  // Before beginning the NFA algorithm, we check if all transitions
+  // of the NFA are complete. If not, we return false immediately.
   if(!completenessCheck()){
     return false;
   }
 
   // We begin traversing the input string.
   for(const char of tokens){
-    console.log("Processing character: " + char);
-    let size = pointers.size;
-    let currPointers : Set<Circle> = new Set(pointers);
-    pointers.clear();
+    // console.log("Processing character: " + char);
+    // We make a copy of the current pointers set to iterate over.
+    // This is because we don't want to modify the set while iterating over it.
+    let currPointers : Set<Circle> = new Set(nextPointers);
+    nextPointers.clear();
 
     for(const pointer of currPointers){
       if(pointer !== undefined){
-        console.log("At state: " + pointer.text);
+        //console.log("At state: " + pointer.text);
         
         // We go through every outgoing arrow for the 
-            // current state.
+        // current state.
         const currOutArrows = pointer.outArrows;
         //console.log("Char: " + char);
+
         for(const arrow of currOutArrows){
           //console.log("At: " + curr.text);
 
           // If the current character from the input string
           // is found in one of the transitions, then we 
           // use that transition to move to the next state.
-    
-          
           if(arrow.transition.has(char)){
-            //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
-            console.log("Taking transition: " + Array.from(arrow.transition).toString() + " to node " + arrow.endCircle.text);
-            pointers.add(arrow.endCircle);
-            epsilonTransitions(arrow.endCircle);
+            // console.log("Taking transition: " + Array.from(arrow.transition).toString() + " to node " + arrow.endCircle.text);
+
+            // We add the endCircle to the nextPointers set, since we will 
+            // iterate over it in the next round.
+            nextPointers.add(arrow.endCircle);
+
+            // We also perform epsilon closure from the new state
+            epsilonTransitions(arrow.endCircle, nextPointers);
           
           }
         }
-        console.log("Leaving state: " + pointer.text);
+        // console.log("Leaving state: " + pointer.text);
         
       }
     }
   }
 
-  // for(const pointer of pointers){
-  //   if(pointer !== undefined){
-  //     for(const arrow of pointer.outArrows){
-  //       if (arrow.transition.has("\\epsilon")) {
-  //         epsilonTransitions(pointer);
-  //         continue;
-  //       }
-  //     }
-  //   } 
-  // }
-
-  for(const pointer of pointers){
+  // After processing all input characters, we check if any
+  // of the current pointers are in an accept state.
+  for(const pointer of nextPointers){
     if(pointer !== undefined && pointer.isAccept){
       alert("The string, \"" + tokens.toString() + "\", was accepted!");
       //console.log("Accepted!");
-      pointers.clear();
+      nextPointers.clear();
       return true;
     }
   }
+  
   alert("The string, \"" + tokens.toString() + "\", was rejected!");
   //console.log("Rejected!");
-  pointers.clear();
+  nextPointers.clear();
   return false;
 }
 
