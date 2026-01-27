@@ -872,6 +872,7 @@ function finalizeEditedArrow(nextSelected: any | null) {
         lastEditedArrow.startCircle.id
       );
     }
+    transitionLabelInputValidator.resetBuffer();
   }
 }
 
