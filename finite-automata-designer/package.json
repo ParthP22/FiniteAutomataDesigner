@@ -7,6 +7,7 @@
     "dev": "next dev --turbopack",
     "dev:all": "npm run build:canvas && npm run dev",
     "dev:dfa": "npm run build:dfa && npm run dev",
+    "dev:nfa": "npm run build:nfa && npm run dev",
     "build": "next build",
     "build:canvas": "rollup -c rollup.dfa.config.js && rollup -c rollup.nfa.config.js",
     "build:dfa": "rollup -c rollup.dfa.config.js",
