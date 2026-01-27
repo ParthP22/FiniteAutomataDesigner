@@ -79,6 +79,7 @@ export function completenessCheck(){
   return true;
 }
 
+// This function performs BFS to do epsilon closure from a given state
 function epsilonTransitions(pointer: Circle){
   let queue: Queue<Circle> = new Queue();
   let visited: Map<Circle, boolean> = new Map();
@@ -104,6 +105,7 @@ function epsilonTransitions(pointer: Circle){
 
 } 
 
+// This function runs the NFA algorithm on the given input string
 export function nfaAlgo(input: string){
   let acceptStateExists: boolean = false;
   for(const circle of circles){
@@ -139,14 +141,6 @@ export function nfaAlgo(input: string){
   pointers.add(startState.pointsToCircle);
 
   epsilonTransitions(startState.pointsToCircle);
-
-  // This "curr" variable will be used to traverse over the whole DFA
-  //let curr: Circle = startState.pointsToCircle;
-
-  // We check if the DFA has been defined correctly. If not, then return false.
-//   if(!inputDeterminismCheck()){
-//     return false;
-//   }
 
   const parseResult = parseInputString(input, alphabet);
 
