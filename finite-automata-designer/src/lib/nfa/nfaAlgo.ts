@@ -78,14 +78,14 @@ export function completenessCheck(){
 
 // This function performs BFS to do epsilon closure from a given state
 function epsilonTransitions(pointer: Circle, nextPointers: Set<Circle>){
-  let queue: Queue<Circle> = new Queue();
-  let visited: Map<Circle, boolean> = new Map();
+  const queue: Queue<Circle> = new Queue();
+  const visited: Map<Circle, boolean> = new Map();
   queue.offer(pointer);
   visited.set(pointer, true);
 
 
   while(!queue.isEmpty()){
-    let current: Circle | undefined = queue.poll();
+    const current: Circle | undefined = queue.poll();
     let currentOutArrows: Set<Arrow | SelfArrow> = new Set();
     if(current !== undefined){
       currentOutArrows = current.outArrows;
@@ -169,7 +169,7 @@ export function nfaAlgo(input: string){
     // console.log("Processing character: " + char);
     // We make a copy of the current pointers set to iterate over.
     // This is because we don't want to modify the set while iterating over it.
-    let currPointers : Set<Circle> = new Set(nextPointers);
+    const currPointers : Set<Circle> = new Set(nextPointers);
     nextPointers.clear();
 
     for(const pointer of currPointers){
