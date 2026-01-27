@@ -787,10 +787,10 @@
 
     // The alphabet defines every character that can be used in the DFA.
     // For easier usage, it has been defined as a Set.
-    var alphabet$2 = new Set(["0", "1"]);
-    var epsilonSymbol = "\\epsilon"; // Symbol representing epsilon transitions
-    var nfaTransitionSymbols = new Set([...alphabet$2, epsilonSymbol]); // Separator for multiple transition symbols
-    var transitionLabelInputValidator$1 = new TransitionLabelInputValidator(nfaTransitionSymbols); // Input validator for transition labels
+    let alphabet$2 = new Set(["0", "1"]);
+    const epsilonSymbol = "\\epsilon"; // Symbol representing epsilon transitions
+    let nfaTransitionSymbols = new Set([...alphabet$2, epsilonSymbol]); // Separator for multiple transition symbols
+    let transitionLabelInputValidator$1 = new TransitionLabelInputValidator(nfaTransitionSymbols); // Input validator for transition labels
     // Since the alphabet is being imported, it cannot be reassigned
     // directly. So, this is a setter method for it.
     function setAlphabet$1(newAlphabet) {
@@ -964,12 +964,12 @@
     }
     // This function performs BFS to do epsilon closure from a given state
     function epsilonTransitions(pointer, nextPointers) {
-        let queue = new Queue();
-        let visited = new Map();
+        const queue = new Queue();
+        const visited = new Map();
         queue.offer(pointer);
         visited.set(pointer, true);
         while (!queue.isEmpty()) {
-            let current = queue.poll();
+            const current = queue.poll();
             let currentOutArrows = new Set();
             if (current !== undefined) {
                 currentOutArrows = current.outArrows;
@@ -1041,7 +1041,7 @@
             // console.log("Processing character: " + char);
             // We make a copy of the current pointers set to iterate over.
             // This is because we don't want to modify the set while iterating over it.
-            let currPointers = new Set(nextPointers);
+            const currPointers = new Set(nextPointers);
             nextPointers.clear();
             for (const pointer of currPointers) {
                 if (pointer !== undefined) {
@@ -1410,7 +1410,7 @@
 
     // The alphabet defines every character that can be used in the DFA.
     // For easier usage, it has been defined as a Set.
-    var alphabet = new Set(["0", "1"]);
+    let alphabet = new Set(["0", "1"]);
     new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
 
     // I haven't figured out how to stop compiling the imports into JS, so here's a command
