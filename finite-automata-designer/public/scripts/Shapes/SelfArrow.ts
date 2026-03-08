@@ -14,8 +14,10 @@ import {Circle} from "./Circle";
 import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
 import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { arrowIdCounter } from "./Arrow";
 
 export class SelfArrow {
+  id: string;
   circle: Circle; // The state which this SelfArrow loops back to
 
   // These two attributes are not really necessary.
@@ -33,6 +35,7 @@ export class SelfArrow {
   point: {x: number, y: number}
 
   constructor(pointsToCircle: Circle, point: {x: number, y: number}) {
+    this.id = 'a' + arrowIdCounter;
     this.circle = pointsToCircle;
     this.startCircle = pointsToCircle;
     this.endCircle = pointsToCircle;
