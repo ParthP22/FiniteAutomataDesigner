@@ -19,6 +19,8 @@ import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 
 export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 
+export let arrowIdCounter = 0;
+
 function circleFromThreePoints(
   x1: number, 
   y1: number, 
@@ -52,6 +54,7 @@ function det(
 }
 
 export class Arrow {
+    id: string;
     startCircle: Circle; // The initial node of the Arrow
     endCircle: Circle; // The terminal node of the Arrow
     text: string; // The text (transition) of the Arrow that will be displayed
@@ -62,6 +65,7 @@ export class Arrow {
 
 
     constructor(startCircle: Circle, endCircle: Circle) {
+        this.id = 'a' + arrowIdCounter;
         this.startCircle = startCircle;
         this.endCircle = endCircle;
         this.text = '';
