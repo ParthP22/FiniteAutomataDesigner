@@ -21,6 +21,10 @@ export var arrows: (Arrow | SelfArrow | EntryArrow)[] = [];
 
 export let arrowIdCounter = 0;
 
+export function incrementArrowIdCounter() {
+    arrowIdCounter++;
+}
+
 function circleFromThreePoints(
   x1: number, 
   y1: number, 
@@ -74,6 +78,7 @@ export class Arrow {
         this.parallelPart = 0.5; // percent from start to end circle
         this.perpendicularPart = 0; // pixels from start to end circle
         this.transition = new Set();
+        arrowIdCounter++;
     }
 
     getAnchorPoint() {
