@@ -5,3 +5,13 @@ export type SerializedState = {
     isAccept: boolean
     text: string
 }
+
+export type SerializedTransition = {
+    id: string
+    from: string
+    to: string
+    transition: string[]
+    parallelPart: number
+    perpendicularPart: number
+    lineAngleAdjust: number
+}
