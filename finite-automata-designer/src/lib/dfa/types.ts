@@ -1,3 +1,8 @@
-export type DFATransitions = {};
+import { SerializedState, SerializedTransition } from "../shared/types"
 
-export type DFA = {};
+export type SerializedDFA = {
+    alphabet: string[];
+    states: SerializedState[];
+    transitions: SerializedTransition[];
+    startState: string;
+}
