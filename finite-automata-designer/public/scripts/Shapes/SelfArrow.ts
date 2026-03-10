@@ -14,7 +14,7 @@ import {Circle} from "./Circle";
 import { drawArrow, drawText, nodeRadius, hitTargetPadding } from "./draw";
 import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { ExportAsSVG } from "../exporting/ExportAsSVG";
-import { arrowIdCounter } from "./Arrow";
+import { arrowIdCounter, incrementArrowIdCounter } from "./Arrow";
 
 export class SelfArrow {
   id: string;
@@ -44,6 +44,7 @@ export class SelfArrow {
     this.text = ''; 
     this.transition = new Set();
     this.point = point;
+    incrementArrowIdCounter();
     
 
     if (point) {
