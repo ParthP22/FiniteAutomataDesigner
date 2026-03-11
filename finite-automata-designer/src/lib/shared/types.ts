@@ -21,3 +21,9 @@ export type SerializedTransition = {
     anchorAngle?: number;
 
 }
+
+export type SerializedEntryArrow = {
+    startState?: string;
+    deltaX?: number;
+    deltaY?: number;
+}
