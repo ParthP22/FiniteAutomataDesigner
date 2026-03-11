@@ -1,8 +1,8 @@
 import { Arrow } from "../../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../../public/scripts/Shapes/SelfArrow";
-import { SerializedTransition } from "../types";
+import { SerializedArrow } from "../types";
 
-export function serializeArrow(arrow: Arrow | SelfArrow): SerializedTransition{
+export function serializeArrow(arrow: Arrow | SelfArrow): SerializedArrow{
     const base = {
         id: arrow.id,
         from: arrow.startCircle.id,
