@@ -307,6 +307,13 @@ export default function DFAPage() {
                 >
                     Run
                 </Link>
+
+                <Link
+                    href="/projects"
+                    className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                    >
+                    My Projects
+                </Link>
             </div>
         </div>
 
