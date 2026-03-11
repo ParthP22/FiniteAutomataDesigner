@@ -1,8 +1,8 @@
-import { SerializedEntryArrow, SerializedState, SerializedTransition } from "../shared/types"
+import { SerializedEntryArrow, SerializedCircle, SerializedArrow } from "../shared/types"
 
 export type SerializedDFA = {
     alphabet: string[];
-    states: SerializedState[];
-    transitions: SerializedTransition[];
+    circles: SerializedCircle[];
+    arrows: SerializedArrow[];
     entryArrow: SerializedEntryArrow;
 }
