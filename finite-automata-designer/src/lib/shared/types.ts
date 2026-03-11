@@ -1,4 +1,4 @@
-export type SerializedState = {
+export type SerializedCircle = {
     id: string;
     x: number;
     y: number;
@@ -6,7 +6,7 @@ export type SerializedState = {
     text: string;
 }
 
-export type SerializedTransition = {
+export type SerializedArrow = {
     id: string;
     from: string;
     to: string;
@@ -26,4 +26,5 @@ export type SerializedEntryArrow = {
     startState?: string;
     deltaX?: number;
     deltaY?: number;
+    startPoint?: {x: number, y: number};
 }
