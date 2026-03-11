@@ -11,7 +11,13 @@ export type SerializedTransition = {
     from: string;
     to: string;
     transition: string[];
-    parallelPart: number;
-    perpendicularPart: number;
-    lineAngleAdjust: number;
+
+    // Attributes for Arrow
+    parallelPart?: number;
+    perpendicularPart?: number;
+    lineAngleAdjust?: number;
+
+    // Attributes for SelfArrow
+    anchorAngle?: number;
+
 }
