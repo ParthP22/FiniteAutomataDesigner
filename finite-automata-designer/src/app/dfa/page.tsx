@@ -3,11 +3,16 @@ import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState } from "react";
 
+import { saveAutomaton } from "@/lib/saveAutomaton";
+import { serializeDFA } from "@/lib/dfa/serializeDFA";
+import { createClient } from "@/lib/supabase/client";
+
 
 export default function DFAPage() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
+    
 
     useEffect(() => {
 
@@ -30,6 +35,27 @@ export default function DFAPage() {
         }
 
     }, [alphabetInput]);
+
+    async function handleSave(){
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if(!user){
+            alert("Yout must be logged in to save.");
+            return;
+        }
+
+        const serialized = serializeDFA();
+
+        try{
+            await saveAutomaton(user.id, serialized);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
+        }
+    }
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
@@ -265,9 +291,20 @@ export default function DFAPage() {
                 />
             </div>
             </div>
-            <div className="flex">
+            <div className="flex gap-3">
+                <button
+                    type="button"
+                    onClick={handleSave}
+                    className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                >
+                    Save
+                </button>
+                
                 {/* Run button to run the DFA with the given input string */}
-                <Link href="/" className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
+                <Link
+                    href="/"
+                    className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                >
                     Run
                 </Link>
             </div>
