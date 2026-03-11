@@ -1,5 +1,5 @@
-import { EntryArrow } from "../../../public/scripts/Shapes/EntryArrow";
-import { SerializedEntryArrow } from "./types";
+import { EntryArrow } from "../../../../public/scripts/Shapes/EntryArrow";
+import { SerializedEntryArrow } from "../types";
 
 export function serializeEntryArrow(entryArrow: EntryArrow | null): SerializedEntryArrow{
     if(entryArrow === null){

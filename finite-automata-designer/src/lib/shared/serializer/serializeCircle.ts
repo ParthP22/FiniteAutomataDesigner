@@ -1,5 +1,5 @@
-import { Circle } from "../../../public/scripts/Shapes/Circle";
-import { SerializedState } from "./types";
+import { Circle } from "../../../../public/scripts/Shapes/Circle";
+import { SerializedState } from "../types";
 
 export function serializeCircle(circle: Circle): SerializedState {
     return {

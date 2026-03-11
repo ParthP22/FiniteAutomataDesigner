@@ -1,6 +1,6 @@
-import { Arrow } from "../../../public/scripts/Shapes/Arrow";
-import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
-import { SerializedTransition } from "./types";
+import { Arrow } from "../../../../public/scripts/Shapes/Arrow";
+import { SelfArrow } from "../../../../public/scripts/Shapes/SelfArrow";
+import { SerializedTransition } from "../types";
 
 export function serializeArrow(arrow: Arrow | SelfArrow): SerializedTransition{
     const base = {
