@@ -273,7 +273,7 @@ export default function DFAPage() {
             </div>
         </div>
 
-        <Script src="/scripts/dfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
+        <Script src="/scripts/dfa/dfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
       </main>
       
     );
