@@ -1,5 +1,5 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet } from "./dfaTransitionSymbols";
+import { alphabet, transitionLabelInputValidator } from "./dfaTransitionSymbols";
 import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
@@ -190,7 +190,7 @@ export function dfaAlgo(input: string){
     return false;
   }
 
-  const parseResult = parseInputString(input, alphabet);
+  const parseResult = parseInputString(input, alphabet, transitionLabelInputValidator);
 
   if (!parseResult.success) {
     alert(parseResult.error);
