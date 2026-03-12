@@ -2,7 +2,6 @@ import { Circle } from "../../Shapes/Circle";
 import { Arrow } from "../../Shapes/Arrow";
 import { SelfArrow } from "../../Shapes/SelfArrow";
 import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
-import { transitionDeterminismCheck } from "../../../../src/lib/dfa/dfaAlgo";
 import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
 
 const startsWith = {
@@ -70,9 +69,6 @@ export class Importer {
                     const arrow = new Arrow(startCircle, endCircle);
                     arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                     arrow.text = label.trim();
-                    if (transitionDeterminismCheck(arrow)) {
-                        this.arrows.push(arrow);
-                    }
                 }
             } else if (raw.startsWith(startsWith.CURVED_ARROW)) {
                 const [, from, to, parallel, perpendicular, label] = raw.match(/from=(\w+), to=(\w+), parallel=([\d.]+), perpendicular=([-]?\d+(?:\.\d+)?), label=(.*)/)!;
@@ -84,9 +80,6 @@ export class Importer {
                     arrow.text = label.trim();
                     arrow.parallelPart = parseFloat(parallel);
                     arrow.perpendicularPart = parseFloat(perpendicular);
-                    if (transitionDeterminismCheck(arrow)) {
-                        this.arrows.push(arrow);
-                    }
                 }
             } else if (raw.startsWith(startsWith.SELF_ARROW)) {
                 const [, circleId, x, y, text] = raw.match(/circle=(\w+), anchor=\(([\d.]+),([\d.]+)\), text=(.*)/)!;
@@ -97,9 +90,6 @@ export class Importer {
                     circle.loop = selfArrow;
                     circle.outArrows.add(selfArrow); // Adds out arrow for the circle
                     selfArrow.text = text;
-                    if (transitionDeterminismCheck(selfArrow)) {
-                        this.arrows.push(selfArrow);
-                    }
                 }
             } else if (raw.startsWith(startsWith.ENTRY_ARROW)) {
                 const [, toId, x, y] = raw.match(/to=(\w+), start=\(([\d.]+),([\d.]+)\)/)!;
