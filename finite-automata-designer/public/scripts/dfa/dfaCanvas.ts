@@ -790,7 +790,10 @@ function importHelper(canvas: HTMLCanvasElement | null,
           if (canvas) {
             if (emptyDFA(canvas, arrows, circles)){
               let importer = new Importer(circles, arrows, textArea.value, drawFunc);
-              importer.convert();
+              let valid = importer.convert();
+              if(!valid){
+                alert("Import failed. Please check if you are importing a DFA.");
+              }
             } else {
               alert("Failure to import DFA");
             }
