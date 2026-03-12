@@ -5,6 +5,7 @@ import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
 import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
 
 const startsWith = {
+    NFA: 'Automaton: NFA',
     ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
@@ -30,7 +31,7 @@ export class Importer {
         this._svgData = '';
     }
 
-    convert(): void{
+    convert(): boolean{
         const commentRegex = /<!--\s*(.*?)\s*-->/g;
         let parsedData: string[] = [];
         let match;
@@ -45,6 +46,21 @@ export class Importer {
                 parsedData.push(raw);
             }
         }
+        
+        // Check to be sure that you are importing an NFA
+        let isNFA: boolean = false;
+        for(let rawData = 0; rawData < parsedData.length; rawData++){
+            const raw = parsedData[rawData];
+            if(raw.startsWith(startsWith.NFA)){
+                isNFA = true;
+                break;
+            }
+        }
+
+        if(!isNFA){
+            return false;
+        }
+
         // Add the circles first because all arrows depend on them 
         for (let rawData = 0; rawData < parsedData.length; rawData++) {
             const raw = parsedData[rawData];
@@ -106,6 +122,7 @@ export class Importer {
         }
 
         this.draw();
+        return true;
     }
 
     normalizeText(text: string) {
