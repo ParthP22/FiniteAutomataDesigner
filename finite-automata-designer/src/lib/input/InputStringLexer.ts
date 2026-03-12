@@ -1,7 +1,8 @@
-import { transitionLabelInputValidator } from "../../../public/scripts/alphabet";
-
 // A discriminated union type that represents either:
 // 1. A successful parse with an array of tokens
+
+import { TransitionLabelInputValidator } from "../validation/TransitionLabelInputValidator";
+
 // 2. A failed parse with an error message
 export type ParseResult =
     | { success: true; tokens: string[] }
@@ -11,7 +12,8 @@ export type ParseResult =
 // tokens according to the alphabet and delimiter rules.
 export function parseInputString(
     input: string,
-    alphabet: Set<string>
+    alphabet: Set<string>,
+    transitionLabelInputValidator: TransitionLabelInputValidator
 ): ParseResult {
 
     // Remove leading and trailing whitespace from the input
