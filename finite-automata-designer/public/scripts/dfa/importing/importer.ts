@@ -6,6 +6,7 @@ import { transitionDeterminismCheck } from "../../../../src/lib/dfa/dfaAlgo";
 import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
 
 const startsWith = {
+    DFA: 'Automaton: DFA',
     ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
@@ -31,7 +32,7 @@ export class Importer {
         this._svgData = '';
     }
 
-    convert(): void{
+    convert(): boolean{
         const commentRegex = /<!--\s*(.*?)\s*-->/g;
         let parsedData: string[] = [];
         let match;
@@ -46,6 +47,21 @@ export class Importer {
                 parsedData.push(raw);
             }
         }
+
+        // Check to be sure that you are importing an NFA
+        let isDFA: boolean = false;
+        for(let rawData = 0; rawData < parsedData.length; rawData++){
+            const raw = parsedData[rawData];
+            if(raw.startsWith(startsWith.DFA)){
+                isDFA = true;
+                break;
+            }
+        }
+
+        if(!isDFA){
+            return false;
+        }
+
         // Add the circles first because all arrows depend on them 
         for (let rawData = 0; rawData < parsedData.length; rawData++) {
             const raw = parsedData[rawData];
@@ -116,6 +132,7 @@ export class Importer {
         }
 
         this.draw();
+        return true;
     }
 
     normalizeText(text: string) {
