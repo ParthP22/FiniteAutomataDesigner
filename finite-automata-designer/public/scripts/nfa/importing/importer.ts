@@ -2,7 +2,7 @@ import { Circle } from "../../Shapes/Circle";
 import { Arrow } from "../../Shapes/Arrow";
 import { SelfArrow } from "../../Shapes/SelfArrow";
 import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
-import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
+import { setAlphabet } from "../../../../src/lib/nfa/nfaTransitionSymbols";
 
 const startsWith = {
     NFA: 'Automaton: NFA',
