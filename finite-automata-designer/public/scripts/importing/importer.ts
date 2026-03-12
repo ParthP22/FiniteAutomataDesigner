@@ -3,7 +3,7 @@ import { Arrow } from "../Shapes/Arrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { EntryArrow, setStartState } from "../Shapes/EntryArrow";
 import { transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
-import { setAlphabet } from "../alphabet";
+import { setAlphabet } from "../../../src/lib/dfa/dfaTransitionSymbols";
 
 const startsWith = {
     ALPHABET: 'Alphabet:',
@@ -16,11 +16,11 @@ const startsWith = {
 
 export class Importer {
     circles: Circle[];
-    arrows: (Arrow | SelfArrow | EntryArrow) [];
+    arrows: (Arrow | SelfArrow) [];
     _svgData: string;
     draw: () => void;
 
-    constructor(circArr: Circle[], arrowsArray: (Arrow | SelfArrow | EntryArrow)[], data: string, drawFunc:() => void) {
+    constructor(circArr: Circle[], arrowsArray: (Arrow | SelfArrow)[], data: string, drawFunc:() => void) {
         this.circles = circArr;
         this.arrows = arrowsArray;
         this._svgData = data;
@@ -107,7 +107,6 @@ export class Importer {
                 if (circle) {
                     const entryArrow = new EntryArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
                     setStartState(entryArrow);
-                    this.arrows.push(entryArrow);
                 }
             } else if (raw.startsWith(startsWith.ALPHABET)) {
                 const [, values] = raw.match(/Alphabet:\s*(.*)/)!;
