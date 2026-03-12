@@ -14,17 +14,17 @@
 // npm run build:canvas
 
 
-import { Circle, circles} from "./Shapes/Circle";
-import { Arrow, arrows} from "./Shapes/Arrow";
-import { SelfArrow} from "./Shapes/SelfArrow";
-import { EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
-import { TemporaryArrow} from "./Shapes/TemporaryArrow";
-import { snapToPadding} from "./Shapes/draw";
-import { commitTransition, nfaAlgo } from "../../src/lib/nfa/nfaAlgo";
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../src/lib/nfa/nfaTransitionSymbols";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { Importer } from "./importing/importer";
+import { Circle, circles} from "../Shapes/Circle";
+import { Arrow, arrows} from "../Shapes/Arrow";
+import { SelfArrow} from "../Shapes/SelfArrow";
+import { EntryArrow, startState, setStartState} from "../Shapes/EntryArrow";
+import { TemporaryArrow} from "../Shapes/TemporaryArrow";
+import { snapToPadding} from "../Shapes/draw";
+import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
+import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { Importer } from "../nfa/importing/importer";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -619,21 +619,21 @@ function attachWhenReady() {
     // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
       });
     }
 
     // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
       });
     }
 
     // Additional button so the user doesn't have to click the drop down to import
     if (drawImportBtn) {
       drawImportBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
       })
     }
 
@@ -771,7 +771,8 @@ function importHelper(canvas: HTMLCanvasElement | null,
                       inputContainer: HTMLDivElement | null, 
                       textArea: HTMLTextAreaElement | null, 
                       circles: Circle[], 
-                      arrows: (Arrow | SelfArrow | EntryArrow)[], 
+                      arrows: (Arrow | SelfArrow)[], 
+                      startState: EntryArrow | null,
                       drawFunc:() => void) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
@@ -814,7 +815,7 @@ function importHelper(canvas: HTMLCanvasElement | null,
   }
 }
 
-function emptyNFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow | SelfArrow)[], circles: Circle[]): boolean {
+function emptyNFA(canvas: HTMLCanvasElement | null, arrows: (Arrow | SelfArrow)[], circles: Circle[]): boolean {
   if (canvas) {
     const ctx = canvas.getContext('2d');
     if (ctx) {
