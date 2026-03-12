@@ -14,17 +14,17 @@
 // npm run build:canvas
 
 
-import { Circle, circles} from "./Shapes/Circle";
-import { Arrow, arrows} from "./Shapes/Arrow";
-import { SelfArrow} from "./Shapes/SelfArrow";
-import { EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
-import { TemporaryArrow} from "./Shapes/TemporaryArrow";
-import { snapToPadding} from "./Shapes/draw";
-import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "./alphabet";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
-import { Importer } from "./importing/importer";
+import { Circle, circles} from "../Shapes/Circle";
+import { Arrow, arrows} from "../Shapes/Arrow";
+import { SelfArrow} from "../Shapes/SelfArrow";
+import { EntryArrow, startState, setStartState} from "../Shapes/EntryArrow";
+import { TemporaryArrow} from "../Shapes/TemporaryArrow";
+import { snapToPadding} from "../Shapes/draw";
+import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
+import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
+import { Importer } from "../nfa/importing/importer";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -67,7 +67,7 @@ const isInsideCanvas = (event: MouseEvent, canvas: HTMLCanvasElement) => {
   );
 }
 
-function setupDfaCanvas(canvas: HTMLCanvasElement) {
+function setupNfaCanvas(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return { draw: () => {} };
 
@@ -471,13 +471,13 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
  * --------------------------------------------------------- */
 function attachWhenReady() {
   const run = () => {
-    // Get the input tag for the input string of the DFA
+    // Get the input tag for the input string of the NFA
     const inputString = document.getElementById("inputString") as HTMLInputElement | null;
-    // Get the input tag for the alphabet input of the DFA
+    // Get the input tag for the alphabet input of the NFA
     const alphabetInput = document.getElementById("alphabet") as HTMLInputElement | null;
-    // Get the canvas tag for the canvas of the DFA
-    const canvas = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
-    // Get label tag for alphabet label of DFA
+    // Get the canvas tag for the canvas of the NFA
+    const canvas = document.getElementById('NFACanvas') as HTMLCanvasElement | null;
+    // Get label tag for alphabet label of NFA
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
     // Export menu button and div
     const exportMenuBtn = document.getElementById("exportMenuBtn")!;
@@ -511,7 +511,7 @@ function attachWhenReady() {
     // Reference to draw fucntion;
     let drawRef:  () => void;
     if (canvas)  {
-      const { draw } = setupDfaCanvas(canvas);
+      const { draw } = setupNfaCanvas(canvas);
       drawRef = draw;
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
@@ -542,7 +542,7 @@ function attachWhenReady() {
         if (event.key === "Enter") {
           event.preventDefault();
 
-          dfaAlgo(inputString.value);
+          nfaAlgo(inputString.value);
           
           // Reset the input tag
           inputString.value = "";
@@ -568,7 +568,7 @@ function attachWhenReady() {
           setAlphabet(newAlphabet);
           
           
-          window.dispatchEvent(new CustomEvent("dfaAlphabetUpdated", {
+          window.dispatchEvent(new CustomEvent("nfaAlphabetUpdated", {
             detail: {
               alphabet: Array.from(newAlphabet)
             }
@@ -619,21 +619,21 @@ function attachWhenReady() {
     // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
       });
     }
 
     // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
       });
     }
 
     // Additional button so the user doesn't have to click the drop down to import
     if (drawImportBtn) {
       drawImportBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
       })
     }
 
@@ -719,6 +719,7 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     if (!canvas) return;
 
     const exporter = new ExportAsSVG(canvas, alphabet);
+    exporter.addAutomatonSpecification("NFA");
     exporter.addAlphabet();
 
     for(let circle = 0; circle < circles.length; circle++) {
@@ -747,6 +748,7 @@ function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
   if (!canvas) return;
   
   const exporter = new ExportAsLaTeX(canvas, alphabet);
+  exporter.addAutomatonSpecification("NFA");
   exporter.addAlphabet();
 
   for(let circle = 0; circle < circles.length; circle++) {
@@ -771,7 +773,8 @@ function importHelper(canvas: HTMLCanvasElement | null,
                       inputContainer: HTMLDivElement | null, 
                       textArea: HTMLTextAreaElement | null, 
                       circles: Circle[], 
-                      arrows: (Arrow | SelfArrow | EntryArrow)[], 
+                      arrows: (Arrow | SelfArrow)[], 
+                      startState: EntryArrow | null,
                       drawFunc:() => void) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
@@ -786,11 +789,14 @@ function importHelper(canvas: HTMLCanvasElement | null,
       if (data) {
         if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")){
           if (canvas) {
-            if (emptyDFA(canvas, arrows, circles)){
+            if (emptyNFA(canvas, arrows, circles)){
               let importer = new Importer(circles, arrows, textArea.value, drawFunc);
-              importer.convert();
+              let valid = importer.convert();
+              if(!valid){
+                alert("Import failed. Please check if you are importing an NFA.");
+              }
             } else {
-              alert("Failure to import DFA");
+              alert("Failure to import NFA");
             }
           }
           
@@ -800,11 +806,11 @@ function importHelper(canvas: HTMLCanvasElement | null,
     if(alphabetLabel){
       alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
 
-      // This event notifies the DFA page that the alphabet has been updated.
-      // This lets the DFA page know if it needs to check for multi-character
+      // This event notifies the NFA page that the alphabet has been updated.
+      // This lets the NFA page know if it needs to check for multi-character
       // elements in the alphabet, in which case it will show a disclaimer to
       // the user on how to submit input strings properly.
-      window.dispatchEvent(new CustomEvent("dfaAlphabetUpdated", {
+      window.dispatchEvent(new CustomEvent("nfaAlphabetUpdated", {
             detail: {
               alphabet: Array.from(alphabet)
             }
@@ -814,7 +820,7 @@ function importHelper(canvas: HTMLCanvasElement | null,
   }
 }
 
-function emptyDFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow | SelfArrow)[], circles: Circle[]): boolean {
+function emptyNFA(canvas: HTMLCanvasElement | null, arrows: (Arrow | SelfArrow)[], circles: Circle[]): boolean {
   if (canvas) {
     const ctx = canvas.getContext('2d');
     if (ctx) {
@@ -846,13 +852,13 @@ function finalizeEditedArrow(nextSelected: any | null) {
 
   // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
   // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
-  // then we will run the transitionDeterminismCheckt
+  // then we will run the commitTransition function
   if (nextSelected !== lastEditedArrow) {
-    // If the transitionDeterminismCheck returns true, that means the transition is valid.
+    // If the commitTransition returns true, that means the transition is valid.
     // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
     // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
     // the text of the lastEditedArrow will be equal
-    if (transitionDeterminismCheck(lastEditedArrow)) {
+    if (commitTransition(lastEditedArrow)) {
       // This will sort the string in ascending order and assign it to the arrow's text,
       // which makes it more visually appealing for the user
       // console.log("Transition determinism check passed for state ", lastEditedArrow.startCircle.id);
@@ -872,6 +878,7 @@ function finalizeEditedArrow(nextSelected: any | null) {
         lastEditedArrow.startCircle.id
       );
     }
+    transitionLabelInputValidator.resetBuffer();
   }
 }
 

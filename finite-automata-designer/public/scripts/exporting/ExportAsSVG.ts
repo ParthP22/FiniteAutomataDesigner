@@ -14,7 +14,19 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { BaseDrawContext, CALLERS, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment,  textToXML, addAlphabetComment} from "../exportUtils";
+import { 
+    BaseDrawContext, 
+    CALLERS, 
+    fixed, 
+    addCircleComment, 
+    addCurvedArrowComment,
+    addStraightArrowComment, 
+    addEntryArrowComment, 
+    addSelfArrowComment,  
+    textToXML, 
+    addAlphabetComment,
+    addAutomatonSpecificationComment
+} from "../exportUtils";
 
 export class ExportAsSVG implements BaseDrawContext{
     readonly type = "svg";
@@ -160,10 +172,14 @@ export class ExportAsSVG implements BaseDrawContext{
     translate(x: number, y: number) {
         this._transX = x;
         this._transY = y;
-    };
+    }
 
     addAlphabet(){
         this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
+    }
+
+    addAutomatonSpecification(automaton: string){
+        this._svgData = addAutomatonSpecificationComment(CALLERS.SVG, this._svgData, automaton);
     }
 
     save() {

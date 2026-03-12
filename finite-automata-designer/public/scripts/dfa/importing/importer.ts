@@ -1,11 +1,12 @@
-import { Circle } from "../Shapes/Circle";
-import { Arrow } from "../Shapes/Arrow";
-import { SelfArrow } from "../Shapes/SelfArrow";
-import { EntryArrow, setStartState } from "../Shapes/EntryArrow";
-import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
-import { setAlphabet } from "../alphabet";
+import { Circle } from "../../Shapes/Circle";
+import { Arrow } from "../../Shapes/Arrow";
+import { SelfArrow } from "../../Shapes/SelfArrow";
+import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
+import { transitionDeterminismCheck } from "../../../../src/lib/dfa/dfaAlgo";
+import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
 
 const startsWith = {
+    DFA: 'Automaton: DFA',
     ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
@@ -16,11 +17,11 @@ const startsWith = {
 
 export class Importer {
     circles: Circle[];
-    arrows: (Arrow | SelfArrow | EntryArrow) [];
+    arrows: (Arrow | SelfArrow) [];
     _svgData: string;
     draw: () => void;
 
-    constructor(circArr: Circle[], arrowsArray: (Arrow | SelfArrow | EntryArrow)[], data: string, drawFunc:() => void) {
+    constructor(circArr: Circle[], arrowsArray: (Arrow | SelfArrow)[], data: string, drawFunc:() => void) {
         this.circles = circArr;
         this.arrows = arrowsArray;
         this._svgData = data;
@@ -31,7 +32,7 @@ export class Importer {
         this._svgData = '';
     }
 
-    convert(): void{
+    convert(): boolean{
         const commentRegex = /<!--\s*(.*?)\s*-->/g;
         let parsedData: string[] = [];
         let match;
@@ -46,6 +47,21 @@ export class Importer {
                 parsedData.push(raw);
             }
         }
+
+        // Check to be sure that you are importing an NFA
+        let isDFA: boolean = false;
+        for(let rawData = 0; rawData < parsedData.length; rawData++){
+            const raw = parsedData[rawData];
+            if(raw.startsWith(startsWith.DFA)){
+                isDFA = true;
+                break;
+            }
+        }
+
+        if(!isDFA){
+            return false;
+        }
+
         // Add the circles first because all arrows depend on them 
         for (let rawData = 0; rawData < parsedData.length; rawData++) {
             const raw = parsedData[rawData];
@@ -107,7 +123,6 @@ export class Importer {
                 if (circle) {
                     const entryArrow = new EntryArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
                     setStartState(entryArrow);
-                    this.arrows.push(entryArrow);
                 }
             } else if (raw.startsWith(startsWith.ALPHABET)) {
                 const [, values] = raw.match(/Alphabet:\s*(.*)/)!;
@@ -117,6 +132,7 @@ export class Importer {
         }
 
         this.draw();
+        return true;
     }
 
     normalizeText(text: string) {

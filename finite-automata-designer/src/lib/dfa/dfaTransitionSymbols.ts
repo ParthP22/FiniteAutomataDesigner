@@ -3,9 +3,9 @@
 import { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
 
 // For easier usage, it has been defined as a Set.
-export var alphabet: Set<string> = new Set(["0","1"]);
+export let alphabet: Set<string> = new Set(["0","1"]);
 
-export var transitionLabelInputValidator: TransitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
+export let transitionLabelInputValidator: TransitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
 
 
 // Since the alphabet is being imported, it cannot be reassigned
