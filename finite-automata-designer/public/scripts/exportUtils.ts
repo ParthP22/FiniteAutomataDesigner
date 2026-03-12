@@ -130,3 +130,13 @@ export function addAlphabetComment(caller: string, _data: string, alphabet: Set<
 
     return _data;
 }
+
+export function addAutomatonSpecificationComment(caller: string, _data: string, automaton: string){
+    if (caller == CALLERS.SVG) {
+        _data += `\t<!-- Automaton: ${automaton} -->\n`;
+    }
+    else if (caller == CALLERS.LATEX) {
+        _data += `\t%<!-- Automaton ${automaton} -->\n`;
+    }
+    return _data;
+}
