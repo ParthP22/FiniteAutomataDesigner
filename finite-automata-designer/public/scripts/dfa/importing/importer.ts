@@ -1,9 +1,9 @@
-import { Circle } from "../Shapes/Circle";
-import { Arrow } from "../Shapes/Arrow";
-import { SelfArrow } from "../Shapes/SelfArrow";
-import { EntryArrow, setStartState } from "../Shapes/EntryArrow";
-import { transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
-import { setAlphabet } from "../../../src/lib/dfa/dfaTransitionSymbols";
+import { Circle } from "../../Shapes/Circle";
+import { Arrow } from "../../Shapes/Arrow";
+import { SelfArrow } from "../../Shapes/SelfArrow";
+import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
+import { transitionDeterminismCheck } from "../../../../src/lib/dfa/dfaAlgo";
+import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
 
 const startsWith = {
     ALPHABET: 'Alphabet:',

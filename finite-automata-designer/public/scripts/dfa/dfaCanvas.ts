@@ -14,16 +14,16 @@
 // npm run build:canvas
 
 
-import { Circle, circles} from "./Shapes/Circle";
-import { Arrow, arrows} from "./Shapes/Arrow";
-import { SelfArrow} from "./Shapes/SelfArrow";
-import { EntryArrow, startState, setStartState} from "./Shapes/EntryArrow";
-import { TemporaryArrow} from "./Shapes/TemporaryArrow";
-import { snapToPadding} from "./Shapes/draw";
-import { dfaAlgo, transitionDeterminismCheck } from "../../src/lib/dfa/dfaAlgo";
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../src/lib/dfa/dfaTransitionSymbols";
-import { ExportAsSVG } from "./exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "./exporting/ExportAsLaTeX";
+import { Circle, circles} from "../Shapes/Circle";
+import { Arrow, arrows} from "../Shapes/Arrow";
+import { SelfArrow} from "../Shapes/SelfArrow";
+import { EntryArrow, startState, setStartState} from "../Shapes/EntryArrow";
+import { TemporaryArrow} from "../Shapes/TemporaryArrow";
+import { snapToPadding} from "../Shapes/draw";
+import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
+import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfa/dfaTransitionSymbols";
+import { ExportAsSVG } from "../exporting/ExportAsSVG";
+import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
 
 // The previously edited object, which is determined by the object that was last
