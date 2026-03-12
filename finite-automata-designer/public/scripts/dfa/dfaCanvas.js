@@ -106,7 +106,16 @@
             _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
         }
         else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
+            _data += `\t%<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
+        }
+        return _data;
+    }
+    function addAutomatonSpecificationComment(caller, _data, automaton) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- Automaton: ${automaton} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- Automaton: ${automaton} -->\n`;
         }
         return _data;
     }
@@ -760,19 +769,8 @@
 
     // The alphabet defines every character that can be used in the DFA.
     // For easier usage, it has been defined as a Set.
-    let alphabet$1 = new Set(["0", "1"]);
-    let transitionLabelInputValidator$1 = new TransitionLabelInputValidator(alphabet$1); // Input validator for transition labels
-    // Since the alphabet is being imported, it cannot be reassigned
-    // directly. So, this is a setter method for it.
-    function setAlphabet$1(newAlphabet) {
-        transitionLabelInputValidator$1 = new TransitionLabelInputValidator(newAlphabet); // Input validator for transition labels
-        alphabet$1 = newAlphabet;
-    }
-
-    // The alphabet defines every character that can be used in the DFA.
-    // For easier usage, it has been defined as a Set.
-    var alphabet = new Set(["0", "1"]);
-    var transitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
+    let alphabet = new Set(["0", "1"]);
+    let transitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
     // Since the alphabet is being imported, it cannot be reassigned
     // directly. So, this is a setter method for it.
     function setAlphabet(newAlphabet) {
@@ -780,9 +778,11 @@
         alphabet = newAlphabet;
     }
 
+    // A discriminated union type that represents either:
+    // 1. A successful parse with an array of tokens
     // Main function that converts a row input string into
     // tokens according to the alphabet and delimiter rules.
-    function parseInputString(input, alphabet) {
+    function parseInputString(input, alphabet, transitionLabelInputValidator) {
         // Remove leading and trailing whitespace from the input
         const trimmed = input.trim();
         if (trimmed.length === 0) {
@@ -912,7 +912,7 @@
         // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
         // it should not work, since "00" and "01" are not in the alphabet.
         for (const newTransition of newTransitions) {
-            if (!alphabet$1.has(newTransition)) {
+            if (!alphabet.has(newTransition)) {
                 lastEditedArrow.text = "";
                 alert("\'" + newTransition + "\' has not been defined in the alphabet!");
                 return false;
@@ -974,7 +974,7 @@
         for (const node of circles) {
             // We retrieve the outgoing arrows from the current state
             const outArrows = node.outArrows;
-            for (const char of alphabet$1) {
+            for (const char of alphabet) {
                 // The "exists" variable will be used to track if
                 // this specific character in the alphabet has been
                 // used as a transition or not for this specific state
@@ -996,7 +996,7 @@
                         // If the transition does not exist in the alphabet,
                         // then immediately return false, since it violates
                         // determinism.
-                        if (!alphabet$1.has(transition)) {
+                        if (!alphabet.has(transition)) {
                             alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
                             return false;
                         }
@@ -1033,7 +1033,7 @@
             alert("Accept state undefined!");
             return false;
         }
-        const parseResult = parseInputString(input, alphabet$1);
+        const parseResult = parseInputString(input, alphabet, transitionLabelInputValidator);
         if (!parseResult.success) {
             alert(parseResult.error);
             return false;
@@ -1214,9 +1214,11 @@
             this._transX = x;
             this._transY = y;
         }
-        ;
         addAlphabet() {
             this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
+        }
+        addAutomatonSpecification(automaton) {
+            this._svgData = addAutomatonSpecificationComment(CALLERS.SVG, this._svgData, automaton);
         }
         save() {
             // No-op for SVG export
@@ -1391,6 +1393,9 @@
         addAlphabet() {
             this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
         }
+        addAutomatonSpecification(automaton) {
+            this._texData = addAutomatonSpecificationComment(CALLERS.LATEX, this._texData, automaton);
+        }
         translate() {
             // No-op for LaTeX export
         }
@@ -1406,6 +1411,7 @@
     }
 
     const startsWith = {
+        DFA: 'Automaton: DFA',
         ALPHABET: 'Alphabet:',
         CIRCLE: 'Circle:',
         STRAIGHT_ARROW: 'StraightArrow:',
@@ -1438,6 +1444,18 @@
                 else {
                     parsedData.push(raw);
                 }
+            }
+            // Check to be sure that you are importing an NFA
+            let isDFA = false;
+            for (let rawData = 0; rawData < parsedData.length; rawData++) {
+                const raw = parsedData[rawData];
+                if (raw.startsWith(startsWith.DFA)) {
+                    isDFA = true;
+                    break;
+                }
+            }
+            if (!isDFA) {
+                return false;
             }
             // Add the circles first because all arrows depend on them 
             for (let rawData = 0; rawData < parsedData.length; rawData++) {
@@ -1503,7 +1521,6 @@
                     if (circle) {
                         const entryArrow = new EntryArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
                         setStartState(entryArrow);
-                        this.arrows.push(entryArrow);
                     }
                 }
                 else if (raw.startsWith(startsWith.ALPHABET)) {
@@ -1513,6 +1530,7 @@
                 }
             }
             this.draw();
+            return true;
         }
         normalizeText(text) {
             return text.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
@@ -1619,7 +1637,7 @@
             if (selectedObj instanceof Arrow ||
                 selectedObj instanceof SelfArrow) {
                 lastEditedArrow = selectedObj;
-                transitionLabelInputValidator$1.setBuffer(selectedObj.text);
+                transitionLabelInputValidator.setBuffer(selectedObj.text);
             }
             if (selectedObj != null) {
                 if (shiftPressed && selectedObj instanceof Circle) {
@@ -1768,7 +1786,7 @@
                         // then save the old text of the object so you can determine later
                         // if a determinism check needs to be ran
                         if (selectedObj instanceof Arrow || selectedObj instanceof SelfArrow) {
-                            if (transitionLabelInputValidator$1.handleBackspace(selectedObj.text)) {
+                            if (transitionLabelInputValidator.handleBackspace(selectedObj.text)) {
                                 selectedObj.text = selectedObj.text.slice(0, -1);
                             }
                         }
@@ -1783,11 +1801,11 @@
                             // If the current object that is being typed on is an Arrow or SelfArrow,
                             // then we will check if the character being typed is defined in the alphabet.
                             // If not, we will alert the user.
-                            if (transitionLabelInputValidator$1.handleChar(event.key)) {
+                            if (transitionLabelInputValidator.handleChar(event.key)) {
                                 selectedObj.text += event.key;
                             }
                             else {
-                                alert(`'${transitionLabelInputValidator$1.getBuffer() + event.key}' is not defined in the alphabet!`);
+                                alert(`'${transitionLabelInputValidator.getBuffer() + event.key}' is not defined in the alphabet!`);
                             }
                         }
                         // Else, the selectedObj must be Circle, which we can type anything for
@@ -2007,16 +2025,16 @@
                         // Obtain the input and update the alphabet variable.
                         // The regex also removes any trailing/leading commas and whitespace
                         const newAlphabet = new Set(normalized);
-                        setAlphabet$1(newAlphabet);
+                        setAlphabet(newAlphabet);
                         window.dispatchEvent(new CustomEvent("dfaAlphabetUpdated", {
                             detail: {
                                 alphabet: Array.from(newAlphabet)
                             }
                         }));
-                        console.log(alphabet$1);
+                        console.log(alphabet);
                         alphabetInput.value = "";
                         if (alphabetLabel) {
-                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet$1).join(",") + "}";
+                            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
                         }
                     }
                 });
@@ -2140,7 +2158,8 @@
     function saveAsSVG(canvas, textArea) {
         if (!canvas)
             return;
-        const exporter = new ExportAsSVG(canvas, alphabet$1);
+        const exporter = new ExportAsSVG(canvas, alphabet);
+        exporter.addAutomatonSpecification("DFA");
         exporter.addAlphabet();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.lineWidth = 1;
@@ -2163,7 +2182,8 @@
     function saveAsLaTeX(canvas, textArea) {
         if (!canvas)
             return;
-        const exporter = new ExportAsLaTeX(canvas, alphabet$1);
+        const exporter = new ExportAsLaTeX(canvas, alphabet);
+        exporter.addAutomatonSpecification("DFA");
         exporter.addAlphabet();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.faObject = circles[circle];
@@ -2195,7 +2215,10 @@
                         if (canvas) {
                             if (emptyDFA(canvas, arrows, circles)) {
                                 let importer = new Importer(circles, arrows, textArea.value, drawFunc);
-                                importer.convert();
+                                let valid = importer.convert();
+                                if (!valid) {
+                                    alert("Import failed. Please check if you are importing a DFA.");
+                                }
                             }
                             else {
                                 alert("Failure to import DFA");
@@ -2205,14 +2228,14 @@
                 }
             }
             if (alphabetLabel) {
-                alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet$1).join(",") + "}";
+                alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
                 // This event notifies the DFA page that the alphabet has been updated.
                 // This lets the DFA page know if it needs to check for multi-character
                 // elements in the alphabet, in which case it will show a disclaimer to
                 // the user on how to submit input strings properly.
                 window.dispatchEvent(new CustomEvent("dfaAlphabetUpdated", {
                     detail: {
-                        alphabet: Array.from(alphabet$1)
+                        alphabet: Array.from(alphabet)
                     }
                 }));
             }
@@ -2270,7 +2293,7 @@
                 // the text of the lastEditedArrow will be equal
                 console.log("Transition determinism check failed for state", lastEditedArrow.startCircle.id);
             }
-            transitionLabelInputValidator$1.resetBuffer();
+            transitionLabelInputValidator.resetBuffer();
         }
     }
     // console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
