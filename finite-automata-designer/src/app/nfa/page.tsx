@@ -273,7 +273,7 @@ export default function NFAPage() {
             </div>
         </div>
 
-        <Script src="/scripts/nfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
+        <Script src="/scripts/nfa/nfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
       </main>
       
     );
