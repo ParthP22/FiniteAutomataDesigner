@@ -719,6 +719,7 @@ function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     if (!canvas) return;
 
     const exporter = new ExportAsSVG(canvas, alphabet);
+    exporter.addAutomatonSpecification("DFA");
     exporter.addAlphabet();
 
     for(let circle = 0; circle < circles.length; circle++) {
@@ -747,6 +748,7 @@ function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
   if (!canvas) return;
   
   const exporter = new ExportAsLaTeX(canvas, alphabet);
+  exporter.addAutomatonSpecification("DFA");
   exporter.addAlphabet();
 
   for(let circle = 0; circle < circles.length; circle++) {
