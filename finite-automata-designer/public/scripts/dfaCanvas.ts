@@ -771,7 +771,7 @@ function importHelper(canvas: HTMLCanvasElement | null,
                       inputContainer: HTMLDivElement | null, 
                       textArea: HTMLTextAreaElement | null, 
                       circles: Circle[], 
-                      arrows: (Arrow | SelfArrow | EntryArrow)[], 
+                      arrows: (Arrow | SelfArrow)[],
                       drawFunc:() => void) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
