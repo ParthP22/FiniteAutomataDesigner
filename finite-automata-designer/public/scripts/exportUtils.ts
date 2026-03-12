@@ -125,7 +125,7 @@ export function addAlphabetComment(caller: string, _data: string, alphabet: Set<
     if (caller == CALLERS.SVG) {
         _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
     } else if (caller == CALLERS.LATEX) {
-        _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
+        _data += `\t%<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
     }
 
     return _data;
@@ -136,7 +136,7 @@ export function addAutomatonSpecificationComment(caller: string, _data: string, 
         _data += `\t<!-- Automaton: ${automaton} -->\n`;
     }
     else if (caller == CALLERS.LATEX) {
-        _data += `\t%<!-- Automaton ${automaton} -->\n`;
+        _data += `\t%<!-- Automaton: ${automaton} -->\n`;
     }
     return _data;
 }
