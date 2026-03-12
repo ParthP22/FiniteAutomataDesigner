@@ -1,5 +1,5 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet, nfaTransitionSymbols } from "./nfaTransitionSymbols";
+import { alphabet, nfaTransitionSymbols, transitionLabelInputValidator } from "./nfaTransitionSymbols";
 import { Arrow, arrows } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
@@ -149,7 +149,7 @@ export function nfaAlgo(input: string){
   epsilonTransitions(startState.pointsToCircle, nextPointers);
 
   // We parse the input string into tokens
-  const parseResult = parseInputString(input, alphabet);
+  const parseResult = parseInputString(input, alphabet, transitionLabelInputValidator);
 
   // If parsing failed, alert the user and return false
   if (!parseResult.success) {
