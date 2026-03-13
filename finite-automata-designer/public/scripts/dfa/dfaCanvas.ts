@@ -25,6 +25,9 @@ import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../s
 import { ExportAsSVG } from "../exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
+import { serializeDFA } from "@/lib/dfa/serializeDFA";
+import { deserializeDFA } from "@/lib/dfa/deserializeDFA";
+import { SerializedDFA } from "@/lib/dfa/types";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -466,6 +469,19 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
   return { draw };
 }
 
+let pendingDFA: SerializedDFA | null = null;
+
+(window as any).loadDFAIntoCanvas = function(data: SerializedDFA){
+  const canvas = document.getElementById("DFACanvas") as HTMLCanvasElement;
+
+  if(!canvas){
+    pendingDFA = data;
+    return;
+  }
+
+  loadSerializedDFA(data);
+}
+
 /* -----------------------------------------------------------
  * Attach automatically when DOM is ready.
  * --------------------------------------------------------- */
@@ -513,6 +529,13 @@ function attachWhenReady() {
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
       drawRef = draw;
+
+      if(pendingDFA){
+        loadSerializedDFA(pendingDFA);
+        pendingDFA = null;
+        draw();
+      }
+
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
         if (!isInsideCanvas(event, canvas)) {
@@ -546,6 +569,10 @@ function attachWhenReady() {
           
           // Reset the input tag
           inputString.value = "";
+
+          const serialized = serializeDFA()
+          const loaded = deserializeDFA(serialized);
+          console.log(loaded);
         }
       });
     }
@@ -879,6 +906,28 @@ function finalizeEditedArrow(nextSelected: any | null) {
     }
     transitionLabelInputValidator.resetBuffer();
   }
+}
+
+function loadSerializedDFA(data: SerializedDFA){
+  const canvas = document.getElementById("DFACanvas") as HTMLCanvasElement;
+
+  emptyDFA(canvas,arrows,circles);
+
+  const deserialized = deserializeDFA(data);
+
+  circles.push(...deserialized.circles);
+
+  arrows.push(...deserialized.arrows);
+
+  setAlphabet(deserialized.alphabet);
+
+  setStartState(deserialized.entryArrow);
+
+  const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
+  if(alphabetLabel){
+    alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+  }
+
 }
 
 
