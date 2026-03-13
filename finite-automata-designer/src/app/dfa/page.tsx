@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { saveAutomaton } from "@/lib/saveAutomaton";
 import { serializeDFA } from "@/lib/dfa/serializeDFA";
@@ -12,7 +13,8 @@ export default function DFAPage() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
-    
+    const searchParams = useSearchParams();
+    const id = searchParams?.get("id");    
 
     useEffect(() => {
 
@@ -36,6 +38,39 @@ export default function DFAPage() {
 
     }, [alphabetInput]);
 
+    useEffect(() => {
+        async function loadAutomaton(){
+            if(!id){
+                return;
+            }
+
+            const supabase = createClient();
+
+            const { data, error } = await supabase
+                .from("finite_automata")
+                .select("automaton")
+                .eq("id",id)
+                .single();
+
+            console.log(data);
+
+            if(error){
+                console.error("Error loading automaton: ", error);
+                return;
+            }
+
+            if(!data){
+                return;
+            }
+
+            
+
+            (window as any).loadDFAIntoCanvas(data.automaton);
+        }
+
+        loadAutomaton();
+    },[id]);
+
     async function handleSave(){
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -46,6 +81,7 @@ export default function DFAPage() {
         }
 
         const serialized = serializeDFA();
+        console.log(serialized);
 
         try{
             await saveAutomaton(user.id, serialized);
