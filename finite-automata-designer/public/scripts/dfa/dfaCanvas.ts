@@ -28,6 +28,7 @@ import { Importer } from "./importing/importer";
 import { serializeDFA } from "@/lib/dfa/serializeDFA";
 import { deserializeDFA } from "@/lib/dfa/deserializeDFA";
 import { SerializedDFA } from "@/lib/dfa/types";
+import { serialize } from "v8";
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -570,9 +571,9 @@ function attachWhenReady() {
           // Reset the input tag
           inputString.value = "";
 
-          const serialized = serializeDFA()
-          const loaded = deserializeDFA(serialized);
-          console.log(loaded);
+          // const serialized = serializeDFA()
+          // const loaded = deserializeDFA(serialized);
+          // console.log(loaded);
         }
       });
     }
@@ -906,6 +907,15 @@ function finalizeEditedArrow(nextSelected: any | null) {
     }
     transitionLabelInputValidator.resetBuffer();
   }
+}
+
+(window as any).exportDFA = function(){
+  return serializeDFA(
+    alphabet,
+    circles,
+    arrows,
+    startState
+  );
 }
 
 function loadSerializedDFA(data: SerializedDFA){
