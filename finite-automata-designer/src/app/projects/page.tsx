@@ -38,7 +38,7 @@ export default function AutomataPage() {
         {machines.map((machine) => (
           <Link
             key={machine.id}
-            href={`/projects/${machine.id}`}
+            href={`/dfa?id=${machine.id}`}
             className="bg-gray-700 text-white px-4 py-3 rounded hover:bg-black transition"
           >
             Automaton {machine.id}
