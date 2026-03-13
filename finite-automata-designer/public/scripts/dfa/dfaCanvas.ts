@@ -52,6 +52,8 @@ let shiftPressed = false; // True if shift is pressed, false otherwise
 let startClick: {x: number, y: number} | null = null;
 let tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
 
+let drawRef: (() => void) | null = null;
+
 // Returns true if no input or focusable element is active meaning the document body has focus.
 function canvasHasFocus() {
   return (document.activeElement || document.body) == document.body;
@@ -473,9 +475,8 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
 let pendingDFA: SerializedDFA | null = null;
 
 (window as any).loadDFAIntoCanvas = function(data: SerializedDFA){
-  const canvas = document.getElementById("DFACanvas") as HTMLCanvasElement;
 
-  if(!canvas){
+  if(!drawRef){
     pendingDFA = data;
     return;
   }
@@ -526,7 +527,6 @@ function attachWhenReady() {
     // Button that will clear the input textarea
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
     // Reference to draw fucntion;
-    let drawRef:  () => void;
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas);
       drawRef = draw;
@@ -802,7 +802,7 @@ function importHelper(canvas: HTMLCanvasElement | null,
                       textArea: HTMLTextAreaElement | null, 
                       circles: Circle[], 
                       arrows: (Arrow | SelfArrow)[],
-                      drawFunc:() => void) {
+                      drawFunc:(() => void) | null) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
       console.log("called the helper function inside the toggle textArea")
@@ -817,7 +817,7 @@ function importHelper(canvas: HTMLCanvasElement | null,
         if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")){
           if (canvas) {
             if (emptyDFA(canvas, arrows, circles)){
-              let importer = new Importer(circles, arrows, textArea.value, drawFunc);
+              let importer = new Importer(circles, arrows, textArea.value, drawFunc!);
               let valid = importer.convert();
               if(!valid){
                 alert("Import failed. Please check if you are importing a DFA.");
@@ -936,6 +936,10 @@ function loadSerializedDFA(data: SerializedDFA){
   const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
   if(alphabetLabel){
     alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+  }
+
+  if(drawRef){
+    drawRef();
   }
 
 }
