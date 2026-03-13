@@ -106,7 +106,16 @@
             _data += `\t<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
         }
         else if (caller == CALLERS.LATEX) {
-            _data += `\t%<!-- Alphabet ${stringifiedAlphabet} -->\n`;
+            _data += `\t%<!-- Alphabet: ${stringifiedAlphabet} -->\n`;
+        }
+        return _data;
+    }
+    function addAutomatonSpecificationComment(caller, _data, automaton) {
+        if (caller == CALLERS.SVG) {
+            _data += `\t<!-- Automaton: ${automaton} -->\n`;
+        }
+        else if (caller == CALLERS.LATEX) {
+            _data += `\t%<!-- Automaton: ${automaton} -->\n`;
         }
         return _data;
     }
@@ -648,6 +657,33 @@
         }
     }
 
+    class Queue {
+        constructor() {
+            this.data = [];
+        }
+        offer(element) {
+            this.data.push(element);
+        }
+        poll() {
+            if (this.isEmpty()) {
+                return undefined;
+            }
+            return this.data.shift();
+        }
+        isEmpty() {
+            return this.data.length === 0;
+        }
+        peek() {
+            if (this.isEmpty()) {
+                return undefined;
+            }
+            return this.data[0];
+        }
+        size() {
+            return this.data.length;
+        }
+    }
+
     /**
      * TransitionLabelInputValidator
      *
@@ -693,7 +729,7 @@
             console.log("Handling char:", char);
             // Always allow commas — they separate symbols
             if (char === ",") {
-                this.reset();
+                this.resetBuffer();
                 console.log("Comma typed, buffer reset");
                 return true;
             }
@@ -715,7 +751,7 @@
          */
         handleBackspace(currentText) {
             if (currentText.length === 0) {
-                this.reset();
+                this.resetBuffer();
                 return true;
             }
             const lastChar = currentText[currentText.length - 1];
@@ -734,7 +770,7 @@
          * - Arrow is deselected
          * - Arrow selection changes
          */
-        reset() {
+        resetBuffer() {
             this.buffer = "";
         }
         getBuffer() {
@@ -742,6 +778,9 @@
         }
         setBuffer(newBuffer) {
             this.rebuildBufferFromText(newBuffer);
+        }
+        getTrie() {
+            return this.trie;
         }
         /**
          * Rebuilds buffer based on the text after backspacing a comma.
@@ -757,18 +796,24 @@
 
     // The alphabet defines every character that can be used in the DFA.
     // For easier usage, it has been defined as a Set.
-    var alphabet = new Set(["0", "1"]);
-    var transitionLabelInputValidator = new TransitionLabelInputValidator(alphabet); // Input validator for transition labels
+    let alphabet = new Set(["0", "1"]);
+    const epsilonSymbol = "\\epsilon"; // Symbol representing epsilon transitions
+    let nfaTransitionSymbols = new Set([...alphabet, epsilonSymbol]); // Separator for multiple transition symbols
+    let transitionLabelInputValidator = new TransitionLabelInputValidator(nfaTransitionSymbols); // Input validator for transition labels
     // Since the alphabet is being imported, it cannot be reassigned
     // directly. So, this is a setter method for it.
     function setAlphabet(newAlphabet) {
-        transitionLabelInputValidator = new TransitionLabelInputValidator(newAlphabet); // Input validator for transition labels
+        // Input validator for transition labels
+        nfaTransitionSymbols = new Set([...newAlphabet, epsilonSymbol]); // Update separator set with new alphabet and epsilon symbol
         alphabet = newAlphabet;
+        transitionLabelInputValidator = new TransitionLabelInputValidator(nfaTransitionSymbols);
     }
 
+    // A discriminated union type that represents either:
+    // 1. A successful parse with an array of tokens
     // Main function that converts a row input string into
     // tokens according to the alphabet and delimiter rules.
-    function parseInputString(input, alphabet) {
+    function parseInputString(input, alphabet, transitionLabelInputValidator) {
         // Remove leading and trailing whitespace from the input
         const trimmed = input.trim();
         if (trimmed.length === 0) {
@@ -817,7 +862,7 @@
             // contains one element, which also happens to be
             // a multi-character symbol.
             if (!allSingleChar) {
-                transitionLabelInputValidator.reset();
+                transitionLabelInputValidator.resetBuffer();
                 // Validate the entire input as a single token
                 for (const char of trimmed) {
                     if (!transitionLabelInputValidator.handleChar(char)) {
@@ -828,14 +873,14 @@
                     }
                 }
                 tokens.push(trimmed);
-                transitionLabelInputValidator.reset();
+                transitionLabelInputValidator.resetBuffer();
             }
             else {
                 // Split the input into individual characters
                 tokens = trimmed.split("");
             }
         }
-        let notDefined = [];
+        const notDefined = [];
         // Validate that each token is in the alphabet
         for (const token of tokens) {
             // If a token is not in the alphabet, return an error
@@ -861,13 +906,8 @@
         }
     }
 
-    // I haven't figured out how to stop compiling the imports into JS, so here's a command
-    // to get rid of them once you cd into their directory lol:
-    // rm alphabet.js && rm arrow.js && rm circle.js && rm draw.js && rm EntryArrow.js && rm SelfArrow.js
-    // This is a "correctness" check: does the new transition coincide
-    // with other transitions going out from that state? If it does,
-    // then it fails determinism.
-    function transitionDeterminismCheck(lastEditedArrow) {
+    // Commits the transition to a given Arrow or SelfArrow after validating it.
+    function commitTransition(lastEditedArrow) {
         if (lastEditedArrow === null) {
             return false;
         }
@@ -898,108 +938,58 @@
         // For example, if the alphabet is {0,1}, but the transition is {00,01}, then
         // it should not work, since "00" and "01" are not in the alphabet.
         for (const newTransition of newTransitions) {
-            if (!alphabet.has(newTransition)) {
+            if (!nfaTransitionSymbols.has(newTransition)) {
                 lastEditedArrow.text = "";
                 alert("\'" + newTransition + "\' has not been defined in the alphabet!");
                 return false;
             }
         }
-        // Check the outArrows of the initial node
-        const startCircOutArrows = lastEditedArrow.startCircle.outArrows;
-        // Keep track of all invalid transitions to be printed to the user later
-        const existingTransitions = [];
-        // You iterate through every arrow that goes outwards from this current node
-        for (const arrow of startCircOutArrows) {
-            const oldTransitions = arrow.transition;
-            // Then, you iterate through each of the old transitions for each arrow
-            for (const oldTransition of oldTransitions) {
-                // Next, you iterate through each transition in the new
-                // transition, and compare it against each transition
-                // in the original transition for that arrow
-                for (const newTransition of newTransitions) {
-                    // If a transition already exists, then it fails determinism
-                    if (newTransition === oldTransition) {
-                        lastEditedArrow.text = "";
-                        existingTransitions.push(newTransition);
-                    }
-                }
-            }
-        }
-        if (existingTransitions.length == 1) {
-            alert("This translation violates determinism since \'" + existingTransitions[0] + "\' is already present for an outgoing arrow of this node");
-            return false;
-        }
-        else if (existingTransitions.length > 1) {
-            alert("This translation violates determinism since \'" + existingTransitions.toString() + "\' are already present for an outgoing arrows of this node");
-            return false;
-        }
-        else {
-            // Update the transition with the new one
-            lastEditedArrow.transition = new Set(newTransitions);
-            lastEditedArrow.text = lastEditedArrow.transition.values().toArray().join(",");
-            return true;
-        }
+        // Update the transition with the new one
+        lastEditedArrow.transition = new Set(newTransitions);
+        lastEditedArrow.text = lastEditedArrow.transition.values().toArray().join(",");
+        return true;
     }
-    // function printTransitions(){
-    //   console.log("Printing transitions");
-    //   for(let circle of circles){
-    //     console.log("Num of trans for circle " + circle.text + " is: " + circle.outArrows.size);
-    //     console.log("Trans for circle: " + circle.text + "{ ");
-    //     const outArrows = circle.outArrows;
-    //     for(let arrow of outArrows){
-    //       console.log(arrow.transition);
-    //     }
-    //     console.log("}");
-    //   }
-    // }
-    // This is a "completeness" check: were all characters of the
-    // alphabet used when building the DFA? This is processed
-    // every time we input a string.
-    function inputDeterminismCheck() {
+    // This is a "completeness" check: do all the arrows have a valid transition?
+    function completenessCheck() {
         // We iterate over every single state
-        for (const node of circles) {
-            // We retrieve the outgoing arrows from the current state
-            const outArrows = node.outArrows;
-            for (const char of alphabet) {
-                // The "exists" variable will be used to track if
-                // this specific character in the alphabet has been
-                // used as a transition or not for this specific state
-                let exists = false;
-                // We iterate over all the outgoing arrows from the
-                // current state
-                for (const arrow of outArrows) {
-                    // Then, for each arrow, we iterate over every
-                    // transition for it.
-                    for (const transition of arrow.transition) {
-                        // If the current character in the alphabet
-                        // does exist as a transition for this current
-                        // state, then exists = true and we break out
-                        // of this loop.
-                        if (char === transition) {
-                            exists = true;
-                            break;
-                        }
-                        // If the transition does not exist in the alphabet,
-                        // then immediately return false, since it violates
-                        // determinism.
-                        if (!alphabet.has(transition)) {
-                            alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
-                            return false;
-                        }
-                    }
-                }
-                // If we iterated over all the transitions for all the outgoing
-                // arrows of this state, and the current character in the alphabet
-                // was not found to be a transition at all, then it fails determinism
-                if (!exists) {
-                    alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
+        for (const arrow of arrows) {
+            if (arrow instanceof Arrow || arrow instanceof SelfArrow) {
+                if (arrow.transition.size === 0) {
+                    alert("Arrow from " + arrow.startCircle.text + " to " + arrow.endCircle.text + " has no transition!");
                     return false;
                 }
             }
         }
         return true;
     }
-    function dfaAlgo(input) {
+    // This function performs BFS to do epsilon closure from a given state
+    function epsilonTransitions(pointer, nextPointers) {
+        const queue = new Queue();
+        const visited = new Map();
+        queue.offer(pointer);
+        visited.set(pointer, true);
+        while (!queue.isEmpty()) {
+            const current = queue.poll();
+            let currentOutArrows = new Set();
+            if (current !== undefined) {
+                currentOutArrows = current.outArrows;
+            }
+            for (const arrow of currentOutArrows) {
+                // If the transition contains epsilon, and the endCircle
+                // has not been visited yet, then we add it to the queue.
+                // We don't want to revisit nodes, since that could lead to infinite loops.
+                if (arrow.transition.has("\\epsilon") && !visited.has(arrow.endCircle)) {
+                    console.log("Splitting epsilon transition to " + arrow.endCircle.text);
+                    visited.set(arrow.endCircle, true);
+                    queue.offer(arrow.endCircle);
+                    nextPointers.add(arrow.endCircle);
+                }
+            }
+        }
+    }
+    // This function runs the NFA algorithm on the given input string
+    function nfaAlgo(input) {
+        // Check if there is a start state and at least one accept state
         let acceptStateExists = false;
         for (const circle of circles) {
             if (circle.isAccept) {
@@ -1021,58 +1011,77 @@
         }
         // First, we make sure the input string is legal. If it contains
         // characters not defined in the alphabet, then we return false immediately.
-        // for(const char of input){
-        //   if(!alphabet.has(char)){
-        //     alert("Input contains \'" + char + "\', which is not in the alphabet");
-        //     return false;
-        //   }
-        // }
-        const parseResult = parseInputString(input, alphabet);
+        for (const char of input) {
+            if (!nfaTransitionSymbols.has(char)) {
+                alert("Input contains \'" + char + "\', which is not in the alphabet");
+                return false;
+            }
+        }
+        // This will contain the pointers that will be used in the next iteration
+        // of the NFA algorithm.
+        const nextPointers = new Set();
+        nextPointers.add(startState.pointsToCircle);
+        // Run an initial epsilon closure from the start state
+        epsilonTransitions(startState.pointsToCircle, nextPointers);
+        // We parse the input string into tokens
+        const parseResult = parseInputString(input, alphabet, transitionLabelInputValidator);
+        // If parsing failed, alert the user and return false
         if (!parseResult.success) {
             alert(parseResult.error);
             return false;
         }
         const tokens = parseResult.tokens;
-        // This "curr" variable will be used to traverse over the whole DFA
-        let curr = startState.pointsToCircle;
-        // We check if the DFA has been defined correctly. If not, then return false.
-        if (!inputDeterminismCheck()) {
+        // Before beginning the NFA algorithm, we check if all transitions
+        // of the NFA are complete. If not, we return false immediately.
+        if (!completenessCheck()) {
             return false;
         }
         // We begin traversing the input string.
         for (const char of tokens) {
-            // We go through every outgoing arrow for the 
-            // current state.
-            const currOutArrows = curr.outArrows;
-            //console.log("Char: " + char);
-            for (const arrow of currOutArrows) {
-                //console.log("At: " + curr.text);
-                //console.log("Checking transition: " + arrow.transition);
-                // If the current character from the input string
-                // is found in one of the transitions, then we 
-                // use that transition to move to the next state.
-                if (arrow.transition.has(char)) {
-                    //console.log("Taking transition: " + arrow.transition + " to node " + arrow.endCircle.text);
-                    curr = arrow.endCircle;
-                    break;
+            // console.log("Processing character: " + char);
+            // We make a copy of the current pointers set to iterate over.
+            // This is because we don't want to modify the set while iterating over it.
+            const currPointers = new Set(nextPointers);
+            nextPointers.clear();
+            for (const pointer of currPointers) {
+                if (pointer !== undefined) {
+                    //console.log("At state: " + pointer.text);
+                    // We go through every outgoing arrow for the 
+                    // current state.
+                    const currOutArrows = pointer.outArrows;
+                    //console.log("Char: " + char);
+                    for (const arrow of currOutArrows) {
+                        //console.log("At: " + curr.text);
+                        // If the current character from the input string
+                        // is found in one of the transitions, then we 
+                        // use that transition to move to the next state.
+                        if (arrow.transition.has(char)) {
+                            // console.log("Taking transition: " + Array.from(arrow.transition).toString() + " to node " + arrow.endCircle.text);
+                            // We add the endCircle to the nextPointers set, since we will 
+                            // iterate over it in the next round.
+                            nextPointers.add(arrow.endCircle);
+                            // We also perform epsilon closure from the new state
+                            epsilonTransitions(arrow.endCircle, nextPointers);
+                        }
+                    }
+                    // console.log("Leaving state: " + pointer.text);
                 }
             }
         }
-        //console.log("Finally at: " + curr.text);
-        // If the final state that we arrived at is the end state,
-        // that means the string was accepted.
-        if (curr.isAccept) {
-            alert("The string, \"" + tokens.toString() + "\", was accepted!");
-            //console.log("Accepted!");
-            return true;
+        // After processing all input characters, we check if any
+        // of the current pointers are in an accept state.
+        for (const pointer of nextPointers) {
+            if (pointer !== undefined && pointer.isAccept) {
+                alert("The string, \"" + tokens.toString() + "\", was accepted!");
+                //console.log("Accepted!");
+                nextPointers.clear();
+                return true;
+            }
         }
-        // Else, the final state we arrived at is not the end state,
-        // which means the string was rejected.
-        else {
-            alert("The string, \"" + tokens.toString() + "\", was rejected!");
-            //console.log("Rejected!");
-            return false;
-        }
+        alert("The string, \"" + tokens.toString() + "\", was rejected!");
+        //console.log("Rejected!");
+        nextPointers.clear();
+        return false;
     }
 
     /*
@@ -1208,9 +1217,11 @@
             this._transX = x;
             this._transY = y;
         }
-        ;
         addAlphabet() {
             this._svgData = addAlphabetComment(CALLERS.SVG, this._svgData, this.alphabet);
+        }
+        addAutomatonSpecification(automaton) {
+            this._svgData = addAutomatonSpecificationComment(CALLERS.SVG, this._svgData, automaton);
         }
         save() {
             // No-op for SVG export
@@ -1385,6 +1396,9 @@
         addAlphabet() {
             this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
         }
+        addAutomatonSpecification(automaton) {
+            this._texData = addAutomatonSpecificationComment(CALLERS.LATEX, this._texData, automaton);
+        }
         translate() {
             // No-op for LaTeX export
         }
@@ -1400,6 +1414,7 @@
     }
 
     const startsWith = {
+        NFA: 'Automaton: NFA',
         ALPHABET: 'Alphabet:',
         CIRCLE: 'Circle:',
         STRAIGHT_ARROW: 'StraightArrow:',
@@ -1433,6 +1448,18 @@
                     parsedData.push(raw);
                 }
             }
+            // Check to be sure that you are importing an NFA
+            let isNFA = false;
+            for (let rawData = 0; rawData < parsedData.length; rawData++) {
+                const raw = parsedData[rawData];
+                if (raw.startsWith(startsWith.NFA)) {
+                    isNFA = true;
+                    break;
+                }
+            }
+            if (!isNFA) {
+                return false;
+            }
             // Add the circles first because all arrows depend on them 
             for (let rawData = 0; rawData < parsedData.length; rawData++) {
                 const raw = parsedData[rawData];
@@ -1457,7 +1484,7 @@
                         const arrow = new Arrow(startCircle, endCircle);
                         arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                         arrow.text = label.trim();
-                        if (transitionDeterminismCheck(arrow)) {
+                        if (commitTransition(arrow)) {
                             this.arrows.push(arrow);
                         }
                     }
@@ -1472,7 +1499,7 @@
                         arrow.text = label.trim();
                         arrow.parallelPart = parseFloat(parallel);
                         arrow.perpendicularPart = parseFloat(perpendicular);
-                        if (transitionDeterminismCheck(arrow)) {
+                        if (commitTransition(arrow)) {
                             this.arrows.push(arrow);
                         }
                     }
@@ -1486,7 +1513,7 @@
                         circle.loop = selfArrow;
                         circle.outArrows.add(selfArrow); // Adds out arrow for the circle
                         selfArrow.text = text;
-                        if (transitionDeterminismCheck(selfArrow)) {
+                        if (commitTransition(selfArrow)) {
                             this.arrows.push(selfArrow);
                         }
                     }
@@ -1497,7 +1524,6 @@
                     if (circle) {
                         const entryArrow = new EntryArrow(circle, { x: parseFloat(x), y: parseFloat(y) });
                         setStartState(entryArrow);
-                        this.arrows.push(entryArrow);
                     }
                 }
                 else if (raw.startsWith(startsWith.ALPHABET)) {
@@ -1507,6 +1533,7 @@
                 }
             }
             this.draw();
+            return true;
         }
         normalizeText(text) {
             return text.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
@@ -1559,7 +1586,7 @@
             y >= rect.top &&
             y <= rect.bottom);
     };
-    function setupDfaCanvas(canvas) {
+    function setupNfaCanvas(canvas) {
         const ctx = canvas.getContext('2d');
         if (!ctx)
             return { draw: () => { } };
@@ -1601,38 +1628,14 @@
             let mouse = getMousePos(event);
             // Check if the mouse has clicked on an object.
             // If true, then selectedObj will be updated.
-            selectedObj = mouseCollision(mouse.x, mouse.y);
+            const nextSelected = mouseCollision(mouse.x, mouse.y);
+            selectedObj = nextSelected;
             dragging = false;
             startClick = mouse;
-            console.log("Last edited arrow:", lastEditedArrow?.startCircle.text, " to ", lastEditedArrow?.endCircle.text);
-            // console.log("Old text:", oldText);
-            console.log("Last edited arrow text:", lastEditedArrow?.text);
-            console.log("Selected object: ", selectedObj instanceof Arrow || selectedObj instanceof SelfArrow ? "Arrow or SelfArrow" : "Not an Arrow or SelfArrow");
-            // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
-            // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
-            // then we will run the transitionDeterminismCheck
-            if (lastEditedArrow && selectedObj !== lastEditedArrow) {
-                // If the transitionDeterminismCheck returns true, that means the transition is valid.
-                // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
-                // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-                // the text of the lastEditedArrow will be equal
-                if (transitionDeterminismCheck(lastEditedArrow)) {
-                    // This will sort the string in ascending order and assign it to the arrow's text,
-                    // which makes it more visually appealing for the user
-                    console.log("Transition determinism check passed for state ", lastEditedArrow.startCircle.id);
-                    lastEditedArrow.text = lastEditedArrow.text.replace(/^[,\s]+|[,\s]+$/g, "").split(",").sort().join(",");
-                    // oldText = lastEditedArrow.text;
-                }
-                // If the transitionDeterminismCheck returns false, that means the transition is not valid.
-                // So, we set oldText equal to the empty string, since the arrow's text will also have been
-                // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
-                // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
-                // the text of the lastEditedArrow will be equal
-                else {
-                    console.log("Transition determinism check failed for state ", lastEditedArrow.startCircle.id);
-                    // oldText = "";
-                }
-            }
+            // console.log("Last edited arrow:", lastEditedArrow?.startCircle.text, " to ", lastEditedArrow?.endCircle.text);
+            // console.log("Last edited arrow text:", lastEditedArrow?.text);
+            // console.log("Selected object: " , selectedObj instanceof Arrow || selectedObj instanceof SelfArrow ? "Arrow or SelfArrow" : "Not an Arrow or SelfArrow");
+            finalizeEditedArrow(nextSelected);
             // Update the previously edited object here
             if (selectedObj instanceof Arrow ||
                 selectedObj instanceof SelfArrow) {
@@ -1801,16 +1804,6 @@
                             // If the current object that is being typed on is an Arrow or SelfArrow,
                             // then we will check if the character being typed is defined in the alphabet.
                             // If not, we will alert the user.
-                            // if(alphabet.has(event.key) || event.key === ','){
-                            // Store the text of the object before it changes, since
-                            // the 'text' attribute of the object will be directly modified
-                            // by this keydown listener
-                            // oldText = selectedObj.text;
-                            // selectedObj.text += event.key;
-                            // }
-                            // else{
-                            //   alert("\'" + event.key + "\' is not defined in the alphabet!");
-                            // }
                             if (transitionLabelInputValidator.handleChar(event.key)) {
                                 selectedObj.text += event.key;
                             }
@@ -1947,13 +1940,13 @@
      * --------------------------------------------------------- */
     function attachWhenReady() {
         const run = () => {
-            // Get the input tag for the input string of the DFA
+            // Get the input tag for the input string of the NFA
             const inputString = document.getElementById("inputString");
-            // Get the input tag for the alphabet input of the DFA
+            // Get the input tag for the alphabet input of the NFA
             const alphabetInput = document.getElementById("alphabet");
-            // Get the canvas tag for the canvas of the DFA
-            const canvas = document.getElementById('DFACanvas');
-            // Get label tag for alphabet label of DFA
+            // Get the canvas tag for the canvas of the NFA
+            const canvas = document.getElementById('NFACanvas');
+            // Get label tag for alphabet label of NFA
             const alphabetLabel = document.getElementById("alphabetLabel");
             // Export menu button and div
             const exportMenuBtn = document.getElementById("exportMenuBtn");
@@ -1987,11 +1980,12 @@
             // Reference to draw fucntion;
             let drawRef;
             if (canvas) {
-                const { draw } = setupDfaCanvas(canvas);
+                const { draw } = setupNfaCanvas(canvas);
                 drawRef = draw;
                 // If you click outside of the canvas it will deselect the object and turn off dragging
                 document.addEventListener("mousedown", (event) => {
                     if (!isInsideCanvas(event, canvas)) {
+                        finalizeEditedArrow(null);
                         selectedObj = null;
                         dragging = false;
                         draw();
@@ -2015,30 +2009,7 @@
                     // If the "Enter" key is pressed on the input string
                     if (event.key === "Enter") {
                         event.preventDefault();
-                        // Obtain the value entered
-                        // let newInput = inputString.value.trim();
-                        // Check to see if it contains anything not defined in the alphabet.
-                        // If it contains undefined characters, alert the user
-                        // let notDefined: Array<string> = [];
-                        // for(let char of newInput){
-                        //   if(!alphabet.has(char)){
-                        //     // Note to self: maybe make it so it goes through the entire string
-                        //     // first and collects every character that is wrong? Then give an alert
-                        //     // afterwards with every character that was wrong
-                        //     notDefined.push(char);
-                        //   }
-                        // }
-                        // if(notDefined.length == 1){
-                        //   alert("\'" + notDefined[0] + "\' is not in the alphabet, this input is invalid!");
-                        // }
-                        // else if(notDefined.length > 1){
-                        //   alert("\'" + notDefined.toString() + "\' is not in the alphabet, this input is invalid!");
-                        // }
-                        // else{
-                        //   // Run the DFA algorithm
-                        //   dfaAlgo(newInput);
-                        // }
-                        dfaAlgo(inputString.value);
+                        nfaAlgo(inputString.value);
                         // Reset the input tag
                         inputString.value = "";
                     }
@@ -2058,7 +2029,7 @@
                         // The regex also removes any trailing/leading commas and whitespace
                         const newAlphabet = new Set(normalized);
                         setAlphabet(newAlphabet);
-                        window.dispatchEvent(new CustomEvent("dfaAlphabetUpdated", {
+                        window.dispatchEvent(new CustomEvent("nfaAlphabetUpdated", {
                             detail: {
                                 alphabet: Array.from(newAlphabet)
                             }
@@ -2103,19 +2074,19 @@
             // Import SVG button event handler and import textarea visiblity enable
             if (importSVGBtn) {
                 importSVGBtn.addEventListener('click', () => {
-                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
                 });
             }
             // Import LaTeX button event handler and Import textarea visiblity enable
             if (importLaTeXBtn) {
                 importLaTeXBtn.addEventListener('click', () => {
-                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
                 });
             }
             // Additional button so the user doesn't have to click the drop down to import
             if (drawImportBtn) {
                 drawImportBtn.addEventListener('click', () => {
-                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+                    importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
                 });
             }
             // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
@@ -2191,6 +2162,7 @@
         if (!canvas)
             return;
         const exporter = new ExportAsSVG(canvas, alphabet);
+        exporter.addAutomatonSpecification("NFA");
         exporter.addAlphabet();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.lineWidth = 1;
@@ -2214,6 +2186,7 @@
         if (!canvas)
             return;
         const exporter = new ExportAsLaTeX(canvas, alphabet);
+        exporter.addAutomatonSpecification("NFA");
         exporter.addAlphabet();
         for (let circle = 0; circle < circles.length; circle++) {
             exporter.faObject = circles[circle];
@@ -2229,7 +2202,7 @@
         }
         output(exporter.toLaTeX(), textArea);
     }
-    function importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, textArea, circles, arrows, drawFunc) {
+    function importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, textArea, circles, arrows, startState, drawFunc) {
         if (inputContainer && drawImportBtn) {
             if (inputContainer.hidden && drawImportBtn.hidden) {
                 console.log("called the helper function inside the toggle textArea");
@@ -2243,12 +2216,15 @@
                 if (data) {
                     if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")) {
                         if (canvas) {
-                            if (emptyDFA(canvas, arrows, circles)) {
+                            if (emptyNFA(canvas, arrows, circles)) {
                                 let importer = new Importer(circles, arrows, textArea.value, drawFunc);
-                                importer.convert();
+                                let valid = importer.convert();
+                                if (!valid) {
+                                    alert("Import failed. Please check if you are importing an NFA.");
+                                }
                             }
                             else {
-                                alert("Failure to import DFA");
+                                alert("Failure to import NFA");
                             }
                         }
                     }
@@ -2256,11 +2232,11 @@
             }
             if (alphabetLabel) {
                 alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
-                // This event notifies the DFA page that the alphabet has been updated.
-                // This lets the DFA page know if it needs to check for multi-character
+                // This event notifies the NFA page that the alphabet has been updated.
+                // This lets the NFA page know if it needs to check for multi-character
                 // elements in the alphabet, in which case it will show a disclaimer to
                 // the user on how to submit input strings properly.
-                window.dispatchEvent(new CustomEvent("dfaAlphabetUpdated", {
+                window.dispatchEvent(new CustomEvent("nfaAlphabetUpdated", {
                     detail: {
                         alphabet: Array.from(alphabet)
                     }
@@ -2268,7 +2244,7 @@
             }
         }
     }
-    function emptyDFA(canvas, arrows, circles) {
+    function emptyNFA(canvas, arrows, circles) {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
@@ -2289,6 +2265,39 @@
     }
     function _toggle_visiblity(element) {
         element.hidden = !element.hidden;
+    }
+    // Simplifies the finalization for the transition of an edited arrow
+    function finalizeEditedArrow(nextSelected) {
+        if (!lastEditedArrow)
+            return;
+        // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,
+        // AND if the currently selected object is different from the previous edited Arrow or SelfArrow,
+        // then we will run the commitTransition function
+        if (nextSelected !== lastEditedArrow) {
+            // If the commitTransition returns true, that means the transition is valid.
+            // So, we set oldText equal to the new text of the arrow. Thus, this if-statement won't
+            // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+            // the text of the lastEditedArrow will be equal
+            if (commitTransition(lastEditedArrow)) {
+                // This will sort the string in ascending order and assign it to the arrow's text,
+                // which makes it more visually appealing for the user
+                // console.log("Transition determinism check passed for state ", lastEditedArrow.startCircle.id);
+                lastEditedArrow.text = lastEditedArrow.text
+                    .replace(/^[,\s]+|[,\s]+$/g, "")
+                    .split(",")
+                    .sort()
+                    .join(",");
+            }
+            else {
+                // If the transitionDeterminismCheck returns false, that means the transition is not valid.
+                // So, we set oldText equal to the empty string, since the arrow's text will also have been
+                // set to the empty string inside the transitionDeterminismCheck. Thus, this if-statement won't
+                // activate more than once, since the 2nd condition won't be fulfilled, because oldText and
+                // the text of the lastEditedArrow will be equal
+                console.log("Transition determinism check failed for state", lastEditedArrow.startCircle.id);
+            }
+            transitionLabelInputValidator.resetBuffer();
+        }
     }
     // console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
 

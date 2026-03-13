@@ -14,7 +14,18 @@ import { Circle } from "../Shapes/Circle";
 import { EntryArrow } from "../Shapes/EntryArrow";
 import { SelfArrow } from "../Shapes/SelfArrow";
 import { Point } from "./PointInterface";
-import { BaseDrawContext, fixed, addCircleComment, addCurvedArrowComment,addStraightArrowComment, addEntryArrowComment, addSelfArrowComment, CALLERS, addAlphabetComment,  } from "../exportUtils";
+import { 
+    BaseDrawContext, 
+    fixed, 
+    addCircleComment, 
+    addCurvedArrowComment,
+    addStraightArrowComment, 
+    addEntryArrowComment, 
+    addSelfArrowComment, 
+    CALLERS, 
+    addAlphabetComment,  
+    addAutomatonSpecificationComment
+} from "../exportUtils";
 
 
 export class ExportAsLaTeX implements BaseDrawContext{
@@ -175,6 +186,10 @@ export class ExportAsLaTeX implements BaseDrawContext{
 
     addAlphabet(){
         this._texData = addAlphabetComment(CALLERS.LATEX, this._texData, this.alphabet);
+    }
+
+    addAutomatonSpecification(automaton: string){
+        this._texData = addAutomatonSpecificationComment(CALLERS.LATEX, this._texData, automaton);
     }
 
     translate() {

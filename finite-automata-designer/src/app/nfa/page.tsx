@@ -4,7 +4,7 @@ import Script from 'next/script';
 import { useEffect, useState } from "react";
 
 
-export default function DFAPage() {
+export default function NFAPage() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
@@ -23,26 +23,26 @@ export default function DFAPage() {
             setHasMultiCharAlphabet(hasMulti);
         }
 
-        window.addEventListener("dfaAlphabetUpdated", handler);
+        window.addEventListener("nfaAlphabetUpdated", handler);
 
         return () => {
-            window.removeEventListener("dfaAlphabetUpdated", handler);
+            window.removeEventListener("nfaAlphabetUpdated", handler);
         }
 
     }, [alphabetInput]);
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
-        {/* DFA title at the top */}
+        {/* NFA title at the top */}
         <h1 className="text-5xl font-bold text-center my-2 text-black ">
             <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
-                Deterministic Finite Automata
+                Non-deterministic Finite Automata
             </span>
             <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
         <div id="canvasDiv" className="flex flex-col text-black">
             {/* Canvas for drawing FSM */}
-            <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400 flex-none"></canvas>
+            <canvas id="NFACanvas" width={800} height={600} className="rounded-lg border border-gray-400 flex-none"></canvas>
             {/* Exporting dropdowns container*/}
             <div className="flex gap-2">
                 <p className="text-lg mt-5">Export as: </p> 
@@ -211,8 +211,8 @@ export default function DFAPage() {
                     <li><p className="font-semibold inline">Make accept state: </p>Double-click an existing state</li>
                     <li><p className="font-semibold inline">Type onto arrow or state: </p>Click on desired state, then begin typing. Click again anywhere else to submit</li>
                     <li><p className="font-semibold inline">Type numeric subscript: </p>Put an underscore before the number (ex: &quot;q_0&quot;)</li>
-                    <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your DFA. Press Enter to submit</li>
-                    <li><p className="font-semibold inline">Run DFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
+                    <li><p className="font-semibold inline">Set alphabet: </p>Type a comma-separated list of all the characters you wish to define for your NFA. Press Enter to submit</li>
+                    <li><p className="font-semibold inline">Run NFA: </p>Type an input string containing only the characters from your alphabet. Press Enter to submit</li>
                 </ul>
             </div>
             <div id='inputDiv' className="flex flex-col self-center w-full max-w-md">
@@ -266,14 +266,14 @@ export default function DFAPage() {
             </div>
             </div>
             <div className="flex">
-                {/* Run button to run the DFA with the given input string */}
+                {/* Run button to run the NFA with the given input string */}
                 <Link href="/" className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
                     Run
                 </Link>
             </div>
         </div>
 
-        <Script src="/scripts/dfa/dfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
+        <Script src="/scripts/nfa/nfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
       </main>
       
     );
