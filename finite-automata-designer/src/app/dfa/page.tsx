@@ -60,6 +60,7 @@ export default function DFAPage() {
             }
 
             if(!data){
+                console.log("No data");
                 return;
             }
 
@@ -67,7 +68,7 @@ export default function DFAPage() {
 
             (window as any).loadDFAIntoCanvas(data.automaton);
         }
-
+        console.log("Loading automaton");
         loadAutomaton();
     },[id]);
 
@@ -80,7 +81,7 @@ export default function DFAPage() {
             return;
         }
 
-        const serialized = serializeDFA();
+        const serialized = (window as any).exportDFA();
         console.log(serialized);
 
         try{
