@@ -5,10 +5,11 @@ import { deserializeEntryArrow } from "../shared/deserializer/deserializeEntryAr
 import { Circle } from "../../../public/scripts/Shapes/Circle"
 import { Arrow } from "../../../public/scripts/Shapes/Arrow"
 import { EntryArrow } from "../../../public/scripts/Shapes/EntryArrow"
+import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow"
 
 export type DFAObjects = {
   circles: Circle[]
-  arrows: Arrow[]
+  arrows: (Arrow | SelfArrow)[]
   entryArrow: EntryArrow
   alphabet: Set<string>
 }
@@ -16,7 +17,7 @@ export type DFAObjects = {
 export function deserializeDFA(data: SerializedDFA): DFAObjects {
 
   const circles: Circle[] = []
-  const arrows: Arrow[] = []
+  const arrows: (Arrow | SelfArrow)[] = []
 
   const circleMap = new Map<string, Circle>()
 
@@ -36,9 +37,8 @@ export function deserializeDFA(data: SerializedDFA): DFAObjects {
   */
 
   for (const a of data.arrows) {
-    const arrow = deserializeArrow(a, circleMap)
-
-    arrows.push(arrow)
+    const arrow = deserializeArrow(a, circleMap);
+    arrows.push(arrow);
 
     // reconnect circle adjacency
     arrow.startCircle.outArrows.add(arrow)
