@@ -740,8 +740,6 @@ function attachWhenReady() {
   }
 }
 
-attachWhenReady();
-
 // saveAsSVG function to export the FSM as SVG
 function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
     if (!canvas) return;
@@ -944,15 +942,4 @@ function loadSerializedDFA(data: SerializedDFA){
 
 }
 
-
-// Helper function to remove white space and multiple commas and then return the string as an array of strings split but commas
-// NOTE: Removes white space from inside of text
-function _arrow_string_formating(text: string){
-  return text
-  .replace(/,+/g, ',')        // collapse multiple commas into one 
-  .replace(/\s+/g, '')         // remove all spaces/tabs/newlines
-  .split(',')                 // split into array
-  .filter(Boolean);           // remove empty string
-}
-
-// console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
+attachWhenReady();

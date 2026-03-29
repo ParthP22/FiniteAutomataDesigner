@@ -264,6 +264,10 @@
      Licensed under the MIT Licenses
     */
     var arrows = [];
+    let arrowIdCounter = 0;
+    function incrementArrowIdCounter() {
+        arrowIdCounter++;
+    }
     function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
         var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
@@ -280,6 +284,7 @@
     }
     class Arrow {
         constructor(startCircle, endCircle) {
+            this.id = 'a' + arrowIdCounter;
             this.startCircle = startCircle;
             this.endCircle = endCircle;
             this.text = '';
@@ -288,6 +293,7 @@
             this.parallelPart = 0.5; // percent from start to end circle
             this.perpendicularPart = 0; // pixels from start to end circle
             this.transition = new Set();
+            arrowIdCounter++;
         }
         getAnchorPoint() {
             var dx = this.endCircle.x - this.startCircle.x;
@@ -440,6 +446,7 @@
     */
     class SelfArrow {
         constructor(pointsToCircle, point) {
+            this.id = 'a' + arrowIdCounter;
             this.circle = pointsToCircle;
             this.startCircle = pointsToCircle;
             this.endCircle = pointsToCircle;
@@ -448,6 +455,7 @@
             this.text = '';
             this.transition = new Set();
             this.point = point;
+            incrementArrowIdCounter();
             if (point) {
                 this.setAnchorPoint(point.x, point.y);
             }
@@ -1537,6 +1545,142 @@
         }
     }
 
+    function serializeCircle(circle) {
+        return {
+            id: circle.id,
+            x: circle.x,
+            y: circle.y,
+            isAccept: circle.isAccept,
+            text: circle.text
+        };
+    }
+
+    function serializeArrow(arrow) {
+        const base = {
+            id: arrow.id,
+            from: arrow.startCircle.id,
+            to: arrow.endCircle.id,
+            transition: Array.from(arrow.transition)
+        };
+        if (arrow instanceof Arrow) {
+            return {
+                ...base,
+                parallelPart: arrow.parallelPart,
+                perpendicularPart: arrow.perpendicularPart,
+                lineAngleAdjust: arrow.lineAngleAdjust
+            };
+        }
+        else {
+            return {
+                ...base,
+                anchorAngle: arrow.anchorAngle
+            };
+        }
+    }
+
+    function serializeEntryArrow(entryArrow) {
+        if (entryArrow === null) {
+            return {};
+        }
+        return {
+            startState: entryArrow.pointsToCircle.id,
+            deltaX: entryArrow.deltaX,
+            deltaY: entryArrow.deltaY,
+            startPoint: entryArrow.startPoint
+        };
+    }
+
+    function serializeDFA(alphabet, circles, arrows, startState) {
+        console.log(circles);
+        console.log(circles.map(serializeCircle));
+        return {
+            alphabet: Array.from(alphabet),
+            circles: circles.map(serializeCircle),
+            arrows: arrows.map(serializeArrow),
+            entryArrow: serializeEntryArrow(startState)
+        };
+    }
+
+    function deserializeCircle(data) {
+        const circle = new Circle(data.x, data.y);
+        circle.id = data.id;
+        circle.isAccept = data.isAccept;
+        return circle;
+    }
+
+    function deserializeArrow(data, circleMap) {
+        const fromCircle = circleMap.get(data.from);
+        const toCircle = circleMap.get(data.to);
+        if (!fromCircle || !toCircle) {
+            throw new Error("Arrow references missing circle");
+        }
+        const arrow = (fromCircle === toCircle) ?
+            new SelfArrow(fromCircle, toCircle) :
+            new Arrow(fromCircle, toCircle);
+        arrow.id = data.id;
+        arrow.text = data.transition.join(",");
+        arrow.transition = new Set(data.transition);
+        if (arrow instanceof Arrow) {
+            arrow.lineAngleAdjust = data.lineAngleAdjust;
+            arrow.parallelPart = data.parallelPart;
+            arrow.perpendicularPart = data.perpendicularPart;
+        }
+        if (arrow instanceof SelfArrow) {
+            arrow.anchorAngle = data.anchorAngle;
+        }
+        return arrow;
+    }
+
+    function deserializeEntryArrow(data, circleMap) {
+        const circle = circleMap.get(data.startState);
+        if (circle === undefined) {
+            throw new Error("EntryArrow references missing circle");
+        }
+        else {
+            const entryArrow = new EntryArrow(circle, data.startPoint);
+            entryArrow.deltaX = data.deltaX;
+            entryArrow.deltaY = data.deltaY;
+            return entryArrow;
+        }
+    }
+
+    function deserializeDFA(data) {
+        const circles = [];
+        const arrows = [];
+        const circleMap = new Map();
+        /*
+        Step 1: Create circles
+        */
+        for (const c of data.circles) {
+            const circle = deserializeCircle(c);
+            circles.push(circle);
+            circleMap.set(c.id, circle);
+        }
+        /*
+        Step 2: Create arrows
+        */
+        for (const a of data.arrows) {
+            const arrow = deserializeArrow(a, circleMap);
+            arrows.push(arrow);
+            // reconnect circle adjacency
+            arrow.startCircle.outArrows.add(arrow);
+        }
+        /*
+        Step 3: Entry Arrow
+        */
+        const entryArrow = deserializeEntryArrow(data.entryArrow, circleMap);
+        /*
+        Step 4: Alphabet
+        */
+        const alphabet = new Set(data.alphabet);
+        return {
+            circles,
+            arrows,
+            entryArrow,
+            alphabet
+        };
+    }
+
     /*
      Portions of this file are adapted from:
 
@@ -1569,6 +1713,7 @@
     let shiftPressed = false; // True if shift is pressed, false otherwise
     let startClick = null;
     let tempArrow = null; // A new arrow being created
+    let drawRef = null;
     // Returns true if no input or focusable element is active meaning the document body has focus.
     function canvasHasFocus() {
         return (document.activeElement || document.body) == document.body;
@@ -1932,6 +2077,14 @@
         // Expose draw to force redraw when clicking outside of the canvas to remove highlighting and dragging
         return { draw };
     }
+    let pendingDFA = null;
+    window.loadDFAIntoCanvas = function (data) {
+        if (!drawRef) {
+            pendingDFA = data;
+            return;
+        }
+        loadSerializedDFA(data);
+    };
     /* -----------------------------------------------------------
      * Attach automatically when DOM is ready.
      * --------------------------------------------------------- */
@@ -1975,10 +2128,14 @@
             // Button that will clear the input textarea
             const clearInputBtn = document.getElementById('clearInput');
             // Reference to draw fucntion;
-            let drawRef;
             if (canvas) {
                 const { draw } = setupDfaCanvas(canvas);
                 drawRef = draw;
+                if (pendingDFA) {
+                    loadSerializedDFA(pendingDFA);
+                    pendingDFA = null;
+                    draw();
+                }
                 // If you click outside of the canvas it will deselect the object and turn off dragging
                 document.addEventListener("mousedown", (event) => {
                     if (!isInsideCanvas(event, canvas)) {
@@ -2009,6 +2166,9 @@
                         dfaAlgo(inputString.value);
                         // Reset the input tag
                         inputString.value = "";
+                        // const serialized = serializeDFA()
+                        // const loaded = deserializeDFA(serialized);
+                        // console.log(loaded);
                     }
                 });
             }
@@ -2153,7 +2313,6 @@
             run(); // DOM is already ready
         }
     }
-    attachWhenReady();
     // saveAsSVG function to export the FSM as SVG
     function saveAsSVG(canvas, textArea) {
         if (!canvas)
@@ -2296,6 +2455,29 @@
             transitionLabelInputValidator.resetBuffer();
         }
     }
+    window.exportDFA = function () {
+        return serializeDFA(alphabet, circles, arrows, startState);
+    };
+    function loadSerializedDFA(data) {
+        const canvas = document.getElementById("DFACanvas");
+        emptyDFA(canvas, arrows, circles);
+        const deserialized = deserializeDFA(data);
+        circles.push(...deserialized.circles);
+        arrows.push(...deserialized.arrows);
+        setAlphabet(deserialized.alphabet);
+        setStartState(deserialized.entryArrow);
+        const alphabetLabel = document.getElementById("alphabetLabel");
+        if (alphabetLabel) {
+            alphabetLabel.textContent = "Alphabet: {" + Array.from(alphabet).join(",") + "}";
+        }
+        if (drawRef) {
+            drawRef();
+        }
+    }
     // console.log(_arrow_string_formating('    ,          ,       1,,,,,0,  00  ,111  ,,, 0000,,111, 1010101,,, 1110010,,10010 1200023, '));
+    document.addEventListener('DOMContentLoaded', () => {
+        // Your code to "grab" elements goes here
+        attachWhenReady();
+    });
 
 })();
