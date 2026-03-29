@@ -22,10 +22,8 @@ import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfa/dfaTransitionSymbols";
-import { ExportAsSVG } from "../exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
-import { saveAsSVG, saveAsLaTeX } from "../canvasUtil/canvasUtil";
+import { saveAsSVG, saveAsLaTeX, _toggle_visiblity } from "../canvasUtil/canvasUtil";
 
 
 // The previously edited object, which is determined by the object that was last
@@ -783,10 +781,6 @@ function emptyDFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow 
     } 
   }
   return false;
-}
-
-function _toggle_visiblity(element: HTMLElement) {
-  element.hidden = !element.hidden;
 }
 
 // Simplifies the finalization for the transition of an edited arrow

@@ -79,3 +79,9 @@ function output(
     element.value = text;
   }
 }
+
+export function _toggle_visiblity(element: HTMLElement) {
+  element.hidden = !element.hidden;
+}
+
+

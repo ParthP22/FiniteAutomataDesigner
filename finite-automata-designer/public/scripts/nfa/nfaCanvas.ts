@@ -22,10 +22,8 @@ import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
 import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
-import { ExportAsSVG } from "../exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
-import { saveAsSVG, saveAsLaTeX } from "../canvasUtil/canvasUtil";
+import { saveAsSVG, saveAsLaTeX, _toggle_visiblity } from "../canvasUtil/canvasUtil";
 
 
 // The previously edited object, which is determined by the object that was last
@@ -621,21 +619,21 @@ function attachWhenReady() {
     // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
       });
     }
 
     // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
+        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
       });
     }
 
     // Additional button so the user doesn't have to click the drop down to import
     if (drawImportBtn) {
       drawImportBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, startState, drawRef);
+        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
       })
     }
 
@@ -723,8 +721,7 @@ function importHelper(
   inputContainer: HTMLDivElement | null, 
   textArea: HTMLTextAreaElement | null, 
   circles: Circle[], 
-  arrows: (Arrow | SelfArrow)[], 
-  startState: EntryArrow | null,
+  arrows: (Arrow | SelfArrow)[],
   drawFunc:() => void
 ) {
   if (inputContainer && drawImportBtn) {
@@ -784,10 +781,6 @@ function emptyNFA(canvas: HTMLCanvasElement | null, arrows: (Arrow | SelfArrow)[
     } 
   }
   return false;
-}
-
-function _toggle_visiblity(element: HTMLElement) {
-  element.hidden = !element.hidden;
 }
 
 // Simplifies the finalization for the transition of an edited arrow
