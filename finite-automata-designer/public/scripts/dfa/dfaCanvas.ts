@@ -25,6 +25,8 @@ import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../s
 import { ExportAsSVG } from "../exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
+import { saveAsSVG, saveAsLaTeX } from "../canvasUtil/canvasUtil";
+
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -590,7 +592,7 @@ function attachWhenReady() {
     if (exportSVGBtn) {
       exportSVGBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
-          saveAsSVG(canvas, outputTextArea);
+          saveAsSVG(canvas, outputTextArea, "DFA", selectedObj, hightlightSelected, base);
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
@@ -606,7 +608,7 @@ function attachWhenReady() {
     if (exportLaTeXBtn) {
       exportLaTeXBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
-          saveAsLaTeX(canvas, outputTextArea);
+          saveAsLaTeX(canvas, outputTextArea, "DFA");
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
@@ -713,59 +715,6 @@ function attachWhenReady() {
 }
 
 attachWhenReady();
-
-// saveAsSVG function to export the FSM as SVG
-function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
-    if (!canvas) return;
-
-    const exporter = new ExportAsSVG(canvas, alphabet);
-    exporter.addAutomatonSpecification("DFA");
-    exporter.addAlphabet();
-
-    for(let circle = 0; circle < circles.length; circle++) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
-      exporter.faObject = circles[circle];
-      circles[circle].draw(exporter);
-    }
-    for (let arrow = 0; arrow < arrows.length; arrow++) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
-      exporter.faObject = arrows[arrow];
-      arrows[arrow].draw(exporter);
-    }
-
-    if (startState) {
-      exporter.faObject = startState;
-      startState.draw(exporter);
-    }
-    
-
-    output(exporter.toSVG(), textArea);
-}
-
-function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
-  if (!canvas) return;
-  
-  const exporter = new ExportAsLaTeX(canvas, alphabet);
-  exporter.addAutomatonSpecification("DFA");
-  exporter.addAlphabet();
-
-  for(let circle = 0; circle < circles.length; circle++) {
-    exporter.faObject = circles[circle];
-    circles[circle].draw(exporter)
-  }
-  for (let arrow = 0; arrow < arrows.length; arrow++) {
-    exporter.faObject = arrows[arrow];
-    arrows[arrow].draw(exporter);
-  }
-  if (startState) {
-    exporter.faObject = startState;
-    startState.draw(exporter);
-  }
-
-  output(exporter.toLaTeX(), textArea);
-}
 
 function importHelper(canvas: HTMLCanvasElement | null, 
                       drawImportBtn: HTMLButtonElement | null,
