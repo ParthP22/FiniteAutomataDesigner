@@ -716,14 +716,16 @@ function attachWhenReady() {
 
 attachWhenReady();
 
-function importHelper(canvas: HTMLCanvasElement | null, 
-                      drawImportBtn: HTMLButtonElement | null,
-                      alphabetLabel: HTMLLabelElement | null, 
-                      inputContainer: HTMLDivElement | null, 
-                      textArea: HTMLTextAreaElement | null, 
-                      circles: Circle[], 
-                      arrows: (Arrow | SelfArrow)[],
-                      drawFunc:() => void) {
+function importHelper(
+  canvas: HTMLCanvasElement | null, 
+  drawImportBtn: HTMLButtonElement | null,
+  alphabetLabel: HTMLLabelElement | null, 
+  inputContainer: HTMLDivElement | null, 
+  textArea: HTMLTextAreaElement | null, 
+  circles: Circle[], 
+  arrows: (Arrow | SelfArrow)[],
+  drawFunc:() => void
+) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
       console.log("called the helper function inside the toggle textArea")
@@ -781,13 +783,6 @@ function emptyDFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow 
     } 
   }
   return false;
-}
-
-
-function output(text: string, element: HTMLTextAreaElement | null) {
-  if (element && element instanceof HTMLTextAreaElement) {
-    element.value = text;
-  }
 }
 
 function _toggle_visiblity(element: HTMLElement) {
