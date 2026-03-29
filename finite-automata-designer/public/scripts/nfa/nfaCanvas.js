@@ -264,6 +264,10 @@
      Licensed under the MIT Licenses
     */
     var arrows = [];
+    let arrowIdCounter = 0;
+    function incrementArrowIdCounter() {
+        arrowIdCounter++;
+    }
     function circleFromThreePoints(x1, y1, x2, y2, x3, y3) {
         var a = det(x1, y1, 1, x2, y2, 1, x3, y3, 1);
         var bx = -det(x1 * x1 + y1 * y1, y1, 1, x2 * x2 + y2 * y2, y2, 1, x3 * x3 + y3 * y3, y3, 1);
@@ -280,6 +284,7 @@
     }
     class Arrow {
         constructor(startCircle, endCircle) {
+            this.id = 'a' + arrowIdCounter;
             this.startCircle = startCircle;
             this.endCircle = endCircle;
             this.text = '';
@@ -288,6 +293,7 @@
             this.parallelPart = 0.5; // percent from start to end circle
             this.perpendicularPart = 0; // pixels from start to end circle
             this.transition = new Set();
+            arrowIdCounter++;
         }
         getAnchorPoint() {
             var dx = this.endCircle.x - this.startCircle.x;
@@ -440,6 +446,7 @@
     */
     class SelfArrow {
         constructor(pointsToCircle, point) {
+            this.id = 'a' + arrowIdCounter;
             this.circle = pointsToCircle;
             this.startCircle = pointsToCircle;
             this.endCircle = pointsToCircle;
@@ -448,6 +455,7 @@
             this.text = '';
             this.transition = new Set();
             this.point = point;
+            incrementArrowIdCounter();
             if (point) {
                 this.setAnchorPoint(point.x, point.y);
             }
