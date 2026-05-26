@@ -22,13 +22,13 @@ import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfa/dfaTransitionSymbols";
-import { ExportAsSVG } from "../exporting/ExportAsSVG";
-import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Importer } from "./importing/importer";
 import { serializeDFA } from "@/lib/dfa/serializeDFA";
 import { deserializeDFA } from "@/lib/dfa/deserializeDFA";
 import { SerializedDFA } from "@/lib/dfa/types";
 import { serialize } from "v8";
+import { saveAsSVG, saveAsLaTeX, _toggle_visiblity } from "../canvasUtil/canvasUtil";
+
 
 // The previously edited object, which is determined by the object that was last
 // under typing mode.
@@ -73,7 +73,7 @@ const isInsideCanvas = (event: MouseEvent, canvas: HTMLCanvasElement) => {
   );
 }
 
-function setupDfaCanvas(canvas: HTMLCanvasElement) {
+function setupDfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return { draw: () => {} };
 
@@ -390,10 +390,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       // checked, we can draw the canvas again
       draw();
     }
-    
-  });
 
-  
+  }, { signal });
+
+
   // If the arrow is being deleted, then update the
   // circles that it is associated with
   function deleteArrow(arrow: Arrow | SelfArrow | EntryArrow, index: number){
@@ -411,7 +411,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     if (event.key === 'Shift') {
       shiftPressed = false;
     }
-  })
+  }, { signal })
 
   /* Helper Functions*/
 
@@ -488,7 +488,14 @@ let pendingDFA: SerializedDFA | null = null;
  * Attach automatically when DOM is ready.
  * --------------------------------------------------------- */
 function attachWhenReady() {
+  let setupAbortController: AbortController | null = null;
+
   const run = () => {
+    // Tear down any listeners registered by the previous run() call.
+    setupAbortController?.abort();
+    setupAbortController = new AbortController();
+    const signal = setupAbortController.signal;
+
     // Get the input tag for the input string of the DFA
     const inputString = document.getElementById("inputString") as HTMLInputElement | null;
     // Get the input tag for the alphabet input of the DFA
@@ -498,11 +505,11 @@ function attachWhenReady() {
     // Get label tag for alphabet label of DFA
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
     // Export menu button and div
-    const exportMenuBtn = document.getElementById("exportMenuBtn")!;
-    const exportMenu = document.getElementById("exportMenu")!;
+    const exportMenuBtn = document.getElementById("exportMenuBtn") as HTMLButtonElement | null;
+    const exportMenu = document.getElementById("exportMenu") as HTMLDivElement | null;
     // Import menu button and div
-    const importMenuBtn = document.getElementById('importMenuBtn')!;
-    const importMenu = document.getElementById('importMenu')!;
+    const importMenuBtn = document.getElementById('importMenuBtn') as HTMLButtonElement | null;
+    const importMenu = document.getElementById('importMenu') as HTMLDivElement | null;
     // Buttons for exporting, SVG and LaTeX
     const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
     const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
@@ -528,8 +535,9 @@ function attachWhenReady() {
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
     // Reference to draw fucntion;
     if (canvas)  {
-      const { draw } = setupDfaCanvas(canvas);
+      const { draw } = setupDfaCanvas(canvas, signal);
       drawRef = draw;
+      draw(); // repaint existing state when canvas is remounted
 
       if(pendingDFA){
         loadSerializedDFA(pendingDFA);
@@ -557,7 +565,7 @@ function attachWhenReady() {
           hideOutputBtn?.blur();
           copyOutputBtn?.blur();
         }
-      });
+      }, { signal });
     };
 
     if (inputString) {
@@ -618,7 +626,7 @@ function attachWhenReady() {
     if (exportSVGBtn) {
       exportSVGBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
-          saveAsSVG(canvas, outputTextArea);
+          saveAsSVG(canvas, outputTextArea, "DFA", selectedObj, hightlightSelected, base);
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
@@ -634,7 +642,7 @@ function attachWhenReady() {
     if (exportLaTeXBtn) {
       exportLaTeXBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
-          saveAsLaTeX(canvas, outputTextArea);
+          saveAsLaTeX(canvas, outputTextArea, "DFA");
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
@@ -647,21 +655,51 @@ function attachWhenReady() {
     // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(
+          "DFA",
+          canvas, 
+          drawImportBtn, 
+          alphabetLabel, 
+          inputContainer, 
+          inputTextArea, 
+          circles, 
+          arrows, 
+          drawRef
+        );
       });
     }
 
     // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(
+          "DFA",
+          canvas, 
+          drawImportBtn, 
+          alphabetLabel, 
+          inputContainer, 
+          inputTextArea, 
+          circles, 
+          arrows, 
+          drawRef
+        );
       });
     }
 
     // Additional button so the user doesn't have to click the drop down to import
     if (drawImportBtn) {
       drawImportBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(
+          "DFA",
+          canvas, 
+          drawImportBtn, 
+          alphabetLabel, 
+          inputContainer, 
+          inputTextArea, 
+          circles, 
+          arrows, 
+          drawRef
+        );
       })
     }
 
@@ -708,99 +746,83 @@ function attachWhenReady() {
     }
 
     // Toggle dropdown visibility
-    exportMenuBtn.addEventListener("click", () => {
-      exportMenu.classList.toggle("hidden");
-    });
+    if (exportMenuBtn && exportMenu) {
+      exportMenuBtn.addEventListener("click", () => {
+        exportMenu.classList.toggle("hidden");
+      });
 
-    // Hide when clicking outside
-    document.addEventListener("click", (event) => {
-      if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
-        exportMenu.classList.add("hidden");
-      }
-    });
+      // Hide when clicking outside
+      document.addEventListener("click", (event) => {
+        if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
+          exportMenu.classList.add("hidden");
+        }
+      }, { signal });
+    }
 
     // Toggle dropdown visibility
-    importMenuBtn.addEventListener("click", () => {
-      importMenu.classList.toggle("hidden");
-    });
+    if (importMenuBtn && importMenu) {
+      importMenuBtn.addEventListener("click", () => {
+        importMenu.classList.toggle("hidden");
+      });
 
-    // Hide when clicking outside
-    document.addEventListener("click", (event) => {
-      if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
-        importMenu.classList.add("hidden");
-      }
-    });
+      // Hide when clicking outside
+      document.addEventListener("click", (event) => {
+        if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
+          importMenu.classList.add("hidden");
+        }
+      }, { signal });
+    }
 
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run(); // DOM is already ready
+  // Next.js client-side navigation unmounts and remounts the canvas element
+  // without re-executing this script.  A persistent MutationObserver watches
+  // for each insertion/removal so listeners are wired up (and cleanly torn
+  // down via AbortController) on every navigation — not just the first load.
+  let currentCanvas: HTMLCanvasElement | null = null;
+
+  const observer = new MutationObserver(() => {
+    const el = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
+
+    if (el && el !== currentCanvas) {
+      // Canvas just appeared (or was swapped out) — initialise it.
+      currentCanvas = el;
+      run();
+    } else if (!el && currentCanvas) {
+      // Canvas was removed — abort the old listeners so they don't pile up.
+      setupAbortController?.abort();
+      setupAbortController = null;
+      currentCanvas = null;
+    }
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  // Kick off immediately in case the canvas is already in the DOM.
+  const existing = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
+  if (existing) {
+    currentCanvas = existing;
+    run();
   }
 }
 
-// saveAsSVG function to export the FSM as SVG
-function saveAsSVG(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
-    if (!canvas) return;
-
-    const exporter = new ExportAsSVG(canvas, alphabet);
-    exporter.addAutomatonSpecification("DFA");
-    exporter.addAlphabet();
-
-    for(let circle = 0; circle < circles.length; circle++) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
-      exporter.faObject = circles[circle];
-      circles[circle].draw(exporter);
-    }
-    for (let arrow = 0; arrow < arrows.length; arrow++) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
-      exporter.faObject = arrows[arrow];
-      arrows[arrow].draw(exporter);
-    }
-
-    if (startState) {
-      exporter.faObject = startState;
-      startState.draw(exporter);
-    }
-    
-
-    output(exporter.toSVG(), textArea);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', attachWhenReady);
+} else {
+  attachWhenReady();
 }
 
-function saveAsLaTeX(canvas: HTMLCanvasElement, textArea: HTMLTextAreaElement) {
-  if (!canvas) return;
-  
-  const exporter = new ExportAsLaTeX(canvas, alphabet);
-  exporter.addAutomatonSpecification("DFA");
-  exporter.addAlphabet();
-
-  for(let circle = 0; circle < circles.length; circle++) {
-    exporter.faObject = circles[circle];
-    circles[circle].draw(exporter)
-  }
-  for (let arrow = 0; arrow < arrows.length; arrow++) {
-    exporter.faObject = arrows[arrow];
-    arrows[arrow].draw(exporter);
-  }
-  if (startState) {
-    exporter.faObject = startState;
-    startState.draw(exporter);
-  }
-
-  output(exporter.toLaTeX(), textArea);
-}
-
-function importHelper(canvas: HTMLCanvasElement | null, 
-                      drawImportBtn: HTMLButtonElement | null,
-                      alphabetLabel: HTMLLabelElement | null, 
-                      inputContainer: HTMLDivElement | null, 
-                      textArea: HTMLTextAreaElement | null, 
-                      circles: Circle[], 
-                      arrows: (Arrow | SelfArrow)[],
-                      drawFunc:(() => void) | null) {
+function importHelper(
+  automationSpecification: string,
+  canvas: HTMLCanvasElement | null, 
+  drawImportBtn: HTMLButtonElement | null,
+  alphabetLabel: HTMLLabelElement | null, 
+  inputContainer: HTMLDivElement | null, 
+  textArea: HTMLTextAreaElement | null, 
+  circles: Circle[], 
+  arrows: (Arrow | SelfArrow)[],
+  drawFunc:() => void
+) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
       console.log("called the helper function inside the toggle textArea")
@@ -818,13 +840,12 @@ function importHelper(canvas: HTMLCanvasElement | null,
               let importer = new Importer(circles, arrows, textArea.value, drawFunc!);
               let valid = importer.convert();
               if(!valid){
-                alert("Import failed. Please check if you are importing a DFA.");
+                alert(`Import failed. Please check if you are importing a ${automationSpecification}.`);
               }
             } else {
               alert("Failure to import DFA");
             }
           }
-          
         }
       }
     }
@@ -858,17 +879,6 @@ function emptyDFA(canvas: HTMLCanvasElement | null, arrows: (EntryArrow | Arrow 
     } 
   }
   return false;
-}
-
-
-function output(text: string, element: HTMLTextAreaElement | null) {
-  if (element && element instanceof HTMLTextAreaElement) {
-    element.value = text;
-  }
-}
-
-function _toggle_visiblity(element: HTMLElement) {
-  element.hidden = !element.hidden;
 }
 
 // Simplifies the finalization for the transition of an edited arrow
