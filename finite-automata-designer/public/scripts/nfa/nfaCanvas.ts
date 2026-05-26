@@ -520,6 +520,7 @@ function attachWhenReady() {
     if (canvas)  {
       const { draw } = setupNfaCanvas(canvas, signal);
       drawRef = draw;
+      draw(); // repaint existing state when canvas is remounted
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
         if (!isInsideCanvas(event, canvas)) {
