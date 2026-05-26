@@ -1,14 +1,14 @@
 'use client';
 import Link from "next/link";
 import Script from 'next/script';
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { saveAutomaton } from "@/lib/saveAutomaton";
 import { createClient } from "@/lib/supabase/client";
 
 
-export default function DFAPage() {
+function DFAPageContent() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
@@ -355,6 +355,14 @@ export default function DFAPage() {
 
         <Script src="/scripts/dfa/dfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
       </main>
-      
+
+    );
+}
+
+export default function DFAPage() {
+    return (
+        <Suspense>
+            <DFAPageContent />
+        </Suspense>
     );
 }
