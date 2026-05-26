@@ -67,7 +67,7 @@ const isInsideCanvas = (event: MouseEvent, canvas: HTMLCanvasElement) => {
   );
 }
 
-function setupDfaCanvas(canvas: HTMLCanvasElement) {
+function setupDfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return { draw: () => {} };
 
@@ -384,10 +384,10 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
       // checked, we can draw the canvas again
       draw();
     }
-    
-  });
 
-  
+  }, { signal });
+
+
   // If the arrow is being deleted, then update the
   // circles that it is associated with
   function deleteArrow(arrow: Arrow | SelfArrow | EntryArrow, index: number){
@@ -405,7 +405,7 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
     if (event.key === 'Shift') {
       shiftPressed = false;
     }
-  })
+  }, { signal })
 
   /* Helper Functions*/
 
@@ -470,7 +470,14 @@ function setupDfaCanvas(canvas: HTMLCanvasElement) {
  * Attach automatically when DOM is ready.
  * --------------------------------------------------------- */
 function attachWhenReady() {
+  let setupAbortController: AbortController | null = null;
+
   const run = () => {
+    // Tear down any listeners registered by the previous run() call.
+    setupAbortController?.abort();
+    setupAbortController = new AbortController();
+    const signal = setupAbortController.signal;
+
     // Get the input tag for the input string of the DFA
     const inputString = document.getElementById("inputString") as HTMLInputElement | null;
     // Get the input tag for the alphabet input of the DFA
@@ -480,11 +487,11 @@ function attachWhenReady() {
     // Get label tag for alphabet label of DFA
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
     // Export menu button and div
-    const exportMenuBtn = document.getElementById("exportMenuBtn")!;
-    const exportMenu = document.getElementById("exportMenu")!;
+    const exportMenuBtn = document.getElementById("exportMenuBtn") as HTMLButtonElement | null;
+    const exportMenu = document.getElementById("exportMenu") as HTMLDivElement | null;
     // Import menu button and div
-    const importMenuBtn = document.getElementById('importMenuBtn')!;
-    const importMenu = document.getElementById('importMenu')!;
+    const importMenuBtn = document.getElementById('importMenuBtn') as HTMLButtonElement | null;
+    const importMenu = document.getElementById('importMenu') as HTMLDivElement | null;
     // Buttons for exporting, SVG and LaTeX
     const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
     const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
@@ -511,7 +518,7 @@ function attachWhenReady() {
     // Reference to draw fucntion;
     let drawRef:  () => void;
     if (canvas)  {
-      const { draw } = setupDfaCanvas(canvas);
+      const { draw } = setupDfaCanvas(canvas, signal);
       drawRef = draw;
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
@@ -533,7 +540,7 @@ function attachWhenReady() {
           hideOutputBtn?.blur();
           copyOutputBtn?.blur();
         }
-      });
+      }, { signal });
     };
 
     if (inputString) {
@@ -619,21 +626,51 @@ function attachWhenReady() {
     // Import SVG button event handler and import textarea visiblity enable
     if (importSVGBtn) {
       importSVGBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(
+          "DFA",
+          canvas, 
+          drawImportBtn, 
+          alphabetLabel, 
+          inputContainer, 
+          inputTextArea, 
+          circles, 
+          arrows, 
+          drawRef
+        );
       });
     }
 
     // Import LaTeX button event handler and Import textarea visiblity enable
     if (importLaTeXBtn) {
       importLaTeXBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn,alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(
+          "DFA",
+          canvas, 
+          drawImportBtn, 
+          alphabetLabel, 
+          inputContainer, 
+          inputTextArea, 
+          circles, 
+          arrows, 
+          drawRef
+        );
       });
     }
 
     // Additional button so the user doesn't have to click the drop down to import
     if (drawImportBtn) {
       drawImportBtn.addEventListener('click', () => {
-        importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, circles, arrows, drawRef);
+        importHelper(
+          "DFA",
+          canvas, 
+          drawImportBtn, 
+          alphabetLabel, 
+          inputContainer, 
+          inputTextArea, 
+          circles, 
+          arrows, 
+          drawRef
+        );
       })
     }
 
@@ -680,41 +717,74 @@ function attachWhenReady() {
     }
 
     // Toggle dropdown visibility
-    exportMenuBtn.addEventListener("click", () => {
-      exportMenu.classList.toggle("hidden");
-    });
+    if (exportMenuBtn && exportMenu) {
+      exportMenuBtn.addEventListener("click", () => {
+        exportMenu.classList.toggle("hidden");
+      });
 
-    // Hide when clicking outside
-    document.addEventListener("click", (event) => {
-      if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
-        exportMenu.classList.add("hidden");
-      }
-    });
+      // Hide when clicking outside
+      document.addEventListener("click", (event) => {
+        if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
+          exportMenu.classList.add("hidden");
+        }
+      }, { signal });
+    }
 
     // Toggle dropdown visibility
-    importMenuBtn.addEventListener("click", () => {
-      importMenu.classList.toggle("hidden");
-    });
+    if (importMenuBtn && importMenu) {
+      importMenuBtn.addEventListener("click", () => {
+        importMenu.classList.toggle("hidden");
+      });
 
-    // Hide when clicking outside
-    document.addEventListener("click", (event) => {
-      if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
-        importMenu.classList.add("hidden");
-      }
-    });
+      // Hide when clicking outside
+      document.addEventListener("click", (event) => {
+        if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
+          importMenu.classList.add("hidden");
+        }
+      }, { signal });
+    }
 
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run(); // DOM is already ready
+  // Next.js client-side navigation unmounts and remounts the canvas element
+  // without re-executing this script.  A persistent MutationObserver watches
+  // for each insertion/removal so listeners are wired up (and cleanly torn
+  // down via AbortController) on every navigation — not just the first load.
+  let currentCanvas: HTMLCanvasElement | null = null;
+
+  const observer = new MutationObserver(() => {
+    const el = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
+
+    if (el && el !== currentCanvas) {
+      // Canvas just appeared (or was swapped out) — initialise it.
+      currentCanvas = el;
+      run();
+    } else if (!el && currentCanvas) {
+      // Canvas was removed — abort the old listeners so they don't pile up.
+      setupAbortController?.abort();
+      setupAbortController = null;
+      currentCanvas = null;
+    }
+  });
+
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  // Kick off immediately in case the canvas is already in the DOM.
+  const existing = document.getElementById('DFACanvas') as HTMLCanvasElement | null;
+  if (existing) {
+    currentCanvas = existing;
+    run();
   }
 }
 
-attachWhenReady();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', attachWhenReady);
+} else {
+  attachWhenReady();
+}
 
 function importHelper(
+  automationSpecification: string,
   canvas: HTMLCanvasElement | null, 
   drawImportBtn: HTMLButtonElement | null,
   alphabetLabel: HTMLLabelElement | null, 
@@ -741,13 +811,12 @@ function importHelper(
               let importer = new Importer(circles, arrows, textArea.value, drawFunc);
               let valid = importer.convert();
               if(!valid){
-                alert("Import failed. Please check if you are importing a DFA.");
+                alert(`Import failed. Please check if you are importing a ${automationSpecification}.`);
               }
             } else {
               alert("Failure to import DFA");
             }
           }
-          
         }
       }
     }
