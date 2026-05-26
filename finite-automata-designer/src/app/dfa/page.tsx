@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { saveAutomaton } from "@/lib/saveAutomaton";
-import { serializeDFA } from "@/lib/dfa/serializeDFA";
 import { createClient } from "@/lib/supabase/client";
 
 
@@ -66,7 +65,7 @@ export default function DFAPage() {
 
             
 
-            (window as any).loadDFAIntoCanvas(data.automaton);
+            window.loadDFAIntoCanvas(data.automaton);
         }
         console.log("Loading automaton");
         loadAutomaton();
@@ -81,7 +80,7 @@ export default function DFAPage() {
             return;
         }
 
-        const serialized = (window as any).exportDFA();
+        const serialized = window.exportDFA();
         console.log(serialized);
 
         try{

@@ -1,6 +1,6 @@
 import { createClient } from "./supabase/client";
 
-export async function saveAutomaton(userId: string, serializedDFA: any){
+export async function saveAutomaton(userId: string, serializedDFA: unknown){
     const supabase = createClient();
 
     const { data, error } = await supabase

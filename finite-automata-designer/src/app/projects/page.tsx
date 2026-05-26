@@ -4,8 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+interface FiniteAutomaton {
+  id: string;
+  user_id: string;
+  name: string;
+  type: string;
+  automaton: unknown;
+  created_at?: string;
+}
+
 export default function AutomataPage() {
-  const [machines, setMachines] = useState<any[]>([]);
+  const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
 
   useEffect(() => {
     async function loadMachines() {
