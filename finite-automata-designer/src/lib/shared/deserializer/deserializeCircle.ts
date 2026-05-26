@@ -3,7 +3,7 @@ import { SerializedCircle } from "../types";
 
 export function deserializeCircle(data: SerializedCircle): Circle {
     const circle = new Circle(data.x, data.y);
-    
+    circle.text = data.text;
     circle.id = data.id;
     circle.isAccept = data.isAccept;
 
