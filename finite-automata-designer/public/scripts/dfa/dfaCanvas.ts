@@ -26,7 +26,6 @@ import { Importer } from "./importing/importer";
 import { serializeDFA } from "@/lib/dfa/serializeDFA";
 import { deserializeDFA } from "@/lib/dfa/deserializeDFA";
 import { SerializedDFA } from "@/lib/dfa/types";
-import { serialize } from "v8";
 import { saveAsSVG, saveAsLaTeX, _toggle_visiblity } from "../canvasUtil/canvasUtil";
 
 
@@ -821,7 +820,7 @@ function importHelper(
   textArea: HTMLTextAreaElement | null, 
   circles: Circle[], 
   arrows: (Arrow | SelfArrow)[],
-  drawFunc:() => void
+  drawFunc:(() => void) | null
 ) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
@@ -951,5 +950,3 @@ function loadSerializedDFA(data: SerializedDFA){
   }
 
 }
-
-attachWhenReady();
