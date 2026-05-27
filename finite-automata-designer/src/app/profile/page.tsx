@@ -104,6 +104,14 @@ export default function ProfilePage() {
           )}
 
         </div>
+        <div className="bg-white/70 backdrop-blur-sm rounded-lg shadow-lg p-6 text-center">
+          <Link
+            href="/projects"
+            className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+            >
+            My Projects
+          </Link>
+        </div>
       </div>
     </main>
   );

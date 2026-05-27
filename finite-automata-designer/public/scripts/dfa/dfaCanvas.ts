@@ -23,6 +23,9 @@ import { snapToPadding} from "../Shapes/draw";
 import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfa/dfaTransitionSymbols";
 import { Importer } from "./importing/importer";
+import { serializeDFA } from "@/lib/dfa/serializeDFA";
+import { deserializeDFA } from "@/lib/dfa/deserializeDFA";
+import { SerializedDFA } from "@/lib/dfa/types";
 import { saveAsSVG, saveAsLaTeX, _toggle_visiblity } from "../canvasUtil/canvasUtil";
 
 
@@ -47,6 +50,8 @@ let dragging = false; // True dragging objects is enabled, false otherwise
 let shiftPressed = false; // True if shift is pressed, false otherwise
 let startClick: {x: number, y: number} | null = null;
 let tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
+
+let drawRef: (() => void) | null = null;
 
 // Returns true if no input or focusable element is active meaning the document body has focus.
 function canvasHasFocus() {
@@ -466,6 +471,18 @@ function setupDfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
   return { draw };
 }
 
+let pendingDFA: SerializedDFA | null = null;
+
+(window as any).loadDFAIntoCanvas = function(data: SerializedDFA){
+
+  if(!drawRef){
+    pendingDFA = data;
+    return;
+  }
+
+  loadSerializedDFA(data);
+}
+
 /* -----------------------------------------------------------
  * Attach automatically when DOM is ready.
  * --------------------------------------------------------- */
@@ -516,11 +533,17 @@ function attachWhenReady() {
     // Button that will clear the input textarea
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
     // Reference to draw fucntion;
-    let drawRef:  () => void;
     if (canvas)  {
       const { draw } = setupDfaCanvas(canvas, signal);
       drawRef = draw;
       draw(); // repaint existing state when canvas is remounted
+
+      if(pendingDFA){
+        loadSerializedDFA(pendingDFA);
+        pendingDFA = null;
+        draw();
+      }
+
       // If you click outside of the canvas it will deselect the object and turn off dragging
       document.addEventListener("mousedown", (event) => {
         if (!isInsideCanvas(event, canvas)) {
@@ -554,6 +577,10 @@ function attachWhenReady() {
           
           // Reset the input tag
           inputString.value = "";
+
+          // const serialized = serializeDFA()
+          // const loaded = deserializeDFA(serialized);
+          // console.log(loaded);
         }
       });
     }
@@ -793,7 +820,7 @@ function importHelper(
   textArea: HTMLTextAreaElement | null, 
   circles: Circle[], 
   arrows: (Arrow | SelfArrow)[],
-  drawFunc:() => void
+  drawFunc:(() => void) | null
 ) {
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
@@ -809,7 +836,7 @@ function importHelper(
         if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")){
           if (canvas) {
             if (emptyDFA(canvas, arrows, circles)){
-              let importer = new Importer(circles, arrows, textArea.value, drawFunc);
+              let importer = new Importer(circles, arrows, textArea.value, drawFunc!);
               let valid = importer.convert();
               if(!valid){
                 alert(`Import failed. Please check if you are importing a ${automationSpecification}.`);
@@ -887,4 +914,39 @@ function finalizeEditedArrow(nextSelected: any | null) {
     }
     transitionLabelInputValidator.resetBuffer();
   }
+}
+
+(window as any).exportDFA = function(){
+  return serializeDFA(
+    alphabet,
+    circles,
+    arrows,
+    startState
+  );
+}
+
+function loadSerializedDFA(data: SerializedDFA){
+  const canvas = document.getElementById("DFACanvas") as HTMLCanvasElement;
+
+  emptyDFA(canvas,arrows,circles);
+
+  const deserialized = deserializeDFA(data);
+
+  circles.push(...deserialized.circles);
+
+  arrows.push(...deserialized.arrows);
+
+  setAlphabet(deserialized.alphabet);
+
+  setStartState(deserialized.entryArrow);
+
+  const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
+  if(alphabetLabel){
+    alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+  }
+
+  if(drawRef){
+    drawRef();
+  }
+
 }
