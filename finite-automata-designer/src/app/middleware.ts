@@ -1,11 +1,13 @@
 import { type NextRequest } from "next/server"
 import { updateSession } from "@/lib/supabase/middleware"
- 
+
 export async function middleware(request: NextRequest) {
   return await updateSession(request)
 }
- 
-// This defines which routes will be able to access the DB
+
+// Match all routes except Next.js internals and static public files
 export const config = {
-  matcher: ["/profile", "/login"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|otf)$).*)",
+  ],
 }
