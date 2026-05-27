@@ -1,7 +1,7 @@
 'use client';
 import Link from "next/link";
 import Script from 'next/script';
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { saveAutomaton } from "@/lib/saveAutomaton";
@@ -13,7 +13,11 @@ function DFAPageContent() {
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
     const searchParams = useSearchParams();
-    const id = searchParams?.get("id");    
+    const id = searchParams?.get("id");
+
+    // Holds automaton data fetched before the canvas script has finished loading.
+    // onReady on the <Script> tag drains this once the script is ready.
+    const pendingAutomaton = useRef<unknown>(null);
 
     useEffect(() => {
 
@@ -38,6 +42,9 @@ function DFAPageContent() {
     }, [alphabetInput]);
 
     useEffect(() => {
+        // Clear stale pending data whenever the target id changes
+        pendingAutomaton.current = null;
+
         async function loadAutomaton(){
             if(!id){
                 return;
@@ -51,8 +58,6 @@ function DFAPageContent() {
                 .eq("id",id)
                 .single();
 
-            console.log(data);
-
             if(error){
                 console.error("Error loading automaton: ", error);
                 return;
@@ -63,11 +68,15 @@ function DFAPageContent() {
                 return;
             }
 
-            
-
-            window.loadDFAIntoCanvas(data.automaton);
+            if (typeof window.loadDFAIntoCanvas === 'function') {
+                // Canvas script is already loaded — call directly.
+                window.loadDFAIntoCanvas(data.automaton);
+            } else {
+                // Canvas script hasn't finished loading yet (production race).
+                // Store the data so the onReady callback can deliver it once ready.
+                pendingAutomaton.current = data.automaton;
+            }
         }
-        console.log("Loading automaton");
         loadAutomaton();
     },[id]);
 
@@ -353,7 +362,21 @@ function DFAPageContent() {
             </div>
         </div>
 
-        <Script src="/scripts/dfa/dfaCanvas.js" type="module" strategy="afterInteractive" crossOrigin="anonymous"/>
+        <Script
+            src="/scripts/dfa/dfaCanvas.js"
+            type="module"
+            strategy="afterInteractive"
+            crossOrigin="anonymous"
+            onReady={() => {
+                // Fires when the script first loads AND after every subsequent
+                // component mount where the script is already cached.
+                // Delivers any automaton data that arrived before the script was ready.
+                if (pendingAutomaton.current !== null) {
+                    window.loadDFAIntoCanvas(pendingAutomaton.current);
+                    pendingAutomaton.current = null;
+                }
+            }}
+        />
       </main>
 
     );
