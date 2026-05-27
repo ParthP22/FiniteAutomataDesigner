@@ -3,7 +3,7 @@ import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Circle, circles} from "../Shapes/Circle";
 import { Arrow, arrows} from "../Shapes/Arrow";
 import { SelfArrow} from "../Shapes/SelfArrow";
-import { EntryArrow, startState, setStartState} from "../Shapes/EntryArrow";
+import { EntryArrow, startState } from "../Shapes/EntryArrow";
 
 // Export the FSM as SVG
 export function saveAsSVG(
