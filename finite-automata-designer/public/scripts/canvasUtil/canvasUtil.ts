@@ -1,10 +1,9 @@
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
 import { ExportAsSVG } from "../exporting/ExportAsSVG";
 import { ExportAsLaTeX } from "../exporting/ExportAsLaTeX";
 import { Circle, circles} from "../Shapes/Circle";
 import { Arrow, arrows} from "../Shapes/Arrow";
 import { SelfArrow} from "../Shapes/SelfArrow";
-import { EntryArrow, startState, setStartState} from "../Shapes/EntryArrow";
+import { EntryArrow, startState } from "../Shapes/EntryArrow";
 
 // Export the FSM as SVG
 export function saveAsSVG(
@@ -12,6 +11,7 @@ export function saveAsSVG(
     textArea: HTMLTextAreaElement, 
     automationSpecification: string, 
     selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null, 
+    alphabet: Set<string>,
     hightlightSelected: string, 
     base: string
 ) {
@@ -47,7 +47,8 @@ export function saveAsSVG(
 export function saveAsLaTeX(
     canvas: HTMLCanvasElement, 
     textArea: HTMLTextAreaElement, 
-    automationSpecification: string
+    automationSpecification: string,
+    alphabet: Set<string>
 ) {
   if (!canvas) return;
   

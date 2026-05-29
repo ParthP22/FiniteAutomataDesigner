@@ -625,7 +625,7 @@ function attachWhenReady() {
     if (exportSVGBtn) {
       exportSVGBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
-          saveAsSVG(canvas, outputTextArea, "DFA", selectedObj, hightlightSelected, base);
+          saveAsSVG(canvas, outputTextArea, "DFA", selectedObj, alphabet, hightlightSelected, base);
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
@@ -641,7 +641,7 @@ function attachWhenReady() {
     if (exportLaTeXBtn) {
       exportLaTeXBtn.addEventListener('click', () => {
         if (canvas && outputTextArea) {
-          saveAsLaTeX(canvas, outputTextArea, "DFA");
+          saveAsLaTeX(canvas, outputTextArea, "DFA", alphabet);
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
