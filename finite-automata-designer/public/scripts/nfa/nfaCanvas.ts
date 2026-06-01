@@ -23,7 +23,7 @@ import { snapToPadding} from "../Shapes/draw";
 import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
 import { Importer } from "./importing/importer";
-import { saveAsSVG, saveAsLaTeX, _toggle_visiblity } from "../canvasUtil/canvasUtil";
+import { saveAsSVG, saveAsLaTeX, toggle_visiblity } from "../canvasUtil/canvasUtil";
 
 
 // The previously edited object, which is determined by the object that was last
@@ -604,7 +604,7 @@ function attachWhenReady() {
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
-            _toggle_visiblity(outputContainer);
+            toggle_visiblity(outputContainer);
           }
         }
       });
@@ -620,7 +620,7 @@ function attachWhenReady() {
         }
         if (outputContainer) {
           if (outputContainer.hidden) {
-            _toggle_visiblity(outputContainer);
+            toggle_visiblity(outputContainer);
           }
         }
       });
@@ -682,7 +682,7 @@ function attachWhenReady() {
     if (hideOutputBtn) {
       hideOutputBtn.addEventListener('click', () => {
         if (outputContainer) {
-          _toggle_visiblity(outputContainer);
+          toggle_visiblity(outputContainer);
         }
       });
     }
@@ -705,8 +705,8 @@ function attachWhenReady() {
     if (hideInputBtn) {
       hideInputBtn.addEventListener('click', () => {
         if (inputContainer && drawImportBtn) {
-          _toggle_visiblity(inputContainer);
-          _toggle_visiblity(drawImportBtn);
+          toggle_visiblity(inputContainer);
+          toggle_visiblity(drawImportBtn);
         }
       });
     }
@@ -813,8 +813,8 @@ function importHelper(
   if (inputContainer && drawImportBtn) {
     if (inputContainer.hidden && drawImportBtn.hidden) {
       console.log("called the helper function inside the toggle textArea")
-      _toggle_visiblity(inputContainer);
-      _toggle_visiblity(drawImportBtn);
+      toggle_visiblity(inputContainer);
+      toggle_visiblity(drawImportBtn);
       return;
     }
     if (circles && arrows && textArea) {

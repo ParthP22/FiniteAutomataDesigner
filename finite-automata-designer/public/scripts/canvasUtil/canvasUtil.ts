@@ -81,7 +81,7 @@ function output(
   }
 }
 
-export function toggle_visibility(element: HTMLElement) {
+export function toggle_visiblity(element: HTMLElement) {
   element.hidden = !element.hidden;
 }
 
