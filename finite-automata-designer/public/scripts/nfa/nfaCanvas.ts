@@ -515,6 +515,8 @@ function attachWhenReady() {
     const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
     // Button that will clear the input textarea
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
+    // Run button
+    const nfaRunBtn = document.getElementById('nfaRunBtn') as HTMLButtonElement | null;
     // Reference to draw fucntion;
     let drawRef:  () => void;
     if (canvas)  {
@@ -745,6 +747,18 @@ function attachWhenReady() {
         }
       }, { signal });
     }
+
+    // Run button
+      if (nfaRunBtn) {
+        nfaRunBtn.addEventListener("click", () => {
+          // Run the DFA check for the user created DFA
+          if (inputString) {
+            nfaAlgo(inputString.value);
+            // Reset the input tag
+            inputString.value = "";
+          }
+        });
+      }
 
   };
 

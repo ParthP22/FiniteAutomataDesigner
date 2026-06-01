@@ -267,9 +267,16 @@ export default function NFAPage() {
             </div>
             <div className="flex">
                 {/* Run button to run the NFA with the given input string */}
-                <Link href="/" className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
+                {/* <Link href="/" className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
                     Run
-                </Link>
+                </Link> */}
+                <button
+                    id="nfaRunBtn"
+                    type="button"
+                    className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                >
+                    Run
+                </button>
             </div>
         </div>
 
