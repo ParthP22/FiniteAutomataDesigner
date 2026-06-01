@@ -746,34 +746,6 @@ function attachWhenReady() {
       })
     }
 
-    // // Toggle dropdown visibility
-    // if (exportMenuBtn && exportMenu) {
-    //   exportMenuBtn.addEventListener("click", () => {
-    //     exportMenu.classList.toggle("hidden");
-    //   });
-
-    //   // Hide when clicking outside
-    //   document.addEventListener("click", (event) => {
-    //     if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
-    //       exportMenu.classList.add("hidden");
-    //     }
-    //   }, { signal });
-    // }
-
-    // // Toggle dropdown visibility
-    // if (importMenuBtn && importMenu) {
-    //   importMenuBtn.addEventListener("click", () => {
-    //     importMenu.classList.toggle("hidden");
-    //   });
-
-    //   // Hide when clicking outside
-    //   document.addEventListener("click", (event) => {
-    //     if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
-    //       importMenu.classList.add("hidden");
-    //     }
-    //   }, { signal });
-    // }
-
     // Run button
     if (dfaRunBtn) {
       dfaRunBtn.addEventListener("click", () => {

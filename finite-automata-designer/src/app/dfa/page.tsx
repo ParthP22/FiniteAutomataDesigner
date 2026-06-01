@@ -22,6 +22,7 @@ function DFAPageContent() {
     // onReady on the <Script> tag drains this once the script is ready.
     const pendingAutomaton = useRef<unknown>(null);
     const exportMenuRef = useRef<HTMLDivElement>(null);
+    const importMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
 
@@ -179,7 +180,7 @@ function DFAPageContent() {
                                     if (exportMenuRef.current) toggle_visiblity(exportMenuRef.current);
                                     setExportOpen(prev => !prev);
                                 }}
-                                className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md"
+                                className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md hover:bg-black transition"
                             >
                                 Export Options
                                 <svg
@@ -238,8 +239,11 @@ function DFAPageContent() {
                                 <button
                                     id="importMenuBtn"
                                     type="button"
-                                    onClick={() => setImportOpen(prev => !prev)}
-                                    className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md"
+                                    onClick={() => {
+                                        if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
+                                        setImportOpen(prev => !prev);
+                                    }}
+                                    className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md hover:bg-black transition"
                                 >
                                     Import Options
                                     <svg
@@ -258,12 +262,18 @@ function DFAPageContent() {
                                 </button>
                                 {/* Import Menu options (SVG and LaTeX)*/}
                                 <div
+                                    ref={importMenuRef}
                                     id="importMenu"
-                                    className="absolute hidden mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
+                                    hidden
+                                    className="absolute mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
                                 >
                                     <button
                                     id="svgImportBtn"
                                     type="button"
+                                    onClick={() => {
+                                        if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
+                                        setImportOpen(false);
+                                    }}
                                     className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                                     >
                                     Import as SVG
@@ -271,6 +281,10 @@ function DFAPageContent() {
                                     <button
                                     id="latexImportBtn"
                                     type="button"
+                                    onClick={() => {
+                                        if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
+                                        setImportOpen(false);
+                                    }}
                                     className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                                     >
                                     Import as LaTeX
@@ -279,7 +293,7 @@ function DFAPageContent() {
                             </div>
                             <button 
                             id="confirmImport"
-                            className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md" 
+                            className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md hover:bg-black transition" 
                             hidden
                             >
                                 Draw Import
