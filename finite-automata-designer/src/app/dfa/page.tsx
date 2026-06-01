@@ -209,6 +209,7 @@ function DFAPageContent() {
                                     type="button"
                                     onClick={() => {
                                         if (exportMenuRef.current) toggle_visiblity(exportMenuRef.current);
+                                        setExportOpen(false);
                                     }}
                                     className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                                 >
@@ -219,6 +220,7 @@ function DFAPageContent() {
                                     type="button"
                                     onClick={() => {
                                         if (exportMenuRef.current) toggle_visiblity(exportMenuRef.current);
+                                        setExportOpen(false);
                                     }}
                                     className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                                 >
