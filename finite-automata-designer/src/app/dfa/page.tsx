@@ -346,12 +346,13 @@ function DFAPageContent() {
                 </button>
                 
                 {/* Run button to run the DFA with the given input string */}
-                <Link
-                    href="/"
+                <button
+                    id="dfaRunBtn"
+                    type="button"
                     className="px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
                 >
                     Run
-                </Link>
+                </button>
 
                 <Link
                     href="/projects"
