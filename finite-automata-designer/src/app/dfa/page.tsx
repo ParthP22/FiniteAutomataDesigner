@@ -3,7 +3,7 @@ import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-
+import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
 import { saveAutomaton } from "@/lib/saveAutomaton";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,13 +14,14 @@ function DFAPageContent() {
     const [alphabetInput, setAlphabetInput] = useState("");
     const [instructionsOpen, setInstructionsOpen] = useState(false);
     const [exportOpen, setExportOpen] = useState(false);
-    const [importOpen, setimportOpen] = useState(false);
+    const [importOpen, setImportOpen] = useState(false);
     const searchParams = useSearchParams();
     const id = searchParams?.get("id");
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
     const pendingAutomaton = useRef<unknown>(null);
+    const exportMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
 
@@ -174,11 +175,15 @@ function DFAPageContent() {
                             <button
                                 id="exportMenuBtn"
                                 type="button"
+                                onClick={() => {
+                                    if (exportMenuRef.current) toggle_visiblity(exportMenuRef.current);
+                                    setExportOpen(prev => !prev);
+                                }}
                                 className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md"
                             >
                                 Export Options
                                 <svg
-                                    className="-mr-1 h-5 w-5 text-gray-400"
+                                    className={`-mr-1 h-5 w-5 text-gray-400 h-4 w-4 transition-transform ${exportOpen ? "rotate-180" : ""}`}
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 20 20"
                                     fill="currentColor"
@@ -194,12 +199,17 @@ function DFAPageContent() {
                             
                             {/* Export Menu options (SVG and LaTeX)*/}
                             <div
+                                ref={exportMenuRef}
                                 id="exportMenu"
-                                className="absolute hidden mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
+                                hidden
+                                className="absolute mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
                             >
                                 <button
                                     id="svgExportBtn"
                                     type="button"
+                                    onClick={() => {
+                                        if (exportMenuRef.current) toggle_visiblity(exportMenuRef.current);
+                                    }}
                                     className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                                 >
                                     SVG
@@ -207,6 +217,9 @@ function DFAPageContent() {
                                 <button
                                     id="latexExportBtn"
                                     type="button"
+                                    onClick={() => {
+                                        if (exportMenuRef.current) toggle_visiblity(exportMenuRef.current);
+                                    }}
                                     className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                                 >
                                     LaTeX
@@ -223,11 +236,12 @@ function DFAPageContent() {
                                 <button
                                     id="importMenuBtn"
                                     type="button"
+                                    onClick={() => setImportOpen(prev => !prev)}
                                     className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md"
                                 >
                                     Import Options
                                     <svg
-                                        className="-mr-1 h-5 w-5 text-gray-400"
+                                        className={`-mr-1 h-5 w-5 text-gray-400 h-4 w-4 transition-transform ${importOpen ? "rotate-180" : ""}`}
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 20 20"
                                         fill="currentColor"
