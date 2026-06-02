@@ -486,12 +486,6 @@ function attachWhenReady() {
     const canvas = document.getElementById('NFACanvas') as HTMLCanvasElement | null;
     // Get label tag for alphabet label of NFA
     const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
-    // Export menu button and div
-    const exportMenuBtn = document.getElementById("exportMenuBtn") as HTMLButtonElement | null;
-    const exportMenu = document.getElementById("exportMenu") as HTMLDivElement | null;
-    // Import menu button and div
-    const importMenuBtn = document.getElementById('importMenuBtn') as HTMLButtonElement | null;
-    const importMenu = document.getElementById('importMenu') as HTMLDivElement | null;
     // Buttons for exporting, SVG and LaTeX
     const exportSVGBtn = document.getElementById('svgExportBtn') as HTMLButtonElement | null;
     const exportLaTeXBtn = document.getElementById('latexExportBtn') as HTMLButtonElement | null;
