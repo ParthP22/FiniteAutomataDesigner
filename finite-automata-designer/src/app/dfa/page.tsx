@@ -390,6 +390,7 @@ function DFAPageContent() {
                             />
                         </div>
                         <div className="flex self-center gap-5">
+                            {/* Save button to save the DFA to the database only if the user is logged in */}
                             <button
                                 type="button"
                                 onClick={handleSave}
@@ -406,7 +407,7 @@ function DFAPageContent() {
                             >
                                 Run
                             </button>
-                            
+                            {/* My Projects button to open the projects page that will list all of the users project when logged in */}
                             <Link
                                 href="/projects"
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
@@ -415,20 +416,20 @@ function DFAPageContent() {
                             </Link>
                         </div>
                     </div>
+                    {/* Clear Canvas parent container */}
+                    <div>
+                        <div className="mt-4 flex justify-center">
+                            <button
+                                id="clearCanvas"
+                                type="button"
+                                className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-500 transition">
+                                Clear Canvas
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        
-        {/* <div className="mt-4 flex justify-center">
-            <button
-                type="button"
-                onClick={handleClear}
-                className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-500 transition">
-                Clear Canvas
-            </button>
-                
-        </div> */}
 
         <Script
             src="/scripts/dfa/dfaCanvas.js"

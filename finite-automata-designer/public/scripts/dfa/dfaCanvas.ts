@@ -532,6 +532,8 @@ function attachWhenReady() {
     const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
     // Button that will clear the input textarea
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
+    // Button that will clear the canvas
+    const clearCanvasBtn = document.getElementById('clearCanvas') as HTMLButtonElement | null;
     // Run button
     const dfaRunBtn = document.getElementById('dfaRunBtn') as HTMLButtonElement | null;
     // Reference to draw fucntion;
@@ -756,6 +758,13 @@ function attachWhenReady() {
           inputString.value = "";
         }
       });
+    }
+
+    // Clear Canvas button
+    if (clearCanvasBtn) {
+      clearCanvasBtn.addEventListener("click", () => {
+        emptyDFA(canvas, arrows, circles);
+      })
     }
 
   };
