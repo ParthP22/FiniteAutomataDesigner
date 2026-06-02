@@ -515,6 +515,8 @@ function attachWhenReady() {
     const hideInputBtn = document.getElementById('hideInput') as HTMLButtonElement | null;
     // Button that will clear the input textarea
     const clearInputBtn = document.getElementById('clearInput') as HTMLButtonElement | null;
+    // Button that will clear the canvas
+    const clearCanvasBtn = document.getElementById('clearCanvas') as HTMLButtonElement | null;
     // Run button
     const nfaRunBtn = document.getElementById('nfaRunBtn') as HTMLButtonElement | null;
     // Reference to draw fucntion;
@@ -720,32 +722,11 @@ function attachWhenReady() {
       })
     }
 
-    // Toggle dropdown visibility
-    if (exportMenuBtn && exportMenu) {
-      exportMenuBtn.addEventListener("click", () => {
-        exportMenu.classList.toggle("hidden");
+    // Clear Canvas button
+    if (clearCanvasBtn) {
+      clearCanvasBtn.addEventListener("click", () => {
+        emptyNFA(canvas, arrows, circles);
       });
-
-      // Hide when clicking outside
-      document.addEventListener("click", (event) => {
-        if (!exportMenu.contains(event.target as Node) && event.target !== exportMenuBtn) {
-          exportMenu.classList.add("hidden");
-        }
-      }, { signal });
-    }
-
-    // Toggle dropdown visibility
-    if (importMenuBtn && importMenu) {
-      importMenuBtn.addEventListener("click", () => {
-        importMenu.classList.toggle("hidden");
-      });
-
-      // Hide when clicking outside
-      document.addEventListener("click", (event) => {
-        if (!importMenu.contains(event.target as Node) && event.target !== importMenuBtn) {
-          importMenu.classList.add("hidden");
-        }
-      }, { signal });
     }
 
     // Run button
