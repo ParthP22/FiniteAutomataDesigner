@@ -35,7 +35,7 @@ let drawRef: (() => void) | null = null;
 // Automaton data that arrived before the canvas finished mounting.
 let pendingDFA: SerializedDFA | null = null;
 
-(window as any).loadDFAIntoCanvas = function(data: SerializedDFA){
+window.loadDFAIntoCanvas = function(data: SerializedDFA){
 
   if(!drawRef){
     pendingDFA = data;
