@@ -41,8 +41,8 @@ let lastEditedArrow: Arrow | SelfArrow | null = null;
 // let oldText: string = "";
 
 let selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null = null; // Currently selected object
-let hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
-let base = 'black'; // Black highlight for objects to indicate that they are not being selected
+const hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
+const base = 'black'; // Black highlight for objects to indicate that they are not being selected
 let dragging = false; // True dragging objects is enabled, false otherwise
 let shiftPressed = false; // True if shift is pressed, false otherwise
 let startClick: {x: number, y: number} | null = null;
@@ -111,7 +111,7 @@ function setupNfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
   canvas.addEventListener('mousedown', (event: MouseEvent) => {
     event.preventDefault();
     
-    let mouse = getMousePos(event);
+    const mouse = getMousePos(event);
     
     // Check if the mouse has clicked on an object.
     // If true, then selectedObj will be updated.
@@ -152,7 +152,7 @@ function setupNfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
 
   // If mouse is double-clicked
   canvas.addEventListener('dblclick', (event) => {
-    let mouse = getMousePos(event);
+    const mouse = getMousePos(event);
     selectedObj = mouseCollision(mouse.x, mouse.y);
 
     // If the mouse double-clicks an empty space, then
@@ -172,7 +172,7 @@ function setupNfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
 
   // If mouse moves
   canvas.addEventListener('mousemove', (event) => {
-    let mouse = getMousePos(event);
+    const mouse = getMousePos(event);
 
     // If a new TemporaryArrow has been created, the
     // canvas must draw where it is going
@@ -211,7 +211,7 @@ function setupNfaCanvas(canvas: HTMLCanvasElement, signal: AbortSignal) {
 
   // If the mouse was originally clicked and now
   // the user let go
-  canvas.addEventListener('mouseup', (event) =>{
+  canvas.addEventListener('mouseup', () =>{
     dragging = false;
 
     if (tempArrow != null) {
@@ -688,7 +688,7 @@ function attachWhenReady() {
       copyOutputBtn.addEventListener('click', async () => {
         if (outputTextArea) {
           try {
-            let textToCopy = outputTextArea.value;
+            const textToCopy = outputTextArea.value;
             await navigator.clipboard.writeText(textToCopy); 
           } catch (err) {
             console.log("Failed to copy: ", err)
@@ -799,8 +799,8 @@ function importHelper(
         if (confirm("Everything on the canvas currently will be erased! Proceed with importing?")){
           if (canvas) {
             if (emptyNFA(canvas, arrows, circles)){
-              let importer = new Importer(circles, arrows, textArea.value, drawFunc);
-              let valid = importer.convert();
+              const importer = new Importer(circles, arrows, textArea.value, drawFunc);
+              const valid = importer.convert();
               if(!valid){
                 alert(`Import failed. Please check if you are importing a ${automationSpecification}.`);
               }
@@ -845,7 +845,7 @@ function emptyNFA(canvas: HTMLCanvasElement | null, arrows: (Arrow | SelfArrow)[
 }
 
 // Simplifies the finalization for the transition of an edited arrow
-function finalizeEditedArrow(nextSelected: any | null) {
+function finalizeEditedArrow(nextSelected: unknown | null) {
   if (!lastEditedArrow) return;
 
   // If the previously edited object was an Arrow or SelfArrow, AND if its text has been modified,

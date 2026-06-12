@@ -389,7 +389,7 @@ function DFAPageContent() {
                                 }}
                             />
                         </div>
-                        <div className="flex self-center gap-5">
+                        <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the DFA to the database only if the user is logged in */}
                             <button
                                 type="button"

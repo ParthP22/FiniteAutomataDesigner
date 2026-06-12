@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
 
 
@@ -13,8 +13,8 @@ function NFAPageContent() {
     const [instructionsOpen, setInstructionsOpen] = useState(false);
     const [exportOpen, setExportOpen] = useState(false);
     const [importOpen, setImportOpen] = useState(false);
-    const searchParams = useSearchParams();
-    const id = searchParams?.get("id");
+    // const searchParams = useSearchParams();
+    // const id = searchParams?.get("id");
 
     const exportMenuRef = useRef<HTMLDivElement>(null);
     const importMenuRef = useRef<HTMLDivElement>(null);
@@ -319,7 +319,7 @@ function NFAPageContent() {
                                 }}
                             />
                         </div>
-                        <div className="flex self-center gap-5">
+                        <div className="flex flex-wrap self-center gap-5">
                             {/* Run button to run the NFA with the given input string */}
                             <button
                                 id="nfaRunBtn"
