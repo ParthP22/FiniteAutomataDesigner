@@ -41,3 +41,11 @@ export interface FiniteAutomaton {
     created_at: string;
     updated_at: string;
 }
+
+export interface CreateAutomaton {
+    user_id: string;
+    name?: string;
+    description?: string;
+    type: "DFA" | "NFA";
+    automaton: SerializedDFA;
+}
