@@ -4,15 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-
-interface FiniteAutomaton {
-  id: string;
-  user_id: string;
-  name: string;
-  type: string;
-  automaton: unknown;
-  created_at?: string;
-}
+import { FiniteAutomaton } from "@/lib/shared/types";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
