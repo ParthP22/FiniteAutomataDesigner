@@ -16,8 +16,8 @@ export default function ProjectCard({
     type
 }: ProjectCardProps) {
     return (
-        <Link
-            href={`/dfa?id=${id}`}
+        <Link 
+            href={`/${type.toLowerCase()}/${id}`}
             className="
                 bg-white
                 rounded-xl
