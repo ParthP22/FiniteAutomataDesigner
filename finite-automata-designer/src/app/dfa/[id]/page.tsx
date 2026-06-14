@@ -6,6 +6,8 @@ import { useParams } from "next/navigation";
 import { toggle_visiblity } from "../../../../public/scripts/canvasUtil/canvasUtil";
 import { saveAutomaton } from "@/lib/saveAutomaton";
 import { createClient } from "@/lib/supabase/client";
+import { FiniteAutomaton } from "@/lib/shared/types";
+import { getAutomaton } from "@/lib/automata/queries";
 
 
 function DFAPageContent() {
@@ -58,33 +60,18 @@ function DFAPageContent() {
                 return;
             }
 
-            const supabase = createClient();
-
-            const { data, error } = await supabase
-                .from("finite_automata")
-                .select("automaton")
-                .eq("id",automatonId)
-                .single();
-
-            if(error){
-                console.error("Error loading automaton: ", error);
-                return;
-            }
-
-            if(!data){
-                console.log("No data");
-                return;
-            }
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
 
             if (typeof window.loadDFAIntoCanvas === 'function') {
                 // Canvas script is already loaded — call directly.
-                window.loadDFAIntoCanvas(data.automaton);
+                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
             } else {
                 // Canvas script hasn't finished loading yet (production race).
                 // Store the data so the onReady callback can deliver it once ready.
-                pendingAutomaton.current = data.automaton;
+                pendingAutomaton.current = finiteAutomatonData.automaton;
             }
         }
+
         loadAutomaton();
     },[automatonId]);
 
