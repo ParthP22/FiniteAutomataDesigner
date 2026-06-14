@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getUserAutomata } from "@/lib/automata/queries";
+import ProjectCard from "../components/projects/ProjectCard";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -42,20 +42,38 @@ export default function AutomataPage() {
   }
 
   return (
-    <main className="min-h-screen bg-blue-100 p-10 text-black">
-      <h1 className="text-4xl font-bold mb-6 text-center">My Projects</h1>
+        <main className="min-h-screen bg-blue-100 p-6 md:p-10">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-4xl font-bold text-gray-800">
+                        My Projects
+                    </h1>
+                </div>
 
-      <div className="flex flex-col gap-4">
-        {machines.map((machine) => (
-          <Link
-            key={machine.id}
-            href={`/dfa?id=${machine.id}`}
-            className="bg-gray-700 text-white px-4 py-3 rounded hover:bg-black transition"
-          >
-            Automaton {machine.id}
-          </Link>
-        ))}
-      </div>
-    </main>
-  );
+                {machines.length === 0 ? (
+                    <div className="bg-white rounded-xl shadow p-10 text-center">
+                        <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+                            No Projects Yet
+                        </h2>
+
+                        <p className="text-gray-500">
+                            Create your first automaton to get started.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {machines.map((machine) => (
+                            <ProjectCard
+                                key={machine.id}
+                                id={machine.id}
+                                name={machine.name}
+                                description={machine.description}
+                                type={machine.type}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </main>
+    );
 }
