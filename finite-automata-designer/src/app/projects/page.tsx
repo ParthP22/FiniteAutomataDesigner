@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { FiniteAutomaton } from "@/lib/shared/types";
+import { getUserAutomata } from "@/lib/automata/queries";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -13,28 +13,18 @@ export default function AutomataPage() {
 
   useEffect(() => {
     async function loadMachines() {
-      const supabase = createClient();
-
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        router.replace("/login");
-        return;
+      try{
+        const automata = await getUserAutomata();
+        setMachines(automata || []);
       }
-
-      const { data, error } = await supabase
-        .from("finite_automata")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (error) {
+      catch(error){
         console.error(error);
-        setLoading(false);
-        return;
+        alert("Failed to retrieve user's projects: " + error);
       }
-
-      setMachines(data || []);
-      setLoading(false);
+      finally{
+        setLoading(false);
+      }
+      
     }
 
     loadMachines();
