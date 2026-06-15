@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
 import { saveAutomaton } from "@/lib/saveAutomaton";
 import { createClient } from "@/lib/supabase/client";
+import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 
 
 function DFAPageContent() {
@@ -15,6 +16,7 @@ function DFAPageContent() {
     const [instructionsOpen, setInstructionsOpen] = useState(false);
     const [exportOpen, setExportOpen] = useState(false);
     const [importOpen, setImportOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const searchParams = useSearchParams();
     const id = searchParams?.get("id");
 
@@ -393,7 +395,7 @@ function DFAPageContent() {
                             {/* Save button to save the DFA to the database only if the user is logged in */}
                             <button
                                 type="button"
-                                onClick={handleSave}
+                                onClick={() => setIsSaving(true)}
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
                             >
                                 Save
@@ -430,6 +432,12 @@ function DFAPageContent() {
                 </div>
             </div>
         </div>
+
+        <SaveProjectModal 
+            isOpen={isSaving}
+            onClose={() => setIsSaving(false)}
+            onSave={handleSave}
+        />
 
         <Script
             src="/scripts/dfa/dfaCanvas.js"
