@@ -20,6 +20,21 @@ export function SaveProjectModal({
     const [name, setName] = useState((initialName === null) ? "" : initialName);
     const [description, setDescription] = useState((initialDescription === null) ? "" : initialDescription);
 
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try{
+            await onSave(name, description);
+        }
+        catch(error){
+            console.error(error);
+            alert("Failed to save changes: " + error);
+        }
+        finally{
+            onClose();
+        }
+
+    };
+
     if(!isOpen){
         return null;
     }
