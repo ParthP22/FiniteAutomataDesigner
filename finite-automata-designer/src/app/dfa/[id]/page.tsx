@@ -395,7 +395,7 @@ function DFAPageContent() {
                             {/* Save button to save the DFA to the database only if the user is logged in */}
                             <button
                                 type="button"
-                                //onClick={handleSave}
+                                onClick={handleSave}
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
                             >
                                 Save
