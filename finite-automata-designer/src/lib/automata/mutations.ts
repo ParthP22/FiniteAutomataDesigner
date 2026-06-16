@@ -30,3 +30,27 @@ export async function saveAutomaton(serializedDFA: SerializedDFA, name: string |
     return data as FiniteAutomaton;
     
 }
+
+export async function updateAutomaton(automatonId: string, serializedDFA: SerializedDFA){
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if(!user){
+        alert("You must be logged in to save.");
+        return;
+    }
+
+    const { data, error } = await supabase
+        .from("finite_automata")
+        .update({
+            automaton: serializedDFA,
+        })
+        .eq("id", automatonId);
+
+    if(error){
+        throw error;
+    }
+
+    return data;
+}
