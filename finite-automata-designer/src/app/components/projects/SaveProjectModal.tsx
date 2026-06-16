@@ -4,21 +4,21 @@ import { useState } from "react";
 
 interface SaveProjectModalProps{
     isOpen: boolean;
-    initialName?: string;
-    initialDescription?: string;
+    initialName: string | null;
+    initialDescription: string | null;
     onClose: () => void;
     onSave: (name: string, description: string) => Promise<void>;
 }
 
 export function SaveProjectModal({
     isOpen,
-    initialName = "", 
-    initialDescription = "",
+    initialName = null, 
+    initialDescription = null,
     onClose,
     onSave,
 }: SaveProjectModalProps){
-    const [name, setName] = useState(initialName);
-    const [description, setDescription] = useState(initialDescription);
+    const [name, setName] = useState((initialName === null) ? "" : initialName);
+    const [description, setDescription] = useState((initialDescription === null) ? "" : initialDescription);
 
     if(!isOpen){
         return null;
@@ -62,7 +62,9 @@ export function SaveProjectModal({
                     </button>
                 </div>
 
-                <form className="space-y-5">
+                <form className="space-y-5"
+                    onSubmit={handleSubmit}
+                >
                     <div>
                         <label
                             htmlFor="project-name"
