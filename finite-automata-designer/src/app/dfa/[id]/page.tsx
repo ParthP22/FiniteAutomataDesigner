@@ -4,8 +4,7 @@ import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useParams } from "next/navigation";
 import { toggle_visiblity } from "../../../../public/scripts/canvasUtil/canvasUtil";
-import { saveAutomaton } from "@/lib/saveAutomaton";
-import { createClient } from "@/lib/supabase/client";
+import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getAutomaton } from "@/lib/automata/queries";
 
@@ -75,20 +74,27 @@ function DFAPageContent() {
         loadAutomaton();
     },[automatonId]);
 
-    async function handleSave(){
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if(!user){
-            alert("Yout must be logged in to save.");
-            return;
-        }
+    async function handleSaveAsNew(name: string, description: string){
 
         const serialized = window.exportDFA();
         console.log(serialized);
 
         try{
-            await saveAutomaton(user.id, serialized);
+            await saveAutomaton(serialized, name, description);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
+        }
+    }
+
+    async function handleSave(){
+        const serialized = window.exportDFA();
+        console.log(serialized);
+
+        try{
+            await updateAutomaton(serialized);
             alert("Automaton saved!");
         }
         catch (err) {
@@ -383,7 +389,7 @@ function DFAPageContent() {
                             {/* Save button to save the DFA to the database only if the user is logged in */}
                             <button
                                 type="button"
-                                onClick={handleSave}
+                                //onClick={handleSave}
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
                             >
                                 Save
