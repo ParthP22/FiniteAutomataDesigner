@@ -87,25 +87,22 @@ function DFAPageContent() {
         loadAutomaton();
     },[id]);
 
-    async function handleSave(){
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if(!user){
-            alert("Yout must be logged in to save.");
-            return;
-        }
+    async function handleSave(name: string, description: string){
 
         const serialized = window.exportDFA();
         console.log(serialized);
 
         try{
-            await saveAutomaton(user.id, serialized);
+            await saveAutomaton(
+                serialized, 
+                (name.trim() === "") ? null : name.trim(), 
+                (description.trim() === "") ? null : description.trim(),
+            );
             alert("Automaton saved!");
         }
         catch (err) {
             console.error(err);
-            alert("Save failed.");
+            alert("Save failed: " + err);
         }
     }
 
@@ -435,6 +432,8 @@ function DFAPageContent() {
 
         <SaveProjectModal 
             isOpen={isSaving}
+            initialName={null}
+            initialDescription={null}
             onClose={() => setIsSaving(false)}
             onSave={handleSave}
         />
