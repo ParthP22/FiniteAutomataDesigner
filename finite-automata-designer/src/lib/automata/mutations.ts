@@ -1,6 +1,6 @@
-import { SerializedDFA } from "./dfa/types";
-import { CreateAutomaton } from "./shared/types";
-import { createClient } from "./supabase/client";
+import { SerializedDFA } from "../dfa/types";
+import { CreateAutomaton } from "../shared/types";
+import { createClient } from "../supabase/client";
 
 export async function saveAutomaton(serializedDFA: SerializedDFA, name: string | null, description: string | null){
     const supabase = createClient();

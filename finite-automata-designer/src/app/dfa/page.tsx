@@ -4,7 +4,7 @@ import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
-import { saveAutomaton } from "@/lib/saveAutomaton";
+import { saveAutomaton } from "@/lib/automata/mutations";
 import { createClient } from "@/lib/supabase/client";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 
