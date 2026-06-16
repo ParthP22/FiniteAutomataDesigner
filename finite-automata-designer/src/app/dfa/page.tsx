@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
 import { saveAutomaton } from "@/lib/automata/mutations";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +19,7 @@ function DFAPageContent() {
     const [isSaving, setIsSaving] = useState(false);
     const searchParams = useSearchParams();
     const id = searchParams?.get("id");
+    const router = useRouter();
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
@@ -93,16 +94,17 @@ function DFAPageContent() {
         console.log(serialized);
 
         try{
-            await saveAutomaton(
+            const finiteAutomataData = await saveAutomaton(
                 serialized, 
                 (name.trim() === "") ? null : name.trim(), 
                 (description.trim() === "") ? null : description.trim(),
             );
             alert("Automaton saved!");
+            router.push(`/dfa/${finiteAutomataData.id}`);
         }
-        catch (err) {
-            console.error(err);
-            alert("Save failed: " + err);
+        catch (error) {
+            console.error(error);
+            alert("Save failed: " + error);
         }
     }
 
