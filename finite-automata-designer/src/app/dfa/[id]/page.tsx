@@ -7,6 +7,7 @@ import { toggle_visiblity } from "../../../../public/scripts/canvasUtil/canvasUt
 import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getAutomaton } from "@/lib/automata/queries";
+import { SaveProjectModal } from "@/app/components/projects/SaveProjectModal";
 
 
 function DFAPageContent() {
@@ -17,6 +18,8 @@ function DFAPageContent() {
     const [exportOpen, setExportOpen] = useState(false);
     const [importOpen, setImportOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [name, setName] = useState<string | null>(null);
+    const [description, setDescription] = useState<string | null>(null);
 
     const params = useParams();
 
@@ -60,6 +63,9 @@ function DFAPageContent() {
             }
 
             const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
+
 
             if (typeof window.loadDFAIntoCanvas === 'function') {
                 // Canvas script is already loaded — call directly.
@@ -74,13 +80,13 @@ function DFAPageContent() {
         loadAutomaton();
     },[automatonId]);
 
-    async function handleSaveAsNew(name: string, description: string){
+    async function handleSaveAsNew(newName: string, newDescription: string){
 
         const serialized = window.exportDFA();
         console.log(serialized);
 
         try{
-            await saveAutomaton(serialized, name, description);
+            await saveAutomaton(serialized, newName, newDescription);
             alert("Automaton saved!");
         }
         catch (err) {
@@ -434,6 +440,14 @@ function DFAPageContent() {
                 </div>
             </div>
         </div>
+
+        <SaveProjectModal
+            isOpen={isSaving}
+            initialName={name}
+            initialDescription={description}
+            onClose={() => setIsSaving(false)}
+            onSave={handleSaveAsNew}
+        />
 
         <Script
             src="/scripts/dfa/dfaCanvas.js"
