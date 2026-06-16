@@ -16,8 +16,7 @@ export default function ProjectCard({
     type
 }: ProjectCardProps) {
     return (
-        <Link 
-            href={`/${type.toLowerCase()}/${id}`}
+        <div
             className="
                 bg-white
                 rounded-xl
@@ -34,34 +33,39 @@ export default function ProjectCard({
                 hover:-translate-y-1
             "
         >
-            <div className="flex items-start justify-between">
-                <h2 className="text-2xl font-bold text-gray-800 break-words">
-                    {name}
-                </h2>
+            <Link
+                href={`/${type.toLowerCase()}/${id}`}
+                className="flex flex-col gap-4"
+            >
+                <div className="flex items-start justify-between">
+                    <h2 className="text-2xl font-bold text-gray-800 break-words">
+                        {name}
+                    </h2>
 
-                <span
-                    className={`
-                        px-3 py-1 rounded-full text-sm font-semibold
-                        ${
-                            type === "DFA"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-purple-100 text-purple-700"
-                        }
-                    `}
-                >
-                    {type}
-                </span>
-            </div>
+                    <span
+                        className={`
+                            px-3 py-1 rounded-full text-sm font-semibold
+                            ${
+                                type === "DFA"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-purple-100 text-purple-700"
+                            }
+                        `}
+                    >
+                        {type}
+                    </span>
+                </div>
 
-            <p className="text-gray-600 flex-grow">
-                {description || "No description provided."}
-            </p>
-
-            <div className="pt-2 border-t border-gray-100">
-                <p className="text-sm text-gray-400 truncate">
-                    ID: {id}
+                <p className="text-gray-600 flex-grow">
+                    {description || "No description provided."}
                 </p>
-            </div>
-        </Link>
+
+                <div className="pt-2 border-t border-gray-100">
+                    <p className="text-sm text-gray-400 truncate">
+                        ID: {id}
+                    </p>
+                </div>
+            </Link>
+        </div>
     );
 }
