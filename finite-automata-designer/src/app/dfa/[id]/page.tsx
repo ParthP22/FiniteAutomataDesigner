@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toggle_visiblity } from "../../../../public/scripts/canvasUtil/canvasUtil";
 import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { FiniteAutomaton } from "@/lib/shared/types";
@@ -22,6 +22,7 @@ function DFAPageContent() {
     const [description, setDescription] = useState<string | null>(null);
 
     const params = useParams();
+    const router = useRouter();
 
     const automatonId = params?.id as string;
 
@@ -86,12 +87,13 @@ function DFAPageContent() {
         console.log(serialized);
 
         try{
-            await saveAutomaton(serialized, newName, newDescription);
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
             alert("Automaton saved!");
+            router.push(`/dfa/${finiteAutomataData.id}`);
         }
-        catch (err) {
-            console.error(err);
-            alert("Save failed.");
+        catch (error) {
+            console.error(error);
+            alert("Save failed: " + error);
         }
     }
 
@@ -100,7 +102,7 @@ function DFAPageContent() {
         console.log(serialized);
 
         try{
-            await updateAutomaton(serialized);
+            await updateAutomaton(automatonId, serialized);
             alert("Automaton saved!");
         }
         catch (err) {
