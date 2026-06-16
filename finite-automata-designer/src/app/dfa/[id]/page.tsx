@@ -394,6 +394,14 @@ function DFAPageContent() {
                             >
                                 Save
                             </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsSaving(true)}
+                                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                            >
+                                Save As New Project
+                            </button>
                     
                             {/* Run button to run the DFA with the given input string */}
                             <button
