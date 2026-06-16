@@ -1,5 +1,5 @@
 import { SerializedDFA } from "../dfa/types";
-import { CreateAutomaton } from "../shared/types";
+import { CreateAutomaton, FiniteAutomaton } from "../shared/types";
 import { createClient } from "../supabase/client";
 
 export async function saveAutomaton(serializedDFA: SerializedDFA, name: string | null, description: string | null){
@@ -8,8 +8,7 @@ export async function saveAutomaton(serializedDFA: SerializedDFA, name: string |
     const { data: { user } } = await supabase.auth.getUser();
 
     if(!user){
-        alert("You must be logged in to save.");
-        return;
+        throw new Error("User is not authenticated.");
     }
 
     const { data, error } = await supabase
@@ -24,10 +23,10 @@ export async function saveAutomaton(serializedDFA: SerializedDFA, name: string |
         .select()
         .single();
 
-        if(error){
-            throw error;
-        }
+    if(error || !data){
+        throw error;
+    }
 
-        return data;
+    return data as FiniteAutomaton;
     
 }
