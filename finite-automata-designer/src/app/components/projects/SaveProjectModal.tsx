@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SaveProjectModalProps{
     isOpen: boolean;
@@ -19,6 +19,14 @@ export function SaveProjectModal({
 }: SaveProjectModalProps){
     const [name, setName] = useState((initialName === null) ? "" : initialName);
     const [description, setDescription] = useState((initialDescription === null) ? "" : initialDescription);
+
+    useEffect(() => {
+        setName(initialName ?? "");
+    }, [initialName]);
+
+    useEffect(() => {
+        setDescription(initialDescription ?? "");
+    }, [initialDescription]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
