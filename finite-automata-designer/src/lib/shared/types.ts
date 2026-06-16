@@ -44,8 +44,8 @@ export interface FiniteAutomaton {
 
 export interface CreateAutomaton {
     user_id: string;
-    name?: string;
-    description?: string;
+    name?: string | null;
+    description?: string | null;
     type: "DFA" | "NFA";
     automaton: SerializedDFA;
 }
