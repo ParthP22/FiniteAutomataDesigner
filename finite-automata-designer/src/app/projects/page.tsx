@@ -6,6 +6,7 @@ import { FiniteAutomaton } from "@/lib/shared/types";
 import { getUserAutomata } from "@/lib/automata/queries";
 import ProjectCard from "../components/projects/ProjectCard";
 import { deleteAutomaton } from "@/lib/automata/mutations";
+import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -36,7 +37,7 @@ export default function AutomataPage() {
   const handleDelete = async (automatonId: string) => {
     try{
       await deleteAutomaton(automatonId);
-
+      
       // Remove the deleted automaton from the machines array
       setMachines((prev) => prev.filter(project => project.id !== automatonId));
     }
@@ -95,6 +96,15 @@ export default function AutomataPage() {
                 )}
             </div>
 
+            { deletingProject &&
+                <DeleteProjectModal 
+                    id={deletingProject.id}
+                    name={deletingProject.name}
+                    description={deletingProject.description}
+                    onDelete={() => handleDelete(deletingProject.id)}
+                    onCancel={() => setDeletingProject(null)}
+                />
+            }
         </main>
     );
 }
