@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getUserAutomata } from "@/lib/automata/queries";
 import ProjectCard from "../components/projects/ProjectCard";
+import { deleteAutomaton } from "@/lib/automata/mutations";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingProject, setDeletingProject] = useState<FiniteAutomaton | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -29,6 +32,22 @@ export default function AutomataPage() {
 
     loadMachines();
   }, [router]);
+
+  const handleDelete = async (automatonId: string) => {
+    try{
+      await deleteAutomaton(automatonId);
+
+      // Remove the deleted automaton from the machines array
+      setMachines((prev) => prev.filter(project => project.id !== automatonId));
+    }
+    catch(error){
+      console.error(error);
+      alert("Failed to delete selected project: " + error);
+    }
+    finally{
+      setDeletingProject(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -69,11 +88,13 @@ export default function AutomataPage() {
                                 name={machine.name}
                                 description={machine.description}
                                 type={machine.type}
+                                onDelete={() => setDeletingProject(machine)}
                             />
                         ))}
                     </div>
                 )}
             </div>
+
         </main>
     );
 }
