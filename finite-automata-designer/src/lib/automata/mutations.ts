@@ -37,8 +37,7 @@ export async function updateAutomaton(automatonId: string, serializedDFA: Serial
     const { data: { user } } = await supabase.auth.getUser();
 
     if(!user){
-        alert("You must be logged in to save.");
-        return;
+        throw new Error("User is not authenticated.");
     }
 
     const { data, error } = await supabase
@@ -54,3 +53,25 @@ export async function updateAutomaton(automatonId: string, serializedDFA: Serial
 
     return data;
 }
+
+export async function deleteAutomaton(automatonId: string){
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if(!user){
+        throw new Error("User is not authenticated.");
+    }
+
+    const { data, error } = await supabase
+        .from("finite_automata")
+        .delete()
+        .eq("id", automatonId);
+
+    if(error){
+        throw error;
+    }
+
+    return data;
+}
+
