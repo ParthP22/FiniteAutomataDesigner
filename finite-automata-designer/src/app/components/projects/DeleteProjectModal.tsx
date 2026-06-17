@@ -5,13 +5,13 @@ import { useState } from "react";
 interface DeleteProjectModalProps{
     name: string;
     onDelete: () => Promise<void>;
-    onCancel: () => void;
+    onClose: () => void;
 }
 
 export function DeleteProjectModal({
     name,
     onDelete,
-    onCancel,
+    onClose,
 }: DeleteProjectModalProps){
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -19,7 +19,12 @@ export function DeleteProjectModal({
         try {
             setIsDeleting(true);
             await onDelete();
-        } finally {
+        } 
+        catch(error){
+            console.error(error);
+            alert("Failed to delete project: " + error);
+        }
+        finally {
             setIsDeleting(false);
         }
     };
@@ -64,7 +69,7 @@ export function DeleteProjectModal({
                 <div className="flex justify-end gap-3">
                     <button
                         type="button"
-                        onClick={onCancel}
+                        onClick={onClose}
                         disabled={isDeleting}
                         className="
                             px-4 py-2
