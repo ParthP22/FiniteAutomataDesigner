@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getUserAutomata } from "@/lib/automata/queries";
 import ProjectCard from "../components/projects/ProjectCard";
-import { deleteAutomaton } from "@/lib/automata/mutations";
+import { deleteAutomaton, editAutomaton } from "@/lib/automata/mutations";
 import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingProject, setDeletingProject] = useState<FiniteAutomaton | null>(null);
+  const [editingProject, setEditingProject] = useState<FiniteAutomaton | null>(null);
 
   const router = useRouter();
 
@@ -40,6 +41,8 @@ export default function AutomataPage() {
       
       // Remove the deleted automaton from the machines array
       setMachines((prev) => prev.filter(project => project.id !== automatonId));
+
+      alert("Deleted project successfully!");
     }
     catch(error){
       console.error(error);
@@ -47,6 +50,25 @@ export default function AutomataPage() {
     }
     finally{
       setDeletingProject(null);
+    }
+  };
+
+  const handleEdit = async (automatonId: string, name: string, description: string) => {
+    try{
+
+      await editAutomaton(
+        automatonId, 
+        (name === "") ? null : name,
+        (description === "") ? null : description,
+      );
+      alert("Saved edit successfully!");
+    }
+    catch(error){
+      console.error(error);
+      alert("Failed to save edit: " + error);
+    }
+    finally{
+      setEditingProject(null);
     }
   };
 
@@ -90,6 +112,7 @@ export default function AutomataPage() {
                                 description={machine.description}
                                 type={machine.type}
                                 onDelete={() => setDeletingProject(machine)}
+                                onEdit={() => setEditingProject(machine)}
                             />
                         ))}
                     </div>
@@ -100,7 +123,7 @@ export default function AutomataPage() {
                 <DeleteProjectModal 
                     name={deletingProject.name}
                     onDelete={() => handleDelete(deletingProject.id)}
-                    onCancel={() => setDeletingProject(null)}
+                    onClose={() => setDeletingProject(null)}
                 />
             }
         </main>
