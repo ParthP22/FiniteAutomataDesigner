@@ -75,3 +75,26 @@ export async function deleteAutomaton(automatonId: string){
     return data;
 }
 
+export async function editAutomaton(automatonId: string, name: string | null, description: string | null){
+    const supabase = createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if(!user){
+        throw new Error("User is not authenticated.");
+    }
+
+    const { data, error } = await supabase
+        .from("finite_automata")
+        .update({
+            name: name,
+            description: description,
+        })
+        .eq("id",automatonId);
+
+    if(error){
+        throw error;
+    }
+
+    return data;
+}
