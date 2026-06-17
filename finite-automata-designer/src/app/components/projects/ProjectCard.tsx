@@ -7,13 +7,15 @@ interface ProjectCardProps {
     name: string;
     description: string | null;
     type: string;
+    onDelete: () => void;
 }
 
 export default function ProjectCard({
     id,
     name,
     description,
-    type
+    type,
+    onDelete
 }: ProjectCardProps) {
     return (
         <div
@@ -66,6 +68,26 @@ export default function ProjectCard({
                     </p>
                 </div>
             </Link>
+
+            <div className="flex gap-3 pt-2">
+
+                <button
+                    type="button"
+                    onClick={onDelete}
+                    className="
+                        flex-1
+                        px-4
+                        py-2
+                        rounded-lg
+                        bg-red-500
+                        text-white
+                        hover:bg-red-600
+                        transition
+                    "
+                >
+                    Delete
+                </button>
+            </div>
         </div>
     );
 }
