@@ -7,6 +7,7 @@ import { getUserAutomata } from "@/lib/automata/queries";
 import ProjectCard from "../components/projects/ProjectCard";
 import { deleteAutomaton, editAutomaton } from "@/lib/automata/mutations";
 import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
+import { EditProjectModal } from "../components/projects/EditProjectModal";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -124,6 +125,16 @@ export default function AutomataPage() {
                     name={deletingProject.name}
                     onDelete={() => handleDelete(deletingProject.id)}
                     onClose={() => setDeletingProject(null)}
+                />
+            }
+
+            { editingProject &&
+                <EditProjectModal 
+                    id={editingProject.id}
+                    initialName={editingProject.name}
+                    initialDescription={editingProject.description}
+                    onSave={handleEdit}
+                    onClose={() => setEditingProject(null)}
                 />
             }
         </main>
