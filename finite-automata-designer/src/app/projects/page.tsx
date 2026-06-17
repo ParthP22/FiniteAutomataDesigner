@@ -98,9 +98,7 @@ export default function AutomataPage() {
 
             { deletingProject &&
                 <DeleteProjectModal 
-                    id={deletingProject.id}
                     name={deletingProject.name}
-                    description={deletingProject.description}
                     onDelete={() => handleDelete(deletingProject.id)}
                     onCancel={() => setDeletingProject(null)}
                 />
