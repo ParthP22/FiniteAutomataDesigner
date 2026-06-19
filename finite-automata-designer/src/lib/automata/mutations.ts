@@ -90,11 +90,13 @@ export async function editAutomaton(automatonId: string, name: string | null, de
             name: name,
             description: description,
         })
-        .eq("id",automatonId);
+        .eq("id",automatonId)
+        .select()
+        .single();
 
     if(error){
         throw error;
     }
 
-    return data;
+    return data as FiniteAutomaton;
 }

@@ -57,7 +57,7 @@ export default function AutomataPage() {
   const handleEdit = async (automatonId: string, name: string, description: string) => {
     try{
 
-      await editAutomaton(
+      const editedAutomaton = await editAutomaton(
         automatonId, 
         (name === "") ? null : name,
         (description === "") ? null : description,
@@ -66,11 +66,7 @@ export default function AutomataPage() {
       setMachines((prev) => 
         prev.map((project) =>
           project.id === automatonId
-            ? {
-                ...project,
-                name: name === "" ? null : name,
-                description: description === "" ? null: description,
-              } as FiniteAutomaton
+            ? editedAutomaton
             : project
         )
       );
