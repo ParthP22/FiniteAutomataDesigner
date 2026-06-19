@@ -62,6 +62,19 @@ export default function AutomataPage() {
         (name === "") ? null : name,
         (description === "") ? null : description,
       );
+      
+      setMachines((prev) => 
+        prev.map((project) =>
+          project.id === automatonId
+            ? {
+                ...project,
+                name: name === "" ? null : name,
+                description: description === "" ? null: description,
+              } as FiniteAutomaton
+            : project
+        )
+      );
+
       alert("Saved edit successfully!");
     }
     catch(error){
