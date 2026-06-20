@@ -8,6 +8,7 @@ import { saveAutomaton } from "@/lib/automata/mutations";
 import { createClient } from "@/lib/supabase/client";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 import Instructions from "../components/editor/Instructions";
+import AutomataHeader from "../components/editor/AutomataHeader";
 
 
 function DFAPageContent() {
@@ -20,6 +21,8 @@ function DFAPageContent() {
     const searchParams = useSearchParams();
     const id = searchParams?.get("id");
     const router = useRouter();
+
+    const title: string = "Deterministic Finite Automata"
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
@@ -111,12 +114,9 @@ function DFAPageContent() {
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* DFA title at the top */}
-        <h1 className="text-5xl font-bold text-center my-2 text-black ">
-            <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
-                Deterministic Finite Automata
-            </span>
-            <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
-        </h1>
+        <AutomataHeader
+            title={title}
+        />
         <div
             className="flex w-full"
         >

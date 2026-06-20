@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense, useRef } from "react";
 // import { useSearchParams } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
 import Instructions from "../components/editor/Instructions";
+import AutomataHeader from "../components/editor/AutomataHeader";
 
 
 function NFAPageContent() {
@@ -15,6 +16,8 @@ function NFAPageContent() {
     const [importOpen, setImportOpen] = useState(false);
     // const searchParams = useSearchParams();
     // const id = searchParams?.get("id");
+
+    const title: string = "Non-deterministic Finite Automata";
 
     const exportMenuRef = useRef<HTMLDivElement>(null);
     const importMenuRef = useRef<HTMLDivElement>(null);
@@ -44,12 +47,9 @@ function NFAPageContent() {
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* NFA title at the top */}
-        <h1 className="text-5xl font-bold text-center my-2 text-black ">
-            <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
-                Non-deterministic Finite Automata
-            </span>
-            <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
-        </h1>
+        <AutomataHeader
+            title={title}
+        />
         <div className="flex w-full">
             {/* Back Button + Instructions parent div*/}
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
