@@ -8,7 +8,7 @@ import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getAutomaton } from "@/lib/automata/queries";
 import { SaveProjectModal } from "@/app/components/projects/SaveProjectModal";
-import { Instructions } from "@/app/components/editor/Instructions";
+import Instructions from "@/app/components/editor/Instructions";
 
 
 function DFAPageContent() {

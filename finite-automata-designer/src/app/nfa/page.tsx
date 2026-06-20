@@ -4,7 +4,7 @@ import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
 // import { useSearchParams } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
-import { Instructions } from "../components/editor/Instructions";
+import Instructions from "../components/editor/Instructions";
 
 
 function NFAPageContent() {

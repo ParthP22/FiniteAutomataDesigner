@@ -6,7 +6,7 @@ interface InstructionsProps{
     type: "DFA" | "NFA";
 }
 
-export function Instructions({ type }: InstructionsProps){
+export default function Instructions({ type }: InstructionsProps){
 
     const [instructionsOpen, setInstructionsOpen] = useState(false);
     

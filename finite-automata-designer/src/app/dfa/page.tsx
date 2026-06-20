@@ -7,7 +7,7 @@ import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil"
 import { saveAutomaton } from "@/lib/automata/mutations";
 import { createClient } from "@/lib/supabase/client";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
-import { Instructions } from "../components/editor/Instructions";
+import Instructions from "../components/editor/Instructions";
 
 
 function DFAPageContent() {
