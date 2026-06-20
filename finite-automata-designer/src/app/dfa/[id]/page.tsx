@@ -11,6 +11,7 @@ import Instructions from "@/app/components/editor/Instructions";
 import AutomataHeader from "@/app/components/editor/AutomataHeader";
 import ImportContainer from "@/app/components/editor/import/ImportContainer";
 import ExportContainer from "@/app/components/editor/export/ExportContainer";
+import ExportTextArea from "@/app/components/editor/export/ExportTextArea";
 
 
 function DFAPageContent() {
@@ -147,19 +148,9 @@ function DFAPageContent() {
                         Import as: <button id='svgImportBtn' type="button" className="cursor-pointer">SVG</button>
                         {' | '} <button id='latexImportBtn' type="button" className="cursor-pointer">LaTeX</button>
                     </div> */}
-                    <div id="exportOutputContainer" hidden className="text-center">
-                        <textarea 
-                        disabled
-                        tabIndex={-1}
-                        id="output"
-                        className="w-full h-24 mt-2 border border-gray-400 rounded text-black bg-white select-none" 
-                        placeholder="Export will appear here...">
-                        </textarea>
-                        <div className="flex gap-4 justify-center text-black">
-                            <button id='hideOutput' type="button" className="cursor-pointer text-center text-decoration underline">Hide Export Output</button>
-                            <button id='copyOutput' type="button" className="cursor-pointer text-center text-decoration underline">Copy Output</button>
-                        </div>
-                    </div>
+                    
+                    <ExportTextArea />
+
                     <div id="importInputContainer" hidden className="text-center">
                         <textarea 
                         tabIndex={-1}
