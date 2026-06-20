@@ -13,6 +13,7 @@ import ImportContainer from "@/app/components/editor/import/ImportContainer";
 import ExportContainer from "@/app/components/editor/export/ExportContainer";
 import ExportTextArea from "@/app/components/editor/export/ExportTextArea";
 import InputString from "@/app/components/editor/InputString";
+import AlphabetInput from "@/app/components/editor/alphabet/AlphabetInput";
 
 
 function DFAPageContent() {
@@ -179,20 +180,8 @@ function DFAPageContent() {
                             <label id="alphabetLabel" htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
                                 Alphabet: {"{0,1}"}
                             </label>
-                            <input
-                                id="alphabet"
-                                type="text"
-                                placeholder="Enter an alphabet..."
-                                className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                //onChange={(e) => setAlphabetDraft(e.target.value)}
-                                // Loose focus after you press enter
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.currentTarget.blur();
-                                        //setAlphabetInput(alphabetDraft.trim());
-                                    }
-                                }}
-                            />
+                            
+                            <AlphabetInput />
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the DFA to the database only if the user is logged in */}

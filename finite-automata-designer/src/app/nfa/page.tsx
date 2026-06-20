@@ -10,6 +10,7 @@ import ExportContainer from "../components/editor/export/ExportContainer";
 import ExportTextArea from "../components/editor/export/ExportTextArea";
 import ImportTextArea from "../components/editor/import/ImportTextArea";
 import InputString from "../components/editor/InputString";
+import AlphabetInput from "../components/editor/alphabet/AlphabetInput";
 
 
 function NFAPageContent() {
@@ -110,18 +111,8 @@ function NFAPageContent() {
                             <label id="alphabetLabel" htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
                                 Alphabet: {"{0,1}"}
                             </label>
-                            <input
-                                id="alphabet"
-                                type="text"
-                                placeholder="Enter an alphabet..."
-                                className="w-full px-4 py-2 border border-gray-400 rounded shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                // Loose focus after you press enter
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.currentTarget.blur();
-                                    }
-                                }}
-                            />
+                            
+                            <AlphabetInput />
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Run button to run the NFA with the given input string */}
