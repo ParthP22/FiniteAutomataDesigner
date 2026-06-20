@@ -48,33 +48,33 @@ export default function ImportContainer(){
                         className="absolute mt-2 w-40 rounded-md bg-gray-700 shadow-lg z-20"
                     >
                         <button
-                        id="svgImportBtn"
-                        type="button"
-                        onClick={() => {
-                            if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
-                            setImportOpen(false);
-                        }}
-                        className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
+                            id="svgImportBtn"
+                            type="button"
+                            onClick={() => {
+                                if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
+                                setImportOpen(false);
+                            }}
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                         >
-                        Import as SVG
+                            Import as SVG
                         </button>
                         <button
-                        id="latexImportBtn"
-                        type="button"
-                        onClick={() => {
-                            if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
-                            setImportOpen(false);
-                        }}
-                        className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
+                            id="latexImportBtn"
+                            type="button"
+                            onClick={() => {
+                                if (importMenuRef.current) toggle_visiblity(importMenuRef.current);
+                                setImportOpen(false);
+                            }}
+                            className="block w-full px-4 py-2 text-left text-white hover:bg-gray-600"
                         >
-                        Import as LaTeX
+                            Import as LaTeX
                         </button>
                     </div>
                 </div>
                 <button 
-                id="confirmImport"
-                className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md hover:bg-black transition" 
-                hidden
+                    id="confirmImport"
+                    className="flex justify-center gap-x-1.5 rounded-md bg-gray-700 text-white px-2 py-1 text-md hover:bg-black transition" 
+                    hidden
                 >
                     Draw Import
                 </button>
