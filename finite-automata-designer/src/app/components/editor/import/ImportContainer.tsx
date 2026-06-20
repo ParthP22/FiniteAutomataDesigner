@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { toggle_visiblity } from "../../../../public/scripts/canvasUtil/canvasUtil";
+import { toggle_visiblity } from "../../../../../public/scripts/canvasUtil/canvasUtil";
 
 
 export default function ImportContainer(){

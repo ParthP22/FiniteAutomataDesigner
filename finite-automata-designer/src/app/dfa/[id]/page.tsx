@@ -9,8 +9,8 @@ import { getAutomaton } from "@/lib/automata/queries";
 import { SaveProjectModal } from "@/app/components/projects/SaveProjectModal";
 import Instructions from "@/app/components/editor/Instructions";
 import AutomataHeader from "@/app/components/editor/AutomataHeader";
-import ImportContainer from "@/app/components/editor/ImportContainer";
-import ExportContainer from "@/app/components/editor/ExportContainer";
+import ImportContainer from "@/app/components/editor/import/ImportContainer";
+import ExportContainer from "@/app/components/editor/export/ExportContainer";
 
 
 function DFAPageContent() {

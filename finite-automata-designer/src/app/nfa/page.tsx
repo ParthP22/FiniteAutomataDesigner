@@ -5,8 +5,8 @@ import { useEffect, useState, Suspense } from "react";
 // import { useSearchParams } from "next/navigation";
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
-import ImportContainer from "../components/editor/ImportContainer";
-import ExportContainer from "../components/editor/ExportContainer";
+import ImportContainer from "../components/editor/import/ImportContainer";
+import ExportContainer from "../components/editor/export/ExportContainer";
 
 
 function NFAPageContent() {

@@ -8,8 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
-import ImportContainer from "../components/editor/ImportContainer";
-import ExportContainer from "../components/editor/ExportContainer";
+import ImportContainer from "../components/editor/import/ImportContainer";
+import ExportContainer from "../components/editor/export/ExportContainer";
 
 
 function DFAPageContent() {
