@@ -12,6 +12,7 @@ import ImportTextArea from "../components/editor/import/ImportTextArea";
 import InputString from "../components/editor/InputString";
 import AlphabetInput from "../components/editor/alphabet/AlphabetInput";
 import AlphabetLabel from "../components/editor/alphabet/AlphabetLabel";
+import RunButton from "../components/editor/RunButton";
 
 
 function NFAPageContent() {
@@ -106,13 +107,10 @@ function NFAPageContent() {
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Run button to run the NFA with the given input string */}
-                            <button
-                                id="nfaRunBtn"
-                                type="button"
-                                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
-                            >
-                                Run
-                            </button>
+                            <RunButton
+                                type={"NFA"}
+                            />
+                            
                             {/* My Projects button to open the projects page */}
                             <Link
                                 href="/projects"
