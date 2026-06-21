@@ -17,6 +17,7 @@ import AlphabetInput from "@/app/components/editor/alphabet/AlphabetInput";
 import AlphabetLabel from "@/app/components/editor/alphabet/AlphabetLabel";
 import RunButton from "@/app/components/editor/RunButton";
 import ProjectsButton from "@/app/components/editor/ProjectsButton";
+import ClearCanvasButton from "@/app/components/editor/ClearCanvasButton";
 
 
 function DFAPageContent() {
@@ -200,19 +201,12 @@ function DFAPageContent() {
 
                             {/* My Projects button to open the projects page that will list all of the users project when logged in */}
                             <ProjectsButton />
-                            
+
                         </div>
                     </div>
                     {/* Clear Canvas parent container */}
                     <div>
-                        <div className="mt-4 flex justify-center">
-                            <button
-                                id="clearCanvas"
-                                type="button"
-                                className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-500 transition">
-                                Clear Canvas
-                            </button>
-                        </div>
+                        <ClearCanvasButton />
                     </div>
                 </div>
             </div>
