@@ -1,5 +1,5 @@
 'use client';
-import Link from "next/link";
+
 import Script from 'next/script';
 import { useEffect, useState, Suspense } from "react";
 // import { useSearchParams } from "next/navigation";
@@ -15,6 +15,7 @@ import AlphabetLabel from "../components/editor/alphabet/AlphabetLabel";
 import RunButton from "../components/editor/RunButton";
 import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
+import BackButton from "../components/editor/BackButton";
 
 
 function NFAPageContent() {
@@ -55,24 +56,27 @@ function NFAPageContent() {
         <AutomataHeader
             title={title}
         />
+
         <div className="flex w-full">
             {/* Back Button + Instructions parent div*/}
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
                 {/* Back Button to return to Home Page */}
-                <Link href="/" className="px-6 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
-                    ← Back
-                </Link>
+                <BackButton />
+
                 <Instructions
                     type={"NFA"}
                 />
+
             </div>
             {/* Canvas parent div*/}
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
                     <canvas id="NFACanvas" width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
+
                     {/* Exporting dropdowns container*/}
                     <ExportContainer />
+
                     {/* Importing dropdowns container*/}
                     <ImportContainer />
 

@@ -1,5 +1,5 @@
 'use client';
-import Link from "next/link";
+
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import RunButton from "@/app/components/editor/RunButton";
 import ProjectsButton from "@/app/components/editor/ProjectsButton";
 import ClearCanvasButton from "@/app/components/editor/ClearCanvasButton";
 import ImportTextArea from "@/app/components/editor/import/ImportTextArea";
+import BackButton from "@/app/components/editor/BackButton";
 
 
 function DFAPageContent() {
@@ -123,18 +124,19 @@ function DFAPageContent() {
             title={!name ? "Deterministic Finite Automata" : ("DFA: " + name)}
             description={description}
         />
+
         <div
             className="flex w-full"
         >
             {/* Back Button + Instructions parent div*/}
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
                 {/* Back Button to return to Home Page */}
-                <Link href="/" className="px-6 py-3 bg-gray-700 text-white rounded hover:bg-black transition">
-                    ← Back
-                </Link>
+                <BackButton />
+
                 <Instructions 
                     type={"DFA"}
                 />
+                
             </div>
             {/* Canvas parent div*/}
             <div>
