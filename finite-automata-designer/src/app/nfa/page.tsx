@@ -68,6 +68,7 @@ function NFAPageContent() {
                 />
 
             </div>
+            
             {/* Canvas parent div*/}
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
@@ -80,15 +81,6 @@ function NFAPageContent() {
                     {/* Importing dropdowns container*/}
                     <ImportContainer />
 
-                    {/*Leave for now in case we turn back the UI for importing and exporting*/}
-
-                    {/* <div className="text-center text-black mt-2">
-                        Export as: <button id='svgExportBtn' type="button" className="cursor-pointer">SVG</button>
-                        {' | '} <button id='latexExportBtn' type="button" className="cursor-pointer">LaTeX</button>
-                        <br />
-                        Import as: <button id='svgImportBtn' type="button" className="cursor-pointer">SVG</button>
-                        {' | '} <button id='latexImportBtn' type="button" className="cursor-pointer">LaTeX</button>
-                    </div> */}
 
                     <ExportTextArea />
 
