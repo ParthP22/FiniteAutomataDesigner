@@ -83,32 +83,34 @@ function DFAPageContent() {
         <div
             className="flex w-full"
         >
-            {/* Back Button + Instructions parent div*/}
+            {/* Back Button + Instructions parent div */}
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
                 {/* Back Button to return to Home Page */}
                 <BackButton />
 
+                {/* Instructions dropdown */}
                 <Instructions 
                     type={"DFA"}
                 />
 
             </div>
-            
-            {/* Canvas parent div*/}
+
+            {/* Canvas parent div */}
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
                     <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
-                    {/* Exporting dropdowns container*/}
+                    {/* Exporting dropdowns container */}
                     <ExportContainer />
 
-                    {/* Importing dropdowns container*/}
+                    {/* Importing dropdowns container */}
                     <ImportContainer />
                     
-                    
+                    {/* Exporting text area */}
                     <ExportTextArea />
 
+                    {/* Importing text area */}
                     <ImportTextArea />
                 
                 </div>
@@ -121,11 +123,13 @@ function DFAPageContent() {
                         <div id='inputDiv' className="flex flex-col self-center w-full max-w-md text-black">
                             {/* Textbox for inputting strings */}
                             <InputString />
-
+                            
+                            {/* Alphabet display */}
                             <AlphabetLabel 
                                 hasMultiCharAlphabet={hasMultiCharAlphabet}
                             />
                             
+                            {/* Input box for new alphabet */}
                             <AlphabetInput />
                             
                         </div>

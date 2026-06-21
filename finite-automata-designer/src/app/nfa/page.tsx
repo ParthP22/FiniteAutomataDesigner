@@ -62,13 +62,14 @@ function NFAPageContent() {
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
                 {/* Back Button to return to Home Page */}
                 <BackButton />
-
+                
+                {/* Instructions dropdown */}
                 <Instructions
                     type={"NFA"}
                 />
 
             </div>
-            
+
             {/* Canvas parent div*/}
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
@@ -81,9 +82,10 @@ function NFAPageContent() {
                     {/* Importing dropdowns container*/}
                     <ImportContainer />
 
-
+                    {/* Exporting text area */}
                     <ExportTextArea />
 
+                    {/* Importing text area */}
                     <ImportTextArea />
 
                 </div>
@@ -97,10 +99,12 @@ function NFAPageContent() {
                             {/* Textbox for inputting strings */}
                             <InputString />
                             
+                            {/* Alphabet display */}
                             <AlphabetLabel
                                 hasMultiCharAlphabet={hasMultiCharAlphabet}
                             />
                             
+                            {/* Input box for new alphabet */}
                             <AlphabetInput />
                         </div>
                         <div className="flex flex-wrap self-center gap-5">

@@ -134,12 +134,13 @@ function DFAPageContent() {
                 {/* Back Button to return to Home Page */}
                 <BackButton />
 
+                {/* Instructions dropdown */}
                 <Instructions 
                     type={"DFA"}
                 />
 
             </div>
-            
+
             {/* Canvas parent div*/}
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
@@ -152,9 +153,10 @@ function DFAPageContent() {
                     {/* Importing dropdowns container*/}
                     <ImportContainer />
 
-                    
+                    {/* Exporting text area */}
                     <ExportTextArea />
 
+                    {/* Importing text area */}
                     <ImportTextArea />
 
                 </div>
@@ -168,10 +170,12 @@ function DFAPageContent() {
                             {/* Textbox for inputting strings */}
                             <InputString />
 
+                            {/* Alphabet display */}
                             <AlphabetLabel 
                                 hasMultiCharAlphabet={hasMultiCharAlphabet}
                             />
                             
+                            {/* Input box for new alphabet */}
                             <AlphabetInput />
 
                         </div>
