@@ -16,6 +16,7 @@ import InputString from "@/app/components/editor/InputString";
 import AlphabetInput from "@/app/components/editor/alphabet/AlphabetInput";
 import AlphabetLabel from "@/app/components/editor/alphabet/AlphabetLabel";
 import RunButton from "@/app/components/editor/RunButton";
+import ProjectsButton from "@/app/components/editor/ProjectsButton";
 
 
 function DFAPageContent() {
@@ -198,12 +199,8 @@ function DFAPageContent() {
                             />
 
                             {/* My Projects button to open the projects page that will list all of the users project when logged in */}
-                            <Link
-                                href="/projects"
-                                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
-                                >
-                                My Projects
-                            </Link>
+                            <ProjectsButton />
+                            
                         </div>
                     </div>
                     {/* Clear Canvas parent container */}

@@ -13,6 +13,7 @@ import InputString from "../components/editor/InputString";
 import AlphabetInput from "../components/editor/alphabet/AlphabetInput";
 import AlphabetLabel from "../components/editor/alphabet/AlphabetLabel";
 import RunButton from "../components/editor/RunButton";
+import ProjectsButton from "../components/editor/ProjectsButton";
 
 
 function NFAPageContent() {
@@ -110,14 +111,10 @@ function NFAPageContent() {
                             <RunButton
                                 type={"NFA"}
                             />
-                            
+
                             {/* My Projects button to open the projects page */}
-                            <Link
-                                href="/projects"
-                                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
-                            >
-                                My Projects
-                            </Link>
+                            <ProjectsButton />
+                            
                         </div>
                     </div>
                     {/* Clear Canvas parent container */}
