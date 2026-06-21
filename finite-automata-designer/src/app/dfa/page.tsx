@@ -184,14 +184,6 @@ function DFAPageContent() {
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the DFA to the database only if the user is logged in */}
-                            {/* <button
-                                type="button"
-                                onClick={() => setIsSaving(true)}
-                                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
-                            >
-                                Save
-                            </button> */}
-
                             <SaveActions
                                 onSave={() => setIsSaving(true)}
                             />
