@@ -20,6 +20,7 @@ import ProjectsButton from "@/app/components/editor/ProjectsButton";
 import ClearCanvasButton from "@/app/components/editor/ClearCanvasButton";
 import ImportTextArea from "@/app/components/editor/import/ImportTextArea";
 import BackButton from "@/app/components/editor/BackButton";
+import SaveActions from '@/app/components/editor/SaveActions';
 
 
 function DFAPageContent() {
@@ -136,7 +137,7 @@ function DFAPageContent() {
                 <Instructions 
                     type={"DFA"}
                 />
-                
+
             </div>
             {/* Canvas parent div*/}
             <div>
@@ -184,7 +185,7 @@ function DFAPageContent() {
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the DFA to the database only if the user is logged in */}
-                            <button
+                            {/* <button
                                 type="button"
                                 onClick={handleSave}
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
@@ -198,7 +199,12 @@ function DFAPageContent() {
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
                             >
                                 Save As New Project
-                            </button>
+                            </button> */}
+
+                            <SaveActions
+                                onSave={handleSave}
+                                onSaveAs={() => setIsSaving(true)}
+                            />
                     
                             {/* Run button to run the DFA with the given input string */}
                             <RunButton 
