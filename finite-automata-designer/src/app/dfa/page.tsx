@@ -2,10 +2,9 @@
 import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
 import { saveAutomaton } from "@/lib/automata/mutations";
-import { createClient } from "@/lib/supabase/client";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 
 
@@ -17,13 +16,10 @@ function DFAPageContent() {
     const [exportOpen, setExportOpen] = useState(false);
     const [importOpen, setImportOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const searchParams = useSearchParams();
-    const id = searchParams?.get("id");
     const router = useRouter();
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
-    const pendingAutomaton = useRef<unknown>(null);
     const exportMenuRef = useRef<HTMLDivElement>(null);
     const importMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,44 +45,6 @@ function DFAPageContent() {
 
     }, [alphabetInput]);
 
-    useEffect(() => {
-        // Clear stale pending data whenever the target id changes
-        pendingAutomaton.current = null;
-
-        async function loadAutomaton(){
-            if(!id){
-                return;
-            }
-
-            const supabase = createClient();
-
-            const { data, error } = await supabase
-                .from("finite_automata")
-                .select("automaton")
-                .eq("id",id)
-                .single();
-
-            if(error){
-                console.error("Error loading automaton: ", error);
-                return;
-            }
-
-            if(!data){
-                console.log("No data");
-                return;
-            }
-
-            if (typeof window.loadDFAIntoCanvas === 'function') {
-                // Canvas script is already loaded — call directly.
-                window.loadDFAIntoCanvas(data.automaton);
-            } else {
-                // Canvas script hasn't finished loading yet (production race).
-                // Store the data so the onReady callback can deliver it once ready.
-                pendingAutomaton.current = data.automaton;
-            }
-        }
-        loadAutomaton();
-    },[id]);
 
     async function handleSave(name: string, description: string){
 
@@ -445,15 +403,6 @@ function DFAPageContent() {
             type="module"
             strategy="afterInteractive"
             crossOrigin="anonymous"
-            onReady={() => {
-                // Fires when the script first loads AND after every subsequent
-                // component mount where the script is already cached.
-                // Delivers any automaton data that arrived before the script was ready.
-                if (pendingAutomaton.current !== null) {
-                    window.loadDFAIntoCanvas(pendingAutomaton.current);
-                    pendingAutomaton.current = null;
-                }
-            }}
         />
       </main>
 
