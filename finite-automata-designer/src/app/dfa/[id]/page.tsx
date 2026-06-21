@@ -18,6 +18,7 @@ import AlphabetLabel from "@/app/components/editor/alphabet/AlphabetLabel";
 import RunButton from "@/app/components/editor/RunButton";
 import ProjectsButton from "@/app/components/editor/ProjectsButton";
 import ClearCanvasButton from "@/app/components/editor/ClearCanvasButton";
+import ImportTextArea from "@/app/components/editor/import/ImportTextArea";
 
 
 function DFAPageContent() {
@@ -140,8 +141,10 @@ function DFAPageContent() {
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
                     <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
+
                     {/* Exporting dropdowns container*/}
                     <ExportContainer />
+
                     {/* Importing dropdowns container*/}
                     <ImportContainer />
                     
@@ -157,8 +160,8 @@ function DFAPageContent() {
                     
                     <ExportTextArea />
 
-                    
-                
+                    <ImportTextArea />
+
                 </div>
             </div>
                 
@@ -175,6 +178,7 @@ function DFAPageContent() {
                             />
                             
                             <AlphabetInput />
+
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the DFA to the database only if the user is logged in */}
