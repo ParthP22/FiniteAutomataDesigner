@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { saveAutomaton } from "@/lib/automata/mutations";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
@@ -32,6 +32,10 @@ function DFAPageContent() {
     const automatonId = searchParams?.get("id") as string;
 
     const title: string = "Deterministic Finite Automata"
+
+    // Holds automaton data fetched before the canvas script has finished loading.
+    // onReady on the <Script> tag drains this once the script is ready.
+    const pendingAutomaton = useRef<unknown>(null);
 
     useEffect(() => {
 
