@@ -60,6 +60,15 @@ initFsmCanvas({
   setAlphabet,
   getValidator: () => transitionLabelInputValidator,
   createImporter: (circs, arrs, data, draw) => new Importer(circs, arrs, data, draw),
+  onCanvasReady: (draw) => {
+    drawRef = draw;
+
+    if(pendingNFA){
+      loadSerializedNFA(pendingNFA);
+      pendingNFA = null;
+      draw();
+    }
+  }
 });
 
 function loadSerializedNFA(data: SerializedNFA){
