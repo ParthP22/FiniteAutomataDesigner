@@ -2,7 +2,7 @@
 
 import Script from 'next/script';
 import { useEffect, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { saveAutomaton } from "@/lib/automata/mutations";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 import Instructions from "../components/editor/Instructions";
@@ -26,7 +26,10 @@ function DFAPageContent() {
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const automatonId = searchParams?.get("id") as string;
 
     const title: string = "Deterministic Finite Automata"
 
