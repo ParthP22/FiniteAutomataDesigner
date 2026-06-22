@@ -28,6 +28,17 @@ import { deserializeNFA } from "@/lib/nfa/deserializeNFA";
 
 let drawRef: (() => void) | null = null;
 
+let pendingNFA: SerializedNFA | null = null;
+
+window.loadNFAIntoCanvas = function(data: SerializedNFA){
+  if(!drawRef){
+    pendingNFA = data;
+    return;
+  }
+
+  loadSerializedNFA(data);
+}
+
 initFsmCanvas({
   automatonLabel: "NFA",
   canvasId: "NFACanvas",
