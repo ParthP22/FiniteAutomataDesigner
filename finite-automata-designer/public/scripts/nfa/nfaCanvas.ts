@@ -21,9 +21,10 @@ import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../s
 import { Importer } from "./importing/importer";
 import { clearAutomaton, initFsmCanvas } from "../canvasUtil/fsmCanvas";
 import { SerializedNFA } from "@/lib/nfa/types";
+import { serializeNFA } from "@/lib/nfa/serializeNFA";
 import { circles } from "../Shapes/Circle";
 import { arrows } from "../Shapes/Arrow";
-import { setStartState } from "../Shapes/EntryArrow";
+import { setStartState, startState } from "../Shapes/EntryArrow";
 import { deserializeNFA } from "@/lib/nfa/deserializeNFA";
 
 let drawRef: (() => void) | null = null;
@@ -37,6 +38,15 @@ window.loadNFAIntoCanvas = function(data: SerializedNFA){
   }
 
   loadSerializedNFA(data);
+}
+
+window.exportNFA = function(){
+  return serializeNFA(
+    alphabet,
+    circles,
+    arrows,
+    startState,
+  );
 }
 
 initFsmCanvas({
