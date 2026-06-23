@@ -10,7 +10,7 @@ interface SaveProjectModalProps{
     onSave: (name: string, description: string) => Promise<void>;
 }
 
-export function SaveProjectModal({
+export default function SaveProjectModal({
     isOpen,
     initialName = null, 
     initialDescription = null,
