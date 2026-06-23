@@ -48,6 +48,8 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
 
+    const title: string = type === "DFA" ? "Deterministic Finite Automata" : "Non-Deterministic Finite Automata";
+
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
     const pendingAutomaton = useRef<SerializedFA | null>(null);
@@ -135,7 +137,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* FA title at the top */}
         <AutomataHeader
-            title={!name ? "Deterministic Finite Automata" : (type.toUpperCase() + ": " + name)}
+            title={!name ? title : (type.toUpperCase() + ": " + name)}
             description={description}
         />
 
