@@ -216,7 +216,7 @@ function DFAPageContent() {
             initialName={null}
             initialDescription={null}
             onClose={() => setIsSaving(false)}
-            onSave={handleSave}
+            onSave={handleSaveAsNew}
         />
 
         <Script
