@@ -63,30 +63,30 @@ function DFAPageContent() {
     }, [alphabetInput]);
 
     useEffect(() => {
-            // Clear stale pending data whenever the target id changes
-            pendingAutomaton.current = null;
-    
-            async function loadAutomaton(){
-                if(!automatonId){
-                    return;
-                }
-    
-                const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
-                setName(finiteAutomatonData.name);
-                setDescription(finiteAutomatonData.description);
-    
-                if (typeof window.loadDFAIntoCanvas === 'function') {
-                    // Canvas script is already loaded — call directly.
-                    window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
-                } else {
-                    // Canvas script hasn't finished loading yet (production race).
-                    // Store the data so the onReady callback can deliver it once ready.
-                    pendingAutomaton.current = finiteAutomatonData.automaton;
-                }
+        // Clear stale pending data whenever the target id changes
+        pendingAutomaton.current = null;
+
+        async function loadAutomaton(){
+            if(!automatonId){
+                return;
             }
-    
-            loadAutomaton();
-        },[automatonId]);
+
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
+
+            if (typeof window.loadDFAIntoCanvas === 'function') {
+                // Canvas script is already loaded — call directly.
+                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+            } else {
+                // Canvas script hasn't finished loading yet (production race).
+                // Store the data so the onReady callback can deliver it once ready.
+                pendingAutomaton.current = finiteAutomatonData.automaton;
+            }
+        }
+
+        loadAutomaton();
+    },[automatonId]);
 
 
     async function handleSave(name: string, description: string){
@@ -101,7 +101,7 @@ function DFAPageContent() {
                 (description.trim() === "") ? null : description.trim(),
             );
             alert("Automaton saved!");
-            router.push(`/dfa/${finiteAutomataData.id}`);
+            router.push(`/dfa?id=${finiteAutomataData.id}`);
         }
         catch (error) {
             console.error(error);
