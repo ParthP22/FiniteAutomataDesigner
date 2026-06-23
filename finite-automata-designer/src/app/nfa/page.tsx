@@ -21,6 +21,7 @@ import { SerializedNFA } from '@/lib/nfa/types';
 import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
 import { saveAutomaton, updateAutomaton } from '@/lib/automata/mutations';
+import SaveActions from '../components/editor/SaveActions';
 
 
 function NFAPageContent() {
@@ -86,6 +87,7 @@ function NFAPageContent() {
 
         loadAutomaton();
     },[automatonId]);
+
 
     async function handleSaveAsNew(newName: string, newDescription: string){
     
@@ -176,6 +178,18 @@ function NFAPageContent() {
                             <AlphabetInput />
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
+                            {/* Save button to save the DFA to the database only if the user is logged in */}
+                            {!automatonId ? (
+                                <SaveActions
+                                    onSave={() => setIsSaving(true)}
+                                />
+                            ) : ( 
+                                <SaveActions
+                                    onSave={handleSave}
+                                    onSaveAs={() => setIsSaving(true)}
+                                />
+                            )}
+                            
                             {/* Run button to run the NFA with the given input string */}
                             <RunButton
                                 type={"NFA"}
