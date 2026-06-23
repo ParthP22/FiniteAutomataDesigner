@@ -56,7 +56,7 @@ export default function ProjectCard({
                             }
                         `}
                     >
-                        {type}
+                        {type.toUpperCase()}
                     </span>
                 </div>
 
