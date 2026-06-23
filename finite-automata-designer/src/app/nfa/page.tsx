@@ -22,6 +22,7 @@ import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
 import { saveAutomaton, updateAutomaton } from '@/lib/automata/mutations';
 import SaveActions from '../components/editor/SaveActions';
+import { SaveProjectModal } from '../components/projects/SaveProjectModal';
 
 
 function NFAPageContent() {
@@ -207,6 +208,14 @@ function NFAPageContent() {
                 </div>
             </div>
         </div>
+
+        <SaveProjectModal 
+            isOpen={isSaving}
+            initialName={null}
+            initialDescription={null}
+            onClose={() => setIsSaving(false)}
+            onSave={handleSaveAsNew}
+        />
 
         <Script
             src="/scripts/nfa/nfaCanvas.js"
