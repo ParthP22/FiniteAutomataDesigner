@@ -16,6 +16,7 @@ import RunButton from "../components/editor/RunButton";
 import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
+import { useRouter } from 'next/navigation';
 
 
 function NFAPageContent() {
@@ -24,6 +25,9 @@ function NFAPageContent() {
     const [alphabetInput, setAlphabetInput] = useState("");
     const [name, setName] = useState<string | null>(null);
     const [description, setDescription] = useState<string | null>(null);
+
+    const router = useRouter();
+
     // const searchParams = useSearchParams();
     // const id = searchParams?.get("id");
 
