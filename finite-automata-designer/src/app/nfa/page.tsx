@@ -91,7 +91,8 @@ function NFAPageContent() {
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* NFA title at the top */}
         <AutomataHeader
-            title={title}
+            title={!name ? "Non-Deterministic Finite Automata" : ("NFA: " + name)}
+            description={description}
         />
 
         <div className="flex w-full">
