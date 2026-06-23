@@ -2,7 +2,7 @@
 
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
-// import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
 import ImportContainer from "../components/editor/import/ImportContainer";
@@ -28,10 +28,8 @@ function NFAPageContent() {
     const [description, setDescription] = useState<string | null>(null);
 
     const router = useRouter();
-
-
-    // const searchParams = useSearchParams();
-    // const id = searchParams?.get("id");
+    const searchParams = useSearchParams();
+    const automatonId = searchParams?.get("id") as string;
 
     const title: string = "Non-deterministic Finite Automata";
 
