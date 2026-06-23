@@ -84,9 +84,9 @@ export default function AutomataEditor(){
             setName(finiteAutomatonData.name);
             setDescription(finiteAutomatonData.description);
 
-            if (typeof window.loadDFAIntoCanvas === 'function') {
+            if (typeof window.loadFAIntoCanvas === 'function') {
                 // Canvas script is already loaded — call directly.
-                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+                window.loadFAIntoCanvas(finiteAutomatonData.automaton);
             } else {
                 // Canvas script hasn't finished loading yet (production race).
                 // Store the data so the onReady callback can deliver it once ready.
@@ -100,7 +100,7 @@ export default function AutomataEditor(){
 
     async function handleSaveAsNew(newName: string, newDescription: string){
     
-        const serialized = window.exportDFA();
+        const serialized = window.exportFA();
         console.log(serialized);
 
         try{
@@ -115,7 +115,7 @@ export default function AutomataEditor(){
     }
 
     async function handleSave(){
-        const serialized = window.exportDFA();
+        const serialized = window.exportFA();
         console.log(serialized);
 
         try{
