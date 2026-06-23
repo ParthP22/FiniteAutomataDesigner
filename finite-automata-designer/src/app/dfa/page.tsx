@@ -3,7 +3,7 @@
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { saveAutomaton } from "@/lib/automata/mutations";
+import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
@@ -89,23 +89,33 @@ function DFAPageContent() {
     },[automatonId]);
 
 
-    async function handleSave(name: string, description: string){
-
+    async function handleSaveAsNew(newName: string, newDescription: string){
+    
         const serialized = window.exportDFA();
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(
-                serialized, 
-                (name.trim() === "") ? null : name.trim(), 
-                (description.trim() === "") ? null : description.trim(),
-            );
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
             alert("Automaton saved!");
-            router.push(`/dfa?id=${finiteAutomataData.id}`);
+            router.push(`/dfa/${finiteAutomataData.id}`);
         }
         catch (error) {
             console.error(error);
             alert("Save failed: " + error);
+        }
+    }
+
+    async function handleSave(){
+        const serialized = window.exportDFA();
+        console.log(serialized);
+
+        try{
+            await updateAutomaton(automatonId, serialized);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
         }
     }
 
