@@ -20,20 +20,20 @@ import { useRouter } from 'next/navigation';
 import { SerializedNFA } from '@/lib/nfa/types';
 import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
+import { saveAutomaton, updateAutomaton } from '@/lib/automata/mutations';
 
 
 function NFAPageContent() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState<string | null>(null);
     const [description, setDescription] = useState<string | null>(null);
 
     const router = useRouter();
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
-
-    const title: string = "Non-deterministic Finite Automata";
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
@@ -86,6 +86,36 @@ function NFAPageContent() {
 
         loadAutomaton();
     },[automatonId]);
+
+    async function handleSaveAsNew(newName: string, newDescription: string){
+    
+        const serialized = window.exportDFA();
+        console.log(serialized);
+
+        try{
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
+            alert("Automaton saved!");
+            router.push(`/nfa?id=${finiteAutomataData.id}`);
+        }
+        catch (error) {
+            console.error(error);
+            alert("Save failed: " + error);
+        }
+    }
+
+    async function handleSave(){
+        const serialized = window.exportDFA();
+        console.log(serialized);
+
+        try{
+            await updateAutomaton(automatonId, serialized);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
+        }
+    }
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
