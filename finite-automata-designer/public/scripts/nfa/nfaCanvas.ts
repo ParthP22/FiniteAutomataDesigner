@@ -20,18 +20,18 @@ import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
 import { Importer } from "./importing/importer";
 import { clearAutomaton, initFsmCanvas } from "../canvasUtil/fsmCanvas";
-import { SerializedNFA } from "@/lib/nfa/types";
-import { serializeNFA } from "@/lib/nfa/serializeNFA";
+import { SerializedFA } from "@/lib/shared/types";
+import { serializeFA } from "@/lib/shared/serializer/serializeFA";
 import { circles } from "../Shapes/Circle";
 import { arrows } from "../Shapes/Arrow";
 import { setStartState, startState } from "../Shapes/EntryArrow";
-import { deserializeNFA } from "@/lib/nfa/deserializeNFA";
+import { deserializeFA } from "@/lib/shared/deserializer/deserializeFA";
 
 let drawRef: (() => void) | null = null;
 
-let pendingNFA: SerializedNFA | null = null;
+let pendingNFA: SerializedFA | null = null;
 
-window.loadNFAIntoCanvas = function(data: SerializedNFA){
+window.loadFAIntoCanvas = function(data: SerializedFA){
   if(!drawRef){
     pendingNFA = data;
     return;
@@ -40,8 +40,8 @@ window.loadNFAIntoCanvas = function(data: SerializedNFA){
   loadSerializedNFA(data);
 }
 
-window.exportNFA = function(){
-  return serializeNFA(
+window.exportFA = function(){
+  return serializeFA(
     alphabet,
     circles,
     arrows,
@@ -71,12 +71,12 @@ initFsmCanvas({
   }
 });
 
-function loadSerializedNFA(data: SerializedNFA){
+function loadSerializedNFA(data: SerializedFA){
   const canvas = document.getElementById("NFACanvas") as HTMLCanvasElement;
 
   clearAutomaton(canvas);
 
-  const deserialized = deserializeNFA(data);
+  const deserialized = deserializeFA(data);
 
   circles.push(...deserialized.circles);
 
