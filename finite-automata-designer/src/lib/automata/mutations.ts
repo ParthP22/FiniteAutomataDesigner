@@ -1,8 +1,14 @@
 import { SerializedDFA } from "../dfa/types";
+import { SerializedNFA } from "../nfa/types";
 import { CreateAutomaton, FiniteAutomaton } from "../shared/types";
 import { createClient } from "../supabase/client";
 
-export async function saveAutomaton(serializedDFA: SerializedDFA, name: string | null, description: string | null){
+export async function saveAutomaton(
+    serializedFA: SerializedDFA | SerializedNFA, 
+    name: string | null, 
+    description: string | null, 
+    type: "DFA" | "NFA"
+){
     const supabase = createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -17,8 +23,8 @@ export async function saveAutomaton(serializedDFA: SerializedDFA, name: string |
             user_id: user.id,
             name: name,
             description: description,
-            type: "DFA",
-            automaton: serializedDFA
+            type: type,
+            automaton: serializedFA
         } as CreateAutomaton)
         .select()
         .single();
@@ -31,7 +37,7 @@ export async function saveAutomaton(serializedDFA: SerializedDFA, name: string |
     
 }
 
-export async function updateAutomaton(automatonId: string, serializedDFA: SerializedDFA){
+export async function updateAutomaton(automatonId: string, serializedFA: SerializedDFA | SerializedNFA){
     const supabase = createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -43,7 +49,7 @@ export async function updateAutomaton(automatonId: string, serializedDFA: Serial
     const { data, error } = await supabase
         .from("finite_automata")
         .update({
-            automaton: serializedDFA,
+            automaton: serializedFA,
         })
         .eq("id", automatonId);
 
