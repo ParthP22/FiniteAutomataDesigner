@@ -76,9 +76,9 @@ function NFAPageContent() {
             setName(finiteAutomatonData.name);
             setDescription(finiteAutomatonData.description);
 
-            if (typeof window.loadDFAIntoCanvas === 'function') {
+            if (typeof window.loadNFAIntoCanvas === 'function') {
                 // Canvas script is already loaded — call directly.
-                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+                window.loadNFAIntoCanvas(finiteAutomatonData.automaton);
             } else {
                 // Canvas script hasn't finished loading yet (production race).
                 // Store the data so the onReady callback can deliver it once ready.
@@ -92,7 +92,7 @@ function NFAPageContent() {
 
     async function handleSaveAsNew(newName: string, newDescription: string){
     
-        const serialized = window.exportDFA();
+        const serialized = window.exportNFA();
         console.log(serialized);
 
         try{
@@ -107,7 +107,7 @@ function NFAPageContent() {
     }
 
     async function handleSave(){
-        const serialized = window.exportDFA();
+        const serialized = window.exportNFA();
         console.log(serialized);
 
         try{
@@ -179,7 +179,7 @@ function NFAPageContent() {
                             <AlphabetInput />
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
-                            {/* Save button to save the DFA to the database only if the user is logged in */}
+                            {/* Save button to save the NFA to the database only if the user is logged in */}
                             {!automatonId ? (
                                 <SaveActions
                                     onSave={() => setIsSaving(true)}
