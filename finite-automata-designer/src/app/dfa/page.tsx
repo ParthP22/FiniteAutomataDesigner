@@ -19,6 +19,9 @@ import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
 import SaveActions from '../components/editor/SaveActions';
+import { SerializedDFA } from '@/lib/dfa/types';
+import { FiniteAutomaton } from '@/lib/shared/types';
+import { getAutomaton } from '@/lib/automata/queries';
 
 
 function DFAPageContent() {
@@ -26,6 +29,8 @@ function DFAPageContent() {
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+    const [name, setName] = useState<string | null>(null);
+    const [description, setDescription] = useState<string | null>(null);
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -35,7 +40,7 @@ function DFAPageContent() {
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
-    const pendingAutomaton = useRef<unknown>(null);
+    const pendingAutomaton = useRef<SerializedDFA | null>(null);
 
     useEffect(() => {
 
@@ -58,6 +63,32 @@ function DFAPageContent() {
         }
 
     }, [alphabetInput]);
+
+    useEffect(() => {
+            // Clear stale pending data whenever the target id changes
+            pendingAutomaton.current = null;
+    
+            async function loadAutomaton(){
+                if(!automatonId){
+                    return;
+                }
+    
+                const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+                setName(finiteAutomatonData.name);
+                setDescription(finiteAutomatonData.description);
+    
+                if (typeof window.loadDFAIntoCanvas === 'function') {
+                    // Canvas script is already loaded — call directly.
+                    window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+                } else {
+                    // Canvas script hasn't finished loading yet (production race).
+                    // Store the data so the onReady callback can deliver it once ready.
+                    pendingAutomaton.current = finiteAutomatonData.automaton;
+                }
+            }
+    
+            loadAutomaton();
+        },[automatonId]);
 
 
     async function handleSave(name: string, description: string){
