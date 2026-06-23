@@ -68,9 +68,11 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             setHasMultiCharAlphabet(hasMulti);
         }
 
+        // Ex: dfaAlphabetUpdated or nfaAlphabetUpdated, where "type" is either "DFA" or "NFA"
         window.addEventListener(`${type.toLowerCase()}AlphabetUpdated`, handler);
 
         return () => {
+            // Ex: dfaAlphabetUpdated or nfaAlphabetUpdated, where "type" is either "DFA" or "NFA"
             window.removeEventListener(`${type.toLowerCase()}AlphabetUpdated`, handler);
         }
 
@@ -111,6 +113,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         try{
             const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, type.toUpperCase() as "DFA" | "NFA");
             alert("Automaton saved!");
+            // Ex: /dfa?id=123 or /nfa?id=456, where "type" is either "DFA" or "NFA"
             router.push(`/${type.toLowerCase()}?id=${finiteAutomataData.id}`);
         }
         catch (error) {
@@ -160,6 +163,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
+                    {/* Ex: id=dfaCanvas or id=nfaCanvas, where "type" is either "DFA" or "NFA" */}
                     <canvas id={`${type.toLowerCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
                     {/* Exporting dropdowns container */}
@@ -195,7 +199,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                             
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
-                            {/* Save button to save the DFA to the database only if the user is logged in */}
+                            {/* Save button to save the FA to the database only if the user is logged in */}
                             {!automatonId ? (
                                 <SaveActions
                                     onSave={() => setIsSaving(true)}
@@ -207,7 +211,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                                 />
                             )}
                     
-                            {/* Run button to run the DFA with the given input string */}
+                            {/* Run button to run the FA with the given input string */}
                             <RunButton 
                                 type={type.toUpperCase() as "DFA" | "NFA"}
                             />
@@ -234,6 +238,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         />
 
         <Script
+            // Ex: /scripts/dfa/dfaCanvas.js or /scripts/nfa/nfaCanvas.js, where "type" is either "DFA" or "NFA"
             src={`/scripts/${type.toLowerCase()}/${type.toLowerCase()}Canvas.js`}
             type="module"
             strategy="afterInteractive"
