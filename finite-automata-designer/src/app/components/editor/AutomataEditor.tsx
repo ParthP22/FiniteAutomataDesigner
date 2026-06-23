@@ -163,8 +163,8 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
-                    {/* Ex: id=dfaCanvas or id=nfaCanvas, where "type" is either "DFA" or "NFA" */}
-                    <canvas id={`${type.toLowerCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
+                    {/* Ex: id=DFACanvas or id=NFACanvas, where "type" is either "DFA" or "NFA" */}
+                    <canvas id={`${type.toUpperCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
                     {/* Exporting dropdowns container */}
                     <ExportContainer />
