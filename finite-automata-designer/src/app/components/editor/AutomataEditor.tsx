@@ -32,8 +32,11 @@ import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
 import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 
+interface AutomataEditorProps {
+    type: "DFA" | "NFA";
+}
 
-export default function AutomataEditor(){
+export default function AutomataEditor({ type }: AutomataEditorProps){
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
