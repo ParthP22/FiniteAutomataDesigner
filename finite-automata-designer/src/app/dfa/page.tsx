@@ -36,8 +36,6 @@ function DFAPageContent() {
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
 
-    const title: string = "Deterministic Finite Automata"
-
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
     const pendingAutomaton = useRef<SerializedDFA | null>(null);
@@ -115,7 +113,8 @@ function DFAPageContent() {
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* DFA title at the top */}
         <AutomataHeader
-            title={title}
+            title={!name ? "Deterministic Finite Automata" : ("DFA: " + name)}
+            description={description}
         />
 
         <div
