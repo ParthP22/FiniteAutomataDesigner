@@ -22,6 +22,8 @@ function NFAPageContent() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
+    const [name, setName] = useState<string | null>(null);
+    const [description, setDescription] = useState<string | null>(null);
     // const searchParams = useSearchParams();
     // const id = searchParams?.get("id");
 
