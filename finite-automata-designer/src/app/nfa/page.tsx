@@ -96,7 +96,7 @@ function NFAPageContent() {
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, "NFA");
             alert("Automaton saved!");
             router.push(`/nfa?id=${finiteAutomataData.id}`);
         }
