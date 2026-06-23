@@ -1,8 +1,13 @@
 'use client';
 
+{/* NFA Script */}
 import Script from 'next/script';
+
+{/* Hooks */}
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
+{/* Components */}
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
 import ImportContainer from "../components/editor/import/ImportContainer";
@@ -16,13 +21,14 @@ import RunButton from "../components/editor/RunButton";
 import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
-import { useRouter } from 'next/navigation';
+import SaveActions from '../components/editor/SaveActions';
+import SaveProjectModal from "../components/projects/SaveProjectModal";
+
+{/* Database/Serialization */}
 import { SerializedNFA } from '@/lib/nfa/types';
 import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
 import { saveAutomaton, updateAutomaton } from '@/lib/automata/mutations';
-import SaveActions from '../components/editor/SaveActions';
-import { SaveProjectModal } from '../components/projects/SaveProjectModal';
 
 
 function NFAPageContent() {
@@ -128,7 +134,9 @@ function NFAPageContent() {
             description={description}
         />
 
-        <div className="flex w-full">
+        <div 
+            className="flex w-full"
+        >
             {/* Back Button + Instructions parent div*/}
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
                 {/* Back Button to return to Home Page */}
@@ -177,6 +185,7 @@ function NFAPageContent() {
                             
                             {/* Input box for new alphabet */}
                             <AlphabetInput />
+
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the NFA to the database only if the user is logged in */}
