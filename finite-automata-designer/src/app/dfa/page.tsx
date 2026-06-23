@@ -97,7 +97,7 @@ function DFAPageContent() {
         try{
             const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
             alert("Automaton saved!");
-            router.push(`/dfa/${finiteAutomataData.id}`);
+            router.push(`/dfa?id=${finiteAutomataData.id}`);
         }
         catch (error) {
             console.error(error);
