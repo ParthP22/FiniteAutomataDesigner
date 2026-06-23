@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 // import { useSearchParams } from "next/navigation";
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
@@ -17,6 +17,7 @@ import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
 import { useRouter } from 'next/navigation';
+import { SerializedNFA } from '@/lib/nfa/types';
 
 
 function NFAPageContent() {
@@ -28,11 +29,15 @@ function NFAPageContent() {
 
     const router = useRouter();
 
+
     // const searchParams = useSearchParams();
     // const id = searchParams?.get("id");
 
     const title: string = "Non-deterministic Finite Automata";
 
+    // Holds automaton data fetched before the canvas script has finished loading.
+    // onReady on the <Script> tag drains this once the script is ready.
+    const pendingAutomaton = useRef<SerializedNFA | null>(null);
 
     useEffect(() => {
 
