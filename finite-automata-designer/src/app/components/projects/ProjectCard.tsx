@@ -38,7 +38,7 @@ export default function ProjectCard({
             "
         >
             <Link
-                href={`/${type.toLowerCase()}/${id}`}
+                href={`/${type.toLowerCase()}?id=${id}`}
                 className="flex flex-col gap-4"
             >
                 <div className="flex items-start justify-between">
