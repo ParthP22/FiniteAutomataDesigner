@@ -18,6 +18,8 @@ import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
 import { useRouter } from 'next/navigation';
 import { SerializedNFA } from '@/lib/nfa/types';
+import { FiniteAutomaton } from '@/lib/shared/types';
+import { getAutomaton } from '@/lib/automata/queries';
 
 
 function NFAPageContent() {
@@ -58,6 +60,32 @@ function NFAPageContent() {
         }
 
     }, [alphabetInput]);
+
+    useEffect(() => {
+        // Clear stale pending data whenever the target id changes
+        pendingAutomaton.current = null;
+
+        async function loadAutomaton(){
+            if(!automatonId){
+                return;
+            }
+
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
+
+            if (typeof window.loadDFAIntoCanvas === 'function') {
+                // Canvas script is already loaded — call directly.
+                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+            } else {
+                // Canvas script hasn't finished loading yet (production race).
+                // Store the data so the onReady callback can deliver it once ready.
+                pendingAutomaton.current = finiteAutomatonData.automaton;
+            }
+        }
+
+        loadAutomaton();
+    },[automatonId]);
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
