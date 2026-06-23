@@ -2,7 +2,7 @@
 
 'use client';
 
-{/* DFA Script */}
+{/* Script */}
 import Script from 'next/script';
 
 {/* Hooks */}
@@ -66,13 +66,13 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             setHasMultiCharAlphabet(hasMulti);
         }
 
-        window.addEventListener("dfaAlphabetUpdated", handler);
+        window.addEventListener(`${type.toLowerCase()}AlphabetUpdated`, handler);
 
         return () => {
-            window.removeEventListener("dfaAlphabetUpdated", handler);
+            window.removeEventListener(`${type.toLowerCase()}AlphabetUpdated`, handler);
         }
 
-    }, [alphabetInput]);
+    }, [alphabetInput, type]);
 
     useEffect(() => {
         // Clear stale pending data whenever the target id changes
@@ -107,9 +107,9 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, "DFA");
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, type.toUpperCase() as "DFA" | "NFA");
             alert("Automaton saved!");
-            router.push(`/dfa?id=${finiteAutomataData.id}`);
+            router.push(`/${type.toLowerCase()}?id=${finiteAutomataData.id}`);
         }
         catch (error) {
             console.error(error);
@@ -133,9 +133,9 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
-        {/* DFA title at the top */}
+        {/* FA title at the top */}
         <AutomataHeader
-            title={!name ? "Deterministic Finite Automata" : ("DFA: " + name)}
+            title={!name ? "Deterministic Finite Automata" : (type.toUpperCase() + ": " + name)}
             description={description}
         />
 
@@ -149,7 +149,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
                 {/* Instructions dropdown */}
                 <Instructions 
-                    type={"DFA"}
+                    type={type.toUpperCase() as "DFA" | "NFA"}
                 />
 
             </div>
@@ -158,7 +158,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
-                    <canvas id="DFACanvas" width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
+                    <canvas id={`${type.toLowerCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
                     {/* Exporting dropdowns container */}
                     <ExportContainer />
@@ -207,7 +207,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                     
                             {/* Run button to run the DFA with the given input string */}
                             <RunButton 
-                                type={"DFA"}
+                                type={type.toUpperCase() as "DFA" | "NFA"}
                             />
 
                             {/* My Projects button to open the projects page that will list all of the users project when logged in */}
@@ -232,7 +232,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         />
 
         <Script
-            src="/scripts/dfa/dfaCanvas.js"
+            src={`/scripts/${type.toLowerCase()}/${type.toLowerCase()}Canvas.js`}
             type="module"
             strategy="afterInteractive"
             crossOrigin="anonymous"
