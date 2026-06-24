@@ -31,7 +31,7 @@ let drawRef: (() => void) | null = null;
 
 let pendingNFA: SerializedFA | null = null;
 
-window.loadFAIntoCanvas = function(data: SerializedFA){
+window.loadNFAIntoCanvas = function(data: SerializedFA){
   if(!drawRef){
     pendingNFA = data;
     return;
@@ -40,7 +40,7 @@ window.loadFAIntoCanvas = function(data: SerializedFA){
   loadSerializedNFA(data);
 }
 
-window.exportFA = function(){
+window.exportNFA = function(){
   return serializeFA(
     alphabet,
     circles,
