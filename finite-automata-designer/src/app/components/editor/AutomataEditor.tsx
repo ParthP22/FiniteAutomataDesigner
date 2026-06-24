@@ -32,6 +32,8 @@ import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
 import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 
+import { automataApi } from './api/automataApi';
+
 interface AutomataEditorProps {
     type: "DFA" | "NFA";
 }
@@ -49,6 +51,8 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const automatonId = searchParams?.get("id") as string;
 
     const title: string = type === "DFA" ? "Deterministic Finite Automata" : "Non-Deterministic Finite Automata";
+
+    const api = automataApi[type];
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
@@ -91,9 +95,9 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             setName(finiteAutomatonData.name);
             setDescription(finiteAutomatonData.description);
 
-            if (typeof window.loadFAIntoCanvas === 'function') {
+            if (typeof api.loadFAIntoCanvas === 'function') {
                 // Canvas script is already loaded — call directly.
-                window.loadFAIntoCanvas(finiteAutomatonData.automaton);
+                api.loadFAIntoCanvas(finiteAutomatonData.automaton);
             } else {
                 // Canvas script hasn't finished loading yet (production race).
                 // Store the data so the onReady callback can deliver it once ready.
@@ -102,12 +106,12 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         }
 
         loadAutomaton();
-    },[automatonId]);
+    },[automatonId, api]);
 
 
     async function handleSaveAsNew(newName: string, newDescription: string){
     
-        const serialized = window.exportFA();
+        const serialized = api.exportFA();
         console.log(serialized);
 
         try{
@@ -123,7 +127,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     }
 
     async function handleSave(){
-        const serialized = window.exportFA();
+        const serialized = api.exportFA();
         console.log(serialized);
 
         try{
@@ -248,7 +252,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                 // component mount where the script is already cached.
                 // Delivers any automaton data that arrived before the script was ready.
                 if (pendingAutomaton.current !== null) {
-                    window.loadFAIntoCanvas(pendingAutomaton.current);
+                    api.loadFAIntoCanvas(pendingAutomaton.current);
                     pendingAutomaton.current = null;
                 }
             }}
