@@ -1,3 +1,5 @@
+import { SerializedDFA } from "../dfa/types";
+
 export type SerializedCircle = {
     id: string;
     x: number;
@@ -27,4 +29,23 @@ export type SerializedEntryArrow = {
     deltaX?: number;
     deltaY?: number;
     startPoint?: {x: number, y: number};
+}
+
+export interface FiniteAutomaton {
+    id: string;
+    user_id: string;
+    name: string;
+    description: string | null;
+    type: "DFA" | "NFA";
+    automaton: SerializedDFA;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateAutomaton {
+    user_id: string;
+    name?: string | null;
+    description?: string | null;
+    type: "DFA" | "NFA";
+    automaton: SerializedDFA;
 }

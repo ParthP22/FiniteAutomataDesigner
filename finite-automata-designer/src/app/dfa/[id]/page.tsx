@@ -2,10 +2,12 @@
 import Link from "next/link";
 import Script from 'next/script';
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { toggle_visiblity } from "../../../public/scripts/canvasUtil/canvasUtil";
-import { saveAutomaton } from "@/lib/automata/mutations";
-import { SaveProjectModal } from "../components/projects/SaveProjectModal";
+import { useParams, useRouter } from "next/navigation";
+import { toggle_visiblity } from "../../../../public/scripts/canvasUtil/canvasUtil";
+import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
+import { FiniteAutomaton } from "@/lib/shared/types";
+import { getAutomaton } from "@/lib/automata/queries";
+import { SaveProjectModal } from "@/app/components/projects/SaveProjectModal";
 
 
 function DFAPageContent() {
@@ -16,10 +18,17 @@ function DFAPageContent() {
     const [exportOpen, setExportOpen] = useState(false);
     const [importOpen, setImportOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [name, setName] = useState<string | null>(null);
+    const [description, setDescription] = useState<string | null>(null);
+
+    const params = useParams();
     const router = useRouter();
+
+    const automatonId = params?.id as string;
 
     // Holds automaton data fetched before the canvas script has finished loading.
     // onReady on the <Script> tag drains this once the script is ready.
+    const pendingAutomaton = useRef<unknown>(null);
     const exportMenuRef = useRef<HTMLDivElement>(null);
     const importMenuRef = useRef<HTMLDivElement>(null);
 
@@ -45,18 +54,39 @@ function DFAPageContent() {
 
     }, [alphabetInput]);
 
+    useEffect(() => {
+        // Clear stale pending data whenever the target id changes
+        pendingAutomaton.current = null;
 
-    async function handleSave(name: string, description: string){
+        async function loadAutomaton(){
+            if(!automatonId){
+                return;
+            }
+
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
+
+            if (typeof window.loadDFAIntoCanvas === 'function') {
+                // Canvas script is already loaded — call directly.
+                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+            } else {
+                // Canvas script hasn't finished loading yet (production race).
+                // Store the data so the onReady callback can deliver it once ready.
+                pendingAutomaton.current = finiteAutomatonData.automaton;
+            }
+        }
+
+        loadAutomaton();
+    },[automatonId]);
+
+    async function handleSaveAsNew(newName: string, newDescription: string){
 
         const serialized = window.exportDFA();
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(
-                serialized, 
-                (name.trim() === "") ? null : name.trim(), 
-                (description.trim() === "") ? null : description.trim(),
-            );
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
             alert("Automaton saved!");
             router.push(`/dfa/${finiteAutomataData.id}`);
         }
@@ -66,15 +96,44 @@ function DFAPageContent() {
         }
     }
 
+    async function handleSave(){
+        const serialized = window.exportDFA();
+        console.log(serialized);
+
+        try{
+            await updateAutomaton(automatonId, serialized);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
+        }
+    }
+
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* DFA title at the top */}
         <h1 className="text-5xl font-bold text-center my-2 text-black ">
             <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
-                Deterministic Finite Automata
+                DFA: {name}
             </span>
             <span className="h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
         </h1>
+        {description && (
+            <p
+                className="
+                    mt-3
+                    max-w-3xl
+                    mx-auto
+                    px-4
+                    text-lg
+                    text-gray-600
+                    break-words
+                "
+            >
+                {description}
+            </p>
+        )}
         <div
             className="flex w-full"
         >
@@ -352,10 +411,18 @@ function DFAPageContent() {
                             {/* Save button to save the DFA to the database only if the user is logged in */}
                             <button
                                 type="button"
-                                onClick={() => setIsSaving(true)}
+                                onClick={handleSave}
                                 className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
                             >
                                 Save
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsSaving(true)}
+                                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                            >
+                                Save As New Project
                             </button>
                     
                             {/* Run button to run the DFA with the given input string */}
@@ -390,12 +457,12 @@ function DFAPageContent() {
             </div>
         </div>
 
-        <SaveProjectModal 
+        <SaveProjectModal
             isOpen={isSaving}
-            initialName={null}
-            initialDescription={null}
+            initialName={name}
+            initialDescription={description}
             onClose={() => setIsSaving(false)}
-            onSave={handleSave}
+            onSave={handleSaveAsNew}
         />
 
         <Script
@@ -403,6 +470,15 @@ function DFAPageContent() {
             type="module"
             strategy="afterInteractive"
             crossOrigin="anonymous"
+            onReady={() => {
+                // Fires when the script first loads AND after every subsequent
+                // component mount where the script is already cached.
+                // Delivers any automaton data that arrived before the script was ready.
+                if (pendingAutomaton.current !== null) {
+                    window.loadDFAIntoCanvas(pendingAutomaton.current);
+                    pendingAutomaton.current = null;
+                }
+            }}
         />
       </main>
 
