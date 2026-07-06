@@ -7,7 +7,7 @@ interface RunButton{
 export default function RunButton({ type }: RunButton){
     return (
         <button
-            id={`${type.toLowerCase()}RunButton`}
+            id={`${type.toLowerCase()}RunBtn`}
             type="button"
             className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
         >
