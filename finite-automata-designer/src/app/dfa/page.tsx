@@ -1,10 +1,13 @@
 'use client';
 
+{/* DFA Script */}
 import Script from 'next/script';
+
+{/* Hooks */}
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
-import { SaveProjectModal } from "../components/projects/SaveProjectModal";
+
+{/* Components */}
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
 import ImportContainer from "../components/editor/import/ImportContainer";
@@ -19,9 +22,13 @@ import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
 import SaveActions from '../components/editor/SaveActions';
+import SaveProjectModal from "../components/projects/SaveProjectModal";
+
+{/* Database/Serialization */}
 import { SerializedDFA } from '@/lib/dfa/types';
 import { FiniteAutomaton } from '@/lib/shared/types';
 import { getAutomaton } from '@/lib/automata/queries';
+import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 
 
 function DFAPageContent() {
@@ -95,7 +102,7 @@ function DFAPageContent() {
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, "DFA");
             alert("Automaton saved!");
             router.push(`/dfa?id=${finiteAutomataData.id}`);
         }

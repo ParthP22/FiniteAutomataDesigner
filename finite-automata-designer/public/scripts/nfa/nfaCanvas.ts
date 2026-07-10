@@ -19,7 +19,35 @@
 import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
 import { Importer } from "./importing/importer";
-import { initFsmCanvas } from "../canvasUtil/fsmCanvas";
+import { clearAutomaton, initFsmCanvas } from "../canvasUtil/fsmCanvas";
+import { SerializedNFA } from "@/lib/nfa/types";
+import { serializeNFA } from "@/lib/nfa/serializeNFA";
+import { circles } from "../Shapes/Circle";
+import { arrows } from "../Shapes/Arrow";
+import { setStartState, startState } from "../Shapes/EntryArrow";
+import { deserializeNFA } from "@/lib/nfa/deserializeNFA";
+
+let drawRef: (() => void) | null = null;
+
+let pendingNFA: SerializedNFA | null = null;
+
+window.loadNFAIntoCanvas = function(data: SerializedNFA){
+  if(!drawRef){
+    pendingNFA = data;
+    return;
+  }
+
+  loadSerializedNFA(data);
+}
+
+window.exportNFA = function(){
+  return serializeNFA(
+    alphabet,
+    circles,
+    arrows,
+    startState,
+  );
+}
 
 initFsmCanvas({
   automatonLabel: "NFA",
@@ -32,4 +60,39 @@ initFsmCanvas({
   setAlphabet,
   getValidator: () => transitionLabelInputValidator,
   createImporter: (circs, arrs, data, draw) => new Importer(circs, arrs, data, draw),
+  onCanvasReady: (draw) => {
+    drawRef = draw;
+
+    if(pendingNFA){
+      loadSerializedNFA(pendingNFA);
+      pendingNFA = null;
+      draw();
+    }
+  }
 });
+
+function loadSerializedNFA(data: SerializedNFA){
+  const canvas = document.getElementById("NFACanvas") as HTMLCanvasElement;
+
+  clearAutomaton(canvas);
+
+  const deserialized = deserializeNFA(data);
+
+  circles.push(...deserialized.circles);
+
+  arrows.push(...deserialized.arrows);
+
+  setAlphabet(deserialized.alphabet);
+
+  setStartState(deserialized.entryArrow);
+
+  const alphabetLabel = document.getElementById("alphabetLabel") as HTMLLabelElement | null;
+
+  if(alphabetLabel){
+    alphabetLabel.textContent = "Alphabet: {"+Array.from(alphabet).join(",")+"}";
+  }
+
+  if(drawRef){
+    drawRef();
+  }
+}

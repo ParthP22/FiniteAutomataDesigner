@@ -1,8 +1,13 @@
 'use client';
 
+{/* NFA Script */}
 import Script from 'next/script';
-import { useEffect, useState, Suspense } from "react";
-// import { useSearchParams } from "next/navigation";
+
+{/* Hooks */}
+import { useEffect, useState, Suspense, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+{/* Components */}
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
 import ImportContainer from "../components/editor/import/ImportContainer";
@@ -16,17 +21,31 @@ import RunButton from "../components/editor/RunButton";
 import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
+import SaveActions from '../components/editor/SaveActions';
+import SaveProjectModal from "../components/projects/SaveProjectModal";
+
+{/* Database/Serialization */}
+import { SerializedNFA } from '@/lib/nfa/types';
+import { FiniteAutomaton } from '@/lib/shared/types';
+import { getAutomaton } from '@/lib/automata/queries';
+import { saveAutomaton, updateAutomaton } from '@/lib/automata/mutations';
 
 
 function NFAPageContent() {
 
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
-    // const searchParams = useSearchParams();
-    // const id = searchParams?.get("id");
+    const [isSaving, setIsSaving] = useState(false);
+    const [name, setName] = useState<string | null>(null);
+    const [description, setDescription] = useState<string | null>(null);
 
-    const title: string = "Non-deterministic Finite Automata";
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const automatonId = searchParams?.get("id") as string;
 
+    // Holds automaton data fetched before the canvas script has finished loading.
+    // onReady on the <Script> tag drains this once the script is ready.
+    const pendingAutomaton = useRef<SerializedNFA | null>(null);
 
     useEffect(() => {
 
@@ -50,14 +69,74 @@ function NFAPageContent() {
 
     }, [alphabetInput]);
 
+    useEffect(() => {
+        // Clear stale pending data whenever the target id changes
+        pendingAutomaton.current = null;
+
+        async function loadAutomaton(){
+            if(!automatonId){
+                return;
+            }
+
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
+
+            if (typeof window.loadNFAIntoCanvas === 'function') {
+                // Canvas script is already loaded — call directly.
+                window.loadNFAIntoCanvas(finiteAutomatonData.automaton);
+            } else {
+                // Canvas script hasn't finished loading yet (production race).
+                // Store the data so the onReady callback can deliver it once ready.
+                pendingAutomaton.current = finiteAutomatonData.automaton;
+            }
+        }
+
+        loadAutomaton();
+    },[automatonId]);
+
+
+    async function handleSaveAsNew(newName: string, newDescription: string){
+    
+        const serialized = window.exportNFA();
+        console.log(serialized);
+
+        try{
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, "NFA");
+            alert("Automaton saved!");
+            router.push(`/nfa?id=${finiteAutomataData.id}`);
+        }
+        catch (error) {
+            console.error(error);
+            alert("Save failed: " + error);
+        }
+    }
+
+    async function handleSave(){
+        const serialized = window.exportNFA();
+        console.log(serialized);
+
+        try{
+            await updateAutomaton(automatonId, serialized);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
+        }
+    }
+
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* NFA title at the top */}
         <AutomataHeader
-            title={title}
+            title={!name ? "Non-Deterministic Finite Automata" : ("NFA: " + name)}
+            description={description}
         />
 
-        <div className="flex w-full">
+        <div 
+            className="flex w-full"
+        >
             {/* Back Button + Instructions parent div*/}
             <div className="flex-1 flex flex-col items-start h-13 pl-5" >
                 {/* Back Button to return to Home Page */}
@@ -106,8 +185,21 @@ function NFAPageContent() {
                             
                             {/* Input box for new alphabet */}
                             <AlphabetInput />
+
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
+                            {/* Save button to save the NFA to the database only if the user is logged in */}
+                            {!automatonId ? (
+                                <SaveActions
+                                    onSave={() => setIsSaving(true)}
+                                />
+                            ) : ( 
+                                <SaveActions
+                                    onSave={handleSave}
+                                    onSaveAs={() => setIsSaving(true)}
+                                />
+                            )}
+                            
                             {/* Run button to run the NFA with the given input string */}
                             <RunButton
                                 type={"NFA"}
@@ -125,6 +217,14 @@ function NFAPageContent() {
                 </div>
             </div>
         </div>
+
+        <SaveProjectModal 
+            isOpen={isSaving}
+            initialName={null}
+            initialDescription={null}
+            onClose={() => setIsSaving(false)}
+            onSave={handleSaveAsNew}
+        />
 
         <Script
             src="/scripts/nfa/nfaCanvas.js"
