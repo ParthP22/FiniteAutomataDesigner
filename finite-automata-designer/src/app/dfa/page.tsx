@@ -1,9 +1,9 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
-import { saveAutomaton } from "@/lib/automata/mutations";
+import { useEffect, useState, Suspense, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { SaveProjectModal } from "../components/projects/SaveProjectModal";
 import Instructions from "../components/editor/Instructions";
 import AutomataHeader from "../components/editor/AutomataHeader";
@@ -19,6 +19,9 @@ import ProjectsButton from "../components/editor/ProjectsButton";
 import ClearCanvasButton from "../components/editor/ClearCanvasButton";
 import BackButton from "../components/editor/BackButton";
 import SaveActions from '../components/editor/SaveActions';
+import { SerializedDFA } from '@/lib/dfa/types';
+import { FiniteAutomaton } from '@/lib/shared/types';
+import { getAutomaton } from '@/lib/automata/queries';
 
 
 function DFAPageContent() {
@@ -26,9 +29,16 @@ function DFAPageContent() {
     const [hasMultiCharAlphabet, setHasMultiCharAlphabet] = useState(false);
     const [alphabetInput, setAlphabetInput] = useState("");
     const [isSaving, setIsSaving] = useState(false);
-    const router = useRouter();
+    const [name, setName] = useState<string | null>(null);
+    const [description, setDescription] = useState<string | null>(null);
 
-    const title: string = "Deterministic Finite Automata"
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const automatonId = searchParams?.get("id") as string;
+
+    // Holds automaton data fetched before the canvas script has finished loading.
+    // onReady on the <Script> tag drains this once the script is ready.
+    const pendingAutomaton = useRef<SerializedDFA | null>(null);
 
     useEffect(() => {
 
@@ -52,20 +62,42 @@ function DFAPageContent() {
 
     }, [alphabetInput]);
 
+    useEffect(() => {
+        // Clear stale pending data whenever the target id changes
+        pendingAutomaton.current = null;
 
-    async function handleSave(name: string, description: string){
+        async function loadAutomaton(){
+            if(!automatonId){
+                return;
+            }
 
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
+
+            if (typeof window.loadDFAIntoCanvas === 'function') {
+                // Canvas script is already loaded — call directly.
+                window.loadDFAIntoCanvas(finiteAutomatonData.automaton);
+            } else {
+                // Canvas script hasn't finished loading yet (production race).
+                // Store the data so the onReady callback can deliver it once ready.
+                pendingAutomaton.current = finiteAutomatonData.automaton;
+            }
+        }
+
+        loadAutomaton();
+    },[automatonId]);
+
+
+    async function handleSaveAsNew(newName: string, newDescription: string){
+    
         const serialized = window.exportDFA();
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(
-                serialized, 
-                (name.trim() === "") ? null : name.trim(), 
-                (description.trim() === "") ? null : description.trim(),
-            );
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription);
             alert("Automaton saved!");
-            router.push(`/dfa/${finiteAutomataData.id}`);
+            router.push(`/dfa?id=${finiteAutomataData.id}`);
         }
         catch (error) {
             console.error(error);
@@ -73,11 +105,26 @@ function DFAPageContent() {
         }
     }
 
+    async function handleSave(){
+        const serialized = window.exportDFA();
+        console.log(serialized);
+
+        try{
+            await updateAutomaton(automatonId, serialized);
+            alert("Automaton saved!");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Save failed.");
+        }
+    }
+
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
         {/* DFA title at the top */}
         <AutomataHeader
-            title={title}
+            title={!name ? "Deterministic Finite Automata" : ("DFA: " + name)}
+            description={description}
         />
 
         <div
@@ -135,9 +182,16 @@ function DFAPageContent() {
                         </div>
                         <div className="flex flex-wrap self-center gap-5">
                             {/* Save button to save the DFA to the database only if the user is logged in */}
-                            <SaveActions
-                                onSave={() => setIsSaving(true)}
-                            />
+                            {!automatonId ? (
+                                <SaveActions
+                                    onSave={() => setIsSaving(true)}
+                                />
+                            ) : ( 
+                                <SaveActions
+                                    onSave={handleSave}
+                                    onSaveAs={() => setIsSaving(true)}
+                                />
+                            )}
                     
                             {/* Run button to run the DFA with the given input string */}
                             <RunButton 
@@ -162,7 +216,7 @@ function DFAPageContent() {
             initialName={null}
             initialDescription={null}
             onClose={() => setIsSaving(false)}
-            onSave={handleSave}
+            onSave={handleSaveAsNew}
         />
 
         <Script
