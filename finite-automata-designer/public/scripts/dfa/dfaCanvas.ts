@@ -23,9 +23,9 @@ import { startState, setStartState } from "../Shapes/EntryArrow";
 import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
 import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfa/dfaTransitionSymbols";
 import { Importer } from "./importing/importer";
-import { serializeDFA } from "@/lib/dfa/serializeDFA";
-import { deserializeDFA } from "@/lib/dfa/deserializeDFA";
-import { SerializedDFA } from "@/lib/dfa/types";
+import { serializeFA } from "@/lib/shared/serializer/serializeFA";
+import { deserializeFA } from "@/lib/shared/deserializer/deserializeFA";
+import { SerializedFA } from "@/lib/shared/types";
 import { initFsmCanvas, clearAutomaton } from "../canvasUtil/fsmCanvas";
 
 // Holds the draw function of the currently mounted canvas so that a DFA
@@ -33,9 +33,9 @@ import { initFsmCanvas, clearAutomaton } from "../canvasUtil/fsmCanvas";
 let drawRef: (() => void) | null = null;
 
 // Automaton data that arrived before the canvas finished mounting.
-let pendingDFA: SerializedDFA | null = null;
+let pendingDFA: SerializedFA | null = null;
 
-window.loadDFAIntoCanvas = function(data: SerializedDFA){
+window.loadDFAIntoCanvas = function(data: SerializedFA){
 
   if(!drawRef){
     pendingDFA = data;
@@ -46,7 +46,7 @@ window.loadDFAIntoCanvas = function(data: SerializedDFA){
 }
 
 window.exportDFA = function(){
-  return serializeDFA(
+  return serializeFA(
     alphabet,
     circles,
     arrows,
@@ -76,12 +76,12 @@ initFsmCanvas({
   },
 });
 
-function loadSerializedDFA(data: SerializedDFA){
+function loadSerializedDFA(data: SerializedFA){
   const canvas = document.getElementById("DFACanvas") as HTMLCanvasElement;
 
   clearAutomaton(canvas);
 
-  const deserialized = deserializeDFA(data);
+  const deserialized = deserializeFA(data);
 
   circles.push(...deserialized.circles);
 
