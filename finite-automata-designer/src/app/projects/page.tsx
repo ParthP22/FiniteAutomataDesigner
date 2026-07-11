@@ -10,6 +10,7 @@ import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
 import { EditProjectModal } from "../components/projects/EditProjectModal";
 import SearchBar from "../components/projects/SearchBar";
 import SortBar, { SortBy, SortDirection } from "../components/projects/SortBar";
+import { useProjectFiltering } from "../hooks/useProjectFiltering";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -22,30 +23,11 @@ export default function AutomataPage() {
 
   const router = useRouter();
 
-  const filteredProjectsBySearch = machines.filter((machine) => (
-    machine.name.trim().toLowerCase().includes(searchTerms.trim().toLowerCase()) ||
-    machine.description?.trim().toLowerCase().includes(searchTerms.trim().toLowerCase())
-  ));
-
-  const sortedProjects = filteredProjectsBySearch.sort((a,b) => {
-    let comparison = 0;
-
-    switch(sortBy){
-      case "created_at":
-        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        break;
-      case "updated_at":
-        comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
-        break;
-      case "name":
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case "description":
-        comparison = (a.description ?? "").localeCompare(b.description ?? "");
-        break;
-    }
-
-    return (sortDirection === "asc") ? comparison : -comparison;
+  const visibleProjects = useProjectFiltering({
+    projects: machines,
+    searchTerms: searchTerms,
+    sortBy: sortBy,
+    sortDirection: sortDirection,
   });
 
   useEffect(() => {
@@ -160,9 +142,9 @@ export default function AutomataPage() {
                     </div>
                 )}
 
-                {sortDirection.length > 0 ? (
+                {visibleProjects.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {sortedProjects.map((machine) => (
+                        {visibleProjects.map((machine) => (
                             <ProjectCard
                                 key={machine.id}
                                 id={machine.id}
