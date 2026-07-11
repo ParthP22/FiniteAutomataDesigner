@@ -8,14 +8,21 @@ import ProjectCard from "../components/projects/ProjectCard";
 import { deleteAutomaton, editAutomaton } from "@/lib/automata/mutations";
 import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
 import { EditProjectModal } from "../components/projects/EditProjectModal";
+import SearchBar from "../components/projects/SearchBar";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingProject, setDeletingProject] = useState<FiniteAutomaton | null>(null);
   const [editingProject, setEditingProject] = useState<FiniteAutomaton | null>(null);
+  const [searchTerms, setSearchTerms] = useState<string>("");
 
   const router = useRouter();
+
+  const filteredProjectsBySearch = machines.filter((machine) => (
+    machine.name.toLowerCase().includes(searchTerms.toLowerCase()) ||
+    machine.description?.toLowerCase().includes(searchTerms.toLowerCase())
+  ));
 
   useEffect(() => {
     async function loadMachines() {
@@ -102,7 +109,13 @@ export default function AutomataPage() {
                     </h1>
                 </div>
 
-                {machines.length === 0 ? (
+                <SearchBar 
+                  searchTerms={searchTerms}
+                  placeholderText="Search projects..."
+                  onChange={setSearchTerms}
+                />
+
+                {machines.length === 0 && (
                     <div className="bg-white rounded-xl shadow p-10 text-center">
                         <h2 className="text-2xl font-semibold text-gray-700 mb-2">
                             No Projects Yet
@@ -112,9 +125,11 @@ export default function AutomataPage() {
                             Create your first automaton to get started.
                         </p>
                     </div>
-                ) : (
+                )}
+
+                {filteredProjectsBySearch.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {machines.map((machine) => (
+                        {filteredProjectsBySearch.map((machine) => (
                             <ProjectCard
                                 key={machine.id}
                                 id={machine.id}
@@ -126,7 +141,18 @@ export default function AutomataPage() {
                             />
                         ))}
                     </div>
-                )}
+                  ) : (
+                    <div className="bg-white rounded-xl shadow p-10 text-center">
+                          <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+                              No Projects Found
+                          </h2>
+
+                          <p className="text-gray-500">
+                              Try a different search term.
+                          </p>
+                      </div>
+                  )
+                }
             </div>
 
             { deletingProject &&
