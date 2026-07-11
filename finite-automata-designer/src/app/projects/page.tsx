@@ -20,8 +20,8 @@ export default function AutomataPage() {
   const router = useRouter();
 
   const filteredProjectsBySearch = machines.filter((machine) => (
-    machine.name.toLowerCase().includes(searchTerms.toLowerCase()) ||
-    machine.description?.toLowerCase().includes(searchTerms.toLowerCase())
+    machine.name.trim().toLowerCase().includes(searchTerms.trim().toLowerCase()) ||
+    machine.description?.trim().toLowerCase().includes(searchTerms.trim().toLowerCase())
   ));
 
   useEffect(() => {
