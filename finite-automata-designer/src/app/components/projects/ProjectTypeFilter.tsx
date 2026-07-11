@@ -18,7 +18,7 @@ export default function ProjectTypeFilter({
                 onClick={() => onFilterChange("all")}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                     filterType === "all"
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-gray-600 text-white font-semibold"
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
             >
@@ -29,8 +29,8 @@ export default function ProjectTypeFilter({
                 onClick={() => onFilterChange("DFA")}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                     filterType === "DFA"
-                        ? "bg-indigo-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        ? "bg-blue-100 text-blue-700 font-semibold"
+                        : "bg-gray-200 text-gray-700 hover:bg-blue-300 hover:text-blue-700"
                 }`}
             >
                 DFA
@@ -40,8 +40,8 @@ export default function ProjectTypeFilter({
                 onClick={() => onFilterChange("NFA")}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                     filterType === "NFA"
-                        ? "bg-indigo-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        ? "bg-purple-100 text-purple-700 font-semibold"
+                        : "bg-gray-200 text-gray-700 hover:bg-purple-300 hover:text-purple-700"
                 }`}
             >
                 NFA
