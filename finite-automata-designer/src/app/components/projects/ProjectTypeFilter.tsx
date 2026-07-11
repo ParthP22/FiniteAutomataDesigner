@@ -13,19 +13,7 @@ export default function ProjectTypeFilter({
 }: ProjectTypeFilterProps){
     return (
         <div className="flex gap-2">
-            {/* {(["all", "DFA", "NFA"] as const).map((type) => (
-                <button
-                    key={type}
-                    onClick={() => onFilterChange(type)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                        filterType === type
-                            ? "bg-indigo-600 text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                >
-                    {type}
-                </button>
-            ))} */}
+            
             <button
                 onClick={() => onFilterChange("all")}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
