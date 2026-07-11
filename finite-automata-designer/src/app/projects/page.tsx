@@ -109,11 +109,13 @@ export default function AutomataPage() {
                     </h1>
                 </div>
 
-                <SearchBar 
-                  searchTerms={searchTerms}
-                  placeholderText="Search projects..."
-                  onChange={setSearchTerms}
-                />
+                <div className="mb-8 rounded-xl bg-white p-4 shadow">
+                    <SearchBar
+                        searchTerms={searchTerms}
+                        placeholderText="Search projects..."
+                        onChange={setSearchTerms}
+                    />
+                </div>
 
                 {machines.length === 0 && (
                     <div className="bg-white rounded-xl shadow p-10 text-center">
