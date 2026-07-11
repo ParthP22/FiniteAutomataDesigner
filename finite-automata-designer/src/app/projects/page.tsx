@@ -27,6 +27,27 @@ export default function AutomataPage() {
     machine.description?.trim().toLowerCase().includes(searchTerms.trim().toLowerCase())
   ));
 
+  const sortedProjects = filteredProjectsBySearch.sort((a,b) => {
+    let comparison = 0;
+
+    switch(sortBy){
+      case "created_at":
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        break;
+      case "updated_at":
+        comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        break;
+      case "name":
+        comparison = a.name.localeCompare(b.name);
+        break;
+      case "description":
+        comparison = (a.description ?? "").localeCompare(b.description ?? "");
+        break;
+    }
+
+    return (sortDirection === "asc") ? comparison : -comparison;
+  });
+
   useEffect(() => {
     async function loadMachines() {
       try{
@@ -139,9 +160,9 @@ export default function AutomataPage() {
                     </div>
                 )}
 
-                {filteredProjectsBySearch.length > 0 ? (
+                {sortDirection.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredProjectsBySearch.map((machine) => (
+                        {sortedProjects.map((machine) => (
                             <ProjectCard
                                 key={machine.id}
                                 id={machine.id}
