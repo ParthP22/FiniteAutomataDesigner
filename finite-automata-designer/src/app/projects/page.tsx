@@ -9,6 +9,8 @@ import { deleteAutomaton, editAutomaton } from "@/lib/automata/mutations";
 import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
 import { EditProjectModal } from "../components/projects/EditProjectModal";
 import SearchBar from "../components/projects/SearchBar";
+import SortBar, { SortBy, SortDirection } from "../components/projects/SortBar";
+import { useProjectFiltering } from "../hooks/useProjectFiltering";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -16,13 +18,17 @@ export default function AutomataPage() {
   const [deletingProject, setDeletingProject] = useState<FiniteAutomaton | null>(null);
   const [editingProject, setEditingProject] = useState<FiniteAutomaton | null>(null);
   const [searchTerms, setSearchTerms] = useState<string>("");
+  const [sortBy, setSortBy] = useState<SortBy>("updated_at");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const router = useRouter();
 
-  const filteredProjectsBySearch = machines.filter((machine) => (
-    machine.name.trim().toLowerCase().includes(searchTerms.trim().toLowerCase()) ||
-    machine.description?.trim().toLowerCase().includes(searchTerms.trim().toLowerCase())
-  ));
+  const visibleProjects = useProjectFiltering({
+    projects: machines,
+    searchTerms: searchTerms,
+    sortBy: sortBy,
+    sortDirection: sortDirection,
+  });
 
   useEffect(() => {
     async function loadMachines() {
@@ -109,11 +115,18 @@ export default function AutomataPage() {
                     </h1>
                 </div>
 
-                <div className="mb-8 rounded-xl bg-white p-4 shadow">
+                <div className="flex items-center justify-between gap-4 mb-8 rounded-xl bg-white p-4 shadow">
                     <SearchBar
                         searchTerms={searchTerms}
                         placeholderText="Search projects..."
                         onChange={setSearchTerms}
+                    />
+
+                    <SortBar 
+                        sortBy={sortBy}
+                        sortDirection={sortDirection}
+                        onSortByChange={(sortBy: SortBy) => setSortBy(sortBy)}
+                        onDirectionChange={(direction: SortDirection) => setSortDirection(direction)}
                     />
                 </div>
 
@@ -129,9 +142,9 @@ export default function AutomataPage() {
                     </div>
                 )}
 
-                {filteredProjectsBySearch.length > 0 ? (
+                {visibleProjects.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredProjectsBySearch.map((machine) => (
+                        {visibleProjects.map((machine) => (
                             <ProjectCard
                                 key={machine.id}
                                 id={machine.id}

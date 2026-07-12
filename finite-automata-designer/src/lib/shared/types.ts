@@ -36,21 +36,18 @@ export type SerializedFA = {
     entryArrow: SerializedEntryArrow;
 }
 
-export interface FiniteAutomaton {
-    id: string;
-    user_id: string;
-    name: string;
-    description: string | null;
-    type: "DFA" | "NFA";
-    automaton: SerializedFA;
-    created_at: string;
-    updated_at: string;
-}
-
 export interface CreateAutomaton {
     user_id: string;
     name?: string | null;
     description?: string | null;
     type: "DFA" | "NFA";
     automaton: SerializedFA;
+}
+
+export interface FiniteAutomaton extends CreateAutomaton {
+    id: string;
+    name: string;
+    description: string | null;
+    created_at: string;
+    updated_at: string;
 }
