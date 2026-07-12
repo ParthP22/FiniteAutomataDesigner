@@ -1,12 +1,14 @@
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { SortBy, SortDirection } from "../components/projects/SortBar";
 import { useMemo } from "react";
+import { ProjectType } from "../components/projects/ProjectTypeFilter";
 
 interface UseProjectFilteringProps{
     projects: FiniteAutomaton[];
     searchTerms: string;
     sortBy: SortBy;
     sortDirection: SortDirection;
+    filterType: ProjectType;
 }
 
 export function useProjectFiltering({
@@ -14,9 +16,20 @@ export function useProjectFiltering({
     searchTerms,
     sortBy,
     sortDirection,
+    filterType,
 }: UseProjectFilteringProps){
     return useMemo(() => {
-        const filteredBySearch = projects.filter((project) => (
+        const filteredByType = 
+            (filterType === "all") ? 
+            (projects) : 
+            (projects.filter(
+                (project) => (
+                    project.type === filterType
+                )
+            )
+        );
+
+        const filteredBySearch = filteredByType.filter((project) => (
             project.name.trim().toLowerCase().includes(searchTerms.trim().toLowerCase()) ||
             project.description?.trim().toLowerCase().includes(searchTerms.trim().toLowerCase())
         ));
@@ -48,5 +61,6 @@ export function useProjectFiltering({
         searchTerms,
         sortBy,
         sortDirection,
+        filterType,
     ]);
 }

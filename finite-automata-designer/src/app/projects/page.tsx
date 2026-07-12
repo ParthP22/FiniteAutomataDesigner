@@ -11,6 +11,7 @@ import { EditProjectModal } from "../components/projects/EditProjectModal";
 import SearchBar from "../components/projects/SearchBar";
 import SortBar, { SortBy, SortDirection } from "../components/projects/SortBar";
 import { useProjectFiltering } from "../hooks/useProjectFiltering";
+import ProjectTypeFilter, { ProjectType } from "../components/projects/ProjectTypeFilter";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -20,6 +21,7 @@ export default function AutomataPage() {
   const [searchTerms, setSearchTerms] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortBy>("updated_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [filterType, setFilterType] = useState<ProjectType>("all");
 
   const router = useRouter();
 
@@ -28,6 +30,7 @@ export default function AutomataPage() {
     searchTerms: searchTerms,
     sortBy: sortBy,
     sortDirection: sortDirection,
+    filterType: filterType,
   });
 
   useEffect(() => {
@@ -115,7 +118,31 @@ export default function AutomataPage() {
                     </h1>
                 </div>
 
-                <div className="flex items-center justify-between gap-4 mb-8 rounded-xl bg-white p-4 shadow">
+                {/* <div className="mb-8 rounded-xl bg-white p-4 shadow">
+                  <div className="flex items-center justify-between gap-4 pb-4">
+                      <SearchBar
+                          searchTerms={searchTerms}
+                          placeholderText="Search projects..."
+                          onChange={setSearchTerms}
+                      />
+
+                      <SortBar 
+                          sortBy={sortBy}
+                          sortDirection={sortDirection}
+                          onSortByChange={(sortBy: SortBy) => setSortBy(sortBy)}
+                          onDirectionChange={(direction: SortDirection) => setSortDirection(direction)}
+                      />
+                  </div>
+
+                  <div>
+                      <ProjectTypeFilter
+                        filterType={filterType}
+                        onFilterChange={(filterType: ProjectType) => setFilterType(filterType)}
+                      />
+                  </div>
+                </div> */}
+
+                <div className="flex items-center justify-between gap-4 pb-4 mb-8 rounded-xl bg-white p-4 shadow">
                     <SearchBar
                         searchTerms={searchTerms}
                         placeholderText="Search projects..."
@@ -127,6 +154,11 @@ export default function AutomataPage() {
                         sortDirection={sortDirection}
                         onSortByChange={(sortBy: SortBy) => setSortBy(sortBy)}
                         onDirectionChange={(direction: SortDirection) => setSortDirection(direction)}
+                    />
+
+                    <ProjectTypeFilter
+                      filterType={filterType}
+                      onFilterChange={(filterType: ProjectType) => setFilterType(filterType)}
                     />
                 </div>
 
