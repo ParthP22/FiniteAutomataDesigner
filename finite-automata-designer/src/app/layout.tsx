@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Finite Automata Designer",
+  title: "FSM Designer",
   description: "Design and experiment with DFA and NFAs",
 };
 
