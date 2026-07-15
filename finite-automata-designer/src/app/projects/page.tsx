@@ -118,30 +118,6 @@ export default function AutomataPage() {
                     </h1>
                 </div>
 
-                {/* <div className="mb-8 rounded-xl bg-white p-4 shadow">
-                  <div className="flex items-center justify-between gap-4 pb-4">
-                      <SearchBar
-                          searchTerms={searchTerms}
-                          placeholderText="Search projects..."
-                          onChange={setSearchTerms}
-                      />
-
-                      <SortBar 
-                          sortBy={sortBy}
-                          sortDirection={sortDirection}
-                          onSortByChange={(sortBy: SortBy) => setSortBy(sortBy)}
-                          onDirectionChange={(direction: SortDirection) => setSortDirection(direction)}
-                      />
-                  </div>
-
-                  <div>
-                      <ProjectTypeFilter
-                        filterType={filterType}
-                        onFilterChange={(filterType: ProjectType) => setFilterType(filterType)}
-                      />
-                  </div>
-                </div> */}
-
                 <div className="flex items-center justify-between gap-4 pb-4 mb-8 rounded-xl bg-white p-4 shadow">
                     <SearchBar
                         searchTerms={searchTerms}
