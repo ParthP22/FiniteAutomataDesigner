@@ -105,7 +105,6 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
   const hightlightSelected = 'blue'; // Blue highlight for objects for regular selection
   const base = 'black'; // Black highlight for objects to indicate that they are not being selected
   let dragging = false; // True dragging objects is enabled, false otherwise
-  let shiftPressed = false; // True if shift is pressed, false otherwise
   let startClick: {x: number, y: number} | null = null;
   let tempArrow: TemporaryArrow | Arrow | SelfArrow | EntryArrow | null = null; // A new arrow being created
 
@@ -171,8 +170,11 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
       }
 
 
+      // Read the modifier straight off the mouse event: the browser stamps it on
+      // every click, so it works even when focus is stuck on another element
+      // (e.g. the import button right after importing an SVG/LaTeX file).
       if (selectedObj != null) {
-        if (shiftPressed && selectedObj instanceof Circle) {
+        if (event.shiftKey && selectedObj instanceof Circle) {
           // Draw a SelfArrow to the selected circle
           tempArrow = new SelfArrow(selectedObj, mouse);
         } else {
@@ -181,7 +183,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             selectedObj.setMouseStart(mouse.x, mouse.y);
           }
         }
-      } else if (shiftPressed) {
+      } else if (event.shiftKey) {
         // Cosmetic arrow logic for interactive response
         tempArrow = new TemporaryArrow(mouse, mouse);
       }
@@ -311,13 +313,6 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         return true;
       }
 
-      // If the "Shift" key is pressed, set
-      // shiftPressed = true, since it'll be used for
-      // other functions on the canvas.
-      if (event.key === 'Shift') {
-        shiftPressed = true;
-      }
-
       // If we are currently selecting an object AND
       // if the currently selected object has a "text"
       // attribute, we will enter this if-statement
@@ -437,12 +432,6 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
       }
       arrows.splice(index,1);
     }
-
-    document.addEventListener('keyup', (event) => {
-      if (event.key === 'Shift') {
-        shiftPressed = false;
-      }
-    }, { signal })
 
     /* Helper Functions*/
 
@@ -653,16 +642,15 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             dragging = false;
             draw();
           } else {
-            // Prevent focusing other elements so accidently taps on tab can be resolved with one click back on the canvas
-            inputString?.blur();
-            alphabetInput?.blur();
-            // Buttons
-            exportSVGBtn?.blur();
-            exportLaTeXBtn?.blur();
-            importSVGBtn?.blur();
-            importLaTeXBtn?.blur();
-            hideOutputBtn?.blur();
-            copyOutputBtn?.blur();
+            // Clicking the canvas must return keyboard control to it. The canvas
+            // mousedown handler calls preventDefault(), which stops the browser
+            // from blurring the focused element on its own, so blur whatever is
+            // focused explicitly — a hardcoded list of controls misses elements
+            // like the import button and leaves keyboard input dead after an import.
+            const active = document.activeElement;
+            if (active instanceof HTMLElement && active !== document.body) {
+              active.blur();
+            }
           }
         }, { signal });
       };

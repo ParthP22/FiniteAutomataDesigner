@@ -3,10 +3,10 @@ import Link from "next/link"
 export default function Home() {
   return (
     <main className="min-h-screen bg-blue-100 flex flex-col">
-      {/* FA Designer title at the top */}
+      {/* FSM Designer title at the top */}
       <h1 className="relative text-5xl font-bold text-center mt-8 text-black">
         <span className="relative z-10 drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
-          Finite Automata Designer
+          Finite State Machine Designer
         </span>
         <span className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-20 rounded pointer-events-none"></span>
       </h1>

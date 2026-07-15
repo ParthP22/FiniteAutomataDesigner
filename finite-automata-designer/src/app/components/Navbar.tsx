@@ -33,7 +33,7 @@ export default function Navbar() {
   return (
     <nav className="w-full bg-gray-700 text-white px-8 py-4 flex items-center justify-between shadow">
       <div className="text-2xl font-bold tracking-wide">
-        <Link href="/">Finite Automata Designer</Link>
+        <Link href="/">Finite State Machine Designer</Link>
       </div>
       <div className="flex items-center space-x-4">
         {/* Note: you cannot use normal if-statements inside the return method lol, so use conditional operator */}
