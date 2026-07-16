@@ -236,14 +236,28 @@ export function dfsmAlgo(input: string){
   // If the final state that we arrived at is the end state,
 	// that means the string was accepted.
   if(curr.isAccept){
-    alert("The string, \"" + tokens.toString() + "\", was accepted!");
+    // Notify the React page so it can show a toast confirming the string was accepted
+    window.dispatchEvent(new CustomEvent("showToast", {
+      detail: { 
+        message: "The string, \"" + tokens.toString() + "\", was accepted!",
+        duration: 6000
+      }
+    }));
+    // alert("The string, \"" + tokens.toString() + "\", was accepted!");
     //console.log("Accepted!");
     return true;
   }
   // Else, the final state we arrived at is not the end state,
-	// which means the string was rejected.
+	// which means the string was rejected. 
   else{
-    alert("The string, \"" + tokens.toString() + "\", was rejected!");
+    // Notify the React page so it can show a toast confirming the string was rejected
+    window.dispatchEvent(new CustomEvent("showToast", {
+      detail: { 
+        message: "The string, \"" + tokens.toString() + "\", was rejected!",
+        duration: 6000
+      }
+    }));
+    // alert("The string, \"" + tokens.toString() + "\", was rejected!");
     //console.log("Rejected!");
     return false;
   }
