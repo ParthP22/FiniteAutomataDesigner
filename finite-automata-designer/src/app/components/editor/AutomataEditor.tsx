@@ -52,7 +52,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
 
-    const title: string = type === "DFA" ? "Deterministic Finite Automata" : "Non-Deterministic Finite Automata";
+    const title: string = type === "DFA" ? "Deterministic Finite State Machine" : "Non-Deterministic Finite State Machine";
 
     const api = automataApi[type];
 
