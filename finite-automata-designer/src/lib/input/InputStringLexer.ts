@@ -97,27 +97,27 @@ export function parseInputString(
         
     }
 
-    const notDefined: Array<string> = [];
+    const notDefined: Set<string> = new Set();
 
     // Validate that each token is in the alphabet
     for (const token of tokens) {
         // If a token is not in the alphabet, return an error
         if (!alphabet.has(token)) {
-            notDefined.push(token);
+            notDefined.add(token);
         }
     }
 
 
-    if(notDefined.length == 1){
+    if(notDefined.size == 1){
         return {
                 success: false,
-                error: `Symbol '${notDefined[0]}' is not in the alphabet. This input is invalid.`,
+                error: `Symbol ${setToString(notDefined)} is not in the alphabet. This input is invalid. Please check if you used any unnecessary spaces or commas.`,
             };
     }
-    else if(notDefined.length > 1){
+    else if(notDefined.size > 1){
         return {
                 success: false,
-                error: `Symbols '${notDefined.toString()}' are not in the alphabet. This input is invalid.`,
+                error: `Symbols ${setToString(notDefined)} are not in the alphabet. This input is invalid. Please check if you used any unnecessary spaces or commas.`,
             };
     }
     else{
@@ -125,4 +125,14 @@ export function parseInputString(
         return { success: true, tokens };
     }
     
+}
+
+function setToString(set: Set<string>){
+    let ret = "";
+    
+    for(const str of set){
+        ret += "\"" + str + "\",";
+    }
+    
+    return ret.slice(0,-1);
 }

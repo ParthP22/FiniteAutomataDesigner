@@ -130,15 +130,6 @@ export function nfaAlgo(input: string){
     return false;
   }
 
-  // First, we make sure the input string is legal. If it contains
-  // characters not defined in the alphabet, then we return false immediately.
-  for(const char of input){
-    if(!nfaTransitionSymbols.has(char)){
-      alert("Input contains \'" + char + "\', which is not in the alphabet");
-      return false;
-    }
-  }
-
   // This will contain the pointers that will be used in the next iteration
   // of the NFA algorithm.
   const nextPointers: Set<Circle> = new Set();  
