@@ -6,12 +6,20 @@ interface ToastNotificationProp {
     toastMsg: string;
     // How long the toast stays on screen, in milliseconds
     duration?: number;
+    // "green" for confirmations (default), "red" for errors
+    color?: "green" | "red";
     onClose?: () => void;
 }
+
+const colorStyles = {
+    green: { toast: "bg-[#9FE2BF]", button: "hover:bg-[#7BB094]" },
+    red: { toast: "bg-[#E1A1A1]", button: "hover:bg-[#B07B7B]" },
+} as const;
 
 export default function ToastNotification({
     toastMsg,
     duration = 2000,
+    color = "green",
     onClose,
 }: ToastNotificationProp) {
     const [visible, setVisible] = useState(true);
@@ -39,11 +47,11 @@ export default function ToastNotification({
 
     return(
         <div
-            className="animate-toast-in bg-[#9FE2BF] border rounded-lg fixed top-5 inset-x-0 z-50 mx-auto w-full max-w-md p-4 text-black text-center"
+            className={`animate-toast-in ${colorStyles[color].toast} border rounded-lg fixed top-5 inset-x-0 z-50 mx-auto w-full max-w-md p-4 text-black text-center`}
         >
             {toastMsg}
         <button
-            className="absolute top-1 right-1 rounded px-2 hover:bg-[#7bb094]"
+            className={`absolute top-1 right-1 rounded px-2 ${colorStyles[color].button}`}
             onClick={dismiss}
             >
             X
