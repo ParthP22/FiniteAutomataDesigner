@@ -243,8 +243,6 @@ export function dfsmAlgo(input: string){
         duration: 6000
       }
     }));
-    // alert("The string, \"" + tokens.toString() + "\", was accepted!");
-    //console.log("Accepted!");
     return true;
   }
   // Else, the final state we arrived at is not the end state,
@@ -257,8 +255,6 @@ export function dfsmAlgo(input: string){
         duration: 6000
       }
     }));
-    // alert("The string, \"" + tokens.toString() + "\", was rejected!");
-    //console.log("Rejected!");
     return false;
   }
 
