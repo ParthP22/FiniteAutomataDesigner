@@ -46,7 +46,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState<string | null>(null);
     const [description, setDescription] = useState<string | null>(null);
-    const [toast, setToast] = useState<{ id: number, message: string } | null>(null); 
+    const [toast, setToast] = useState<{ id: number, message: string, duration?: number } | null>(null);
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -87,10 +87,16 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     // Holds the toast notification subscriber
     useEffect(() => {
 
-        // This will listen for toast requests from the canvas script
+        // This will listen for toast requests from the canvas script.
+        // Dispatchers can pass an optional duration (ms) in the event detail
+        // to control how long the toast stays up; omitting it uses the default.
         const handler = (event: Event) => {
-            const customEvent = event as CustomEvent<{ message: string }>;
-            setToast(prev => ({ id: (prev?.id ?? 0) + 1, message: customEvent.detail.message }));
+            const customEvent = event as CustomEvent<{ message: string, duration?: number }>;
+            setToast(prev => ({
+                id: (prev?.id ?? 0) + 1,
+                message: customEvent.detail.message,
+                duration: customEvent.detail.duration,
+            }));
         }
 
         window.addEventListener("showToast", handler);
@@ -168,6 +174,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             <ToastNotification
                 key={toast.id}
                 toastMsg={toast.message}
+                duration={toast.duration}
                 onClose={() => setToast(null)}
             />
         )}
