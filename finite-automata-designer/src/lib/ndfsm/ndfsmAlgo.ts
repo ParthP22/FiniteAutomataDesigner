@@ -223,7 +223,8 @@ export function ndfsmAlgo(input: string){
   window.dispatchEvent(new CustomEvent("showToast", {
     detail: { 
       message: "The string, \"" + tokens.toString() + "\", was rejected!",
-      duration: 6000
+      duration: 6000,
+      color: "red"
     }
   }));
   nextPointers.clear();
