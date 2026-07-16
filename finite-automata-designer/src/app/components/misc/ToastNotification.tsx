@@ -11,6 +11,12 @@ interface ToastNotificationProp {
     onClose?: () => void;
 }
 
+// The event contract and showToast() dispatch helper live in the React-free
+// module src/lib/toast.ts so code compiled into the canvas bundles can import
+// them too; re-exported here so React callers can get everything in one place.
+export { SHOW_TOAST_EVENT, showToast } from "@/lib/toast";
+export type { ShowToastDetail } from "@/lib/toast";
+
 const colorStyles = {
     green: { toast: "bg-[#9FE2BF]", button: "hover:bg-[#7BB094]" },
     red: { toast: "bg-[#E1A1A1]", button: "hover:bg-[#B07B7B]" },
