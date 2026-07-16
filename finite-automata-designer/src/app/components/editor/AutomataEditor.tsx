@@ -36,7 +36,7 @@ import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { automataApi } from './api/automataApi';
 
 interface AutomataEditorProps {
-    type: "DFA" | "NFA";
+    type: "DFSM" | "NDFSM";
 }
 
 export default function AutomataEditor({ type }: AutomataEditorProps){
@@ -52,7 +52,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
 
-    const title: string = type === "DFA" ? "Deterministic Finite State Machine" : "Non-Deterministic Finite State Machine";
+    const title: string = type === "DFSM" ? "Deterministic Finite State Machine" : "Non-Deterministic Finite State Machine";
 
     const api = automataApi[type];
 
@@ -74,11 +74,11 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             setHasMultiCharAlphabet(hasMulti);
         }
 
-        // Ex: dfaAlphabetUpdated or nfaAlphabetUpdated, where "type" is either "DFA" or "NFA"
+        // Ex: dfsmAlphabetUpdated or ndfsmAlphabetUpdated, where "type" is either "DFSM" or "NDFSM"
         window.addEventListener(`${type.toLowerCase()}AlphabetUpdated`, handler);
 
         return () => {
-            // Ex: dfaAlphabetUpdated or nfaAlphabetUpdated, where "type" is either "DFA" or "NFA"
+            // Ex: dfsmAlphabetUpdated or ndfsmAlphabetUpdated, where "type" is either "DFSM" or "NDFSM"
             window.removeEventListener(`${type.toLowerCase()}AlphabetUpdated`, handler);
         }
 
@@ -134,9 +134,9 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, type.toUpperCase() as "DFA" | "NFA");
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, type.toUpperCase() as "DFSM" | "NDFSM");
             alert("Automaton saved!");
-            // Ex: /dfa?id=123 or /nfa?id=456, where "type" is either "DFA" or "NFA"
+            // Ex: /dfsm?id=123 or /ndfsm?id=456, where "type" is either "DFSM" or "NDFSM"
             router.push(`/${type.toLowerCase()}?id=${finiteAutomataData.id}`);
         }
         catch (error) {
@@ -186,7 +186,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
                 {/* Instructions dropdown */}
                 <Instructions 
-                    type={type.toUpperCase() as "DFA" | "NFA"}
+                    type={type.toUpperCase() as "DFSM" | "NDFSM"}
                 />
 
             </div>
@@ -195,7 +195,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             <div>
                 <div id="canvasDiv" className="flex flex-col text-black">
                     {/* Canvas for drawing FSM */}
-                    {/* Ex: id=DFACanvas or id=NFACanvas, where "type" is either "DFA" or "NFA" */}
+                    {/* Ex: id=DFSMCanvas or id=NDFSMCanvas, where "type" is either "DFSM" or "NDFSM" */}
                     <canvas id={`${type.toUpperCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
                     {/* Exporting dropdowns container */}
@@ -245,7 +245,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                     
                             {/* Run button to run the FA with the given input string */}
                             <RunButton 
-                                type={type.toUpperCase() as "DFA" | "NFA"}
+                                type={type.toUpperCase() as "DFSM" | "NDFSM"}
                             />
 
                             {/* My Projects button to open the projects page that will list all of the users project when logged in */}
@@ -270,7 +270,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         />
 
         <Script
-            // Ex: /scripts/dfa/dfaCanvas.js or /scripts/nfa/nfaCanvas.js, where "type" is either "DFA" or "NFA"
+            // Ex: /scripts/dfsm/dfsmCanvas.js or /scripts/ndfsm/ndfsmCanvas.js, where "type" is either "DFSM" or "NDFSM"
             src={`/scripts/${type.toLowerCase()}/${type.toLowerCase()}Canvas.js`}
             type="module"
             strategy="afterInteractive"

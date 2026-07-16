@@ -1,5 +1,5 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet, nfaTransitionSymbols, transitionLabelInputValidator } from "./nfaTransitionSymbols";
+import { alphabet, ndfsmTransitionSymbols, transitionLabelInputValidator } from "./ndfsmTransitionSymbols";
 import { Arrow, arrows } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
@@ -45,7 +45,7 @@ export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
     // it should not work, since "00" and "01" are not in the alphabet.
     for(const newTransition of newTransitions){
       
-      if(!nfaTransitionSymbols.has(newTransition)){
+      if(!ndfsmTransitionSymbols.has(newTransition)){
         lastEditedArrow.text = "";
         alert("\'" + newTransition + "\' has not been defined in the alphabet!");
         return false;
@@ -105,8 +105,8 @@ function epsilonTransitions(pointer: Circle, nextPointers: Set<Circle>){
 
 } 
 
-// This function runs the NFA algorithm on the given input string
-export function nfaAlgo(input: string){
+// This function runs the NDFSM algorithm on the given input string
+export function ndfsmAlgo(input: string){
 
   // Check if there is a start state and at least one accept state
   let acceptStateExists: boolean = false;
@@ -133,14 +133,14 @@ export function nfaAlgo(input: string){
   // First, we make sure the input string is legal. If it contains
   // characters not defined in the alphabet, then we return false immediately.
   for(const char of input){
-    if(!nfaTransitionSymbols.has(char)){
+    if(!ndfsmTransitionSymbols.has(char)){
       alert("Input contains \'" + char + "\', which is not in the alphabet");
       return false;
     }
   }
 
   // This will contain the pointers that will be used in the next iteration
-  // of the NFA algorithm.
+  // of the NDFSM algorithm.
   const nextPointers: Set<Circle> = new Set();  
 
   nextPointers.add(startState.pointsToCircle);
@@ -158,8 +158,8 @@ export function nfaAlgo(input: string){
   }
   const tokens = parseResult.tokens;
 
-  // Before beginning the NFA algorithm, we check if all transitions
-  // of the NFA are complete. If not, we return false immediately.
+  // Before beginning the NDFSM algorithm, we check if all transitions
+  // of the NDFSM are complete. If not, we return false immediately.
   if(!completenessCheck()){
     return false;
   }

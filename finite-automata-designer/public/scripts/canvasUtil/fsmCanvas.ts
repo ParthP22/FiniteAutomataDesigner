@@ -10,9 +10,9 @@
  Licensed under the MIT Licenses
 */
 
-// Shared controller for the DFA and NFA designer canvases.
+// Shared controller for the DFSM and NDFSM designer canvases.
 // Everything common to both canvases lives here; the per-automaton entry
-// points (dfa/dfaCanvas.ts and nfa/nfaCanvas.ts) supply the differences
+// points (dfsm/dfsmCanvas.ts and ndfsm/ndfsmCanvas.ts) supply the differences
 // through an FsmCanvasConfig.
 
 import { Circle, circles} from "../Shapes/Circle";
@@ -29,7 +29,7 @@ export interface FsmImporter {
 }
 
 export interface FsmCanvasConfig {
-  // "DFA" or "NFA" — used in export headers and user-facing messages
+  // "DFSM" or "NDFSM" — used in export headers and user-facing messages
   automatonLabel: string;
   // id of the <canvas> element for this automaton's page
   canvasId: string;

@@ -40,7 +40,7 @@ export interface CreateAutomaton {
     user_id: string;
     name?: string | null;
     description?: string | null;
-    type: "DFA" | "NFA";
+    type: "DFSM" | "NDFSM";
     automaton: SerializedFA;
 }
 

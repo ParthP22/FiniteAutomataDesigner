@@ -2,11 +2,11 @@
 // import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 // export default {
-//   input: {dfa: "public/scripts/dfaCanvas.ts", nfa: "public/scripts/nfaCanvas.ts"},
+//   input: {dfsm: "public/scripts/dfsmCanvas.ts", ndfsm: "public/scripts/ndfsmCanvas.ts"},
 //   output: {
-//     // file: {dfa: 'public/scripts/dfaCanvas.js', nfa: 'public/scripts/nfaCanvas.js'},
+//     // file: {dfsm: 'public/scripts/dfsmCanvas.js', ndfsm: 'public/scripts/ndfsmCanvas.js'},
 //     // format: 'iife',
-//     // name: {dfa: 'DfaCanvas', nfa: 'NfaCanvas'},
+//     // name: {dfsm: 'DfsmCanvas', ndfsm: 'NdfsmCanvas'},
 //     dir: "public/scripts/",
 //     format: "esm",
 //     entryFileNames: "[name]Canvas.js",
@@ -35,7 +35,7 @@ export default {
   output: {
     file: 'public/scripts/ndfsm/ndfsmCanvas.js',
     format: 'iife',
-    name: 'NfaCanvas'
+    name: 'NdfsmCanvas'
   },
   plugins: [
     nodeResolve(),

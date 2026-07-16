@@ -13,39 +13,39 @@
 // Command to compile this file into JS
 // npm run build:canvas
 
-// All canvas behavior shared with the NFA designer lives in
-// canvasUtil/fsmCanvas.ts. This file supplies the DFA-specific pieces
+// All canvas behavior shared with the NDFSM designer lives in
+// canvasUtil/fsmCanvas.ts. This file supplies the DFSM-specific pieces
 // plus the database save/load hooks exposed on window.
 
 import { circles } from "../Shapes/Circle";
 import { arrows } from "../Shapes/Arrow";
 import { startState, setStartState } from "../Shapes/EntryArrow";
-import { dfaAlgo, transitionDeterminismCheck } from "../../../src/lib/dfa/dfaAlgo";
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfa/dfaTransitionSymbols";
+import { dfsmAlgo, transitionDeterminismCheck } from "../../../src/lib/dfsm/dfsmAlgo";
+import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/dfsm/dfsmTransitionSymbols";
 import { Importer } from "./importing/importer";
 import { serializeFA } from "@/lib/shared/serializer/serializeFA";
 import { deserializeFA } from "@/lib/shared/deserializer/deserializeFA";
 import { SerializedFA } from "@/lib/shared/types";
 import { initFsmCanvas, clearAutomaton } from "../canvasUtil/fsmCanvas";
 
-// Holds the draw function of the currently mounted canvas so that a DFA
+// Holds the draw function of the currently mounted canvas so that a DFSM
 // loaded from the database can trigger a repaint.
 let drawRef: (() => void) | null = null;
 
 // Automaton data that arrived before the canvas finished mounting.
-let pendingDFA: SerializedFA | null = null;
+let pendingDFSM: SerializedFA | null = null;
 
-window.loadDFAIntoCanvas = function(data: SerializedFA){
+window.loadDFSMIntoCanvas = function(data: SerializedFA){
 
   if(!drawRef){
-    pendingDFA = data;
+    pendingDFSM = data;
     return;
   }
 
-  loadSerializedDFA(data);
+  loadSerializedDFSM(data);
 }
 
-window.exportDFA = function(){
+window.exportDFSM = function(){
   return serializeFA(
     alphabet,
     circles,
@@ -55,11 +55,11 @@ window.exportDFA = function(){
 }
 
 initFsmCanvas({
-  automatonLabel: "DFA",
-  canvasId: "DFACanvas",
-  runBtnId: "dfaRunBtn",
-  alphabetUpdatedEventName: "dfaAlphabetUpdated",
-  runAlgo: dfaAlgo,
+  automatonLabel: "DFSM",
+  canvasId: "DFSMCanvas",
+  runBtnId: "dfsmRunBtn",
+  alphabetUpdatedEventName: "dfsmAlphabetUpdated",
+  runAlgo: dfsmAlgo,
   commitTransition: transitionDeterminismCheck,
   getAlphabet: () => alphabet,
   setAlphabet,
@@ -68,16 +68,16 @@ initFsmCanvas({
   onCanvasReady: (draw) => {
     drawRef = draw;
 
-    if(pendingDFA){
-      loadSerializedDFA(pendingDFA);
-      pendingDFA = null;
+    if(pendingDFSM){
+      loadSerializedDFSM(pendingDFSM);
+      pendingDFSM = null;
       draw();
     }
   },
 });
 
-function loadSerializedDFA(data: SerializedFA){
-  const canvas = document.getElementById("DFACanvas") as HTMLCanvasElement;
+function loadSerializedDFSM(data: SerializedFA){
+  const canvas = document.getElementById("DFSMCanvas") as HTMLCanvasElement;
 
   clearAutomaton(canvas);
 

@@ -6,7 +6,7 @@ export default {
   output: {
     file: 'public/scripts/dfsm/dfsmCanvas.js',
     format: 'iife',
-    name: 'DfaCanvas'
+    name: 'DfsmCanvas'
   },
   plugins: [
     nodeResolve(),

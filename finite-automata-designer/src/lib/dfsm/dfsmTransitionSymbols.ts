@@ -1,4 +1,4 @@
-// The alphabet defines every character that can be used in the DFA.
+// The alphabet defines every character that can be used in the DFSM.
 
 import { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
 

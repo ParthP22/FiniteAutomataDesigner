@@ -2,11 +2,11 @@ import { Circle } from "../../Shapes/Circle";
 import { Arrow } from "../../Shapes/Arrow";
 import { SelfArrow } from "../../Shapes/SelfArrow";
 import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
-import { setAlphabet } from "../../../../src/lib/nfa/nfaTransitionSymbols";
-import { commitTransition } from "@/lib/nfa/nfaAlgo";
+import { setAlphabet } from "../../../../src/lib/ndfsm/ndfsmTransitionSymbols";
+import { commitTransition } from "@/lib/ndfsm/ndfsmAlgo";
 
 const startsWith = {
-    NFA: 'Automaton: NFA',
+    NDFSM: 'Automaton: NDFSM',
     ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
@@ -48,17 +48,17 @@ export class Importer {
             }
         }
         
-        // Check to be sure that you are importing an NFA
-        let isNFA: boolean = false;
+        // Check to be sure that you are importing an NDFSM
+        let isNDFSM: boolean = false;
         for(let rawData = 0; rawData < parsedData.length; rawData++){
             const raw = parsedData[rawData];
-            if(raw.startsWith(startsWith.NFA)){
-                isNFA = true;
+            if(raw.startsWith(startsWith.NDFSM)){
+                isNDFSM = true;
                 break;
             }
         }
 
-        if(!isNFA){
+        if(!isNDFSM){
             return false;
         }
 

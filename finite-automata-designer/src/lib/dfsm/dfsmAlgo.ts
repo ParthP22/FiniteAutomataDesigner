@@ -1,5 +1,5 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet, transitionLabelInputValidator } from "./dfaTransitionSymbols";
+import { alphabet, transitionLabelInputValidator } from "./dfsmTransitionSymbols";
 import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
@@ -114,7 +114,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
 // }
 
 // This is a "completeness" check: were all characters of the
-// alphabet used when building the DFA? This is processed
+// alphabet used when building the DFSM? This is processed
 // every time we input a string.
 export function inputDeterminismCheck(){
   
@@ -168,7 +168,7 @@ export function inputDeterminismCheck(){
   return true;
 }
 
-export function dfaAlgo(input: string){
+export function dfsmAlgo(input: string){
   let acceptStateExists: boolean = false;
   for(const circle of circles){
     if(circle.isAccept){
@@ -198,10 +198,10 @@ export function dfaAlgo(input: string){
   }
   const tokens = parseResult.tokens;
 
-  // This "curr" variable will be used to traverse over the whole DFA
+  // This "curr" variable will be used to traverse over the whole DFSM
   let curr: Circle = startState.pointsToCircle;
 
-  // We check if the DFA has been defined correctly. If not, then return false.
+  // We check if the DFSM has been defined correctly. If not, then return false.
   if(!inputDeterminismCheck()){
     return false;
   }

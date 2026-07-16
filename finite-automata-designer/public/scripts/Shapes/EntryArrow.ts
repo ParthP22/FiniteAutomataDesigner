@@ -30,7 +30,7 @@ export function setStartState(newEntryArrow: EntryArrow | null){
 }
 
 export class EntryArrow {
-  pointsToCircle: Circle; // The startState of the DFA which this arrow points to
+  pointsToCircle: Circle; // The startState of the DFSM which this arrow points to
   deltaX: number;
   deltaY: number;
   // text: string;

@@ -2,11 +2,11 @@ import { Circle } from "../../Shapes/Circle";
 import { Arrow } from "../../Shapes/Arrow";
 import { SelfArrow } from "../../Shapes/SelfArrow";
 import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
-import { transitionDeterminismCheck } from "../../../../src/lib/dfa/dfaAlgo";
-import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
+import { transitionDeterminismCheck } from "../../../../src/lib/dfsm/dfsmAlgo";
+import { setAlphabet } from "../../../../src/lib/dfsm/dfsmTransitionSymbols";
 
 const startsWith = {
-    DFA: 'Automaton: DFA',
+    DFSM: 'Automaton: DFSM',
     ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
@@ -48,17 +48,17 @@ export class Importer {
             }
         }
 
-        // Check to be sure that you are importing an NFA
-        let isDFA: boolean = false;
+        // Check to be sure that you are importing a DFSM
+        let isDFSM: boolean = false;
         for(let rawData = 0; rawData < parsedData.length; rawData++){
             const raw = parsedData[rawData];
-            if(raw.startsWith(startsWith.DFA)){
-                isDFA = true;
+            if(raw.startsWith(startsWith.DFSM)){
+                isDFSM = true;
                 break;
             }
         }
 
-        if(!isDFA){
+        if(!isDFSM){
             return false;
         }
 

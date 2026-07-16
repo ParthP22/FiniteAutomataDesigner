@@ -7,14 +7,14 @@ import { Arrow } from "../../../../public/scripts/Shapes/Arrow"
 import { EntryArrow } from "../../../../public/scripts/Shapes/EntryArrow"
 import { SelfArrow } from "../../../../public/scripts/Shapes/SelfArrow"
 
-export type DFAObjects = {
+export type DFSMObjects = {
   circles: Circle[],
   arrows: (Arrow | SelfArrow)[],
   entryArrow: EntryArrow,
   alphabet: Set<string>,
 }
 
-export function deserializeFA(data: SerializedFA): DFAObjects {
+export function deserializeFA(data: SerializedFA): DFSMObjects {
 
   const circles: Circle[] = []
   const arrows: (Arrow | SelfArrow)[] = []
