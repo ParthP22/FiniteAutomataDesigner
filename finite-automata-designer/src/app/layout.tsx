@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "FSM Designer",
-  description: "Design and experiment with DFA and NFAs",
+  description: "Design and experiment with DFSM and NFSMs",
 };
 
 export default async function RootLayout({ children }: {
