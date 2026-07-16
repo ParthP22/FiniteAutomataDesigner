@@ -209,15 +209,23 @@ export function ndfsmAlgo(input: string){
   // of the current pointers are in an accept state.
   for(const pointer of nextPointers){
     if(pointer !== undefined && pointer.isAccept){
-      alert("The string, \"" + tokens.toString() + "\", was accepted!");
-      //console.log("Accepted!");
+      window.dispatchEvent(new CustomEvent("showToast", {
+        detail: { 
+          message: "The string, \"" + tokens.toString() + "\", was accepted!",
+          duration: 6000
+        }
+      }));
       nextPointers.clear();
       return true;
     }
   }
   
-  alert("The string, \"" + tokens.toString() + "\", was rejected!");
-  //console.log("Rejected!");
+  window.dispatchEvent(new CustomEvent("showToast", {
+    detail: { 
+      message: "The string, \"" + tokens.toString() + "\", was rejected!",
+      duration: 6000
+    }
+  }));
   nextPointers.clear();
   return false;
 }
