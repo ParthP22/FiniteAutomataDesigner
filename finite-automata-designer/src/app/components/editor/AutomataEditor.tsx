@@ -25,6 +25,7 @@ import ClearCanvasButton from "./ClearCanvasButton";
 import BackButton from "./BackButton";
 import SaveActions from './SaveActions';
 import SaveProjectModal from "../projects/SaveProjectModal";
+import ToastNotification from "../misc/ToastNotification";
 
 {/* Database/Serialization */}
 import { SerializedFA } from '@/lib/shared/types';
@@ -45,6 +46,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState<string | null>(null);
     const [description, setDescription] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ id: number, message: string } | null>(null); 
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -81,6 +83,23 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         }
 
     }, [alphabetInput, type]);
+
+    // Holds the toast notification subscriber
+    useEffect(() => {
+
+        // This will listen for toast requests from the canvas script
+        const handler = (event: Event) => {
+            const customEvent = event as CustomEvent<{ message: string }>;
+            setToast(prev => ({ id: (prev?.id ?? 0) + 1, message: customEvent.detail.message }));
+        }
+
+        window.addEventListener("showToast", handler);
+
+        return () => {
+            window.removeEventListener("showToast", handler);
+        }
+
+    }, []);
 
     useEffect(() => {
         // Clear stale pending data whenever the target id changes
@@ -142,6 +161,15 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
     return (
       <main className="min-h-screen bg-blue-100 flex flex-col items-center">
+        {/* Toast notification, shown when the canvas script requests one */}
+        {toast && (
+            <ToastNotification
+                key={toast.id}
+                toastMsg={toast.message}
+                onClose={() => setToast(null)}
+            />
+        )}
+
         {/* FA title at the top */}
         <AutomataHeader
             title={!name ? title : (type.toUpperCase() + ": " + name)}
