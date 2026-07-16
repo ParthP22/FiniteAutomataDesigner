@@ -692,6 +692,10 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             alphabetInput.value = "";
 
             updateAlphabetLabel(alphabetLabel);
+            // Notify the React page so it can show a toast confirming the alphabet update
+            window.dispatchEvent(new CustomEvent("showToast", {
+              detail: { message: "Alphabet updated!" }
+            }));
           }
         });
       }
