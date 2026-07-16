@@ -7,7 +7,8 @@ export async function saveAutomaton(
     serializedFA: SerializedDFSM | SerializedNDFSM, 
     name: string | null, 
     description: string | null, 
-    type: "DFSM" | "NDFSM"
+    // Database value — legacy DFA/NFA names, see CreateAutomaton in shared/types
+    type: "DFA" | "NFA"
 ){
     const supabase = createClient();
 

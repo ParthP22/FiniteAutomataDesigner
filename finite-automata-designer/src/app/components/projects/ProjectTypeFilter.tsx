@@ -1,6 +1,8 @@
 "use client";
 
-export type ProjectType = "all" | "DFSM" | "NDFSM";
+// Filter values match the type names stored in the database, which keep the
+// legacy DFA/NFA spelling; the buttons display the renamed DFSM/NDFSM labels.
+export type ProjectType = "all" | "DFA" | "NFA";
 
 interface ProjectTypeFilterProps{
     filterType: ProjectType;
@@ -25,9 +27,9 @@ export default function ProjectTypeFilter({
             </button>
 
             <button
-                onClick={() => onFilterChange("DFSM")}
+                onClick={() => onFilterChange("DFA")}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    filterType === "DFSM"
+                    filterType === "DFA"
                         ? "bg-blue-100 text-blue-700 font-semibold border border-blue-700/100"
                         : "bg-gray-200 text-gray-700 hover:bg-blue-300 hover:text-blue-700"
                 }`}
@@ -36,9 +38,9 @@ export default function ProjectTypeFilter({
             </button>
 
             <button
-                onClick={() => onFilterChange("NDFSM")}
+                onClick={() => onFilterChange("NFA")}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    filterType === "NDFSM"
+                    filterType === "NFA"
                         ? "bg-purple-100 text-purple-700 font-semibold border border-purple-700/100"
                         : "bg-gray-200 text-gray-700 hover:bg-purple-300 hover:text-purple-700"
                 }`}

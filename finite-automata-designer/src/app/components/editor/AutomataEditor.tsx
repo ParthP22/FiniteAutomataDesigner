@@ -134,7 +134,9 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         console.log(serialized);
 
         try{
-            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, type.toUpperCase() as "DFSM" | "NDFSM");
+            // The database stores the legacy DFA/NFA type names; map the UI name here
+            const dbType = type === "DFSM" ? "DFA" as const : "NFA" as const;
+            const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, dbType);
             alert("Automaton saved!");
             // Ex: /dfsm?id=123 or /ndfsm?id=456, where "type" is either "DFSM" or "NDFSM"
             router.push(`/${type.toLowerCase()}?id=${finiteAutomataData.id}`);

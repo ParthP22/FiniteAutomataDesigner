@@ -40,7 +40,9 @@ export interface CreateAutomaton {
     user_id: string;
     name?: string | null;
     description?: string | null;
-    type: "DFSM" | "NDFSM";
+    // Stored values in the database keep the legacy DFA/NFA names so existing
+    // rows stay valid; the UI maps them to DFSM/NDFSM at the display boundary.
+    type: "DFA" | "NFA";
     automaton: SerializedFA;
 }
 
