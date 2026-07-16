@@ -48,7 +48,7 @@ export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
       
       if(!ndfsmTransitionSymbols.has(newTransition)){
         lastEditedArrow.text = "";
-        alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+        showToast("\'" + newTransition + "\' has not been defined in the alphabet!", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -68,7 +68,7 @@ export function completenessCheck(){
   for(const arrow of arrows){
     if(arrow instanceof Arrow || arrow instanceof SelfArrow){
       if(arrow.transition.size === 0){
-        alert("Arrow from " + arrow.startCircle.text + " to " + arrow.endCircle.text + " has no transition!");
+        showToast("Arrow from " + arrow.startCircle.text + " to " + arrow.endCircle.text + " has no transition!", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -119,15 +119,15 @@ export function ndfsmAlgo(input: string){
   }
 
   if(startState === null && !acceptStateExists){
-    alert("Start state and accept states are both undefined!");
+    showToast("Start state and accept states are both undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(startState === null){
-    alert("Start state undefined!");
+    showToast("Start state undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(!acceptStateExists){
-    alert("Accept state undefined!");
+    showToast("Accept state undefined!", { color: "red", duration: 6000 });
     return false;
   }
 
@@ -135,7 +135,7 @@ export function ndfsmAlgo(input: string){
   // characters not defined in the alphabet, then we return false immediately.
   for(const char of input){
     if(!ndfsmTransitionSymbols.has(char)){
-      alert("Input contains \'" + char + "\', which is not in the alphabet");
+      showToast("Input contains \'" + char + "\', which is not in the alphabet", { color: "red", duration: 6000 });
       return false;
     }
   }
@@ -154,7 +154,7 @@ export function ndfsmAlgo(input: string){
 
   // If parsing failed, alert the user and return false
   if (!parseResult.success) {
-    alert(parseResult.error);
+    showToast(parseResult.error, { color: "red", duration: 6000 });
     return false;
   }
   const tokens = parseResult.tokens;

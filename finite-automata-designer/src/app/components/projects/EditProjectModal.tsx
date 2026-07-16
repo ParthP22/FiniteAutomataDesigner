@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { showToast } from "@/lib/toast";
 
 interface EditProjectModalProps{
     id: string;
@@ -37,7 +38,7 @@ export function EditProjectModal({
         }
         catch(error){
             console.error(error);
-            alert("Failed to save changes: " + error);
+            showToast("Failed to save changes: " + error, { color: "red", duration: 6000 });
         }
         finally{
             setIsSaving(false);

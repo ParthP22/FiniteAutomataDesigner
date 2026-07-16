@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { showToast } from "@/lib/toast";
 
 interface DeleteProjectModalProps{
     name: string;
@@ -22,7 +23,7 @@ export function DeleteProjectModal({
         } 
         catch(error){
             console.error(error);
-            alert("Failed to delete project: " + error);
+            showToast("Failed to delete project: " + error, { color: "red", duration: 6000 });
         }
         finally {
             setIsDeleting(false);

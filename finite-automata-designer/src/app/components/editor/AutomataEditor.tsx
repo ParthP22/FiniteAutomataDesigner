@@ -25,7 +25,7 @@ import ClearCanvasButton from "./ClearCanvasButton";
 import BackButton from "./BackButton";
 import SaveActions from './SaveActions';
 import SaveProjectModal from "../projects/SaveProjectModal";
-import ToastNotification, { SHOW_TOAST_EVENT, ShowToastDetail } from "../misc/ToastNotification";
+import ToastNotification, { SHOW_TOAST_EVENT, ShowToastDetail, showToast } from "../misc/ToastNotification";
 
 {/* Database/Serialization */}
 import { SerializedFA } from '@/lib/shared/types';
@@ -145,13 +145,13 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             // The database stores the legacy DFA/NFA type names; map the UI name here
             const dbType = type === "DFSM" ? "DFA" as const : "NFA" as const;
             const finiteAutomataData = await saveAutomaton(serialized, newName, newDescription, dbType);
-            alert("Automaton saved!");
+            showToast("Automaton saved!");
             // Ex: /dfsm?id=123 or /ndfsm?id=456, where "type" is either "DFSM" or "NDFSM"
             router.push(`/${type.toLowerCase()}?id=${finiteAutomataData.id}`);
         }
         catch (error) {
             console.error(error);
-            alert("Save failed: " + error);
+            showToast("Save failed: " + error, { color: "red", duration: 6000 });
         }
     }
 
@@ -161,11 +161,11 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
         try{
             await updateAutomaton(automatonId, serialized);
-            alert("Automaton saved!");
+            showToast("Automaton saved!");
         }
         catch (err) {
             console.error(err);
-            alert("Save failed.");
+            showToast("Save failed.", { color: "red", duration: 6000 });
         }
     }
 

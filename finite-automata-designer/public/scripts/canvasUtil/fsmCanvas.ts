@@ -347,7 +347,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               if (config.getValidator().handleChar(event.key)) {
                 selectedObj.text += event.key;
               } else {
-                alert(`'${config.getValidator().getBuffer() + event.key}' is not defined in the alphabet!`);
+                showToast(`'${config.getValidator().getBuffer() + event.key}' is not defined in the alphabet!`, { color: "red", duration: 6000 });
               }
             }
             // Else, the selectedObj must be Circle, which we can type anything for
@@ -537,10 +537,10 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
                 const importer = config.createImporter(circles, arrows, textArea.value, drawFunc!);
                 const valid = importer.convert();
                 if(!valid){
-                  alert(`Import failed. Please check if you are importing a ${config.automatonLabel}.`);
+                  showToast(`Import failed. Please check if you are importing a ${config.automatonLabel}.`, { color: "red", duration: 6000 });
                 }
               } else {
-                alert(`Failure to import ${config.automatonLabel}`);
+                showToast(`Failure to import ${config.automatonLabel}`, { color: "red", duration: 6000 });
               }
             }
           }

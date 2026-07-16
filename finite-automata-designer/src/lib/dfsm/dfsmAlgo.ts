@@ -52,7 +52,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
       
       if(!alphabet.has(newTransition)){
         lastEditedArrow.text = "";
-        alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+        showToast("\'" + newTransition + "\' has not been defined in the alphabet!", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -85,11 +85,11 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     }
 
     if(existingTransitions.length == 1){
-      alert("This translation violates determinism since \'" + existingTransitions[0] + "\' is already present for an outgoing arrow of this node");
+      showToast("This translation violates determinism since \'" + existingTransitions[0] + "\' is already present for an outgoing arrow of this node", { color: "red", duration: 6000 });
       return false;
     }
     else if(existingTransitions.length > 1){
-      alert("This translation violates determinism since \'" + existingTransitions.toString() + "\' are already present for an outgoing arrows of this node");
+      showToast("This translation violates determinism since \'" + existingTransitions.toString() + "\' are already present for an outgoing arrows of this node", { color: "red", duration: 6000 });
       return false;
     }
     else{
@@ -150,7 +150,7 @@ export function inputDeterminismCheck(){
 					// then immediately return false, since it violates
 					// determinism.
           if(!alphabet.has(transition)){
-            alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
+            showToast("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet", { color: "red", duration: 6000 });
             return false;
           }
         }
@@ -160,7 +160,7 @@ export function inputDeterminismCheck(){
 			// arrows of this state, and the current character in the alphabet
 			// was not found to be a transition at all, then it fails determinism
       if(!exists){
-        alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
+        showToast(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -179,22 +179,22 @@ export function dfsmAlgo(input: string){
   }
 
   if(startState === null && !acceptStateExists){
-    alert("Start state and accept states are both undefined!");
+    showToast("Start state and accept states are both undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(startState === null){
-    alert("Start state undefined!");
+    showToast("Start state undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(!acceptStateExists){
-    alert("Accept state undefined!");
+    showToast("Accept state undefined!", { color: "red", duration: 6000 });
     return false;
   }
 
   const parseResult = parseInputString(input, alphabet, transitionLabelInputValidator);
 
   if (!parseResult.success) {
-    alert(parseResult.error);
+    showToast(parseResult.error, { color: "red", duration: 6000 });
     return false;
   }
   const tokens = parseResult.tokens;
