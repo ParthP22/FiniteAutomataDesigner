@@ -25,7 +25,7 @@ import ClearCanvasButton from "./ClearCanvasButton";
 import BackButton from "./BackButton";
 import SaveActions from './SaveActions';
 import SaveProjectModal from "../projects/SaveProjectModal";
-import ToastNotification from "../misc/ToastNotification";
+import ToastNotification, { SHOW_TOAST_EVENT, ShowToastDetail } from "../misc/ToastNotification";
 
 {/* Database/Serialization */}
 import { SerializedFA } from '@/lib/shared/types';
@@ -87,12 +87,12 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     // Holds the toast notification subscriber
     useEffect(() => {
 
-        // This will listen for toast requests from the canvas script.
-        // Dispatchers can pass an optional duration (ms) to control how long
-        // the toast stays up and an optional color ("green" | "red", e.g. red
-        // for errors); omitting either uses the defaults (2s, green).
+        // This will listen for toast requests, dispatched either through the
+        // showToast() helper (React code) or manually (canvas scripts).
+        // Optional duration (ms) and color ("green" | "red") in the detail
+        // override the defaults (2s, green).
         const handler = (event: Event) => {
-            const customEvent = event as CustomEvent<{ message: string, duration?: number, color?: "green" | "red" }>;
+            const customEvent = event as CustomEvent<ShowToastDetail>;
             setToast(prev => ({
                 id: (prev?.id ?? 0) + 1,
                 message: customEvent.detail.message,
@@ -101,10 +101,10 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             }));
         }
 
-        window.addEventListener("showToast", handler);
+        window.addEventListener(SHOW_TOAST_EVENT, handler);
 
         return () => {
-            window.removeEventListener("showToast", handler);
+            window.removeEventListener(SHOW_TOAST_EVENT, handler);
         }
 
     }, []);

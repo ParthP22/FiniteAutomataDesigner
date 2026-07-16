@@ -4,6 +4,7 @@ import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { parseInputString } from "../input/InputStringLexer";
+import { showToast } from "../toast";
 
 // I haven't figured out how to stop compiling the imports into JS, so here's a command
 // to get rid of them once you cd into their directory lol:
@@ -237,25 +238,14 @@ export function dfsmAlgo(input: string){
 	// that means the string was accepted.
   if(curr.isAccept){
     // Notify the React page so it can show a toast confirming the string was accepted
-    window.dispatchEvent(new CustomEvent("showToast", {
-      detail: { 
-        message: "The string, \"" + tokens.toString() + "\", was accepted!",
-        duration: 6000
-      }
-    }));
+    showToast( "The string, \"" + tokens.toString() + "\", was accepted!", { duration: 6000 });
     return true;
   }
   // Else, the final state we arrived at is not the end state,
 	// which means the string was rejected. 
   else{
     // Notify the React page so it can show a toast confirming the string was rejected
-    window.dispatchEvent(new CustomEvent("showToast", {
-      detail: { 
-        message: "The string, \"" + tokens.toString() + "\", was rejected!",
-        duration: 6000,
-        color: "red"
-      }
-    }));
+    showToast("The string, \"" + tokens.toString() + "\", was rejected!", { duration: 6000, color: "red" });
     return false;
   }
 

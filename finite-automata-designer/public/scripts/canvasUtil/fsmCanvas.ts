@@ -23,6 +23,7 @@ import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
 import { saveAsSVG, saveAsLaTeX, toggle_visiblity } from "./canvasUtil";
 import type { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
+import { showToast } from "@/lib/toast";
 
 export interface FsmImporter {
   convert(): boolean;
@@ -693,9 +694,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
 
             updateAlphabetLabel(alphabetLabel);
             // Notify the React page so it can show a toast confirming the alphabet updated
-            window.dispatchEvent(new CustomEvent("showToast", {
-              detail: { message: "Alphabet updated!" }
-            }));
+            showToast("Alphabet Updated!");
           }
         });
       }
@@ -768,10 +767,9 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               const textToCopy = outputTextArea.value;
               await navigator.clipboard.writeText(textToCopy);
               // Notify the React page so it can show a toast confirming the copy
-              window.dispatchEvent(new CustomEvent("showToast", {
-                detail: { message: "Copied to clipboard!" }
-              }));
+              showToast("Copied to clipboard!");
             } catch (err) {
+              showToast(`Failed to copy: ${err}`)
               console.log("Failed to copy: ", err)
             }
           }
@@ -813,6 +811,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
       if (clearCanvasBtn) {
         clearCanvasBtn.addEventListener("click", () => {
           clearAutomaton(canvas);
+          showToast('Canvas Cleared!')
         })
       }
 

@@ -5,6 +5,7 @@ import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { Queue } from "../data-structures/";
 import { parseInputString } from "../input/InputStringLexer";
+import { showToast } from "../toast";
 
 
 // Commits the transition to a given Arrow or SelfArrow after validating it.
@@ -209,24 +210,13 @@ export function ndfsmAlgo(input: string){
   // of the current pointers are in an accept state.
   for(const pointer of nextPointers){
     if(pointer !== undefined && pointer.isAccept){
-      window.dispatchEvent(new CustomEvent("showToast", {
-        detail: { 
-          message: "The string, \"" + tokens.toString() + "\", was accepted!",
-          duration: 6000
-        }
-      }));
+      showToast("The string, \"" + tokens.toString() + "\", was accepted!", { duration: 6000 });
+    
       nextPointers.clear();
       return true;
     }
   }
-  
-  window.dispatchEvent(new CustomEvent("showToast", {
-    detail: { 
-      message: "The string, \"" + tokens.toString() + "\", was rejected!",
-      duration: 6000,
-      color: "red"
-    }
-  }));
+  showToast("The string, \"" + tokens.toString() + "\", was rejected!", { duration: 6000, color: "red" });
   nextPointers.clear();
   return false;
 }
