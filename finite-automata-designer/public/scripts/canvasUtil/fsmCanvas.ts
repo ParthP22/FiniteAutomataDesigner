@@ -756,13 +756,17 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         });
       }
 
-      // Copies the output created from the export to your clipboard NOTE FOR FUTURE: Some indicator that it has been copied to your clipboard
+      // Copies the output created from the export to your clipboard
       if (copyOutputBtn) {
         copyOutputBtn.addEventListener('click', async () => {
           if (outputTextArea) {
             try {
               const textToCopy = outputTextArea.value;
               await navigator.clipboard.writeText(textToCopy);
+              // Notify the React page so it can show a toast confirming the copy
+              window.dispatchEvent(new CustomEvent("showToast", {
+                detail: { message: "Copied to clipboard!" }
+              }));
             } catch (err) {
               console.log("Failed to copy: ", err)
             }
