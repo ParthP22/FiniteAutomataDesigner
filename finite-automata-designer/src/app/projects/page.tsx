@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiniteAutomaton } from "@/lib/shared/types";
 import { getUserAutomata } from "@/lib/automata/queries";
-import ProjectCard from "../components/projects/ProjectCard";
 import { deleteAutomaton, editAutomaton } from "@/lib/automata/mutations";
 import { DeleteProjectModal } from "../components/projects/DeleteProjectModal";
 import { EditProjectModal } from "../components/projects/EditProjectModal";
@@ -12,6 +11,7 @@ import SearchBar from "../components/projects/SearchBar";
 import SortBar, { SortBy, SortDirection } from "../components/projects/SortBar";
 import { useProjectFiltering } from "../hooks/useProjectFiltering";
 import ProjectTypeFilter, { ProjectType } from "../components/projects/ProjectTypeFilter";
+import ProjectGrid from "../components/projects/ProjectGrid";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -118,30 +118,6 @@ export default function AutomataPage() {
                     </h1>
                 </div>
 
-                {/* <div className="mb-8 rounded-xl bg-white p-4 shadow">
-                  <div className="flex items-center justify-between gap-4 pb-4">
-                      <SearchBar
-                          searchTerms={searchTerms}
-                          placeholderText="Search projects..."
-                          onChange={setSearchTerms}
-                      />
-
-                      <SortBar 
-                          sortBy={sortBy}
-                          sortDirection={sortDirection}
-                          onSortByChange={(sortBy: SortBy) => setSortBy(sortBy)}
-                          onDirectionChange={(direction: SortDirection) => setSortDirection(direction)}
-                      />
-                  </div>
-
-                  <div>
-                      <ProjectTypeFilter
-                        filterType={filterType}
-                        onFilterChange={(filterType: ProjectType) => setFilterType(filterType)}
-                      />
-                  </div>
-                </div> */}
-
                 <div className="flex items-center justify-between gap-4 pb-4 mb-8 rounded-xl bg-white p-4 shadow">
                     <SearchBar
                         searchTerms={searchTerms}
@@ -162,44 +138,12 @@ export default function AutomataPage() {
                     />
                 </div>
 
-                {machines.length === 0 && (
-                    <div className="bg-white rounded-xl shadow p-10 text-center">
-                        <h2 className="text-2xl font-semibold text-gray-700 mb-2">
-                            No Projects Yet
-                        </h2>
-
-                        <p className="text-gray-500">
-                            Create your first automaton to get started.
-                        </p>
-                    </div>
-                )}
-
-                {visibleProjects.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {visibleProjects.map((machine) => (
-                            <ProjectCard
-                                key={machine.id}
-                                id={machine.id}
-                                name={machine.name}
-                                description={machine.description}
-                                type={machine.type}
-                                onDelete={() => setDeletingProject(machine)}
-                                onEdit={() => setEditingProject(machine)}
-                            />
-                        ))}
-                    </div>
-                  ) : (
-                    <div className="bg-white rounded-xl shadow p-10 text-center">
-                          <h2 className="text-2xl font-semibold text-gray-700 mb-2">
-                              No Projects Found
-                          </h2>
-
-                          <p className="text-gray-500">
-                              Try a different search term.
-                          </p>
-                      </div>
-                  )
-                }
+                <ProjectGrid 
+                  totalProjects={machines.length}
+                  visibleProjects={visibleProjects}
+                  onDelete={setDeletingProject}
+                  onEdit={setEditingProject}
+                />
             </div>
 
             { deletingProject &&
