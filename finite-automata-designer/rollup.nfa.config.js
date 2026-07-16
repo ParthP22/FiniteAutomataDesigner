@@ -31,9 +31,9 @@ import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default {
-  input: 'public/scripts/nfa/nfaCanvas.ts',
+  input: 'public/scripts/ndfsm/ndfsmCanvas.ts',
   output: {
-    file: 'public/scripts/nfa/nfaCanvas.js',
+    file: 'public/scripts/ndfsm/ndfsmCanvas.js',
     format: 'iife',
     name: 'NfaCanvas'
   },
