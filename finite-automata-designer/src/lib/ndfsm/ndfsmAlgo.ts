@@ -131,15 +131,6 @@ export function ndfsmAlgo(input: string){
     return false;
   }
 
-  // First, we make sure the input string is legal. If it contains
-  // characters not defined in the alphabet, then we return false immediately.
-  for(const char of input){
-    if(!ndfsmTransitionSymbols.has(char)){
-      showToast("Input contains \'" + char + "\', which is not in the alphabet", { color: "red", duration: 6000 });
-      return false;
-    }
-  }
-
   // This will contain the pointers that will be used in the next iteration
   // of the NDFSM algorithm.
   const nextPointers: Set<Circle> = new Set();  
