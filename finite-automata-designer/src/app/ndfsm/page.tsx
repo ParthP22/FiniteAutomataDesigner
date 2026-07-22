@@ -3,10 +3,10 @@
 import { Suspense } from "react";
 import AutomataEditor from "../components/editor/AutomataEditor";
 
-export default function NFAPage() {
+export default function NDFSMPage() {
     return (
         <Suspense>
-            <AutomataEditor type="NFA" />
+            <AutomataEditor type="NDFSM" />
         </Suspense>
     );
 }

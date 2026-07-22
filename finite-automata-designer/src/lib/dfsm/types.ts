@@ -1,6 +1,6 @@
 import { SerializedEntryArrow, SerializedCircle, SerializedArrow } from "../shared/types"
 
-export type SerializedNFA = {
+export type SerializedDFSM = {
     alphabet: string[];
     circles: SerializedCircle[];
     arrows: SerializedArrow[];

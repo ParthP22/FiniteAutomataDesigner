@@ -13,11 +13,11 @@
 // Command to compile this file into JS
 // npm run build:canvas
 
-// All canvas behavior shared with the DFA designer lives in
-// canvasUtil/fsmCanvas.ts. This file only supplies the NFA-specific pieces.
+// All canvas behavior shared with the DFSM designer lives in
+// canvasUtil/fsmCanvas.ts. This file only supplies the NDFSM-specific pieces.
 
-import { commitTransition, nfaAlgo } from "../../../src/lib/nfa/nfaAlgo";
-import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/nfa/nfaTransitionSymbols";
+import { commitTransition, ndfsmAlgo } from "../../../src/lib/ndfsm/ndfsmAlgo";
+import { alphabet, setAlphabet, transitionLabelInputValidator } from "../../../src/lib/ndfsm/ndfsmTransitionSymbols";
 import { Importer } from "./importing/importer";
 import { clearAutomaton, initFsmCanvas } from "../canvasUtil/fsmCanvas";
 import { SerializedFA } from "@/lib/shared/types";
@@ -29,18 +29,18 @@ import { deserializeFA } from "@/lib/shared/deserializer/deserializeFA";
 
 let drawRef: (() => void) | null = null;
 
-let pendingNFA: SerializedFA | null = null;
+let pendingNDFSM: SerializedFA | null = null;
 
-window.loadNFAIntoCanvas = function(data: SerializedFA){
+window.loadNDFSMIntoCanvas = function(data: SerializedFA){
   if(!drawRef){
-    pendingNFA = data;
+    pendingNDFSM = data;
     return;
   }
 
-  loadSerializedNFA(data);
+  loadSerializedNDFSM(data);
 }
 
-window.exportNFA = function(){
+window.exportNDFSM = function(){
   return serializeFA(
     alphabet,
     circles,
@@ -50,11 +50,11 @@ window.exportNFA = function(){
 }
 
 initFsmCanvas({
-  automatonLabel: "NFA",
-  canvasId: "NFACanvas",
-  runBtnId: "nfaRunBtn",
-  alphabetUpdatedEventName: "nfaAlphabetUpdated",
-  runAlgo: nfaAlgo,
+  automatonLabel: "NDFSM",
+  canvasId: "NDFSMCanvas",
+  runBtnId: "ndfsmRunBtn",
+  alphabetUpdatedEventName: "ndfsmAlphabetUpdated",
+  runAlgo: ndfsmAlgo,
   commitTransition,
   getAlphabet: () => alphabet,
   setAlphabet,
@@ -63,16 +63,16 @@ initFsmCanvas({
   onCanvasReady: (draw) => {
     drawRef = draw;
 
-    if(pendingNFA){
-      loadSerializedNFA(pendingNFA);
-      pendingNFA = null;
+    if(pendingNDFSM){
+      loadSerializedNDFSM(pendingNDFSM);
+      pendingNDFSM = null;
       draw();
     }
   }
 });
 
-function loadSerializedNFA(data: SerializedFA){
-  const canvas = document.getElementById("NFACanvas") as HTMLCanvasElement;
+function loadSerializedNDFSM(data: SerializedFA){
+  const canvas = document.getElementById("NDFSMCanvas") as HTMLCanvasElement;
 
   clearAutomaton(canvas);
 

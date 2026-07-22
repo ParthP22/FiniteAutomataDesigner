@@ -2,11 +2,11 @@ import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default {
-  input: 'public/scripts/dfa/dfaCanvas.ts',
+  input: 'public/scripts/dfsm/dfsmCanvas.ts',
   output: {
-    file: 'public/scripts/dfa/dfaCanvas.js',
+    file: 'public/scripts/dfsm/dfsmCanvas.js',
     format: 'iife',
-    name: 'DfaCanvas'
+    name: 'DfsmCanvas'
   },
   plugins: [
     nodeResolve(),

@@ -1,9 +1,10 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet, transitionLabelInputValidator } from "./dfaTransitionSymbols";
+import { alphabet, transitionLabelInputValidator } from "./dfsmTransitionSymbols";
 import { Arrow } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { parseInputString } from "../input/InputStringLexer";
+import { showToast } from "../toast";
 
 // I haven't figured out how to stop compiling the imports into JS, so here's a command
 // to get rid of them once you cd into their directory lol:
@@ -51,7 +52,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
       
       if(!alphabet.has(newTransition)){
         lastEditedArrow.text = "";
-        alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+        showToast("\'" + newTransition + "\' has not been defined in the alphabet!", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -84,11 +85,11 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
     }
 
     if(existingTransitions.length == 1){
-      alert("This translation violates determinism since \'" + existingTransitions[0] + "\' is already present for an outgoing arrow of this node");
+      showToast("This translation violates determinism since \'" + existingTransitions[0] + "\' is already present for an outgoing arrow of this node", { color: "red", duration: 6000 });
       return false;
     }
     else if(existingTransitions.length > 1){
-      alert("This translation violates determinism since \'" + existingTransitions.toString() + "\' are already present for an outgoing arrows of this node");
+      showToast("This translation violates determinism since \'" + existingTransitions.toString() + "\' are already present for an outgoing arrows of this node", { color: "red", duration: 6000 });
       return false;
     }
     else{
@@ -114,7 +115,7 @@ export function transitionDeterminismCheck(lastEditedArrow: Arrow | SelfArrow | 
 // }
 
 // This is a "completeness" check: were all characters of the
-// alphabet used when building the DFA? This is processed
+// alphabet used when building the DFSM? This is processed
 // every time we input a string.
 export function inputDeterminismCheck(){
   
@@ -149,7 +150,7 @@ export function inputDeterminismCheck(){
 					// then immediately return false, since it violates
 					// determinism.
           if(!alphabet.has(transition)){
-            alert("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet");
+            showToast("Transition " + transition + " for state " + node.text + " has not been defined in the alphabet", { color: "red", duration: 6000 });
             return false;
           }
         }
@@ -159,7 +160,7 @@ export function inputDeterminismCheck(){
 			// arrows of this state, and the current character in the alphabet
 			// was not found to be a transition at all, then it fails determinism
       if(!exists){
-        alert(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used");
+        showToast(char + " has not been implemented for this state: " + node.text + "; not all characters from alphabet were used", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -168,7 +169,7 @@ export function inputDeterminismCheck(){
   return true;
 }
 
-export function dfaAlgo(input: string){
+export function dfsmAlgo(input: string){
   let acceptStateExists: boolean = false;
   for(const circle of circles){
     if(circle.isAccept){
@@ -178,30 +179,30 @@ export function dfaAlgo(input: string){
   }
 
   if(startState === null && !acceptStateExists){
-    alert("Start state and accept states are both undefined!");
+    showToast("Start state and accept states are both undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(startState === null){
-    alert("Start state undefined!");
+    showToast("Start state undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(!acceptStateExists){
-    alert("Accept state undefined!");
+    showToast("Accept state undefined!", { color: "red", duration: 6000 });
     return false;
   }
 
   const parseResult = parseInputString(input, alphabet, transitionLabelInputValidator);
 
   if (!parseResult.success) {
-    alert(parseResult.error);
+    showToast(parseResult.error, { color: "red", duration: 6000 });
     return false;
   }
   const tokens = parseResult.tokens;
 
-  // This "curr" variable will be used to traverse over the whole DFA
+  // This "curr" variable will be used to traverse over the whole DFSM
   let curr: Circle = startState.pointsToCircle;
 
-  // We check if the DFA has been defined correctly. If not, then return false.
+  // We check if the DFSM has been defined correctly. If not, then return false.
   if(!inputDeterminismCheck()){
     return false;
   }
@@ -236,15 +237,15 @@ export function dfaAlgo(input: string){
   // If the final state that we arrived at is the end state,
 	// that means the string was accepted.
   if(curr.isAccept){
-    alert("The string, \"" + tokens.toString() + "\", was accepted!");
-    //console.log("Accepted!");
+    // Notify the React page so it can show a toast confirming the string was accepted
+    showToast( "The string, \"" + tokens.toString() + "\", was accepted!", { duration: 6000 });
     return true;
   }
   // Else, the final state we arrived at is not the end state,
-	// which means the string was rejected.
+	// which means the string was rejected. 
   else{
-    alert("The string, \"" + tokens.toString() + "\", was rejected!");
-    //console.log("Rejected!");
+    // Notify the React page so it can show a toast confirming the string was rejected
+    showToast("The string, \"" + tokens.toString() + "\", was rejected!", { duration: 6000, color: "red" });
     return false;
   }
 

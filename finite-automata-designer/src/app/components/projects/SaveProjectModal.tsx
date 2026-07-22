@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { showToast } from "@/lib/toast";
 
 interface SaveProjectModalProps{
     isOpen: boolean;
@@ -35,7 +36,7 @@ export default function SaveProjectModal({
         }
         catch(error){
             console.error(error);
-            alert("Failed to save changes: " + error);
+            showToast("Failed to save changes: " + error, { color: "red", duration: 6000 });
         }
         finally{
             onClose();

@@ -1,12 +1,13 @@
-import { SerializedDFA } from "../dfa/types";
-import { SerializedNFA } from "../nfa/types";
+import { SerializedDFSM } from "../dfsm/types";
+import { SerializedNDFSM } from "../ndfsm/types";
 import { CreateAutomaton, FiniteAutomaton } from "../shared/types";
 import { createClient } from "../supabase/client";
 
 export async function saveAutomaton(
-    serializedFA: SerializedDFA | SerializedNFA, 
+    serializedFA: SerializedDFSM | SerializedNDFSM, 
     name: string | null, 
     description: string | null, 
+    // Database value — legacy DFA/NFA names, see CreateAutomaton in shared/types
     type: "DFA" | "NFA"
 ){
     const supabase = createClient();
@@ -37,7 +38,7 @@ export async function saveAutomaton(
     
 }
 
-export async function updateAutomaton(automatonId: string, serializedFA: SerializedDFA | SerializedNFA){
+export async function updateAutomaton(automatonId: string, serializedFA: SerializedDFSM | SerializedNDFSM){
     const supabase = createClient();
 
     const { data: { user } } = await supabase.auth.getUser();

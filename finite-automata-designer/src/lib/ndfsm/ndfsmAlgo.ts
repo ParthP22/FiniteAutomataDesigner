@@ -1,10 +1,11 @@
 import { Circle, circles } from "../../../public/scripts/Shapes/Circle";
-import { alphabet, nfaTransitionSymbols, transitionLabelInputValidator } from "./nfaTransitionSymbols";
+import { alphabet, ndfsmTransitionSymbols, transitionLabelInputValidator } from "./ndfsmTransitionSymbols";
 import { Arrow, arrows } from "../../../public/scripts/Shapes/Arrow";
 import { SelfArrow } from "../../../public/scripts/Shapes/SelfArrow";
 import { startState } from "../../../public/scripts/Shapes/EntryArrow";
 import { Queue } from "../data-structures/";
 import { parseInputString } from "../input/InputStringLexer";
+import { showToast } from "../toast";
 
 
 // Commits the transition to a given Arrow or SelfArrow after validating it.
@@ -45,9 +46,9 @@ export function commitTransition(lastEditedArrow: Arrow | SelfArrow | null){
     // it should not work, since "00" and "01" are not in the alphabet.
     for(const newTransition of newTransitions){
       
-      if(!nfaTransitionSymbols.has(newTransition)){
+      if(!ndfsmTransitionSymbols.has(newTransition)){
         lastEditedArrow.text = "";
-        alert("\'" + newTransition + "\' has not been defined in the alphabet!");
+        showToast("\'" + newTransition + "\' has not been defined in the alphabet!", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -67,7 +68,7 @@ export function completenessCheck(){
   for(const arrow of arrows){
     if(arrow instanceof Arrow || arrow instanceof SelfArrow){
       if(arrow.transition.size === 0){
-        alert("Arrow from " + arrow.startCircle.text + " to " + arrow.endCircle.text + " has no transition!");
+        showToast("Arrow from " + arrow.startCircle.text + " to " + arrow.endCircle.text + " has no transition!", { color: "red", duration: 6000 });
         return false;
       }
     }
@@ -105,8 +106,8 @@ function epsilonTransitions(pointer: Circle, nextPointers: Set<Circle>){
 
 } 
 
-// This function runs the NFA algorithm on the given input string
-export function nfaAlgo(input: string){
+// This function runs the NDFSM algorithm on the given input string
+export function ndfsmAlgo(input: string){
 
   // Check if there is a start state and at least one accept state
   let acceptStateExists: boolean = false;
@@ -118,20 +119,20 @@ export function nfaAlgo(input: string){
   }
 
   if(startState === null && !acceptStateExists){
-    alert("Start state and accept states are both undefined!");
+    showToast("Start state and accept states are both undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(startState === null){
-    alert("Start state undefined!");
+    showToast("Start state undefined!", { color: "red", duration: 6000 });
     return false;
   }
   else if(!acceptStateExists){
-    alert("Accept state undefined!");
+    showToast("Accept state undefined!", { color: "red", duration: 6000 });
     return false;
   }
 
   // This will contain the pointers that will be used in the next iteration
-  // of the NFA algorithm.
+  // of the NDFSM algorithm.
   const nextPointers: Set<Circle> = new Set();  
 
   nextPointers.add(startState.pointsToCircle);
@@ -144,13 +145,13 @@ export function nfaAlgo(input: string){
 
   // If parsing failed, alert the user and return false
   if (!parseResult.success) {
-    alert(parseResult.error);
+    showToast(parseResult.error, { color: "red", duration: 6000 });
     return false;
   }
   const tokens = parseResult.tokens;
 
-  // Before beginning the NFA algorithm, we check if all transitions
-  // of the NFA are complete. If not, we return false immediately.
+  // Before beginning the NDFSM algorithm, we check if all transitions
+  // of the NDFSM are complete. If not, we return false immediately.
   if(!completenessCheck()){
     return false;
   }
@@ -200,15 +201,13 @@ export function nfaAlgo(input: string){
   // of the current pointers are in an accept state.
   for(const pointer of nextPointers){
     if(pointer !== undefined && pointer.isAccept){
-      alert("The string, \"" + tokens.toString() + "\", was accepted!");
-      //console.log("Accepted!");
+      showToast("The string, \"" + tokens.toString() + "\", was accepted!", { duration: 6000 });
+    
       nextPointers.clear();
       return true;
     }
   }
-  
-  alert("The string, \"" + tokens.toString() + "\", was rejected!");
-  //console.log("Rejected!");
+  showToast("The string, \"" + tokens.toString() + "\", was rejected!", { duration: 6000, color: "red" });
   nextPointers.clear();
   return false;
 }

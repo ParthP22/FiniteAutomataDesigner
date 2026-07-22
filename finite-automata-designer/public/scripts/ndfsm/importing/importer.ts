@@ -2,11 +2,11 @@ import { Circle } from "../../Shapes/Circle";
 import { Arrow } from "../../Shapes/Arrow";
 import { SelfArrow } from "../../Shapes/SelfArrow";
 import { EntryArrow, setStartState } from "../../Shapes/EntryArrow";
-import { transitionDeterminismCheck } from "../../../../src/lib/dfa/dfaAlgo";
-import { setAlphabet } from "../../../../src/lib/dfa/dfaTransitionSymbols";
+import { setAlphabet } from "../../../../src/lib/ndfsm/ndfsmTransitionSymbols";
+import { commitTransition } from "@/lib/ndfsm/ndfsmAlgo";
 
 const startsWith = {
-    DFA: 'Automaton: DFA',
+    NDFSM: 'Automaton: NDFSM',
     ALPHABET: 'Alphabet:',
     CIRCLE: 'Circle:',
     STRAIGHT_ARROW: 'StraightArrow:',
@@ -47,18 +47,18 @@ export class Importer {
                 parsedData.push(raw);
             }
         }
-
-        // Check to be sure that you are importing an NFA
-        let isDFA: boolean = false;
+        
+        // Check to be sure that you are importing an NDFSM
+        let isNDFSM: boolean = false;
         for(let rawData = 0; rawData < parsedData.length; rawData++){
             const raw = parsedData[rawData];
-            if(raw.startsWith(startsWith.DFA)){
-                isDFA = true;
+            if(raw.startsWith(startsWith.NDFSM)){
+                isNDFSM = true;
                 break;
             }
         }
 
-        if(!isDFA){
+        if(!isNDFSM){
             return false;
         }
 
@@ -86,7 +86,7 @@ export class Importer {
                     const arrow = new Arrow(startCircle, endCircle);
                     arrow.startCircle.outArrows.add(arrow); // Adds out arrow for the starting circle of the arrow
                     arrow.text = label.trim();
-                    if (transitionDeterminismCheck(arrow)) {
+                    if(commitTransition(arrow)){
                         this.arrows.push(arrow);
                     }
                 }
@@ -100,7 +100,7 @@ export class Importer {
                     arrow.text = label.trim();
                     arrow.parallelPart = parseFloat(parallel);
                     arrow.perpendicularPart = parseFloat(perpendicular);
-                    if (transitionDeterminismCheck(arrow)) {
+                    if(commitTransition(arrow)){
                         this.arrows.push(arrow);
                     }
                 }
@@ -113,7 +113,7 @@ export class Importer {
                     circle.loop = selfArrow;
                     circle.outArrows.add(selfArrow); // Adds out arrow for the circle
                     selfArrow.text = text;
-                    if (transitionDeterminismCheck(selfArrow)) {
+                    if(commitTransition(selfArrow)){
                         this.arrows.push(selfArrow);
                     }
                 }

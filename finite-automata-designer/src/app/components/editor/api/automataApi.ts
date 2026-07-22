@@ -1,12 +1,12 @@
 import { SerializedFA } from "@/lib/shared/types";
 
 export const automataApi = {
-    DFA: {
-        loadFAIntoCanvas: (data: SerializedFA) => window.loadDFAIntoCanvas(data),
-        exportFA: () => window.exportDFA(),
+    DFSM: {
+        loadFAIntoCanvas: (data: SerializedFA) => window.loadDFSMIntoCanvas(data),
+        exportFA: () => window.exportDFSM(),
     },
-    NFA: {
-        loadFAIntoCanvas: (data: SerializedFA) => window.loadNFAIntoCanvas(data),
-        exportFA: () => window.exportNFA(),
+    NDFSM: {
+        loadFAIntoCanvas: (data: SerializedFA) => window.loadNDFSMIntoCanvas(data),
+        exportFA: () => window.exportNDFSM(),
     },
 } as const;

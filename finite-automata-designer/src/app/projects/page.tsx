@@ -11,6 +11,8 @@ import SearchBar from "../components/projects/SearchBar";
 import SortBar, { SortBy, SortDirection } from "../components/projects/SortBar";
 import { useProjectFiltering } from "../hooks/useProjectFiltering";
 import ProjectTypeFilter, { ProjectType } from "../components/projects/ProjectTypeFilter";
+import ToastHost from "../components/misc/ToastHost";
+import { showToast } from "@/lib/toast";
 import ProjectGrid from "../components/projects/ProjectGrid";
 
 export default function AutomataPage() {
@@ -41,7 +43,7 @@ export default function AutomataPage() {
       }
       catch(error){
         console.error(error);
-        alert("Failed to retrieve user's projects: " + error);
+        showToast("Failed to retrieve user's projects: " + error, { color: "red", duration: 6000 });
       }
       finally{
         setLoading(false);
@@ -59,11 +61,11 @@ export default function AutomataPage() {
       // Remove the deleted automaton from the machines array
       setMachines((prev) => prev.filter(project => project.id !== automatonId));
 
-      alert("Deleted project successfully!");
+      showToast("Deleted project successfully!");
     }
     catch(error){
       console.error(error);
-      alert("Failed to delete selected project: " + error);
+      showToast("Failed to delete selected project: " + error, { color: "red", duration: 6000 });
     }
     finally{
       setDeletingProject(null);
@@ -87,11 +89,11 @@ export default function AutomataPage() {
         )
       );
 
-      alert("Saved edit successfully!");
+      showToast("Saved edit successfully!");
     }
     catch(error){
       console.error(error);
-      alert("Failed to save edit: " + error);
+      showToast("Failed to save edit: " + error, { color: "red", duration: 6000 });
     }
     finally{
       setEditingProject(null);
@@ -111,6 +113,9 @@ export default function AutomataPage() {
 
   return (
         <main className="min-h-screen bg-blue-100 p-6 md:p-10">
+            {/* Renders toasts requested via showToast() on this page */}
+            <ToastHost />
+
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-4xl font-bold text-gray-800">

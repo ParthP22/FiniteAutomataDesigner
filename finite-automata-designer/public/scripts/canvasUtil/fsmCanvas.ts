@@ -10,9 +10,9 @@
  Licensed under the MIT Licenses
 */
 
-// Shared controller for the DFA and NFA designer canvases.
+// Shared controller for the DFSM and NDFSM designer canvases.
 // Everything common to both canvases lives here; the per-automaton entry
-// points (dfa/dfaCanvas.ts and nfa/nfaCanvas.ts) supply the differences
+// points (dfsm/dfsmCanvas.ts and ndfsm/ndfsmCanvas.ts) supply the differences
 // through an FsmCanvasConfig.
 
 import { Circle, circles} from "../Shapes/Circle";
@@ -23,13 +23,14 @@ import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
 import { saveAsSVG, saveAsLaTeX, toggle_visiblity } from "./canvasUtil";
 import type { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
+import { showToast } from "@/lib/toast";
 
 export interface FsmImporter {
   convert(): boolean;
 }
 
 export interface FsmCanvasConfig {
-  // "DFA" or "NFA" — used in export headers and user-facing messages
+  // "DFSM" or "NDFSM" — used in export headers and user-facing messages
   automatonLabel: string;
   // id of the <canvas> element for this automaton's page
   canvasId: string;
@@ -346,7 +347,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               if (config.getValidator().handleChar(event.key)) {
                 selectedObj.text += event.key;
               } else {
-                alert(`'${config.getValidator().getBuffer() + event.key}' is not defined in the alphabet!`);
+                showToast(`'${config.getValidator().getBuffer() + event.key}' is not defined in the alphabet!`, { color: "red", duration: 6000 });
               }
             }
             // Else, the selectedObj must be Circle, which we can type anything for
@@ -536,10 +537,10 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
                 const importer = config.createImporter(circles, arrows, textArea.value, drawFunc!);
                 const valid = importer.convert();
                 if(!valid){
-                  alert(`Import failed. Please check if you are importing a ${config.automatonLabel}.`);
+                  showToast(`Import failed. Please check if you are importing a ${config.automatonLabel}.`, { color: "red", duration: 6000 });
                 }
               } else {
-                alert(`Failure to import ${config.automatonLabel}`);
+                showToast(`Failure to import ${config.automatonLabel}`, { color: "red", duration: 6000 });
               }
             }
           }
@@ -692,6 +693,8 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             alphabetInput.value = "";
 
             updateAlphabetLabel(alphabetLabel);
+            // Notify the React page so it can show a toast confirming the alphabet updated
+            showToast("Alphabet Updated!");
           }
         });
       }
@@ -756,14 +759,17 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         });
       }
 
-      // Copies the output created from the export to your clipboard NOTE FOR FUTURE: Some indicator that it has been copied to your clipboard
+      // Copies the output created from the export to your clipboard
       if (copyOutputBtn) {
         copyOutputBtn.addEventListener('click', async () => {
           if (outputTextArea) {
             try {
               const textToCopy = outputTextArea.value;
               await navigator.clipboard.writeText(textToCopy);
+              // Notify the React page so it can show a toast confirming the copy
+              showToast("Copied to clipboard!");
             } catch (err) {
+              showToast(`Failed to copy: ${err}`)
               console.log("Failed to copy: ", err)
             }
           }
@@ -805,6 +811,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
       if (clearCanvasBtn) {
         clearCanvasBtn.addEventListener("click", () => {
           clearAutomaton(canvas);
+          showToast('Canvas Cleared!')
         })
       }
 

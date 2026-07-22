@@ -1,5 +1,7 @@
 "use client";
 
+// Filter values match the type names stored in the database, which keep the
+// legacy DFA/NFA spelling; the buttons display the renamed DFSM/NDFSM labels.
 export type ProjectType = "all" | "DFA" | "NFA";
 
 interface ProjectTypeFilterProps{
@@ -32,7 +34,7 @@ export default function ProjectTypeFilter({
                         : "bg-gray-200 text-gray-700 hover:bg-blue-300 hover:text-blue-700"
                 }`}
             >
-                DFA
+                DFSM
             </button>
 
             <button
@@ -43,7 +45,7 @@ export default function ProjectTypeFilter({
                         : "bg-gray-200 text-gray-700 hover:bg-purple-300 hover:text-purple-700"
                 }`}
             >
-                NFA
+                NDFSM
             </button>
         </div>
     );

@@ -21,7 +21,7 @@ export class SelfArrow {
   circle: Circle; // The state which this SelfArrow loops back to
 
   // These two attributes are not really necessary.
-  // However, since the DFA algorithm will check the startCircle
+  // However, since the DFSM algorithm will check the startCircle
   // and endCircle of each state, it makes it a lot simpler if the
   // SelfArrow has these attributes as well, so that we don't 
   // have to create an entirely separate case for it in the algo.

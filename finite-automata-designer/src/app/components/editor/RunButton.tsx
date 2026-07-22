@@ -1,7 +1,7 @@
 "use client";
 
 interface RunButton{
-    type: "DFA" | "NFA";
+    type: "DFSM" | "NDFSM";
 }
 
 export default function RunButton({ type }: RunButton){

@@ -2,11 +2,11 @@
 // import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 // export default {
-//   input: {dfa: "public/scripts/dfaCanvas.ts", nfa: "public/scripts/nfaCanvas.ts"},
+//   input: {dfsm: "public/scripts/dfsmCanvas.ts", ndfsm: "public/scripts/ndfsmCanvas.ts"},
 //   output: {
-//     // file: {dfa: 'public/scripts/dfaCanvas.js', nfa: 'public/scripts/nfaCanvas.js'},
+//     // file: {dfsm: 'public/scripts/dfsmCanvas.js', ndfsm: 'public/scripts/ndfsmCanvas.js'},
 //     // format: 'iife',
-//     // name: {dfa: 'DfaCanvas', nfa: 'NfaCanvas'},
+//     // name: {dfsm: 'DfsmCanvas', ndfsm: 'NdfsmCanvas'},
 //     dir: "public/scripts/",
 //     format: "esm",
 //     entryFileNames: "[name]Canvas.js",
@@ -31,11 +31,11 @@ import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default {
-  input: 'public/scripts/nfa/nfaCanvas.ts',
+  input: 'public/scripts/ndfsm/ndfsmCanvas.ts',
   output: {
-    file: 'public/scripts/nfa/nfaCanvas.js',
+    file: 'public/scripts/ndfsm/ndfsmCanvas.js',
     format: 'iife',
-    name: 'NfaCanvas'
+    name: 'NdfsmCanvas'
   },
   plugins: [
     nodeResolve(),

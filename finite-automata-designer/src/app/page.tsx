@@ -15,17 +15,17 @@ export default function Home() {
       <div className="flex-grow flex items-center justify-center">
         <div className="flex space-x-10">
           
-          {/* Button for DFA */}
-          <Link href="/dfa" passHref>
+          {/* Button for DFSM */}
+          <Link href="/dfsm" passHref>
             <button className="px-10 py-5 bg-gray-600 text-2xl text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-400">
-              DFA
+              DFSM
             </button>
           </Link>
 
-          {/* Button for NFA */}
-          <Link href="/nfa" passHref>
+          {/* Button for NDFSM */}
+          <Link href="/ndfsm" passHref>
             <button className="px-10 py-5 bg-gray-600 text-2xl text-white rounded hover:bg-black hover:shadow-lg hover:scale-105 transition-transform duration-400">
-              NFA
+              NDFSM
             </button>
           </Link>
         </div>

@@ -19,6 +19,12 @@ export default function ProjectCard({
     onEdit,
     onDelete,
 }: ProjectCardProps) {
+    // The database stores the legacy "DFA"/"NFA" type names; map them to the
+    // renamed routes and display names here so existing rows keep working.
+    const isDfsm = type === "DFA";
+    const route = isDfsm ? "dfsm" : "ndfsm";
+    const displayType = isDfsm ? "DFSM" : "NDFSM";
+
     return (
         <div
             className="
@@ -38,7 +44,7 @@ export default function ProjectCard({
             "
         >
             <Link
-                href={`/${type.toLowerCase()}?id=${id}`}
+                href={`/${route}?id=${id}`}
                 className="flex flex-col gap-4"
             >
                 <div className="flex items-start justify-between">
@@ -50,13 +56,13 @@ export default function ProjectCard({
                         className={`
                             px-3 py-1 rounded-full text-sm font-semibold
                             ${
-                                type === "DFA"
+                                isDfsm
                                     ? "bg-blue-100 text-blue-700"
                                     : "bg-purple-100 text-purple-700"
                             }
                         `}
                     >
-                        {type.toUpperCase()}
+                        {displayType}
                     </span>
                 </div>
 
