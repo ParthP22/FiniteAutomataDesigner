@@ -23,7 +23,7 @@ import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
 import { saveAsSVG, saveAsLaTeX, toggle_visiblity } from "./canvasUtil";
 import type { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
-import { showToast } from "@/lib/toast";
+import { showToast, ShowToastDetail } from "@/lib/toast";
 
 export interface FsmImporter {
   convert(): boolean;
@@ -31,7 +31,7 @@ export interface FsmImporter {
 
 export interface FsmCanvasConfig {
   // "DFSM" or "NDFSM" — used in export headers and user-facing messages
-  automatonLabel: string;
+  automatonLabel: "DFSM" | "NDFSM";
   // id of the <canvas> element for this automaton's page
   canvasId: string;
   // id of the Run button for this automaton's page
@@ -682,13 +682,24 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               .split(',')
               .map(s => s.trim())
               .filter(s => s.length > 0);
+
+            let alphabetToastMsg = "Alphabet Updated!";
+            let toastConfig = { duration: 4000, color: "green" } as Omit<ShowToastDetail, "message">;
             
             if(normalized.length === 0){
               config.setAlphabet(new Set(["0","1"]));
-              showToast("No alphabet was entered, so the it has been reset to the default alphabet.");
+              alphabetToastMsg = "No alphabet was entered, so the it has been reset to the default alphabet.";
+              toastConfig = { duration: 4000, color: "red" };
             }
-            
-            config.setAlphabet(new Set(normalized));
+            else if(normalized.some((element) => element === "\\epsilon")){
+              config.setAlphabet(new Set(["0","1"]));
+              alphabetToastMsg = "You cannot add epsilon to the alphabet! The alphabet has been reset to the default alphabet.";
+              toastConfig = { duration: 4000, color: "red"  };
+              
+            }
+            else{
+              config.setAlphabet(new Set(normalized));
+            }
 
             updateAlphabetLabel(alphabetLabel);
 
@@ -699,7 +710,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             alphabetInput.value = "";
 
             // Notify the React page so it can show a toast confirming the alphabet updated
-            showToast("Alphabet Updated!");
+            showToast(alphabetToastMsg, toastConfig);
           }
         });
       }
