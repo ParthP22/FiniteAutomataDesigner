@@ -682,7 +682,12 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               .split(',')
               .map(s => s.trim())
               .filter(s => s.length > 0);
-
+            
+            if(normalized.length === 0){
+              config.setAlphabet(new Set(["0","1"]));
+              showToast("No alphabet was entered, so the it has been reset to the default alphabet.");
+            }
+            
             config.setAlphabet(new Set(normalized));
 
             updateAlphabetLabel(alphabetLabel);
