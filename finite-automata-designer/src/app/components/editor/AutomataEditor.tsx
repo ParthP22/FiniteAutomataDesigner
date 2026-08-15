@@ -173,10 +173,10 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                     projectId: automatonId
                 });
 
-                setLoading(false);
-
                 // Canvas script is already loaded — call directly.
                 api.loadFAIntoCanvas(finiteAutomatonData.automaton);
+
+                setLoading(false);
 
             } else {
                 // Canvas script hasn't finished loading yet (production race).
@@ -246,129 +246,131 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     };
 
     return (
-        <>
-            {loading ? (
-                <Loading />
-            ) : (
-                <main className="min-h-screen bg-blue-100 flex flex-col items-center">
-                    {/* Toast notification, shown when the canvas script requests one */}
-                    {toast && (
-                        <ToastNotification
-                            key={toast.id}
-                            toastMsg={toast.message}
-                            duration={toast.duration}
-                            color={toast.color}
-                            onClose={() => setToast(null)}
-                        />
-                    )}
+        <div className="relative min-h-screen">
+            {loading && (
+                <div className="absolute inset-0 z-50">
+                    <Loading />
+                </div>
+            )}
 
-                    {/* FA title at the top */}
-                    <AutomataHeader
-                        title={!name ? title : (type.toUpperCase() + ": " + name)}
-                        description={description}
+            <main className="min-h-screen bg-blue-100 flex flex-col items-center">
+                {/* Toast notification, shown when the canvas script requests one */}
+                {toast && (
+                    <ToastNotification
+                        key={toast.id}
+                        toastMsg={toast.message}
+                        duration={toast.duration}
+                        color={toast.color}
+                        onClose={() => setToast(null)}
                     />
+                )}
 
-                    <div
-                        className="flex w-full"
-                    >
-                        {/* Back Button + Instructions parent div */}
-                        <div className="flex-1 flex flex-col items-start h-13 pl-5" >
-                            {/* Back Button to return to Home Page */}
-                            <BackButton />
+                {/* FA title at the top */}
+                <AutomataHeader
+                    title={!name ? title : (type.toUpperCase() + ": " + name)}
+                    description={description}
+                />
 
-                            {/* Instructions dropdown */}
-                            <Instructions 
-                                type={type.toUpperCase() as "DFSM" | "NDFSM"}
-                            />
+                <div
+                    className="flex w-full"
+                >
+                    {/* Back Button + Instructions parent div */}
+                    <div className="flex-1 flex flex-col items-start h-13 pl-5" >
+                        {/* Back Button to return to Home Page */}
+                        <BackButton />
 
-                        </div>
+                        {/* Instructions dropdown */}
+                        <Instructions 
+                            type={type.toUpperCase() as "DFSM" | "NDFSM"}
+                        />
 
-                        {/* Canvas parent div */}
-                        <div>
-                            <div id="canvasDiv" className="flex flex-col text-black">
-                                {/* Canvas for drawing FSM */}
-                                {/* Ex: id=DFSMCanvas or id=NDFSMCanvas, where "type" is either "DFSM" or "NDFSM" */}
-                                <canvas id={`${type.toUpperCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
+                    </div>
 
-                                {/* Exporting dropdowns container */}
-                                <ExportContainer />
+                    {/* Canvas parent div */}
+                    <div>
+                        <div id="canvasDiv" className="flex flex-col text-black">
+                            {/* Canvas for drawing FSM */}
+                            {/* Ex: id=DFSMCanvas or id=NDFSMCanvas, where "type" is either "DFSM" or "NDFSM" */}
+                            <canvas id={`${type.toUpperCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
-                                {/* Importing dropdowns container */}
-                                <ImportContainer />
-                                
-                                {/* Exporting text area */}
-                                <ExportTextArea />
+                            {/* Exporting dropdowns container */}
+                            <ExportContainer />
 
-                                {/* Importing text area */}
-                                <ImportTextArea />
+                            {/* Importing dropdowns container */}
+                            <ImportContainer />
                             
-                            </div>
+                            {/* Exporting text area */}
+                            <ExportTextArea />
+
+                            {/* Importing text area */}
+                            <ImportTextArea />
+                        
                         </div>
-                            
-                        {/* Right hand parent div*/}
-                        <div className="flex-1">
-                            <div className="flex flex-col gap-3 h-13 justify-start-safe pl-5">
-                                <div className="flex flex-col gap-5">
-                                    <div id='inputDiv' className="flex flex-col self-center w-full max-w-md text-black">
-                                        {/* Textbox for inputting strings */}
-                                        <InputString />
-                                        
-                                        {/* Alphabet display */}
-                                        <AlphabetLabel 
-                                            hasMultiCharAlphabet={hasMultiCharAlphabet}
-                                        />
-                                        
-                                        {/* Input box for new alphabet */}
-                                        <AlphabetInput />
-                                        
-                                    </div>
-                                    <div className="flex flex-wrap self-center gap-5">
-                                        {/* Save button to save the FA to the database only if the user is logged in */}
-                                        {!automatonId ? (
-                                            <SaveActions
-                                                onSave={() => setIsSaving(true)}
-                                            />
-                                        ) : ( 
-                                            <SaveActions
-                                                onSave={handleSave}
-                                                onSaveAs={() => setIsSaving(true)}
-                                            />
-                                        )}
-                                
-                                        {/* Run button to run the FA with the given input string */}
-                                        <RunButton 
-                                            type={type.toUpperCase() as "DFSM" | "NDFSM"}
-                                        />
-
-                                        {/* My Projects button to open the projects page that will list all of the users project when logged in */}
-                                        <ProjectsButton />
-
-                                    </div>
-                                </div>
-                                <div>
-                                    <NewProjectButton
-                                        handleNewProject={handleNewProject}
+                    </div>
+                        
+                    {/* Right hand parent div*/}
+                    <div className="flex-1">
+                        <div className="flex flex-col gap-3 h-13 justify-start-safe pl-5">
+                            <div className="flex flex-col gap-5">
+                                <div id='inputDiv' className="flex flex-col self-center w-full max-w-md text-black">
+                                    {/* Textbox for inputting strings */}
+                                    <InputString />
+                                    
+                                    {/* Alphabet display */}
+                                    <AlphabetLabel 
+                                        hasMultiCharAlphabet={hasMultiCharAlphabet}
                                     />
+                                    
+                                    {/* Input box for new alphabet */}
+                                    <AlphabetInput />
+                                    
                                 </div>
+                                <div className="flex flex-wrap self-center gap-5">
+                                    {/* Save button to save the FA to the database only if the user is logged in */}
+                                    {!automatonId ? (
+                                        <SaveActions
+                                            onSave={() => setIsSaving(true)}
+                                        />
+                                    ) : ( 
+                                        <SaveActions
+                                            onSave={handleSave}
+                                            onSaveAs={() => setIsSaving(true)}
+                                        />
+                                    )}
+                            
+                                    {/* Run button to run the FA with the given input string */}
+                                    <RunButton 
+                                        type={type.toUpperCase() as "DFSM" | "NDFSM"}
+                                    />
 
-                                {/* Clear Canvas parent container */}
-                                <div>
-                                    <ClearCanvasButton />
+                                    {/* My Projects button to open the projects page that will list all of the users project when logged in */}
+                                    <ProjectsButton />
+
                                 </div>
+                            </div>
+                            <div>
+                                <NewProjectButton
+                                    handleNewProject={handleNewProject}
+                                />
+                            </div>
+
+                            {/* Clear Canvas parent container */}
+                            <div>
+                                <ClearCanvasButton />
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <SaveProjectModal 
-                        isOpen={isSaving}
-                        initialName={null}
-                        initialDescription={null}
-                        onClose={() => setIsSaving(false)}
-                        onSave={handleSaveAsNew}
-                    />
+                <SaveProjectModal 
+                    isOpen={isSaving}
+                    initialName={null}
+                    initialDescription={null}
+                    onClose={() => setIsSaving(false)}
+                    onSave={handleSaveAsNew}
+                />
 
-                </main>
-            )}
+            </main>
 
             <Script
                 // Ex: /scripts/dfsm/dfsmCanvas.js or /scripts/ndfsm/ndfsmCanvas.js, where "type" is either "DFSM" or "NDFSM"
@@ -392,7 +394,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                     }   
                 }}
             />
-        </>
+        </div>
 
     );
 }
