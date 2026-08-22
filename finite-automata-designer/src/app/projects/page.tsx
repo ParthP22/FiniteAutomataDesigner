@@ -14,6 +14,7 @@ import ProjectTypeFilter, { ProjectType } from "../components/projects/ProjectTy
 import ToastHost from "../components/misc/ToastHost";
 import { showToast } from "@/lib/toast";
 import ProjectGrid from "../components/projects/ProjectGrid";
+import Loading from "../components/misc/Loading";
 
 export default function AutomataPage() {
   const [machines, setMachines] = useState<FiniteAutomaton[]>([]);
@@ -101,14 +102,7 @@ export default function AutomataPage() {
   };
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-blue-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </main>
-    );
+    return <Loading />;
   }
 
   return (

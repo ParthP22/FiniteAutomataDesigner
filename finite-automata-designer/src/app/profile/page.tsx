@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import Image from "next/image";
+import Loading from "../components/misc/Loading";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -32,14 +33,7 @@ export default function ProfilePage() {
   }, [router, supabase]);
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-blue-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </main>
-    );
+    return <Loading />;
   }
 
   if (!user) return null;
