@@ -692,9 +692,8 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               toastConfig = { duration: 4000, color: "red" };
             }
             else if(normalized.some((element) => element === "\\epsilon")){
-              config.setAlphabet(new Set(["0","1"]));
-              alphabetToastMsg = "You cannot add epsilon to the alphabet! The alphabet has been reset to the default alphabet.";
-              toastConfig = { duration: 4000, color: "red"  };
+              alphabetToastMsg = "You cannot add epsilon to the alphabet! The alphabet remains unchanged.";
+              toastConfig = { duration: 4000, color: "red" };
               
             }
             else{
