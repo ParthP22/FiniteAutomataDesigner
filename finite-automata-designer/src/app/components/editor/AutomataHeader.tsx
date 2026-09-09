@@ -9,7 +9,7 @@ interface AutomataHeaderProps{
 export default function AutomataHeader({title, description = null}: AutomataHeaderProps){
     return (
         <>
-            <h1 className="text-5xl font-bold text-center my-2 text-black ">
+            <h1 className="text-3xl font-bold text-center my-2 text-black ">
                 <span className="drop-shadow-[0_0_1px_rgba(0,0,0,0.7)]">
                     {title}
                 </span>

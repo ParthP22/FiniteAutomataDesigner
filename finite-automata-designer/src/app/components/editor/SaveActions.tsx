@@ -14,7 +14,7 @@ export default function SaveActions({
             <button
                 type="button"
                 onClick={onSave}
-                className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-black transition"
             >
                 Save
             </button>
@@ -23,7 +23,7 @@ export default function SaveActions({
                 <button
                     type="button"
                     onClick={onSaveAs}
-                    className="flex-none px-8 py-3 bg-gray-700 text-white rounded hover:bg-black transition"
+                    className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-black transition"
                 >
                     Save As New Project
                 </button>

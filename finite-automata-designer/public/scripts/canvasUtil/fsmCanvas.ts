@@ -21,9 +21,10 @@ import { SelfArrow} from "../Shapes/SelfArrow";
 import { EntryArrow, startState, setStartState} from "../Shapes/EntryArrow";
 import { TemporaryArrow} from "../Shapes/TemporaryArrow";
 import { snapToPadding} from "../Shapes/draw";
-import { saveAsSVG, saveAsLaTeX, toggle_visiblity } from "./canvasUtil";
+import { saveAsSVG, saveAsLaTeX, toggle_visiblity, buildSVG } from "./canvasUtil";
 import type { TransitionLabelInputValidator } from "@/lib/validation/TransitionLabelInputValidator";
 import { showToast, ShowToastDetail } from "@/lib/toast";
+import { printSVG } from "../printing/printSVG";
 
 export interface FsmImporter {
   convert(): boolean;
@@ -195,7 +196,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         tempArrow = new TemporaryArrow(mouse, mouse);
       }
       draw();
-    });
+    }, { signal });
 
     // If mouse is double-clicked
     canvas.addEventListener('dblclick', (event) => {
@@ -215,7 +216,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         selectedObj.isAccept = !selectedObj.isAccept;
         draw();
       }
-    });
+    }, { signal });
 
     // If mouse moves
     canvas.addEventListener('mousemove', (event) => {
@@ -254,7 +255,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         }
         draw();
       }
-    });
+    }, { signal });
 
     // If the mouse was originally clicked and now
     // the user let go
@@ -307,11 +308,11 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
       }
 
       draw();
-    });
+    }, { signal });
 
     // This disables the default context menu on the canvas, since it was getting annoying
     // having to press Esc every time I right-clicked on an object when I wanted to type.
-    canvas.addEventListener('contextmenu', event => event.preventDefault());
+    canvas.addEventListener('contextmenu', event => event.preventDefault(), { signal });
 
     // Whenever a key is pressed on the user's keyboard
     document.addEventListener('keydown', (event) => {
@@ -619,6 +620,8 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
       const clearCanvasBtn = document.getElementById('clearCanvas') as HTMLButtonElement | null;
       // Run button
       const runBtn = document.getElementById(config.runBtnId) as HTMLButtonElement | null;
+      // Print button - renders the current FSM through the SVG exporter
+      const printBtn = document.getElementById('printCanvas') as HTMLButtonElement | null;
       // Reference to draw function
       let drawRef: (() => void) | null = null;
       if (canvas)  {
@@ -660,7 +663,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             // Reset the input tag
             inputString.value = "";
           }
-        });
+        }, { signal });
       }
 
       if(alphabetLabel){
@@ -711,7 +714,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             // Notify the React page so it can show a toast confirming the alphabet updated
             showToast(alphabetToastMsg, toastConfig);
           }
-        });
+        }, { signal });
       }
 
       // Export SVG button event handler and export textarea visiblity enable
@@ -725,7 +728,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               toggle_visiblity(outputContainer);
             }
           }
-        });
+        }, { signal });
       } else {
         console.log("unable to find the export svg btn");
       }
@@ -741,28 +744,28 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               toggle_visiblity(outputContainer);
             }
           }
-        });
+        }, { signal });
       }
 
       // Import SVG button event handler and import textarea visiblity enable
       if (importSVGBtn) {
         importSVGBtn.addEventListener('click', () => {
           importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, drawRef);
-        });
+        }, { signal });
       }
 
       // Import LaTeX button event handler and Import textarea visiblity enable
       if (importLaTeXBtn) {
         importLaTeXBtn.addEventListener('click', () => {
           importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, drawRef);
-        });
+        }, { signal });
       }
 
       // Additional button so the user doesn't have to click the drop down to import
       if (drawImportBtn) {
         drawImportBtn.addEventListener('click', () => {
           importHelper(canvas, drawImportBtn, alphabetLabel, inputContainer, inputTextArea, drawRef);
-        })
+        }, { signal })
       }
 
       // Event handler to hide the export textarea (refered to as the output container, since hiding the div hides the textarea)
@@ -771,7 +774,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
           if (outputContainer) {
             toggle_visiblity(outputContainer);
           }
-        });
+        }, { signal });
       }
 
       // Copies the output created from the export to your clipboard
@@ -788,7 +791,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
               console.log("Failed to copy: ", err)
             }
           }
-        });
+        }, { signal });
       }
 
       // Event handler to hide the import textarea (refered to as the input container, since hiding the div hides the textarea)
@@ -798,7 +801,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             toggle_visiblity(inputContainer);
             toggle_visiblity(drawImportBtn);
           }
-        });
+        }, { signal });
       }
 
       // Event handler to clear the text in the inputTextArea
@@ -807,7 +810,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
           if (inputTextArea) {
             inputTextArea.value = '';
           }
-        })
+        }, { signal })
       }
 
       // Run button
@@ -819,7 +822,7 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
             // Reset the input tag
             inputString.value = "";
           }
-        });
+        }, { signal });
       }
 
       // Clear Canvas button
@@ -827,7 +830,20 @@ export function initFsmCanvas(config: FsmCanvasConfig) {
         clearCanvasBtn.addEventListener("click", () => {
           clearAutomaton(canvas);
           showToast('Canvas Cleared!')
-        })
+        }, { signal })
+      }
+
+      // Print button - renders the current FSM through the SVG exporter
+      if (printBtn) {
+        printBtn.addEventListener("click", () => {
+          if (!canvas) return;
+          // selectedObj is deliberately null and both colors are `base`: a
+          // printout shouldn't carry the blue selection highlight.
+          printSVG(
+            buildSVG(canvas, config.automatonLabel, null, config.getAlphabet(), base, base, false),
+            config.automatonLabel
+          );
+        }, { signal });
       }
 
     };

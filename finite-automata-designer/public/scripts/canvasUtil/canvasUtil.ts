@@ -5,6 +5,42 @@ import { Arrow, arrows} from "../Shapes/Arrow";
 import { SelfArrow} from "../Shapes/SelfArrow";
 import { EntryArrow, startState } from "../Shapes/EntryArrow";
 
+export function buildSVG(
+  canvas: HTMLCanvasElement,
+  automationSpecification: string,
+  selectedObj: Circle | EntryArrow | Arrow | SelfArrow | null,
+  alphabet: Set<string>,
+  hightlightSelected: string,
+  base: string,
+  includeMetadata: boolean = true
+): string {
+  const exporter = new ExportAsSVG(canvas, alphabet);
+
+  if (includeMetadata) {
+    exporter.addAutomatonSpecification(automationSpecification);
+    exporter.addAlphabet();
+  }
+
+  for (let circle = 0; circle < circles.length; circle++) {
+    exporter.lineWidth = 1;
+    exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
+    exporter.faObject = circles[circle];
+    circles[circle].draw(exporter);
+  }
+  for (let arrow = 0; arrow < arrows.length; arrow++) {
+    exporter.lineWidth = 1;
+    exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
+    exporter.faObject = arrows[arrow];
+    arrows[arrow].draw(exporter);
+  }
+  if (startState) {
+    exporter.faObject = startState;
+    startState.draw(exporter);
+  }
+
+  return exporter.toSVG();
+}
+
 // Export the FSM as SVG
 export function saveAsSVG(
     canvas: HTMLCanvasElement, 
@@ -16,31 +52,7 @@ export function saveAsSVG(
     base: string
 ) {
     if (!canvas) return;
-
-    const exporter = new ExportAsSVG(canvas, alphabet);
-    exporter.addAutomatonSpecification(automationSpecification);
-    exporter.addAlphabet();
-
-    for(let circle = 0; circle < circles.length; circle++) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = (circles[circle] == selectedObj) ? hightlightSelected : base;
-      exporter.faObject = circles[circle];
-      circles[circle].draw(exporter);
-    }
-    for (let arrow = 0; arrow < arrows.length; arrow++) {
-      exporter.lineWidth = 1;
-      exporter.fillStyle = exporter.strokeStyle = (arrows[arrow] == selectedObj) ? hightlightSelected : base;
-      exporter.faObject = arrows[arrow];
-      arrows[arrow].draw(exporter);
-    }
-
-    if (startState) {
-      exporter.faObject = startState;
-      startState.draw(exporter);
-    }
-    
-
-    output(exporter.toSVG(), textArea);
+    output(buildSVG(canvas, automationSpecification, selectedObj, alphabet, hightlightSelected, base), textArea);
 }
 
 // Export the FSM as LaTeX

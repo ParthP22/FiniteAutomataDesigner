@@ -25,6 +25,7 @@ import SaveActions from './SaveActions';
 import SaveProjectModal from "../projects/SaveProjectModal";
 import ToastNotification, { SHOW_TOAST_EVENT, ShowToastDetail, showToast } from "../misc/ToastNotification";
 import NewProjectButton from './NewProjectButton';
+import PrintButton from '../printing/PrintButton';
 
 {/* Database/Serialization */}
 import { SerializedFA } from '@/lib/shared/types';
@@ -264,7 +265,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                         onClose={() => setToast(null)}
                     />
                 )}
-
+    
                 {/* FA title at the top */}
                 <AutomataHeader
                     title={!name ? title : (type.toUpperCase() + ": " + name)}
@@ -293,6 +294,19 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                             {/* Ex: id=DFSMCanvas or id=NDFSMCanvas, where "type" is either "DFSM" or "NDFSM" */}
                             <canvas id={`${type.toUpperCase()}Canvas`} width={800} height={600} className="rounded-lg border border-gray-400"></canvas>
 
+                            { /* Project Related buttons below the canvas */}
+                            <div className="pt-3 flex gap-1 self-center">
+                                {/* Save button to save the FA to the database only if the user is logged in */}
+                                {!automatonId ? 
+                                    ( <SaveActions onSave={() => setIsSaving(true)} />) : 
+                                    ( <SaveActions onSave={handleSave} onSaveAs={() => setIsSaving(true)} />
+                                )}
+                                {/* My Projects button to open the projects page that will list all of the users project when logged in */}
+                                <ProjectsButton />
+                                <NewProjectButton handleNewProject={handleNewProject} /> 
+                                { /* Print button parent container */}
+                                <PrintButton />
+                            </div>
                             {/* Exporting dropdowns container */}
                             <ExportContainer />
 
@@ -315,48 +329,19 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                                 <div id='inputDiv' className="flex flex-col self-center w-full max-w-md text-black">
                                     {/* Textbox for inputting strings */}
                                     <InputString />
-                                    
                                     {/* Alphabet display */}
-                                    <AlphabetLabel 
-                                        hasMultiCharAlphabet={hasMultiCharAlphabet}
+                                    <AlphabetLabel hasMultiCharAlphabet={hasMultiCharAlphabet}
                                     />
-                                    
                                     {/* Input box for new alphabet */}
                                     <AlphabetInput />
-                                    
+                                    {/* Canvas Related Buttons Parent Container */}
+                                    <div className="flex self-center gap-3 pt-3">
+                                        {/* Run button to run the FA with the given input string */}
+                                        <RunButton type={type.toUpperCase() as "DFSM" | "NDFSM"}/>
+                                        {/* Clear Canvas parent container */}
+                                        <ClearCanvasButton />
+                                    </div>
                                 </div>
-                                <div className="flex flex-wrap self-center gap-5">
-                                    {/* Save button to save the FA to the database only if the user is logged in */}
-                                    {!automatonId ? (
-                                        <SaveActions
-                                            onSave={() => setIsSaving(true)}
-                                        />
-                                    ) : ( 
-                                        <SaveActions
-                                            onSave={handleSave}
-                                            onSaveAs={() => setIsSaving(true)}
-                                        />
-                                    )}
-                            
-                                    {/* Run button to run the FA with the given input string */}
-                                    <RunButton 
-                                        type={type.toUpperCase() as "DFSM" | "NDFSM"}
-                                    />
-
-                                    {/* My Projects button to open the projects page that will list all of the users project when logged in */}
-                                    <ProjectsButton />
-
-                                </div>
-                            </div>
-                            <div>
-                                <NewProjectButton
-                                    handleNewProject={handleNewProject}
-                                />
-                            </div>
-
-                            {/* Clear Canvas parent container */}
-                            <div>
-                                <ClearCanvasButton />
                             </div>
                         </div>
                     </div>
