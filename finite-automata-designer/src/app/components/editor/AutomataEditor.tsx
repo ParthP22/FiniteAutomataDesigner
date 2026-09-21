@@ -35,6 +35,7 @@ import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { automataApi } from './api/automataApi';
 import { getEditorSession, setEditorSession } from '@/lib/editorSession';
 import Loading from '../misc/Loading';
+import ErrorMessage from '../misc/ErrorMessage';
 import ToastHost from '../misc/ToastHost';
 
 interface AutomataEditorProps {
@@ -49,9 +50,14 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const [description, setDescription] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Id of the project that couldn't be loaded. Storing the id (not a boolean)
+    // means the error clears itself as soon as the URL points somewhere else.
+    const [notFoundId, setNotFoundId] = useState<string | null>(null);
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
+    const projectNotFound = !!automatonId && notFoundId === automatonId;
     const isNewProject = (searchParams?.get("new") === "true") as boolean;
 
     const title: string = type === "DFSM" ? "Deterministic Finite State Machine" : "Non-Deterministic Finite State Machine";
@@ -140,13 +146,10 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
             const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
 
+            // RLS hides other users' projects, so "missing" and "not yours" both land here
             if(!finiteAutomatonData){
-                showToast("This project doesn't exist or you don't have access.", { color: "red", duration: 6000 });
-                router.push("/");
+                setNotFoundId(automatonId);
                 return;
-            }
-            else{
-                console.log("Is owner");
             }
 
             setName(finiteAutomatonData.name);
@@ -171,7 +174,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         }
 
         loadAutomaton();
-    },[automatonId, api, type, router]);
+    },[automatonId, api, type]);
 
     useEffect(() => {
         if (!isNewProject) return;
@@ -229,6 +232,15 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
         router.push(`/${type.toLowerCase()}?new=true`);
     };
+
+    if (projectNotFound) {
+        return (
+            <ErrorMessage
+                title="Project not found"
+                message="This project doesn't exist, or you don't have access to it."
+            />
+        );
+    }
 
     return (
         <div className="relative min-h-screen">
