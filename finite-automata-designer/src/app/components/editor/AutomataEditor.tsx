@@ -38,6 +38,9 @@ import Loading from '../misc/Loading';
 import ErrorMessage from '../misc/ErrorMessage';
 import ToastHost from '../misc/ToastHost';
 
+// Project ids are Postgres UUIDs; anything else would make the query itself fail
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 interface AutomataEditorProps {
     type: "DFSM" | "NDFSM";
 }
@@ -141,6 +144,12 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
         async function loadAutomaton(){
             if(!automatonId){
+                return;
+            }
+
+            // A malformed id can never match a project, so skip the round trip
+            if(!UUID_PATTERN.test(automatonId)){
+                setNotFoundId(automatonId);
                 return;
             }
 
