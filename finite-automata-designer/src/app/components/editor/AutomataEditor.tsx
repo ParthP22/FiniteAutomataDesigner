@@ -23,7 +23,7 @@ import ClearCanvasButton from "./ClearCanvasButton";
 import BackButton from "./BackButton";
 import SaveActions from './SaveActions';
 import SaveProjectModal from "../projects/SaveProjectModal";
-import ToastNotification, { SHOW_TOAST_EVENT, ShowToastDetail, showToast } from "../misc/ToastNotification";
+import { showToast } from "../misc/ToastNotification";
 import NewProjectButton from './NewProjectButton';
 
 {/* Database/Serialization */}
@@ -35,6 +35,7 @@ import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { automataApi } from './api/automataApi';
 import { getEditorSession, setEditorSession } from '@/lib/editorSession';
 import Loading from '../misc/Loading';
+import ToastHost from '../misc/ToastHost';
 
 interface AutomataEditorProps {
     type: "DFSM" | "NDFSM";
@@ -46,7 +47,6 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState<string | null>(null);
     const [description, setDescription] = useState<string | null>(null);
-    const [toast, setToast] = useState<{ id: number, message: string, duration?: number, color?: "green" | "red" } | null>(null);
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
@@ -128,31 +128,6 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         }
 
     }, [type]);
-
-    // Holds the toast notification subscriber
-    useEffect(() => {
-
-        // This will listen for toast requests, dispatched either through the
-        // showToast() helper (React code) or manually (canvas scripts).
-        // Optional duration (ms) and color ("green" | "red") in the detail
-        // override the defaults (2s, green).
-        const handler = (event: Event) => {
-            const customEvent = event as CustomEvent<ShowToastDetail>;
-            setToast(prev => ({
-                id: (prev?.id ?? 0) + 1,
-                message: customEvent.detail.message,
-                duration: customEvent.detail.duration,
-                color: customEvent.detail.color,
-            }));
-        }
-
-        window.addEventListener(SHOW_TOAST_EVENT, handler);
-
-        return () => {
-            window.removeEventListener(SHOW_TOAST_EVENT, handler);
-        }
-
-    }, []);
 
     useEffect(() => {
         // Clear stale pending data whenever the target id changes
@@ -264,16 +239,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             )}
 
             <main className="min-h-screen bg-blue-100 flex flex-col items-center">
-                {/* Toast notification, shown when the canvas script requests one */}
-                {toast && (
-                    <ToastNotification
-                        key={toast.id}
-                        toastMsg={toast.message}
-                        duration={toast.duration}
-                        color={toast.color}
-                        onClose={() => setToast(null)}
-                    />
-                )}
+                <ToastHost />
 
                 {/* FA title at the top */}
                 <AutomataHeader
