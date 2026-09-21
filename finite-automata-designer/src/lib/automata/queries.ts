@@ -38,9 +38,9 @@ export async function getAutomaton(automatonId: string){
         .from("finite_automata")
         .select("*")
         .eq("id", automatonId)
-        .single();
+        .maybeSingle();
 
-    if(!data || error){
+    if(error){
         console.error(error);
         throw new Error("Failed to fetch selected automaton.");
     }

@@ -164,6 +164,16 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             }
 
             const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+
+            if(!finiteAutomatonData){
+                showToast("This project doesn't exist or you don't have access.", { color: "red", duration: 6000 });
+                router.push("/");
+                return;
+            }
+            else{
+                console.log("Is owner");
+            }
+
             setName(finiteAutomatonData.name);
             setDescription(finiteAutomatonData.description);
 
@@ -186,7 +196,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         }
 
         loadAutomaton();
-    },[automatonId, api, type]);
+    },[automatonId, api, type, router]);
 
     useEffect(() => {
         if (!isNewProject) return;
