@@ -247,6 +247,7 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             <ErrorMessage
                 title="Project not found"
                 message="This project doesn't exist, or you don't have access to it."
+                action={<NewProjectButton handleNewProject={handleNewProject} />}
             />
         );
     }
