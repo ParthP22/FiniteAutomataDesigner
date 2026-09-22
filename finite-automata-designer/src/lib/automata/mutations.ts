@@ -52,10 +52,16 @@ export async function updateAutomaton(automatonId: string, serializedFA: Seriali
         .update({
             automaton: serializedFA,
         })
-        .eq("id", automatonId);
+        .eq("id", automatonId)
+        .select("id")
+        .maybeSingle();
 
     if(error){
         throw error;
+    }
+
+    if(!data){
+        throw new Error("Automaton not found or you don't have access to it.");
     }
 
     return data;
@@ -73,10 +79,16 @@ export async function deleteAutomaton(automatonId: string){
     const { data, error } = await supabase
         .from("finite_automata")
         .delete()
-        .eq("id", automatonId);
+        .eq("id", automatonId)
+        .select("id")
+        .maybeSingle();
 
     if(error){
         throw error;
+    }
+
+    if(!data){
+        throw new Error("Automaton not found or you don't have access to it.");
     }
 
     return data;
@@ -98,11 +110,15 @@ export async function editAutomaton(automatonId: string, name: string | null, de
             description: description,
         })
         .eq("id",automatonId)
-        .select()
-        .single();
+        .select("*")
+        .maybeSingle();
 
     if(error){
         throw error;
+    }
+
+    if(!data){
+        throw new Error("Automaton not found or you don't have access to it.");
     }
 
     return data as FiniteAutomaton;
