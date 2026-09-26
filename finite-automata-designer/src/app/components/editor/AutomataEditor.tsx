@@ -72,7 +72,12 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const pendingAutomaton = useRef<SerializedFA | null>(null);
 
     useEffect(() => {
-        if (automatonId || isNewProject) {
+        if(isNewProject){
+            api.resetEditor();
+            return;
+        }
+
+        if (automatonId) {
             return;
         }
 
@@ -109,7 +114,8 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         type,
         automatonId,
         isNewProject,
-        router
+        router,
+        api
     ]);
 
 
