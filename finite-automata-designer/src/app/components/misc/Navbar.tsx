@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
+import { clearAllEditorSessions } from "@/lib/editorSession";
 
 export default function Navbar() {
 
@@ -20,8 +21,16 @@ export default function Navbar() {
 
     // Supabase auth listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_, session) => {
+      (event, session) => {
         setUser(session?.user ?? null);
+
+        // Wipe any "resume last project" state so the next person to sign
+        // in on this tab doesn't land in the previous user's project.
+        // Handles sign-out from any source (this button, another tab,
+        // session expiry), not just the click below.
+        if (event === "SIGNED_OUT") {
+          clearAllEditorSessions();
+        }
       }
     );
 
