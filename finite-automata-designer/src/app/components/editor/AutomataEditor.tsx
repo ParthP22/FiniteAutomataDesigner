@@ -4,7 +4,7 @@
 import Script from 'next/script';
 
 {/* Hooks */}
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 {/* Components */}
@@ -155,6 +155,26 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
     }, []);
 
+    // A project that can't be fetched (deleted, owned by another account, not
+    // logged in) or can't be deserialized. Without this the loading overlay
+    // never clears, and the editor session keeps redirecting back to the same
+    // broken id on every visit.
+    const handleLoadFailure = useCallback((error: unknown) => {
+        console.error(error);
+        pendingAutomaton.current = null;
+
+        setEditorSession(type, { mode: "new" });
+        setName(null);
+        setDescription(null);
+
+        const reason = error instanceof Error ? error.message : String(error);
+        showToast("Could not open project: " + reason, { color: "red", duration: 6000 });
+
+        setLoading(false);
+        // Ex: /dfsm?new=true or /ndfsm?new=true, where "type" is either "DFSM" or "NDFSM"
+        router.replace(`/${type.toLowerCase()}?new=true`);
+    }, [router, type]);
+
     useEffect(() => {
         // Clear stale pending data whenever the target id changes
         pendingAutomaton.current = null;
@@ -164,30 +184,35 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                 return;
             }
 
-            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
-            setName(finiteAutomatonData.name);
-            setDescription(finiteAutomatonData.description);
+            try {
+                const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+                setName(finiteAutomatonData.name);
+                setDescription(finiteAutomatonData.description);
 
-            if (typeof api.loadFAIntoCanvas === 'function') {
                 setEditorSession(type, {
                     mode: "saved",
                     projectId: automatonId
                 });
 
-                // Canvas script is already loaded — call directly.
-                api.loadFAIntoCanvas(finiteAutomatonData.automaton);
+                if (typeof api.loadFAIntoCanvas === 'function') {
+                    // Canvas script is already loaded — call directly.
+                    api.loadFAIntoCanvas(finiteAutomatonData.automaton);
 
-                setLoading(false);
+                    setLoading(false);
 
-            } else {
-                // Canvas script hasn't finished loading yet (production race).
-                // Store the data so the onReady callback can deliver it once ready.
-                pendingAutomaton.current = finiteAutomatonData.automaton;
+                } else {
+                    // Canvas script hasn't finished loading yet (production race).
+                    // Store the data so the onReady callback can deliver it once ready.
+                    pendingAutomaton.current = finiteAutomatonData.automaton;
+                }
+            }
+            catch (error) {
+                handleLoadFailure(error);
             }
         }
 
         loadAutomaton();
-    },[automatonId, api, type]);
+    },[automatonId, api, type, handleLoadFailure]);
 
     useEffect(() => {
         if (!isNewProject) return;
@@ -368,9 +393,14 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                     // component mount where the script is already cached.
                     // Delivers any automaton data that arrived before the script was ready.
                     if (pendingAutomaton.current !== null) {
-                        api.loadFAIntoCanvas(pendingAutomaton.current);
-                        pendingAutomaton.current = null;
-                        setLoading(false);
+                        try {
+                            api.loadFAIntoCanvas(pendingAutomaton.current);
+                            pendingAutomaton.current = null;
+                            setLoading(false);
+                        }
+                        catch (error) {
+                            handleLoadFailure(error);
+                        }
                     }
                     else{
                         // Synchronize React with the current alphabet now that the
