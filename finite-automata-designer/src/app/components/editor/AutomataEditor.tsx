@@ -145,33 +145,9 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
 
     }, [type]);
 
-    // Holds the toast notification subscriber
-    useEffect(() => {
-
-        // This will listen for toast requests, dispatched either through the
-        // showToast() helper (React code) or manually (canvas scripts).
-        // Optional duration (ms) and color ("green" | "red") in the detail
-        // override the defaults (2s, green).
-        const handler = (event: Event) => {
-            const customEvent = event as CustomEvent<ShowToastDetail>;
-            setToast(prev => ({
-                id: (prev?.id ?? 0) + 1,
-                message: customEvent.detail.message,
-                duration: customEvent.detail.duration,
-                color: customEvent.detail.color,
-            }));
-        }
-
-        window.addEventListener(SHOW_TOAST_EVENT, handler);
-
-        return () => {
-            window.removeEventListener(SHOW_TOAST_EVENT, handler);
-        }
-
-    }, []);
-
-    // A project that can't be fetched (deleted, owned by another account, not
-    // logged in) or can't be deserialized. Without this the loading overlay
+    // A project that can't be fetched (not logged in, query failed) or can't be
+    // deserialized. Missing or inaccessible projects are handled separately by
+    // the "Project not found" page. Without this the loading overlay
     // never clears, and the editor session keeps redirecting back to the same
     // broken id on every visit.
     const handleLoadFailure = useCallback((error: unknown) => {
@@ -199,26 +175,23 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                 return;
             }
 
-            try {
-                const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
-                setName(finiteAutomatonData.name);
-                setDescription(finiteAutomatonData.description);
             // A malformed id can never match a project, so skip the round trip
             if(!UUID_PATTERN.test(automatonId)){
                 setNotFoundId(automatonId);
                 return;
             }
 
-            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+            try {
+                const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
 
-            // RLS hides other users' projects, so "missing" and "not yours" both land here
-            if(!finiteAutomatonData){
-                setNotFoundId(automatonId);
-                return;
-            }
+                // RLS hides other users' projects, so "missing" and "not yours" both land here
+                if(!finiteAutomatonData){
+                    setNotFoundId(automatonId);
+                    return;
+                }
 
-            setName(finiteAutomatonData.name);
-            setDescription(finiteAutomatonData.description);
+                setName(finiteAutomatonData.name);
+                setDescription(finiteAutomatonData.description);
 
                 setEditorSession(type, {
                     mode: "saved",
@@ -321,17 +294,6 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
             )}
 
             <main className="min-h-screen bg-blue-100 flex flex-col items-center">
-                {/* Toast notification, shown when the canvas script requests one */}
-                {toast && (
-                    <ToastNotification
-                        key={toast.id}
-                        toastMsg={toast.message}
-                        duration={toast.duration}
-                        color={toast.color}
-                        onClose={() => setToast(null)}
-                    />
-                )}
-    
                 <ToastHost />
 
                 {/* FA title at the top */}

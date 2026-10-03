@@ -2,12 +2,13 @@
   // TypeScript config for the Rollup canvas bundles (rollup.*.config.js) only.
   //
   // @rollup/plugin-typescript runs a TypeScript *watch* program even for a
-  // one-off build. Pointed at the root tsconfig.json, whose "**/*.ts" include
-  // covers the whole project, that program watches .next/ as well; a running
-  // `next dev` writes there constantly, and each write schedules a rebuild that
-  // keeps Rollup alive after "created ...Canvas.js", so build:canvas / dev:all
-  // never finish. Scoping the program to what the canvas actually compiles
-  // keeps the watchers off .next/ (and off the bundles Rollup itself writes).
+  // one-off build and closes it in buildEnd. TypeScript's close() does not
+  // cancel an already-scheduled rebuild, so if any watched file changes during
+  // the build, that rebuild fires after close() and leaves ~700 fs watchers
+  // open, and Rollup never exits after "created ...Canvas.js". The real fix is
+  // `--forceExit` on the rollup commands in package.json. Scoping the program
+  // to what the canvas actually compiles just keeps it from watching the whole
+  // project (.next/ included), which makes that race less likely.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "allowJs": false,
