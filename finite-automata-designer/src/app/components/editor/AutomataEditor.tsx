@@ -23,7 +23,7 @@ import ClearCanvasButton from "./ClearCanvasButton";
 import BackButton from "./BackButton";
 import SaveActions from './SaveActions';
 import SaveProjectModal from "../projects/SaveProjectModal";
-import ToastNotification, { SHOW_TOAST_EVENT, ShowToastDetail, showToast } from "../misc/ToastNotification";
+import { showToast } from "../misc/ToastNotification";
 import NewProjectButton from './NewProjectButton';
 import PrintButton from '../printing/PrintButton';
 
@@ -36,6 +36,11 @@ import { saveAutomaton, updateAutomaton } from "@/lib/automata/mutations";
 import { automataApi } from './api/automataApi';
 import { getEditorSession, setEditorSession } from '@/lib/editorSession';
 import Loading from '../misc/Loading';
+import ErrorMessage from '../misc/ErrorMessage';
+import ToastHost from '../misc/ToastHost';
+
+// Project ids are Postgres UUIDs; anything else would make the query itself fail
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface AutomataEditorProps {
     type: "DFSM" | "NDFSM";
@@ -47,12 +52,16 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState<string | null>(null);
     const [description, setDescription] = useState<string | null>(null);
-    const [toast, setToast] = useState<{ id: number, message: string, duration?: number, color?: "green" | "red" } | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // Id of the project that couldn't be loaded. Storing the id (not a boolean)
+    // means the error clears itself as soon as the URL points somewhere else.
+    const [notFoundId, setNotFoundId] = useState<string | null>(null);
 
     const router = useRouter();
     const searchParams = useSearchParams();
     const automatonId = searchParams?.get("id") as string;
+    const projectNotFound = !!automatonId && notFoundId === automatonId;
     const isNewProject = (searchParams?.get("new") === "true") as boolean;
 
     const title: string = type === "DFSM" ? "Deterministic Finite State Machine" : "Non-Deterministic Finite State Machine";
@@ -64,7 +73,12 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
     const pendingAutomaton = useRef<SerializedFA | null>(null);
 
     useEffect(() => {
-        if (automatonId || isNewProject) {
+        if(isNewProject){
+            api.resetEditor();
+            return;
+        }
+
+        if (automatonId) {
             return;
         }
 
@@ -101,7 +115,8 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         type,
         automatonId,
         isNewProject,
-        router
+        router,
+        api
     ]);
 
 
@@ -188,6 +203,22 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                 const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
                 setName(finiteAutomatonData.name);
                 setDescription(finiteAutomatonData.description);
+            // A malformed id can never match a project, so skip the round trip
+            if(!UUID_PATTERN.test(automatonId)){
+                setNotFoundId(automatonId);
+                return;
+            }
+
+            const finiteAutomatonData: FiniteAutomaton = await getAutomaton(automatonId);
+
+            // RLS hides other users' projects, so "missing" and "not yours" both land here
+            if(!finiteAutomatonData){
+                setNotFoundId(automatonId);
+                return;
+            }
+
+            setName(finiteAutomatonData.name);
+            setDescription(finiteAutomatonData.description);
 
                 setEditorSession(type, {
                     mode: "saved",
@@ -271,6 +302,16 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
         router.push(`/${type.toLowerCase()}?new=true`);
     };
 
+    if (projectNotFound) {
+        return (
+            <ErrorMessage
+                title="Project not found"
+                message="This project doesn't exist, or you don't have access to it."
+                action={<NewProjectButton handleNewProject={handleNewProject} />}
+            />
+        );
+    }
+
     return (
         <div className="relative min-h-screen">
             {loading && (
@@ -291,6 +332,8 @@ export default function AutomataEditor({ type }: AutomataEditorProps){
                     />
                 )}
     
+                <ToastHost />
+
                 {/* FA title at the top */}
                 <AutomataHeader
                     title={!name ? title : (type.toUpperCase() + ": " + name)}

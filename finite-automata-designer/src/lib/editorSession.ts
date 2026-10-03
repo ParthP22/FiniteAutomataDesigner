@@ -33,3 +33,10 @@ export function clearEditorSession(
 
     sessionStorage.removeItem(key);
 }
+
+// Clears both DFSM and NDFSM session entries. Call this on sign-out so the
+// next person to use this tab doesn't get dropped into the previous user's
+// last-opened project.
+export function clearAllEditorSessions() {
+    (["DFSM", "NDFSM"] as const).forEach(clearEditorSession);
+}
