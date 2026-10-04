@@ -3,11 +3,17 @@ import { SerializedEntryArrow } from "../types"
 import { Circle } from "../../../../public/scripts/Shapes/Circle"
 
 export function deserializeEntryArrow(
-  data: SerializedEntryArrow,
+  data: SerializedEntryArrow | null | undefined,
   circleMap: Map<string, Circle>
-): EntryArrow {
+): EntryArrow | null {
 
-  const circle = circleMap.get(data.startState!);
+  // serializeEntryArrow writes {} when the automaton has no start state yet,
+  // so a missing startState is valid data, not corruption.
+  if (!data || data.startState === undefined) {
+    return null;
+  }
+
+  const circle = circleMap.get(data.startState);
 
   if (circle === undefined) {
     throw new Error("EntryArrow references missing circle");
@@ -21,5 +27,5 @@ export function deserializeEntryArrow(
     return entryArrow;
   }
 
-  
+
 }

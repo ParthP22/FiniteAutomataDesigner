@@ -40,7 +40,7 @@ export default {
   plugins: [
     nodeResolve(),
     typescript({
-      tsconfig: './tsconfig.json',
+      tsconfig: './tsconfig.canvas.json', // see the comment at the top of that file
       sourceMap: false,
       compilerOptions: {
         module: 'esnext',

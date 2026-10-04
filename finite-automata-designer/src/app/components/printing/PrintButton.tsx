@@ -1,13 +1,13 @@
 "use client";
 
-export default function ClearCanvasButton(){
+export default function PrintButton() {
     return (
         <button
-            id="clearCanvas"
+            id="printCanvas"
             type="button"
             className="bg-gray-700 text-white px-6 py-3 rounded hover:bg-black transition"
         >
-            Clear Canvas
+            Print
         </button>
     );
 }

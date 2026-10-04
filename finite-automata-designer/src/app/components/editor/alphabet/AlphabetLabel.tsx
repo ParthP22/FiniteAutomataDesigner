@@ -6,8 +6,8 @@ interface AlphabetLabelProps{
 
 export default function AlphabetLabel({ hasMultiCharAlphabet }: AlphabetLabelProps){
     return (
-        <>
-            <div className="min-h-[3rem]">
+        <div>
+            <div className="min-h-[1rem]">
                 {hasMultiCharAlphabet && (
                     <div className="w-full rounded border border-red-300 bg-red-100 px-3 py-2">
                         <p className="text-sm text-red-700 font-semibold">
@@ -22,6 +22,6 @@ export default function AlphabetLabel({ hasMultiCharAlphabet }: AlphabetLabelPro
             <label id="alphabetLabel" htmlFor="alphabet" className="block mb-1 text-gray-700 text-xl font-bold">
                 Alphabet: {"{0,1}"}
             </label>
-        </>
+        </div>
     );
 }

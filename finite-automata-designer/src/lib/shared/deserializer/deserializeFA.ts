@@ -10,7 +10,7 @@ import { SelfArrow } from "../../../../public/scripts/Shapes/SelfArrow"
 export type DFSMObjects = {
   circles: Circle[],
   arrows: (Arrow | SelfArrow)[],
-  entryArrow: EntryArrow,
+  entryArrow: EntryArrow | null,
   alphabet: Set<string>,
 }
 
