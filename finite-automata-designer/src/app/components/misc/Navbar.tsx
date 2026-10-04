@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
-import { clearEditorSession } from "@/lib/editorSession";
 import { clearAllEditorSessions } from "@/lib/editorSession";
 
 export default function Navbar() {
@@ -62,10 +61,6 @@ export default function Navbar() {
               className="px-5 py-2 bg-red-500 hover:bg-red-700 rounded transition"
               onClick={async () => {
                 await supabase.auth.signOut();
-                // The editor remembers the last opened project per tab; drop it so
-                // the next account to log in here isn't sent to a project it can't read
-                clearEditorSession("DFSM");
-                clearEditorSession("NDFSM");
                 router.refresh(); // Forces UI update
                 router.push('/login'); // Redirect to login page
               }}
